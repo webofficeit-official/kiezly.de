@@ -28,7 +28,7 @@ export default function Page() {
   <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
     <div className="flex items-center gap-2">
       <ShieldCheck className="h-5 w-5" />
-      <a href="/" className="font-semibold">Mini-Helfer</a>
+      <a href="/" className="font-semibold">Kiezly.de</a>
     </div>
     <nav className="hidden items-center gap-6 text-sm md:flex">
       <a href="/how-it-works" className="hover:opacity-80">How it works</a>
@@ -207,7 +207,7 @@ export default function Page() {
 
       <footer className="border-t">
   <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-neutral-600 md:flex-row">
-    <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /><span>Mini-Helfer</span></div>
+    <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /><span>Kiezly.de</span></div>
     <div className="flex flex-wrap items-center gap-4">
       <a className="hover:opacity-80" href="#">Impressum</a>
       <a className="hover:opacity-80" href="#">Privacy</a>
