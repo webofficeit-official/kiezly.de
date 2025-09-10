@@ -1,7 +1,7 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'Kiezly.de - Find trusted help for everyday mini-jobs',
+  title: 'Kiezly - Find trusted help for everyday mini-jobs',
   description: 'Find trusted help for everyday mini‑jobs',
 }
 
