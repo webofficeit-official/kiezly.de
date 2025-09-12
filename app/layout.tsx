@@ -1,4 +1,5 @@
-import './globals.css'
+import ClientLayout from './client-layout/client-layout';
+import './globals.css';
 
 export const metadata = {
   title: 'Kiezly.de',
@@ -8,7 +9,13 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+
+      <body>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
+      </body>
+
     </html>
   )
 }
