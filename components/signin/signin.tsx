@@ -1,7 +1,10 @@
 "use client";
 
+import { useLogin } from "@/lib/react-query/queries/user/account";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
+import toast from "react-hot-toast";
+import { FaCheckCircle } from "react-icons/fa";
 
 // NOTE: Simple Link shim so this file runs in any React runtime (no Next.js dependency)
 function Link({ href = "#", className = "", children, ...props }) {
@@ -47,6 +50,7 @@ function LoginPage() {
     }, []);
     const getFieldError = (name) => errors && errors[name];
     const hasErrors = React.useMemo(() => Object.values(errors || {}).some(Boolean), [errors]);
+    const loginUser = useLogin();
 
     function validateField(name, value) {
         const v = typeof value === "string" ? value.trim() : "";
@@ -103,10 +107,51 @@ function LoginPage() {
         try {
             setSubmitting(true);
             // Simulate API call
-            await new Promise((r) => setTimeout(r, 500));
-            setMessage({ type: "success", text: "Welcome back! You are now signed in." });
+            loginUser.mutate(
+                { email, password, role },
+                {
+                    onSuccess: (res) => {
+                        const accessToken = res.token.access;
+                        const userRole = res.data.role;
+
+                        localStorage.setItem("accessToken", accessToken);
+                        localStorage.setItem("userRole", userRole);
+
+                        toast.custom((t) => (
+                            <div
+                                className={`${t.visible ? "animate-enter" : "animate-leave"
+                                    } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+                            >
+                                {/* Icon */}
+                                <div className="flex items-center justify-center p-4">
+                                    <FaCheckCircle className="text-green-500 w-6 h-6" />
+                                </div>
+
+                                {/* Text */}
+                                <div className="flex-1 w-0 p-4">
+                                    <p className="text-sm font-semibold text-green-600">
+                                        Login successful!
+                                    </p>
+
+                                </div>
+                            </div>
+                        ));
+
+                        // redirect based on role
+                        if (userRole === "helper") {
+
+                        } else {
+
+                        }
+                    },
+                    onError: (err) => {
+                        toast.error(err.message || "Could not sign in.")
+                    },
+                }
+            );
+
         } catch (err) {
-            setMessage({ type: "error", text: (err && err.message) || "Could not sign in." });
+            toast.error(err.message || "Could not sign in.")
         } finally {
             setSubmitting(false);
         }
