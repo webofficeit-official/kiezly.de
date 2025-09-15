@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import Section from "../shared-ui/section/section";
+import { FaCheckCircle } from "react-icons/fa";
 import Input from "../shared-ui/input/input";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { SignupData, useSignup } from "@/lib/react-query/queries/user/account";
+import toast from "react-hot-toast";
 
 export type UserRole = 'client' | 'helper'
 
@@ -12,7 +14,7 @@ export type User = {
     first_name: string;
     last_name: string;
     email: string;
-    password?: string;
+    password: string;
     role: UserRole;
     confirm_password: string;
 };
@@ -65,6 +67,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
         confirm_password: ""
     });
     const [errors, setErrors] = useState<FormErrors>({});
+    const signup = useSignup();
 
     function validate(): FormErrors {
         const e: FormErrors = {};
@@ -72,11 +75,15 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
         if (!form.last_name) e.last_name = "Last name required";
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) e.email = "Valid email required";
         if (!form.password) e.password = "Password required";
+        if (form.password.length < 8) {
+            e.password = "Password must be 8 digit";
+        }
         if (!form.confirm_password) {
             e.confirm_password = "Confirm password required";
         } else if (form.password !== form.confirm_password) {
             e.confirm_password = "Passwords do not match";
         }
+
         return e;
     }
 
@@ -151,7 +158,49 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
         }
 
         // TODO: call your API here
-        console.log("Submitted user:", form);
+        const payload: SignupData = {
+            first_name: form.first_name,
+            last_name: form.last_name,
+            email: form.email,
+            password: form.password, // required
+            role: form.role,
+        };
+        signup.mutate(payload, {
+            onSuccess: (data) => {
+                toast.custom((t) => (
+                    <div
+                        className={`${t.visible ? "animate-enter" : "animate-leave"
+                            } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+                    >
+                        {/* Icon */}
+                        <div className="flex items-center justify-center p-4">
+                            <FaCheckCircle className="text-green-500 w-6 h-6" />
+                        </div>
+
+                        {/* Text */}
+                        <div className="flex-1 w-0 p-4">
+                            <p className="text-sm font-semibold text-green-600">
+                                Registration successful!
+                            </p>
+                            <p className="mt-1 text-sm text-gray-700">
+                                Please verify your email to activate your account.
+                            </p>
+                        </div>
+                    </div>
+                ));
+
+
+                setForm({
+                    email: "",
+                    password: "",
+                    role: roleParam === "client" || roleParam === "helper" ? roleParam : "client",
+                    first_name: "",
+                    last_name: "",
+                    confirm_password: ""
+                });
+            },
+            onError: (err: any) => toast.error(err.message || "Registration failed!"),
+        });
     }
 
     return (
