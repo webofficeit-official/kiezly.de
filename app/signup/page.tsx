@@ -1,7 +1,11 @@
 "use client";
 import React from "react";
-import KiezlyUserFlow from "@/components/signup/signup";
+import Signup from "@/components/signup/signup";
 
 export default function Page() {
-  return <KiezlyUserFlow />;
+  return (
+    <main className="mx-auto max-w-6xl px-4">
+      <Signup />
+    </main>
+  );
 }

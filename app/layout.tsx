@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
 
-      <body>
+      <body className='min-h-screen bg-gradient-to-b from-neutral-50 to-white text-neutral-900'>
         <ClientLayout>
           {children}
         </ClientLayout>
