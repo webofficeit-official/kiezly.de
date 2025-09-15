@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import Signup from "@/components/signup/signup";
+import Signin from "@/components/signin/signin";
 
 export default function Page() {
   return (
     <main className="mx-auto max-w-6xl px-4">
-      <Signup />
+      <Signin />
     </main>
   );
 }
