@@ -184,7 +184,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
                             : "border-gray-200 hover:border-gray-300"
                         }`}
                 >
-                    <img src='/images/job.png' alt="Custom Icon" className="h-20 w-20" />
+                    <img src='/images/helper.png' alt="Custom Icon" className="h-20 w-20" />
                     <span className="mt-2 font-medium">Helper</span>
                 </button>
             </div>
