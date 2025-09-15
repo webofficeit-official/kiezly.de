@@ -34,7 +34,7 @@ export default function Signup() {
     const [data, setData] = useState<User | null>(null);
 
     return (
-        <div className="flex mt-2 mb-2 items-center justify-center">
+        <div className=" flex mt-2 mb-2 items-center justify-center">
             <div className="w-full max-w-lg p-6 rounded-2xl border shadow-sm bg-white">
                 {/* Header */}
                 <h1 className="text-center text-2xl font-bold">
@@ -214,7 +214,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
             <div className="grid grid-cols-2 gap-4">
                 <button
                     type="button"
-                    onClick={() => update((d) => (d.role = "client"))}
+                    onClick={() => update((d) => (d.role = "client"),"role")}
                     className={`flex flex-col items-center rounded-xl border p-2 transition  ${form.role === "client"
                         ? "border-sky-500 bg-sky-50"
                         : "border-gray-200 hover:border-gray-300"
@@ -226,7 +226,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
 
                 <button
                     type="button"
-                    onClick={() => update((d) => (d.role = "helper"))}
+                    onClick={() => update((d) => (d.role = "helper"),"role")}
                     className={`flex flex-col items-center rounded-xl border p-2 transition 
                         ${form.role === "helper"
                             ? "border-sky-500 bg-sky-50"
@@ -273,7 +273,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
 
                 <p className="text-sm text-gray-600">
                     Already have an account?{" "}
-                    <Link href="/signin" className="text-black font-medium hover:underline">
+                    <Link href={`/signin?role=${form.role}`} className="text-black font-medium hover:underline">
                         Sign in
                     </Link>
                 </p>
