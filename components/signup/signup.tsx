@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import Section from "../shared-ui/section/section";
 import Input from "../shared-ui/input/input";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export type UserRole = 'client' | 'helper'
 
@@ -53,10 +54,12 @@ export default function Signup() {
 // Onboarding Form
 // ----------------------------
 function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
+    const searchParams = useSearchParams();
+    const roleParam = searchParams.get("role") as "client" | "helper" | null;
     const [form, setForm] = useState<User>({
         email: "",
         password: "",
-        role: "client",
+        role: roleParam === "client" || roleParam === "helper" ? roleParam : "client",
         first_name: "",
         last_name: "",
         confirm_password: ""
@@ -79,10 +82,60 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
 
 
 
-    function update<T>(path: (draft: User) => void) {
+    function update(path: (draft: User) => void, field?: keyof User) {
         setForm((prev) => {
             const draft: User = JSON.parse(JSON.stringify(prev));
             path(draft);
+
+            if (field) {
+                setErrors((prevErrors) => {
+                    const newErrors = { ...prevErrors };
+
+                    switch (field) {
+                        case "email":
+                            if (!draft.email) {
+                                newErrors.email = "Email is required";
+                            } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(draft.email)) {
+                                newErrors.email = "Valid email required";
+                            } else {
+                                delete newErrors.email;
+                            }
+                            break;
+
+                        case "password":
+                            if (!draft.password) {
+                                newErrors.password = "Password is required";
+                            } else {
+                                delete newErrors.password;
+                            }
+                            // Also check confirm password if it exists
+                            if (draft.confirm_password && draft.password !== draft.confirm_password) {
+                                newErrors.confirm_password = "Passwords do not match";
+                            } else if (draft.confirm_password) {
+                                delete newErrors.confirm_password;
+                            }
+                            break;
+
+                        case "confirm_password":
+                            if (!draft.confirm_password) {
+                                newErrors.confirm_password = "Confirm password required";
+                            } else if (draft.password !== draft.confirm_password) {
+                                newErrors.confirm_password = "Passwords do not match";
+                            } else {
+                                delete newErrors.confirm_password;
+                            }
+                            break;
+
+                        default:
+                            // For other fields, just clear the error
+                            delete newErrors[field];
+                            break;
+                    }
+
+                    return newErrors;
+                });
+            }
+
             return draft;
         });
     }
@@ -140,28 +193,28 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
 
             <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                    <Input label="First name" value={form.first_name} onChange={(v) => update((d) => (d.first_name = v))}  required error={errors.first_name} />
-                  
+                    <Input label="First name" value={form.first_name} onChange={(v) => update((d) => (d.first_name = v), "first_name")} required error={errors.first_name} />
+
                 </div>
                 <div>
-                    <Input label="Last name" value={form.last_name} onChange={(v) => update((d) => (d.last_name = v))} required error={errors.last_name}/>
-                  
+                    <Input label="Last name" value={form.last_name} onChange={(v) => update((d) => (d.last_name = v), "last_name")} required error={errors.last_name} />
+
                 </div>
             </div>
 
 
             <div className="grid gap-2">
-                <Input label="Email" type="email" value={form.email} onChange={(v) => update((d) => (d.email = v))}required error={errors.email}/>
-             
+                <Input label="Email" type="email" value={form.email} onChange={(v) => update((d) => (d.email = v), "email")} required error={errors.email} />
+
             </div>
             <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                    <Input label="Password" type="password" value={form.password} onChange={(v) => update((d) => (d.password = v))} required error={errors.password}/>
-                  
+                    <Input label="Password" type="password" value={form.password} onChange={(v) => update((d) => (d.password = v), "password")} required error={errors.password} />
+
                 </div>
                 <div>
-                    <Input label="Confirm Password" type="password" value={form.confirm_password} onChange={(v) => update((d) => (d.confirm_password = v))} required error={errors.confirm_password}/>
-                
+                    <Input label="Confirm Password" type="password" value={form.confirm_password} onChange={(v) => update((d) => (d.confirm_password = v), "confirm_password")} required error={errors.confirm_password} />
+
                 </div>
             </div>
 
