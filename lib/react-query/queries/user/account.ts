@@ -50,6 +50,14 @@ export interface LoginResponse {
   };
 }
 
+export interface CollectionResponse {
+  success: boolean;
+  message: string;
+  data: {
+    jobCategories: [];
+  };
+}
+
 export const useSignup = (): UseMutationResult<
   SignupResponse,      // Type of data returned
   Error,               // Type of error
@@ -71,5 +79,15 @@ export const useLogin = (): UseMutationResult<
   return useMutation({
     mutationFn: (data: LoginData) =>
       apiClient.post("/auth/login", data).then(res => res.data),
+  });
+};
+
+export const useCollections = (): UseMutationResult<
+  CollectionResponse,   
+  Error       
+> => {
+  return useMutation({
+    mutationFn: (data: LoginData) =>
+      apiClient.get("/collection").then(res => res.data),
   });
 };
