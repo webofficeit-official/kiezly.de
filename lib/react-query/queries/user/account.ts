@@ -6,7 +6,14 @@ export interface SignupData {
   last_name: string;
   email: string;
   password: string;
-  role:string
+  role:string;
+  city:string;
+  zip:string;
+  country:string;
+  org_name:string;
+  website:string;
+  skills:string;
+  rate:string;
 }
 
 interface SignupResponse {
@@ -15,6 +22,8 @@ interface SignupResponse {
   last_name: string;
   email: string;
   token: string;
+  message: string;
+  success: boolean
 }
 
 
