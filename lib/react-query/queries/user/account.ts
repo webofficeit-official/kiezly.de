@@ -6,14 +6,14 @@ export interface SignupData {
   last_name: string;
   email: string;
   password: string;
-  role:string;
-  city:string;
-  zip:string;
-  country:string;
-  org_name:string;
-  website:string;
+  role: string;
+  city: string;
+  zip: string;
+  country: string;
+  org_name: string;
+  website: string;
   skills: any[];
-  rate:string;
+  rate: string;
 }
 
 interface SignupResponse {
@@ -30,7 +30,7 @@ interface SignupResponse {
 export interface LoginData {
   email: string;
   password: string;
-  role?: string; 
+  role?: string;
 }
 
 export interface LoginResponse {
@@ -72,19 +72,29 @@ export const useSignup = (): UseMutationResult<
 
 
 export const useLogin = (): UseMutationResult<
-  LoginResponse,   
-  Error,          
-  LoginData       
+  LoginResponse,
+  Error,
+  LoginData
 > => {
   return useMutation({
     mutationFn: (data: LoginData) =>
-      apiClient.post("/auth/login", data).then(res => res.data),
+      apiClient.post("/auth/login", data).then(
+        (res) => {
+          const loginData = res.data;
+
+          //  Set access token in Axios defaults for future requests
+          if (loginData?.token?.access) {
+            apiClient.defaults.headers.common["Authorization"] = `Bearer ${loginData.token.access}`;
+          }
+
+          return loginData;
+        }),
   });
 };
 
 export const useCollections = (): UseMutationResult<
-  CollectionResponse,   
-  Error       
+  CollectionResponse,
+  Error
 > => {
   return useMutation({
     mutationFn: (data: LoginData) =>
