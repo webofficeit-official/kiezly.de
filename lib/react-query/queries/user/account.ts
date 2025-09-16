@@ -12,7 +12,7 @@ export interface SignupData {
   country:string;
   org_name:string;
   website:string;
-  skills:string;
+  skills: any[];
   rate:string;
 }
 

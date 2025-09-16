@@ -1,9 +1,6 @@
 "use client";
 
-import { SignupData, useSignup } from "@/lib/react-query/queries/user/account";
 import * as React from "react";
-import toast from "react-hot-toast";
-import { FaCheckCircle } from "react-icons/fa";
 
 // Simple Link shim so this runs outside Next.js too
 function Link({ href = "#", className = "", children, ...props }) {
@@ -169,9 +166,7 @@ export default function RegisterPage() {
   const [message, setMessage] = React.useState(null);
   const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState({});
-    const [skills, setSkills] = React.useState([]);
-
-  const signup = useSignup();
+  const [skills, setSkills] = React.useState([]);
 
   const setFieldError = React.useCallback((name, error) => {
     setErrors((prev) => ({ ...prev, [name]: error || undefined }));
@@ -227,23 +222,23 @@ export default function RegisterPage() {
   const pwdInput = typeof password === "string" ? password : "";
   const rawScore = React.useMemo(() => computePwdScore(pwdInput), [pwdInput]);
   const pwdScore = Number.isFinite(rawScore) ? Math.max(0, Math.min(5, rawScore)) : 0;
-  
-    const DEFAULT_SKILLS = React.useMemo(
-      () => [
-        "Cleaning",
-        "Babysitting",
-        "Gardening",
-        "Tutoring",
-        "Pet care",
-        "Elderly care",
-        "Handyman",
-        "Delivery",
-        "Cooking",
-        "Moving help",
-        "IT support",
-      ],
-      []
-    );
+
+  const DEFAULT_SKILLS = React.useMemo(
+    () => [
+      "Cleaning",
+      "Babysitting",
+      "Gardening",
+      "Tutoring",
+      "Pet care",
+      "Elderly care",
+      "Handyman",
+      "Delivery",
+      "Cooking",
+      "Moving help",
+      "IT support",
+    ],
+    []
+  );
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -258,18 +253,6 @@ export default function RegisterPage() {
     const firstName = typeof firstNameVal === "string" ? firstNameVal.trim() : "";
     const lastNameVal = form.get("lastName");
     const lastName = typeof lastNameVal === "string" ? lastNameVal.trim() : "";
-    const cityVal = form.get("city");
-    const city = typeof cityVal === "string" ? cityVal.trim() : "";
-    const zipVal = form.get("zip");
-    const zip = typeof zipVal === "string" ? zipVal.trim() : "";
-    const countryVal = form.get("country");
-    const country = typeof countryVal === "string" ? countryVal.trim() : "";
-    const orgNameVal = form.get("orgName");
-    const orgName = typeof orgNameVal === "string" ? orgNameVal.trim() : "";
-    const websiteVal = form.get("website");
-    const website = typeof websiteVal === "string" ? websiteVal.trim() : "";
-    const rateVal = form.get("rate");
-    const rate = typeof rateVal === "string" ? rateVal.trim() : "";
 
     const nextErrors = {
       firstName: validateField("firstName", firstName),
@@ -293,60 +276,21 @@ export default function RegisterPage() {
 
     const payload = Object.fromEntries(form.entries());
     payload.role = role;
-    // payload.skills = skills;
+    payload.skills = skills; // ensure array form
 
     try {
       setSubmitting(true);
-        const newPayload: SignupData = {
-            first_name: firstName,
-            last_name: lastName,
-            email,
-            password,
-            role,
-            city,
-            country,
-            zip,
-            org_name: orgName,
-            website,
-            skills: skills,
-            rate
-        };
-        signup.mutate(newPayload, {
-            onSuccess: (data) => {
-                toast.custom((t) => (
-                    <div
-                        className={`${t.visible ? "animate-enter" : "animate-leave"
-                            } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-                    >
-                        {/* Icon */}
-                        <div className="flex items-center justify-center p-4">
-                            <FaCheckCircle className="text-green-500 w-6 h-6" />
-                        </div>  
-                        {/* Text */}
-                        <div className="flex-1 w-0 p-4">
-                            <p className="text-sm font-semibold text-green-600">
-                                Registration successful!
-                            </p>
-                            <p className="mt-1 text-sm text-gray-700">
-                                Please verify your email to activate your account.
-                            </p>
-                        </div>
-                    </div>
-                )); 
-                setAgree(false);
-                setErrors({});
-                setSubmitting(false);
-                setPassword("");
-            },
-            onError: (err: any) => {
-                toast.error(err?.response?.data?.message || "Registration failed!")
-                setSubmitting(false);
-            }
-        });
-        if (e.currentTarget && typeof e.currentTarget.reset === "function") e.currentTarget.reset();
+      await new Promise((r) => setTimeout(r, 600));
+      setMessage({ type: "success", text: "Account created! Please verify your email." });
+      if (e.currentTarget && typeof e.currentTarget.reset === "function") e.currentTarget.reset();
+      setPassword("");
+      setAgree(false);
+      setSkills([]);
+      setErrors({});
     } catch (err) {
       setMessage({ type: "error", text: (err && err.message) || "Something went wrong." });
     } finally {
+      setSubmitting(false);
     }
   }
 
@@ -363,6 +307,19 @@ export default function RegisterPage() {
   const submitDisabled = submitting || hasErrors;
 
   return (
+    <div className="flex min-h-screen flex-col">
+      {/* Header (template-like, but runtime-safe) */}
+      <header className="border-b bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <Link href="/" className="text-xl font-bold">Kiezly</Link>
+          <nav className="space-x-6 text-sm">
+            <Link href="/jobs" className="hover:underline">Jobs</Link>
+            <Link href="/helpers" className="hover:underline">Helpers</Link>
+            <Link href="/about" className="hover:underline">About</Link>
+          </nav>
+        </div>
+      </header>
+
       <main className="flex-1 bg-gray-50">
         <section className="mx-auto max-w-3xl px-4 py-10">
           <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
@@ -374,7 +331,7 @@ export default function RegisterPage() {
               <button type="button" onClick={() => setRole("helper")} className={`rounded-full px-4 py-2 ${role === "helper" ? "bg-white shadow ring-1 ring-black/5" : "opacity-70 hover:opacity-100"}`}>
                 I’m a Helper
               </button>
-              <button type="button" onClick={() => setRole("client")} className={`rounded-full px-4 py-2 ${role === "client" ? "bg-white shadow ring-1 ring-black/5" : "opacity-70 hover:opacity-100"}`}>
+              <button type="button" onClick={() => setRole("poster")} className={`rounded-full px-4 py-2 ${role === "poster" ? "bg-white shadow ring-1 ring-black/5" : "opacity-70 hover:opacity-100"}`}>
                 I want to Post Jobs
               </button>
             </div>
@@ -483,7 +440,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {role === "client" ? (
+              {role === "poster" ? (
                 <fieldset className="rounded-2xl border border-gray-200 p-4">
                   <legend className="px-1 text-sm font-semibold text-gray-700">Additional (for Job Posters)</legend>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -550,12 +507,6 @@ export default function RegisterPage() {
               >
                 {submitting ? "Creating account…" : "Create account"}
               </button>
-                <p className="text-sm text-gray-600">
-                    Already have an account?{" "}
-                    <Link href={`/signin?role=${role}`} className="text-black font-medium hover:underline">
-                        Sign in
-                    </Link>
-                </p>
 
               {message && (
                 <div className={`rounded-xl border px-4 py-3 text-sm ${message.type === "success" ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}`}>
@@ -566,5 +517,17 @@ export default function RegisterPage() {
           </div>
         </section>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-gray-600 flex justify-between">
+          <p>© {new Date().getFullYear()} Kiezly. All rights reserved.</p>
+          <div className="space-x-4">
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
