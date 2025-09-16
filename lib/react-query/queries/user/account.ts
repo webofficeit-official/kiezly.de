@@ -6,7 +6,14 @@ export interface SignupData {
   last_name: string;
   email: string;
   password: string;
-  role:string
+  role:string;
+  city:string;
+  zip:string;
+  country:string;
+  org_name:string;
+  website:string;
+  skills: any[];
+  rate:string;
 }
 
 interface SignupResponse {
@@ -15,6 +22,8 @@ interface SignupResponse {
   last_name: string;
   email: string;
   token: string;
+  message: string;
+  success: boolean
 }
 
 
@@ -41,6 +50,14 @@ export interface LoginResponse {
   };
 }
 
+export interface CollectionResponse {
+  success: boolean;
+  message: string;
+  data: {
+    jobCategories: [];
+  };
+}
+
 export const useSignup = (): UseMutationResult<
   SignupResponse,      // Type of data returned
   Error,               // Type of error
@@ -62,5 +79,15 @@ export const useLogin = (): UseMutationResult<
   return useMutation({
     mutationFn: (data: LoginData) =>
       apiClient.post("/auth/login", data).then(res => res.data),
+  });
+};
+
+export const useCollections = (): UseMutationResult<
+  CollectionResponse,   
+  Error       
+> => {
+  return useMutation({
+    mutationFn: (data: LoginData) =>
+      apiClient.get("/collection").then(res => res.data),
   });
 };
