@@ -1,5 +1,5 @@
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
-import apiClient from "@/lib/config/axios-client";
+import apiClient, { setAccessToken, setRefreshToken } from "@/lib/config/axios-client";
 
 export interface SignupData {
   first_name: string;
@@ -84,7 +84,10 @@ export const useLogin = (): UseMutationResult<
 
           //  Set access token in Axios defaults for future requests
           if (loginData?.token?.access) {
-            apiClient.defaults.headers.common["Authorization"] = `Bearer ${loginData.token.access}`;
+            setAccessToken(loginData.token.access);
+          }
+          if (loginData?.token?.refresh) {
+            setRefreshToken(loginData.token.refresh);
           }
 
           return loginData;
