@@ -27,8 +27,20 @@ export interface UpdateProfileData {
   avatar_url: string;
   org_name: string;
   website: string;
-  skills: any[];
   rate: number;
+  display_name: string;
+  gender: string;
+  district: string;
+  fixed_price: boolean;
+  min_hours: number;
+  work_permit: boolean;
+  issue_invoice: boolean;
+  experience: number;
+  certificates: string;
+  skills: any[];
+  languages: any[];
+  weekdays: any[];
+  time_windows: any[];
 }
 
 interface UpdateProfileResponse {

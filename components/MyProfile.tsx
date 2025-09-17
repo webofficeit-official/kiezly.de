@@ -98,8 +98,21 @@ export type UserProfile = {
     police_verified?: boolean | null;
     avatar_url?: string | null;
     geom?: any | null;
+    display_name: string | null;
+    gender: string | null;
+    district: string | null;
+    fixed_price: boolean;
+    min_hours: number | null;
+    work_permit: boolean | null;
+    issue_involve: boolean;
+    experience: number | null;
+    certificates: string | null;
+    skills: Tag[];
+    languages: any[];
+    weekdays: any[];
+    time_windows: any[];
     created_at: Date;
-    updated_at: Date
+    updated_at: Date;
   }
 
 export type User = {
@@ -124,7 +137,7 @@ export type User = {
   lng?: number;
 
   // helper-specific
-  categories: string[]; // e.g., ["Childcare", "Cleaning"]
+  categories: number[]; // e.g., ["Childcare", "Cleaning"]
   languages: string[]; // e.g., ["German", "English"]
   hasWorkPermit?: boolean;
   canInvoice?: boolean; // if offers invoice (for non-mini job gigs)
@@ -218,25 +231,51 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
   useEffect(() => {
     pofile.mutate('', {
       onSuccess: (data) => {
-        console.log(data);
+        console.log(data);    
+        const updatedDateOfBirth = new Date(data.user.date_of_birth);    
+        const formatted = `${(updatedDateOfBirth.getUTCMonth() + 1).toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCDate().toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCFullYear()}`;
         setForm({
           ...form,
           firstName: data.user.first_name,
           lastName: data.user.last_name,
+          displayName: data.user.display_name,
           email: data.user.email,
           phone: data.user.phone,
-          dateOfBirth: data.user.date_of_birth,
+          dateOfBirth: formatted,
+          gender: data.user.gender,
           photoUrl: data.user.avatar_url,
           about: data.user.bio,
           address: {
             city: data.user.city,
             street: data.user.street,
             postcode: data.user.postal_code,
+            districtOrKiez: data.user.district,
           },
           rate: {
             hourlyEUR: data.user.rate,
-            fixedPriceAvailable: false
-          }
+            fixedPriceAvailable: data.user.fixed_price,
+            minHoursPerBooking: data.user.min_hours
+          },
+          categories: data.user.skills.map(skill => skill.id),
+          languages: data.user.languages.map(lan => lan.id),
+          availability: {
+            weekdays: data.user.weekdays,
+            timeWindows: data.user.time_windows,
+            radiusKm: 10
+          },
+          verification: {
+            firstAid: {
+              completed: data.user.has_first_aid
+            },
+            idVerified: data.user.is_email_verified,
+            policeCertificate: {
+              hasCertificate: data.user.police_verified
+            }
+          },
+          hasWorkPermit: data.user.work_permit,
+          canInvoice: data.user.issue_involve,
+          experienceYears: data.user.experience,
+          certificates: data.user.certificates.split(",")
         })
       },
       onError: (err: any) => {
@@ -315,14 +354,26 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       street: form.address.street,
       lat: 0,
       lng: 0,
-      has_first_aid: false,
+      has_first_aid: form.verification.firstAid.completed,
       education_level: '',
-      police_verified: false,
+      police_verified: form.verification.policeCertificate.hasCertificate,
       avatar_url: '',
       org_name: '',
       website: '',
       rate: form.rate.hourlyEUR,
-      skills: [],
+      display_name: form.displayName,
+      gender: form.gender,
+      district: form.address.districtOrKiez,
+      fixed_price: form.rate.fixedPriceAvailable,
+      min_hours: form.rate.minHoursPerBooking,
+      work_permit: form.hasWorkPermit,
+      issue_invoice: form.canInvoice,
+      experience: form.experienceYears,
+      certificates: form.certificates.map(c => c).join(', '),
+      skills: form.categories,
+      languages: form.languages,
+      weekdays: form.availability.weekdays,
+      time_windows: form.availability.timeWindows,
     }, {
       onSuccess: (data) => {
         toast.custom((t) => (
