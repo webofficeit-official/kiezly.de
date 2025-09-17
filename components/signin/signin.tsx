@@ -1,7 +1,8 @@
 "use client";
 
-import { useLogin } from "@/lib/react-query/queries/user/account";
-import { useSearchParams,useRouter } from "next/navigation";
+import { useAuth } from "@/lib/context/auth-context";
+import { getErrorMessage } from "@/lib/utils/error";
+import { useSearchParams, useRouter } from "next/navigation";
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
@@ -45,14 +46,15 @@ function LoginPage() {
         roleParam === "client" || roleParam === "helper" ? roleParam : "client"
     );
 
-    const router=useRouter()
+    const router = useRouter()
+    const { login } = useAuth();
 
     const setFieldError = React.useCallback((name, error) => {
         setErrors(prev => ({ ...prev, [name]: error || undefined }));
     }, []);
     const getFieldError = (name) => errors && errors[name];
     const hasErrors = React.useMemo(() => Object.values(errors || {}).some(Boolean), [errors]);
-    const loginUser = useLogin();
+
 
     function validateField(name, value) {
         const v = typeof value === "string" ? value.trim() : "";
@@ -109,46 +111,33 @@ function LoginPage() {
         try {
             setSubmitting(true);
             // Simulate API call
-            loginUser.mutate(
-                { email, password },
-                {
-                    onSuccess: (res) => {
-                        const accessToken = res.token.access;
-                        const userRole = res.data.role;
 
-                        localStorage.setItem("accessToken", accessToken);
-                        localStorage.setItem("userRole", userRole);
 
-                        toast.custom((t) => (
-                            <div
-                                className={`${t.visible ? "animate-enter" : "animate-leave"
-                                    } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-                            >
-                                {/* Icon */}
-                                <div className="flex items-center justify-center p-4">
-                                    <FaCheckCircle className="text-green-500 w-6 h-6" />
-                                </div>
-
-                                {/* Text */}
-                                <div className="flex-1 w-0 p-4">
-                                    <p className="text-sm font-semibold text-green-600">
-                                        Login successful!
-                                    </p>
-
-                                </div>
+            login(email, password, {
+                onSuccess: () => {
+                    toast.custom((t) => (
+                        <div
+                            className={`${t.visible ? "animate-enter" : "animate-leave"
+                                } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+                        >
+                            <div className="flex items-center justify-center p-4">
+                                <FaCheckCircle className="text-green-500 w-6 h-6" />
                             </div>
-                        ));
+                            <div className="flex-1 w-0 p-4">
+                                <p className="text-sm font-semibold text-green-600">
+                                    Login successful!
+                                </p>
+                            </div>
+                        </div>
+                    ));
 
-                        
-                        router.push('/my-profile')
-                      
-                    },
-                    onError: (err) => {
-                        toast.error(err.message || "Could not sign in.")
-                    },
-                }
-            );
-
+                    router.push("/my-profile");
+                },
+                onError: (err) => {
+                    toast.error(getErrorMessage(err) || "Could not sign in.");
+                },
+            });
+            setSubmitting(false);
         } catch (err) {
             toast.error(err.message || "Could not sign in.")
         } finally {
@@ -158,84 +147,84 @@ function LoginPage() {
 
     const submitDisabled = submitting || hasErrors;
 
-    return (      
+    return (
 
-            <main className="flex-1 flex-col  h-[calc(100vh-9rem)]">
-                <section className="mx-auto max-w-md px-4 py-10">
-                    <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
-                        <h1 className="text-2xl font-bold tracking-tight">Log in</h1>
+        <main className="flex-1 flex-col  h-[calc(100vh-8rem)]">
+            <section className="mx-auto max-w-md px-4 py-10">
+                <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
+                    <h1 className="text-2xl font-bold tracking-tight">Log in</h1>
 
-                        <p className="mt-1 text-sm text-gray-600">Welcome back! Please enter your details.</p>
-                     
+                    <p className="mt-1 text-sm text-gray-600">Welcome back! Please enter your details.</p>
 
 
-                        <form onSubmit={onSubmit} noValidate className="mt-8 grid grid-cols-1 gap-5">
-                            <div>
-                                <label htmlFor="email" className="mb-1 block text-sm font-medium">Email *</label>
+
+                    <form onSubmit={onSubmit} noValidate className="mt-8 grid grid-cols-1 gap-5">
+                        <div>
+                            <label htmlFor="email" className="mb-1 block text-sm font-medium">Email *</label>
+                            <input
+                                id="email"
+                                type="email"
+                                name="email"
+                                required
+                                aria-invalid={!!getFieldError("email")}
+                                aria-describedby={getFieldError("email") ? "email-error" : undefined}
+                                onBlur={handleBlur}
+                                onChange={handleChange}
+                                className={`w-full rounded-xl border px-3 py-2 ${getFieldError("email") ? "border-red-400 focus:ring-red-200" : "border-gray-300 focus:ring-black/20"}`}
+                            />
+                            {getFieldError("email") && (
+                                <p id="email-error" className="mt-1 text-xs text-red-600">{getFieldError("email")}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="mb-1 block text-sm font-medium">Password *</label>
+                            <div className="relative">
                                 <input
-                                    id="email"
-                                    type="email"
-                                    name="email"
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
                                     required
-                                    aria-invalid={!!getFieldError("email")}
-                                    aria-describedby={getFieldError("email") ? "email-error" : undefined}
+                                    aria-invalid={!!getFieldError("password")}
+                                    aria-describedby={getFieldError("password") ? "password-error" : undefined}
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    className={`w-full rounded-xl border px-3 py-2 ${getFieldError("email") ? "border-red-400 focus:ring-red-200" : "border-gray-300 focus:ring-black/20"}`}
+                                    className={`w-full rounded-xl border px-3 py-2 pr-12 ${getFieldError("password") ? "border-red-400 focus:ring-red-200" : "border-gray-300 focus:ring-black/20"}`}
                                 />
-                                {getFieldError("email") && (
-                                    <p id="email-error" className="mt-1 text-xs text-red-600">{getFieldError("email")}</p>
-                                )}
+                                <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute inset-y-0 right-2 my-auto rounded-lg px-2 text-xs text-gray-600 hover:bg-gray-100">
+                                    {showPassword ? "Hide" : "Show"}
+                                </button>
                             </div>
-
-                            <div>
-                                <label htmlFor="password" className="mb-1 block text-sm font-medium">Password *</label>
-                                <div className="relative">
-                                    <input
-                                        id="password"
-                                        type={showPassword ? "text" : "password"}
-                                        name="password"
-                                        required
-                                        aria-invalid={!!getFieldError("password")}
-                                        aria-describedby={getFieldError("password") ? "password-error" : undefined}
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        className={`w-full rounded-xl border px-3 py-2 pr-12 ${getFieldError("password") ? "border-red-400 focus:ring-red-200" : "border-gray-300 focus:ring-black/20"}`}
-                                    />
-                                    <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute inset-y-0 right-2 my-auto rounded-lg px-2 text-xs text-gray-600 hover:bg-gray-100">
-                                        {showPassword ? "Hide" : "Show"}
-                                    </button>
-                                </div>
-                                {getFieldError("password") && (
-                                    <p id="password-error" className="mt-1 text-xs text-red-600">{getFieldError("password")}</p>
-                                )}
-                                <div className="mt-2 text-right text-xs">
-                                    <Link href="/forgot-password" className="text-gray-600 underline hover:text-black">Forgot password?</Link>
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={submitDisabled}
-                                className="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-white disabled:opacity-60"
-                                aria-disabled={submitDisabled}
-                            >
-                                {submitting ? "Signing in…" : "Sign in"}
-                            </button>
-
-                            <p className="text-sm text-gray-600">
-                                Don’t have an account? <Link href="/signup" className="font-medium underline">Create one</Link>
-                            </p>
-
-                            {message && (
-                                <div className={`rounded-xl border px-4 py-3 text-sm ${message.type === "success" ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}`}>
-                                    {message.text}
-                                </div>
+                            {getFieldError("password") && (
+                                <p id="password-error" className="mt-1 text-xs text-red-600">{getFieldError("password")}</p>
                             )}
-                        </form>
-                    </div>
-                </section>
-            </main>
+                            <div className="mt-2 text-right text-xs">
+                                <Link href="/forgot-password" className="text-gray-600 underline hover:text-black">Forgot password?</Link>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={submitDisabled}
+                            className="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-white disabled:opacity-60"
+                            aria-disabled={submitDisabled}
+                        >
+                            {submitting ? "Signing in…" : "Sign in"}
+                        </button>
+
+                        <p className="text-sm text-gray-600">
+                            Don’t have an account? <Link href="/signup" className="font-medium underline">Create one</Link>
+                        </p>
+
+                        {message && (
+                            <div className={`rounded-xl border px-4 py-3 text-sm ${message.type === "success" ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}`}>
+                                {message.text}
+                            </div>
+                        )}
+                    </form>
+                </div>
+            </section>
+        </main>
 
     );
 }
