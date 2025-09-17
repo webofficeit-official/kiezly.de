@@ -7,6 +7,7 @@
 npm i
 npm run dev
 
-## Static export
+## Static export   
+
 npm run export
 # output: ./out
