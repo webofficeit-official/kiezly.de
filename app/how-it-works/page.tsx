@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 export default function HowItWorksPage() {
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
-      <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
+      {/* <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5" />
@@ -22,7 +22,7 @@ export default function HowItWorksPage() {
             <a href="/" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Back to home</a>
           </div>
         </div>
-      </header>
+      </header> */}
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-4">
