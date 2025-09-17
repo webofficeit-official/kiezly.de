@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "";
 
 // keep access in memory for speed
 let accessToken: string | null = null;
@@ -31,7 +32,7 @@ export const setRefreshToken = (token: string | null) => {
 };
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: baseURL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
@@ -88,7 +89,9 @@ apiClient.interceptors.response.use(
         processQueue(err, null);
         setAccessToken(null);
         setRefreshToken(null);
-        window.location.href = "/login";
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
