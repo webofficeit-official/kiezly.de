@@ -1,12 +1,19 @@
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
-import apiClient from "@/lib/config/axios-client";
+import apiClient, { setAccessToken, setRefreshToken } from "@/lib/config/axios-client";
 
 export interface SignupData {
   first_name: string;
   last_name: string;
   email: string;
   password: string;
-  role:string
+  role: string;
+  city: string;
+  zip: string;
+  country: string;
+  org_name: string;
+  website: string;
+  skills: any[];
+  rate: string;
 }
 
 interface SignupResponse {
@@ -15,13 +22,15 @@ interface SignupResponse {
   last_name: string;
   email: string;
   token: string;
+  message: string;
+  success: boolean
 }
 
 
 export interface LoginData {
   email: string;
   password: string;
-  role?: string; 
+  role?: string;
 }
 
 export interface LoginResponse {
@@ -41,6 +50,14 @@ export interface LoginResponse {
   };
 }
 
+export interface CollectionResponse {
+  success: boolean;
+  message: string;
+  data: {
+    jobCategories: [];
+  };
+}
+
 export const useSignup = (): UseMutationResult<
   SignupResponse,      // Type of data returned
   Error,               // Type of error
@@ -55,12 +72,35 @@ export const useSignup = (): UseMutationResult<
 
 
 export const useLogin = (): UseMutationResult<
-  LoginResponse,   
-  Error,          
-  LoginData       
+  LoginResponse,
+  Error,
+  LoginData
 > => {
   return useMutation({
     mutationFn: (data: LoginData) =>
-      apiClient.post("/auth/login", data).then(res => res.data),
+      apiClient.post("/auth/login", data).then(
+        (res) => {
+          const loginData = res.data;
+
+          //  Set access token in Axios defaults for future requests
+          if (loginData?.token?.access) {
+            setAccessToken(loginData.token.access);
+          }
+          if (loginData?.token?.refresh) {
+            setRefreshToken(loginData.token.refresh);
+          }
+
+          return loginData;
+        }),
+  });
+};
+
+export const useCollections = (): UseMutationResult<
+  CollectionResponse,
+  Error
+> => {
+  return useMutation({
+    mutationFn: (data: LoginData) =>
+      apiClient.get("/collection").then(res => res.data),
   });
 };
