@@ -1,8 +1,10 @@
 "use client";
 
 import { useCollections } from "@/lib/react-query/queries/user/account";
-import { getProfile } from "@/lib/react-query/queries/user/profile";
+import { getProfile, updateProfile } from "@/lib/react-query/queries/user/profile";
 import React, { useMemo, useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import { FaCheckCircle } from "react-icons/fa";
 
 /**
  * Kiezly – User Creation & Profile (fixed)
@@ -184,8 +186,8 @@ export default function MyProfile() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-3xl font-semibold tracking-tight">Become a helper – Onboarding</h1>
-      <p className="mt-1 text-sm text-gray-600">Create your account and build a strong profile. Badges like ID, First Aid and Police Certificate help clients hire confidently.</p>
+      <h1 className="text-3xl font-semibold tracking-tight">My Profile</h1>
+      {/* <p className="mt-1 text-sm text-gray-600">Create your account and build a strong profile. Badges like ID, First Aid and Police Certificate help clients hire confidently.</p> */}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="rounded-2xl border p-6 shadow-sm">
@@ -212,6 +214,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
 
   const collections = useCollections();
   const pofile = getProfile();
+  const updatePofile = updateProfile();
 
   useEffect(() => {
     collections.mutate({}, {
@@ -221,7 +224,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
       onError: (err: any) => {
       }
     });
-    pofile.mutate("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MmVjYWQwNC1jNDk5LTRjN2MtOWUxYS0xZTYyYTEwMzQ5OTAiLCJyb2xlIjoiaGVscGVyIiwiaWF0IjoxNzU4MDI3NDgxLCJleHAiOjE3NTgwMjgzODF9.vKB3zA-rqxLdd2U58vtmRo4AmU2VEHwJCRFwzivFDKA", {
+    pofile.mutate('', {
       onSuccess: (data) => {
         console.log(data);
         setForm({
@@ -290,7 +293,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
     if (!form.firstName) e.push("First name required");
     if (!form.lastName) e.push("Last name required");
     if (!form.address.city) e.push("City required");
-    if (!form.categories.length) e.push("Select at least one category");
+    // if (!form.categories.length) e.push("Select at least one category");
     if (form.rate.hourlyEUR < 12) e.push("Hourly rate must be ≥ 12 € (min wage)");
     return e;
   }, [form]);
@@ -306,9 +309,57 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
   function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
     if (errors.length) return;
-    // TODO: call your API here
     console.log("Submitted user:", form);
+    updatePofile.mutate({
+      first_name: form.firstName,
+      last_name: form.lastName,
+      phone: form.phone,
+      date_of_birth: form.dateOfBirth,
+      bio: form.about,
+      country: 'Germany',
+      state: form.address.districtOrKiez,
+      city: form.address.city,
+      postal_code: form.address.postcode,
+      street: form.address.street,
+      lat: 0,
+      lng: 0,
+      has_first_aid: false,
+      education_level: '',
+      police_verified: false,
+      avatar_url: '',
+      org_name: '',
+      website: '',
+      rate: form.rate.hourlyEUR,
+      skills: [],
+    }, {
+      onSuccess: (data) => {
+        toast.custom((t) => (
+          <div
+            className={`${t.visible ? "animate-enter" : "animate-leave"
+            } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+          >
+            {/* Icon */}
+            <div className="flex items-center justify-center p-4">
+              <FaCheckCircle className="text-green-500 w-6 h-6" />
+            </div>
+            {/* Text */}
+            <div className="flex-1 w-0 p-4">
+              <p className="text-sm font-semibold text-green-600">
+                Profile Updated!
+              </p>
+              <p className="mt-1 text-sm text-gray-700">
+                
+              </p>
+            </div>
+          </div>
+        ));
+      },
+      onError: (err: any) => {
+          toast.error(err?.response?.data?.message || "Registration failed!")
+      }
+    });
   }
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
