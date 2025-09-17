@@ -55,6 +55,9 @@ export interface CollectionResponse {
   message: string;
   data: {
     jobCategories: [];
+    weekdays: [];
+    timeWindows: [];
+    languages: [];
   };
 }
 

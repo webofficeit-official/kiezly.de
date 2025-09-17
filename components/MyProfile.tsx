@@ -141,37 +141,10 @@ export type User = {
   socials: SocialLinks;
 };
 
-// ----------------------------
-// Dictionaries & helpers
-// ----------------------------
-const ALL_CATEGORIES = [
-  "Childcare",
-  "Cleaning",
-  "Pet care",
-  "Senior support",
-  "Errands",
-  "Garden",
-  "Events",
-] as const;
-
-const ALL_LANGUAGES = [
-  "German",
-  "English",
-  "Turkish",
-  "Polish",
-  "Russian",
-  "Arabic",
-  "Hindi",
-] as const;
-
 type Tag = {
     id: number;
-    slug: string;
     name: string;
 };
-
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-const TIME_WINDOWS = ["Morning", "Afternoon", "Evening", "Weekend"] as const;
 
 // FIX: Define classNames helper locally to avoid ReferenceError
 function classNames(...xs: Array<string | false | undefined | null>) {
@@ -182,7 +155,26 @@ function classNames(...xs: Array<string | false | undefined | null>) {
 // Main component
 // ----------------------------
 export default function MyProfile() {
+  const collections = useCollections();
+  
   const [data, setData] = useState<User | null>(null);
+  const [weekdays, setWeekdays] = useState([]);
+  const [timeWindows, setTimeWindows] = useState([]);
+  const [jobCategories, setJobCategories] = React.useState([])
+  const [languages, setLanguages] = React.useState([])
+
+  useEffect(() => {
+    collections.mutate({}, {
+      onSuccess: (data) => {
+        setWeekdays(data.data.weekdays)
+        setTimeWindows(data.data.timeWindows)
+        setJobCategories(data.data.jobCategories)
+        setLanguages(data.data.languages)
+      },
+      onError: (err: any) => {
+      }
+    });
+  }, [])
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -191,12 +183,12 @@ export default function MyProfile() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="rounded-2xl border p-6 shadow-sm">
-          <OnboardingForm onChange={setData} />
+          <OnboardingForm onChange={setData} weekdays={weekdays} timeWindows={timeWindows} jobCategories={jobCategories} languages={languages} />
         </div>
         <div className="rounded-2xl border p-6 shadow-sm">
           <h2 className="mb-4 text-xl font-semibold">Live profile preview</h2>
           {data ? (
-            <PublicProfile user={data} />
+            <PublicProfile user={data} jobCategories={jobCategories} languages={languages} />
           ) : (
             <div className="text-sm text-gray-500">Start typing in the form to see your live public profile preview here.</div>
           )}
@@ -206,24 +198,24 @@ export default function MyProfile() {
   );
 }
 
+export type OnboardingFormProps = {
+  onChange: (u: User, weekdays: any[], timeWindows: any[], jobCategories: object[], languages: object[]) => void;
+  weekdays: any[];
+  timeWindows: any[];
+  jobCategories: object[];
+  languages: object[];
+};
+
 // ----------------------------
 // Onboarding Form
 // ----------------------------
-function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
+function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, languages }: OnboardingFormProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  const collections = useCollections();
   const pofile = getProfile();
   const updatePofile = updateProfile();
 
   useEffect(() => {
-    collections.mutate({}, {
-      onSuccess: (data) => {
-        console.log(data);
-      },
-      onError: (err: any) => {
-      }
-    });
     pofile.mutate('', {
       onSuccess: (data) => {
         console.log(data);
@@ -266,10 +258,10 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
     photoUrl: "",
     address: { street: "", postcode: "", city: "", districtOrKiez: "" },
     categories: [],
-    languages: ["German"],
+    languages: [],
     hasWorkPermit: true,
     canInvoice: false,
-    availability: { radiusKm: 5, weekdays: ["Mon", "Tue", "Wed"], timeWindows: ["Afternoon"] },
+    availability: { radiusKm: 5, weekdays: [], timeWindows: [] },
     rate: { hourlyEUR: 15, fixedPriceAvailable: false, minHoursPerBooking: 2 },
     experienceYears: 0,
     education: [],
@@ -284,7 +276,7 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
 
   // push form updates to parent in real-time (also triggers once on mount)
   useEffect(() => {
-    onChange(form);
+    onChange(form, weekdays, timeWindows, jobCategories, languages);
   }, [form, onChange]);
 
   const errors = useMemo(() => {
@@ -387,21 +379,21 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="Service radius (km)" type="number" min={1} max={100} value={form.availability.radiusKm} onChange={(v) => update((d) => (d.availability.radiusKm = Number(v)))} />
-          <MultiCheckbox label="Available days" values={form.availability.weekdays} onChange={(vals) => update((d) => (d.availability.weekdays = vals))} options={Array.from(WEEKDAYS)} />
+          <MultiCheckbox label="Available days" values={form.availability.weekdays} onChange={(vals) => update((d) => (d.availability.weekdays = vals))} options={Array.from(weekdays)} />
         </div>
-        <MultiCheckbox label="Time windows" values={form.availability.timeWindows} onChange={(vals) => update((d) => (d.availability.timeWindows = vals))} options={Array.from(TIME_WINDOWS)} />
+        <MultiCheckbox label="Time windows" values={form.availability.timeWindows} onChange={(vals) => update((d) => (d.availability.timeWindows = vals))} options={Array.from(timeWindows)} />
       </Section>
 
       {/* Work */}
       <Section title="Work preferences">
-        <MultiCheckbox label="Categories" values={form.categories} onChange={(vals) => update((d) => (d.categories = vals))} options={Array.from(ALL_CATEGORIES)} />
+        <MultiCheckboxWithObject label="Categories" values={form.categories} onChange={(vals) => update((d) => (d.categories = vals))} options={Array.from(jobCategories)} />
         <div className="grid gap-4 md:grid-cols-3">
           <Input label="Hourly rate (€)" type="number" min={12} max={200} value={form.rate.hourlyEUR} onChange={(v) => update((d) => (d.rate.hourlyEUR = Number(v)))} />
           <Switch label="Fixed price available" checked={form.rate.fixedPriceAvailable} onChange={(v) => update((d) => (d.rate.fixedPriceAvailable = v))} />
           <Input label="Min hours per booking" type="number" min={1} max={12} value={form.rate.minHoursPerBooking || 1} onChange={(v) => update((d) => (d.rate.minHoursPerBooking = Number(v)))} />
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <MultiCheckbox label="Languages" values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(ALL_LANGUAGES)} />
+          <MultiCheckboxWithObject label="Languages" values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(languages)} />
           <Switch label="Has work permit" checked={!!form.hasWorkPermit} onChange={(v) => update((d) => (d.hasWorkPermit = v))} />
           <Switch label="Can issue invoice" checked={!!form.canInvoice} onChange={(v) => update((d) => (d.canInvoice = v))} />
         </div>
@@ -470,10 +462,16 @@ function OnboardingForm({ onChange }: { onChange: (u: User) => void }) {
 // ----------------------------
 // Public profile (Preview)
 // ----------------------------
-function PublicProfile({ user }: { user: User }) {
+function PublicProfile({ user, jobCategories, languages }: { user: User, jobCategories: {
+  id: string;
+  name: string;
+}[], languages: {
+  id: string;
+  name: string;
+}[] }) {
   const hasName = (user.displayName && user.displayName.trim()) || (user.firstName || user.lastName);
   const name = hasName ? (user.displayName || `${user.firstName} ${user.lastName}`.trim()) : "New helper";
-  const cityLine = [user.address?.city, user.address?.districtOrKiez].filter(Boolean).join(" • ");
+  const cityLine = [user.address?.city, user.address?.districtOrKiez].filter(Boolean).join(" • ");  
 
   return (
     <div className="space-y-6">
@@ -485,14 +483,14 @@ function PublicProfile({ user }: { user: User }) {
             <Badges verification={user.verification} />
           </div>
           <div className="mt-1 text-sm text-gray-600">
-            {cityLine || "Add your city"}{user.languages?.length ? ` • ${user.languages.join(", ")}` : ""}
+            {cityLine || "Add your city"}{user.languages?.length ? ` • ${user.languages.map(id => languages.find(lan => lan.id === id)?.name || "").join(", ")}` : ""}
           </div>
           {user.about && <p className="mt-3 text-gray-800">{user.about}</p>}
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <InfoTile title="Categories" content={user.categories?.length ? user.categories.join(", ") : "–"} />
+        <InfoTile title="Categories" content={user.categories?.length ? user.categories.map(id => jobCategories.find(cat => cat.id === id)?.name || "Unknown").join(", ") : "–"} />
         <InfoTile title="Rate" content={`${user.rate?.hourlyEUR ?? "–"} €/h${user.rate?.minHoursPerBooking ? ` • min ${user.rate.minHoursPerBooking} h` : ""}`} />
         <InfoTile title="Availability" content={`${(user.availability?.weekdays || []).join(", ") || "–"} • ${(user.availability?.timeWindows || []).join(", ") || "–"}`} />
         <InfoTile title="Experience" content={`${user.experienceYears ?? 0} years`} />
@@ -713,6 +711,27 @@ function MultiCheckbox({ label, options, values, onChange }: { label: string; op
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
           <button type="button" key={opt} onClick={() => toggle(opt)} className={classNames("rounded-full border px-3 py-1 text-sm", values.includes(opt) ? "bg-black text-white" : "")}>{opt}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MultiCheckboxWithObject({ label, options, values, onChange }: { label: string; options: {
+  id: string;
+  name: string;
+}[]; values: string[]; onChange: (next: string[]) => void }) {
+  function toggle(val: string) {
+    const set = new Set(values);
+    if (set.has(val)) set.delete(val); else set.add(val);
+    onChange(Array.from(set));
+  }
+  return (
+    <div className="space-y-2">
+      <div className="text-sm text-gray-700">{label}</div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => (
+          <button type="button" key={opt.id} onClick={() => toggle(opt.id)} className={classNames("rounded-full border px-3 py-1 text-sm", values.includes(opt.id) ? "bg-black text-white" : "")}>{opt.name}</button>
         ))}
       </div>
     </div>
