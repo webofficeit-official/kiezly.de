@@ -1,7 +1,7 @@
 "use client";
 
 import { useLogin } from "@/lib/react-query/queries/user/account";
-import { useSearchParams,useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
@@ -44,8 +44,6 @@ function LoginPage() {
     const [role, setRole] = React.useState<"helper" | "client">(
         roleParam === "client" || roleParam === "helper" ? roleParam : "client"
     );
-
-    const router=useRouter()
 
     const setFieldError = React.useCallback((name, error) => {
         setErrors(prev => ({ ...prev, [name]: error || undefined }));
@@ -110,7 +108,7 @@ function LoginPage() {
             setSubmitting(true);
             // Simulate API call
             loginUser.mutate(
-                { email, password },
+                { email, password, role },
                 {
                     onSuccess: (res) => {
                         const accessToken = res.token.access;
@@ -139,9 +137,12 @@ function LoginPage() {
                             </div>
                         ));
 
-                        
-                        router.push('/my-profile')
-                      
+                        // redirect based on role
+                        if (userRole === "helper") {
+
+                        } else {
+
+                        }
                     },
                     onError: (err) => {
                         toast.error(err.message || "Could not sign in.")
@@ -158,15 +159,29 @@ function LoginPage() {
 
     const submitDisabled = submitting || hasErrors;
 
-    return (      
+    return (
+        <div className="flex flex-col">
 
-            <main className="flex-1 flex-col  h-[calc(100vh-9rem)]">
+            <main className="flex-1 ">
                 <section className="mx-auto max-w-md px-4 py-10">
                     <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
                         <h1 className="text-2xl font-bold tracking-tight">Log in</h1>
 
                         <p className="mt-1 text-sm text-gray-600">Welcome back! Please enter your details.</p>
-                     
+                        {/* Role selector */}
+                        <div className="mt-6 inline-flex rounded-full bg-gray-100 p-1 text-sm">
+                            <button type="button"
+                                onClick={() => setRole("helper")} className={`rounded-full px-4 py-2 ${role === "helper" ? "bg-white shadow ring-1 ring-black/5" : "opacity-70 hover:opacity-100"}`}
+                            >
+                                I’m a Helper
+                            </button>
+                            <button type="button"
+                                onClick={() => setRole("client")}
+                                className={`rounded-full px-4 py-2 ${role === "client" ? "bg-white shadow ring-1 ring-black/5" : "opacity-70 hover:opacity-100"}`}
+                            >
+                                I want to Post Jobs
+                            </button>
+                        </div>
 
 
                         <form onSubmit={onSubmit} noValidate className="mt-8 grid grid-cols-1 gap-5">
@@ -237,6 +252,8 @@ function LoginPage() {
                 </section>
             </main>
 
+
+        </div>
     );
 }
 
