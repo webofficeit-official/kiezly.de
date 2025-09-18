@@ -49,11 +49,13 @@ export default function VerifyEmailPage() {
                 <CardHeader>
                     <CardTitle>Email Verification</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    {(statusLocal === "idle" || statusLocal === "loading") && (
-                        <p className="text-gray-700 font-medium">{message}</p>
-                    )}
+                <CardContent className="min-h-[200px] flex flex-col items-center justify-center gap-3">
+                    {/* Placeholder for loading */}
+                    {statusLocal === "idle" || statusLocal === "loading" ? (
+                        <p className="text-gray-700 font-medium">{message || "Verifying your email..."}</p>
+                    ) : null}
 
+                    {/* Success */}
                     {statusLocal === "success" && (
                         <div className="flex flex-col items-center gap-3">
                             <CheckCircle2 className="h-12 w-12 text-green-500" />
@@ -62,6 +64,7 @@ export default function VerifyEmailPage() {
                         </div>
                     )}
 
+                    {/* Error */}
                     {statusLocal === "error" && (
                         <div className="flex flex-col items-center gap-3">
                             <AlertCircle className="h-12 w-12 text-red-500" />
@@ -69,7 +72,6 @@ export default function VerifyEmailPage() {
                             <p className="text-red-600 text-sm text-center">
                                 There was an issue verifying your email. Please try again or check your verification link.
                             </p>
-
                         </div>
                     )}
                 </CardContent>
