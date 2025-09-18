@@ -5,6 +5,7 @@ import "react-quill/dist/quill.snow.css";
 import { useCollections } from "@/lib/react-query/queries/user/account";
 import { Combobox } from "@headlessui/react";
 import { ChevronsUpDownIcon } from "lucide-react";
+import Section from "../shared-ui/section/section";
 
 // Dynamically import to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -19,6 +20,22 @@ export type JobFormValues = {
     price_type: string;
     price_value_min: string;
     price_value_max: string;
+    currency: string;
+    country: string;
+    state: string;
+    city: string;
+    postal_code: string;
+    street: string;
+    lat: string;
+    lng: string;
+    starts_at: Date;
+    ends_at: Date;
+    job_experience: "junior" | "middle" | "experienced";
+    job_type: "part_time" | "on_demand" | "full_time";
+    first_aid_verified: boolean;
+    police_verified: boolean;
+    verified: boolean;
+
 };
 
 const DEFAULT_JOB: JobFormValues = {
@@ -29,24 +46,26 @@ const DEFAULT_JOB: JobFormValues = {
     price_type: "fixed",
     price_value_min: "",
     price_value_max: "",
-    // currency: "EUR",
-    // country: "",
-    // state: "",
-    // city: "",
-    // postal_code: "",
-    // street: "",
-    // lat: "",
-    // lng: "",
-    // starts_at: "",
-    // ends_at: "",
-    // job_type: "part_time",
-    // job_experience: "junior",
-    // first_aid_verified: false,
-    // police_verified: false,
-    // verified: false,
+    currency: "EUR",
+    country: "",
+    state: "",
+    city: "",
+    postal_code: "",
+    street: "",
+    lat: "",
+    lng: "",
+    starts_at: new Date(),
+    ends_at: new Date(),
+    job_experience: "junior",
+    job_type: "part_time",
+    first_aid_verified: false,
+    police_verified: false,
+    verified: false,
 };
 
-
+function classNames(...xs: Array<string | false | undefined | null>) {
+    return xs.filter(Boolean).join(" ");
+}
 
 
 export default function CreateJobForm() {
@@ -64,6 +83,8 @@ export default function CreateJobForm() {
 }
 
 
+
+
 // ----------------------------
 // Onboarding Form
 // ----------------------------
@@ -79,12 +100,26 @@ function OnboardingForm({ }) {
         price_type: "",
         price_value_min: "",
         price_value_max: "",
+        currency: "EUR",
+        country: "",
+        state: "",
+        city: "",
+        postal_code: "",
+        street: "",
+        lat: "",
+        lng: "",
+        starts_at: new Date(),
+        ends_at: new Date(),
+        job_experience: "junior",
+        job_type: "part_time",
+        first_aid_verified: false,
+        police_verified: false,
+        verified: false,
     });
 
     React.useEffect(() => {
         collections.mutate({}, {
             onSuccess: (data) => {
-                console.log(data);
                 setJobCategories(data.data.jobCategories)
             },
             onError: (err: any) => {
@@ -170,26 +205,107 @@ function OnboardingForm({ }) {
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <Input label="City" value={form?.price_value_min} onChange={(v) => update((d) => (d.price_value_min = v))} required />
+                    <Input label="City" value={form?.city} onChange={(v) => update((d) => (d.city = v))} required />
                 </div>
                 <div>
 
-                    <Input label="Street" value={form?.price_value_max} onChange={(v) => update((d) => (d.price_value_max = v))} required />
+                    <Input label="Street" value={form?.street} onChange={(v) => update((d) => (d.street = v))} required />
                 </div>
 
             </div>
 
             <div className="grid sm:grid-cols-3 gap-4">
                 <div>
-                    <Input label="Postcode" value={form?.price_value_min} onChange={(v) => update((d) => (d.price_value_min = v))} required />
+                    <Input label="Postcode" value={form?.postal_code} onChange={(v) => update((d) => (d.postal_code = v))} required />
                 </div>
                 <div>
-                    <Input type="number" label="lat" value={form?.price_value_min} onChange={(v) => update((d) => (d.price_value_min = v))} required />
+                    <Input type="number" label="lat" value={form?.lat} onChange={(v) => update((d) => (d.lat = v))} required />
                 </div>
                 <div>
 
-                    <Input type="number" label="lng" value={form?.price_value_max} onChange={(v) => update((d) => (d.price_value_max = v))} required />
+                    <Input type="number" label="lng" value={form?.lng} onChange={(v) => update((d) => (d.lng = v))} required />
                 </div>
+            </div>
+
+            {/* Dates */}
+            <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <Input
+                        label="Starts at"
+                        type="date"
+                        value={form?.lng}
+                        onChange={(v) => update((d) => (d.lng = v))}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium">Ends at</label>
+                    <Input
+                        label="Ends at"
+                        type="date"
+                        value={form?.lng}
+                        onChange={(v) => update((d) => (d.lng = v))}
+                    />
+                </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <SingleSelect
+                        label="Job Experience"
+                        placeholder="Select experience"
+                        value={{ id: form.job_experience, name: form.job_experience }}
+                        onChange={(opt) => update((d) => (d.job_experience = opt ? (opt.id as JobFormValues["job_experience"]) : "junior"))}
+                        options={[
+                            { id: "junior", name: "Junior" },
+                            { id: "middle", name: "Middle" },
+                            { id: "experienced", name: "Experienced" },
+                        ]}
+                    />
+                </div>
+                <div>
+                    <SingleSelect
+                        label="Job Type"
+                        placeholder="Select type"
+                        value={{ id: form.job_type, name: form.job_type.replace("_", " ") }}
+                        onChange={(opt) => update((d) => (d.job_type = opt ? (opt.id as JobFormValues["job_type"]) : "part_time"))}
+                        options={[
+                            { id: "part_time", name: "Part Time" },
+                            { id: "on_demand", name: "On Demand" },
+                            { id: "full_time", name: "Full Time" },
+                        ]}
+                    />
+                </div>
+            </div>
+            <Section title="Verification">
+                <div className="grid gap-4 sm:grid-cols-3">
+                    <Switch
+                        label="First Aid Verified"
+                        checked={form.first_aid_verified}
+                        onChange={(v) => update((d) => (d.first_aid_verified = v))}
+                    />
+                    <Switch
+                        label="Police Verified"
+                        checked={form.police_verified}
+                        onChange={(v) => update((d) => (d.police_verified = v))}
+                    />
+                    <Switch
+                        label="Verified"
+                        checked={form.verified}
+                        onChange={(v) => update((d) => (d.verified = v))}
+                    />
+                </div>
+            </Section>
+
+            <div className="flex items-center justify-end ">
+                {/* <div className="text-sm text-red-600">{errors[0] || ""}</div> */}
+                <button
+                    type="submit"
+                    className={classNames(
+                        "rounded-xl w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800",
+                    )}
+                // disabled={!!errors.length}
+                >
+                    Create Job
+                </button>
             </div>
 
         </form>
@@ -295,9 +411,9 @@ export function SingleSelect({
                 <div className="relative">
                     <div
                         className="relative w-full cursor-default overflow-hidden rounded-xl border bg-white text-left shadow-sm focus-within:border-black"
-                        onMouseEnter={() => setOpen(true)}   // 👈 open dropdown on hover
-                        onFocus={() => setOpen(true)}        // 👈 open on focus
-                        onMouseLeave={() => setOpen(false)}  // 👈 close when leaving
+                        onMouseEnter={() => setOpen(true)}
+                        onFocus={() => setOpen(true)}
+                        onMouseLeave={() => setOpen(false)}
                     >
                         <Combobox.Input
                             className="w-full border-none py-2 pl-3 pr-10 outline-none focus:ring-0 text-sm"
@@ -328,6 +444,31 @@ export function SingleSelect({
                     )}
                 </div>
             </Combobox>
+        </div>
+    );
+}
+
+
+function Switch({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+    return (
+        <div className="flex items-center justify-between rounded-xl border px-3 py-2">
+            <span className="text-sm">{label}</span>
+            <button
+                type="button"
+                onClick={() => onChange(!checked)}
+                className={classNames(
+                    "h-6 w-11 rounded-full border p-0.5 text-left",
+                    checked ? "bg-black" : "bg-gray-200"
+                )}
+                aria-pressed={checked}
+            >
+                <span
+                    className={classNames(
+                        "block h-5 w-5 rounded-full bg-white transition",
+                        checked ? "translate-x-5" : "translate-x-0"
+                    )}
+                />
+            </button>
         </div>
     );
 }
