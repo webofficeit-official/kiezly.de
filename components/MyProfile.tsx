@@ -490,7 +490,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       {/* Basic info */}
       <Section title="Basic information" description="This appears on your public profile.">
         <div className="grid gap-4 md:grid-cols-2">
-          {/* <Input label="First name" value={form.firstName} onChange={(v) => update((d) => (d.firstName = v))} required /> */}
+          <Input label="First name" value={form.firstName} onChange={(v) => update((d) => (d.firstName = v))} required />
           <Input label="Last name" value={form.lastName} onChange={(v) => update((d) => (d.lastName = v))} required />
           <Input label="Display name (optional)" value={form.displayName || ""} onChange={(v) => update((d) => (d.displayName = v))} />
           <Input label="Phone" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />

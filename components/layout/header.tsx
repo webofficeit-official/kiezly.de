@@ -28,9 +28,22 @@ export default function Header() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm font-medium hover:bg-gray-100"
               >
-                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
-                  {(user?.display_name || user?.first_name)?.[0].toUpperCase() || <User className="w-4 h-4" />}
-                </div>
+                {
+                  user?.avatar_url ?
+                  (
+                    <>
+                      <img src={user?.avatar_url || "https://placehold.co/96x96"} alt={user?.display_name} className="h-10 w-10 rounded-full object-cover" />
+                    </>
+                  ) :
+                  (
+                    <>
+                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
+                        {(user?.avatar_url || user?.avatar_url)?.[0].toUpperCase() || <User className="w-4 h-4" />}
+                      </div>
+                    </>
+                  )
+                }
+                
                 <span>{user?.display_name || `${user?.first_name} ${user?.last_name}` }</span>
               </button>
 
