@@ -77,6 +77,14 @@ interface UploadResponse {
   }
 }
 
+interface UploadProfilePicResponse {
+  success: boolean;
+  message: string; // adjust to your backend response
+  data: {
+    filePath: string
+  }
+}
+
 interface UpdateProfileResponse {
   success: boolean;
   message: string;
@@ -115,7 +123,32 @@ export const uploadDocument = (): UseMutationResult<
       formData.append("file", file);
 
       const res = await apiClient.post(
-        `/document/upload?type=${encodeURIComponent(type)}`,
+        `/upload/document?type=${encodeURIComponent(type)}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return res.data;
+    },
+  });
+};
+
+export const uploadProfilePic = (): UseMutationResult<
+  UploadProfilePicResponse,
+  Error,
+  { file: File }
+> => {
+  return useMutation({
+    mutationFn: async ({ file }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await apiClient.post(
+        `/upload/image`,
         formData,
         {
           headers: {

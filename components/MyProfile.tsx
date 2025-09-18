@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/context/auth-context";
 import { useCollections } from "@/lib/react-query/queries/user/account";
-import { getProfile, updateProfile, uploadDocument } from "@/lib/react-query/queries/user/profile";
+import { getProfile, updateProfile, uploadDocument, uploadProfilePic } from "@/lib/react-query/queries/user/profile";
 import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle, FaTrash } from "react-icons/fa";
@@ -166,7 +166,7 @@ export type User = {
   lng?: number;
 
   // helper-specific
-  categories: number[]; // e.g., ["Childcare", "Cleaning"]
+  categories: any[]; // e.g., ["Childcare", "Cleaning"]
   languages: string[]; // e.g., ["German", "English"]
   hasWorkPermit?: boolean;
   canInvoice?: boolean; // if offers invoice (for non-mini job gigs)
@@ -244,8 +244,8 @@ export type OnboardingFormProps = {
   onChange: (u: User, weekdays: any[], timeWindows: any[], jobCategories: object[], languages: object[]) => void;
   weekdays: any[];
   timeWindows: any[];
-  jobCategories: object[];
-  languages: object[];
+  jobCategories: { id: string; name: string; }[];
+  languages: { id: string; name: string; }[];
 };
 
 // ----------------------------
@@ -254,6 +254,7 @@ export type OnboardingFormProps = {
 function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, languages }: OnboardingFormProps) {
   const updatePofile = updateProfile();
   const uploadMutation = uploadDocument();
+  const uploadProfile = uploadProfilePic();
 
   const myProfile = useAuth()
   
@@ -387,7 +388,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
         fileUrl: form.verification.policeCertificate.fileUrl,
         fileId: form.verification.policeCertificate.fileId
       },
-      avatar_url: '',
+      avatar_url: form.photoUrl,
       org_name: '',
       website: '',
       rate: form.rate.hourlyEUR,
@@ -446,24 +447,39 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     if (Array.isArray(file)) {
       console.log("Multiple files:", file, type);
     } else {
-      uploadMutation.mutate(
-        { file, type },
-        {
-          onSuccess: (data) => {
-            if(type == 'police_clearance') {
-              update((d) => (d.verification.policeCertificate.fileUrl = data.document.file_url))
-              update((d) => (d.verification.policeCertificate.fileId = data.document.id))
-            }
-            if(type == 'first_aid') {
-              update((d) => (d.verification.firstAid.fileUrl = data.document.file_url))
-              update((d) => (d.verification.firstAid.fileId = data.document.id))
-            }
-          },
-          onError: (err) => {
-            console.error("Upload failed:", err);
-          },
-        }
-      );
+      if(type == 'profile_pic') {
+        uploadProfile.mutate(
+          { file },
+          {
+            onSuccess: (data) => {
+              update((d) => (form.photoUrl = data.data.filePath))
+            },
+            onError: (err) => {
+              console.error("Upload failed:", err);
+            },
+          }
+        );
+      } else {
+        uploadMutation.mutate(
+          { file, type },
+          {
+            onSuccess: (data) => {
+              if(type == 'police_clearance') {
+                update((d) => (d.verification.policeCertificate.fileUrl = data.document.file_url))
+                update((d) => (d.verification.policeCertificate.fileId = data.document.id))
+              }
+              if(type == 'first_aid') {
+                update((d) => (d.verification.firstAid.fileUrl = data.document.file_url))
+                update((d) => (d.verification.firstAid.fileId = data.document.id))
+              }
+            },
+            onError: (err) => {
+              console.error("Upload failed:", err);
+            },
+          }
+        );
+      }
+      
     }
   }
 
@@ -482,7 +498,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Select label="Gender" value={form.gender || ""} onChange={(v) => update((d) => (d.gender = v))} options={["", "Female", "Male", "Non-binary", "Prefer not to say"]} />
         </div>
         <Textarea label="About you" placeholder="A short intro, experience, strengths…" value={form.about || ""} onChange={(v) => update((d) => (d.about = v))} />
-        <Input label="Profile photo URL" placeholder="https://…" value={form.photoUrl || ""} onChange={(v) => update((d) => (d.photoUrl = v))} />
+        <FileInput label="Profile photo" accept=".png,.jpeg,.jpg" onChange={(v) => handleFileUpload(v, 'profile_pic')} />
       </Section>
 
       {/* Location */}
@@ -872,7 +888,7 @@ function MultiCheckbox({ label, options, values, onChange }: { label: string; op
 function MultiCheckboxWithObject({ label, options, values, onChange }: { label: string; options: {
   id: string;
   name: string;
-}[]; values: string[]; onChange: (next: string[]) => void }) {
+}[]; values: any[]; onChange: (next: string[]) => void }) {
   function toggle(val: string) {
     const set = new Set(values);
     if (set.has(val)) set.delete(val); else set.add(val);
