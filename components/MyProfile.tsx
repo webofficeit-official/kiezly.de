@@ -6,7 +6,9 @@ import { getProfile, updateProfile, uploadDocument, uploadProfilePic } from "@/l
 import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle, FaTrash } from "react-icons/fa";
-import { Button } from "./ui/button";
+import { Listbox, Popover } from "@headlessui/react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay } from "date-fns";
 
 /**
  * Kiezly – User Creation & Profile (fixed)
@@ -258,8 +260,78 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
 
   const myProfile = useAuth()
   
-  const updatedDateOfBirth = new Date(myProfile?.user?.date_of_birth ?? '');    
-  const formatted = `${(updatedDateOfBirth.getUTCMonth() + 1).toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCDate().toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCFullYear()}`;
+  const updatedDateOfBirth = new Date(myProfile?.user?.date_of_birth ?? '');  
+  const formatted = updatedDateOfBirth.toISOString().split("T")[0];  
+  
+  useEffect(() => {
+    setForm({
+    firstName: myProfile?.user?.first_name ?? '',
+    lastName: myProfile?.user?.last_name ?? '',
+    displayName: myProfile?.user?.display_name ?? '',
+    email: myProfile?.user?.email ?? '',
+    phone: myProfile?.user?.phone ?? '',
+    dateOfBirth: formatted,
+    gender: myProfile?.user?.gender ?? '',
+    photoUrl: myProfile?.user?.avatar_url ?? '',
+    about: myProfile?.user?.bio ?? '',
+    address: {
+      city: myProfile?.user?.city ?? '',
+      street: myProfile?.user?.street ?? '',
+      postcode: myProfile?.user?.postal_code ?? '',
+      districtOrKiez: myProfile?.user?.district ?? '',
+      state: myProfile?.user?.state ?? '',
+      country: myProfile?.user?.country ?? '',
+    },
+    rate: {
+      hourlyEUR: myProfile?.user?.rate ?? 0,
+      fixedPriceAvailable: myProfile?.user?.fixed_price ?? false,
+      minHoursPerBooking: myProfile?.user?.min_hours ?? 0
+    },
+    categories: myProfile?.user?.skills?.map(skill => skill.id),
+    languages: myProfile?.user?.languages?.map(lan => lan.id),
+    availability: {
+      weekdays: myProfile?.user?.weekdays ?? [],
+      timeWindows: myProfile?.user?.time_windows ?? [],
+      radiusKm: myProfile?.user?.radius ?? 5,
+      lat: myProfile?.user?.lat ?? 0,
+      lng: myProfile?.user?.lng ?? 0,
+    },
+    verification: {
+      firstAid: {
+        completed: myProfile?.user?.has_first_aid,
+        provider: myProfile?.user?.first_aid?.provider,
+        certificateId: myProfile?.user?.first_aid?.certificateId,
+        completionDate: myProfile?.user?.first_aid?.completionDate,
+        expiryDate: myProfile?.user?.first_aid?.expiryDate,
+        fileUrl: myProfile?.user?.first_aid?.fileUrl,
+        fileId: myProfile?.user?.first_aid?.fileId,
+      },
+      idVerified: myProfile?.user?.is_email_verified,
+      policeCertificate: {
+        hasCertificate: myProfile?.user?.police_verified,
+        level: myProfile?.user?.police_certificate?.level,
+        issueDate: myProfile?.user?.police_certificate?.issueDate,
+        expiryDate: myProfile?.user?.police_certificate?.expiryDate,
+        fileUrl: myProfile?.user?.police_certificate?.fileUrl,
+        fileId: myProfile?.user?.police_certificate?.fileId,
+      }
+    },
+    hasWorkPermit: myProfile?.user?.work_permit,
+    canInvoice: myProfile?.user?.issue_invoice,
+    experienceYears: myProfile?.user?.experience ?? 0,
+    certificates: myProfile?.user?.certificates?.split(","),
+    password: '',
+    education: myProfile?.user?.education,
+    role: myProfile?.user?.role ?? 'helper',
+    socials: {
+      website: myProfile?.user?.social_links?.find((link) => link.platform === "website")?.url || "",
+      linkedin: myProfile?.user?.social_links?.find((link) => link.platform === "linkedin")?.url || "",
+      x: myProfile?.user?.social_links?.find((link) => link.platform === "x")?.url || "",
+      instagram: myProfile?.user?.social_links?.find((link) => link.platform === "instagram")?.url || "",
+      facebook: myProfile?.user?.social_links?.find((link) => link.platform === "facebook")?.url || "",
+    },
+  })
+  }, [myProfile]);
 
   const [form, setForm] = useState<User>({
     firstName: myProfile?.user?.first_name ?? '',
@@ -494,7 +566,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Input label="Last name" value={form.lastName} onChange={(v) => update((d) => (d.lastName = v))} required />
           <Input label="Display name (optional)" value={form.displayName || ""} onChange={(v) => update((d) => (d.displayName = v))} />
           <Input label="Phone" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
-          <Input label="Date of birth" type="date" value={form.dateOfBirth || ""} onChange={(v) => update((d) => (d.dateOfBirth = v))} />
+          <DateInput label="Date of birth" value={form.dateOfBirth || ""} onChange={(v) => update((d) => (d.dateOfBirth = v))} />
           <Select label="Gender" value={form.gender || ""} onChange={(v) => update((d) => (d.gender = v))} options={["", "Female", "Male", "Non-binary", "Prefer not to say"]} />
         </div>
         <Textarea label="About you" placeholder="A short intro, experience, strengths…" value={form.about || ""} onChange={(v) => update((d) => (d.about = v))} />
@@ -522,18 +594,22 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
 
       {/* Work */}
       <Section title="Work preferences">
-        <MultiCheckboxWithObject label="Categories" values={form.categories} onChange={(vals) => update((d) => (d.categories = vals))} options={Array.from(jobCategories)} />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="py-2">
+          <MultiCheckboxWithObject label="Categories" values={form.categories} onChange={(vals) => update((d) => (d.categories = vals))} options={Array.from(jobCategories)} />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 py-2">
           <Input label="Hourly rate (€)" type="number" min={12} max={200} value={form.rate.hourlyEUR} onChange={(v) => update((d) => (d.rate.hourlyEUR = Number(v)))} />
-          <Switch label="Fixed price available" checked={form.rate.fixedPriceAvailable} onChange={(v) => update((d) => (d.rate.fixedPriceAvailable = v))} />
           <Input label="Min hours per booking" type="number" min={1} max={12} value={form.rate.minHoursPerBooking || 1} onChange={(v) => update((d) => (d.rate.minHoursPerBooking = Number(v)))} />
         </div>
-          <MultiCheckboxWithObject label="Languages" values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(languages)} />
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 py-2">
+                    <Switch label="Fixed price available" checked={form.rate.fixedPriceAvailable} onChange={(v) => update((d) => (d.rate.fixedPriceAvailable = v))} />
+          <MultiSelect label="Languages" values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(languages)} />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 py-2">
           <Switch label="Has work permit" checked={!!form.hasWorkPermit} onChange={(v) => update((d) => (d.hasWorkPermit = v))} />
           <Switch label="Can issue invoice" checked={!!form.canInvoice} onChange={(v) => update((d) => (d.canInvoice = v))} />
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 py-2">
           <Input label="Years of experience" type="number" min={0} max={40} value={form.experienceYears || 0} onChange={(v) => update((d) => (d.experienceYears = Number(v)))} />
           <TagInput label="Certificates (comma separated)" placeholder="HACCP, Pflegebasiskurs…" value={(form.certificates || []).join(", ")}
             onChange={(v) => update((d) => (d.certificates = v.split(",").map((s) => s.trim()).filter(Boolean)))} />
@@ -555,8 +631,8 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Input label="Provider" value={form.verification.firstAid.provider || ""} onChange={(v) => update((d) => (d.verification.firstAid.provider = v))} />
             <Input label="Certificate ID" value={form.verification.firstAid.certificateId || ""} onChange={(v) => update((d) => (d.verification.firstAid.certificateId = v))} />
-            <Input label="Completion date" type="date" value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
-            <Input label="Expiry date (optional)" type="date" value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
+            <DateInput label="Completion date" value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
+            <DateInput label="Expiry date (optional)" value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
             <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />       
           </div>
         )}
@@ -566,8 +642,8 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
         </div>
         {form.verification.policeCertificate.hasCertificate && (
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <Input label="Issue date" type="date" value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
-            <Input label="Expiry date" type="date" value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
+            <DateInput label="Issue date" value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
+            <DateInput label="Expiry date" value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
             <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
           </div>
         )}
@@ -650,11 +726,11 @@ function PublicProfile({ user, jobCategories, languages }: { user: User, jobCate
         <section>
           <h4 className="mb-2 text-lg font-semibold">Links</h4>
           <div className="flex flex-wrap gap-2 text-sm">
-            {user.socials.website && <a className="rounded-full border px-3 py-1" href={user.socials.website}>Website</a>}
-            {user.socials.linkedin && <a className="rounded-full border px-3 py-1" href={user.socials.linkedin}>LinkedIn</a>}
-            {user.socials.x && <a className="rounded-full border px-3 py-1" href={user.socials.x}>X</a>}
-            {user.socials.instagram && <a className="rounded-full border px-3 py-1" href={user.socials.instagram}>Instagram</a>}
-            {user.socials.facebook && <a className="rounded-full border px-3 py-1" href={user.socials.facebook}>Facebook</a>}
+            {user.socials.website && <a className="rounded-full border px-3 py-1" href={user.socials.website} target="__blank">Website</a>}
+            {user.socials.linkedin && <a className="rounded-full border px-3 py-1" href={user.socials.linkedin} target="__blank">LinkedIn</a>}
+            {user.socials.x && <a className="rounded-full border px-3 py-1" href={user.socials.x} target="__blank">X</a>}
+            {user.socials.instagram && <a className="rounded-full border px-3 py-1" href={user.socials.instagram} target="__blank">Instagram</a>}
+            {user.socials.facebook && <a className="rounded-full border px-3 py-1" href={user.socials.facebook} target="__blank">Facebook</a>}
           </div>
         </section>
       )}
@@ -791,7 +867,91 @@ function Input({ label, value, onChange, type = "text", required, placeholder, m
   );
 }
 
-function FileInput({ label, onChange, required, accept, multiple }: {
+function DateInput({
+  label,
+  value,
+  onChange,
+  required,
+}: {
+  label: string;
+  value: string | null;
+  onChange: (v: string) => void;
+  required?: boolean;
+}) {
+  const [month, setMonth] = useState(new Date());
+
+  const days = eachDayOfInterval({
+    start: startOfMonth(month),
+    end: endOfMonth(month),
+  });
+
+  return (
+    <div className="block text-sm">
+      <span className="mb-1 block text-gray-700">
+        {label}
+        {required && <span className="text-red-600">*</span>}
+      </span>
+
+      <Popover className="relative">
+        <Popover.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-left shadow-sm focus:border-black">
+          {value ? format(new Date(value), "yyyy-MM-dd") : "Select date"}
+          <CalendarIcon className="h-4 w-4 text-gray-400" />
+        </Popover.Button>
+
+        <Popover.Panel className="absolute z-10 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+          {/* Month navigation */}
+          <div className="mb-2 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setMonth(subMonths(month, 1))}
+              className="rounded p-1 hover:bg-gray-100"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="font-medium">{format(month, "MMMM yyyy")}</span>
+            <button
+              type="button"
+              onClick={() => setMonth(addMonths(month, 1))}
+              className="rounded p-1 hover:bg-gray-100"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 gap-1 text-center text-xs">
+            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+              <div key={d} className="font-medium text-gray-500">
+                {d}
+              </div>
+            ))}
+            {days.map((day) => (
+              <button
+                key={day.toISOString()}
+                onClick={() => onChange(format(day, "yyyy-MM-dd"))}
+                className={`rounded-lg px-2 py-1 text-sm hover:bg-gray-100 ${
+                  value && isSameDay(new Date(value), day)
+                    ? "bg-black text-white"
+                    : "text-gray-700"
+                }`}
+              >
+                {format(day, "d")}
+              </button>
+            ))}
+          </div>
+        </Popover.Panel>
+      </Popover>
+    </div>
+  );
+}
+
+function FileInput({
+  label,
+  onChange,
+  required,
+  accept,
+  multiple,
+}: {
   label: string;
   onChange: (file: File | File[] | null) => void;
   required?: boolean;
@@ -801,11 +961,15 @@ function FileInput({ label, onChange, required, accept, multiple }: {
   return (
     <label className="block text-sm">
       <span className="mb-1 block text-gray-700">
-        {label}{required && <span className="text-red-600">*</span>}
+        {label}
+        {required && <span className="text-red-600"> *</span>}
       </span>
+
       <input
-        className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black file:mr-3 file:rounded-lg file:border file:border-gray-300 file:bg-gray-50 file:px-3 file:py-1 file:text-sm file:text-gray-700 hover:file:bg-gray-100"
         type="file"
+        required={required}
+        accept={accept}
+        multiple={multiple}
         onChange={(e) => {
           const files = e.target.files;
           if (!files || files.length === 0) {
@@ -814,13 +978,12 @@ function FileInput({ label, onChange, required, accept, multiple }: {
             onChange(multiple ? Array.from(files) : files[0]);
           }
         }}
-        required={required}
-        accept={accept}
-        multiple={multiple}
+        className="w-full cursor-pointer rounded-xl border border-gray-300 bg-white text-sm shadow-sm file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200 focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20"
       />
     </label>
   );
 }
+
 
 
 function Textarea({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
@@ -832,18 +995,50 @@ function Textarea({ label, value, onChange, placeholder }: { label: string; valu
   );
 }
 
-function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
   return (
-    <label className="block text-sm">
+    <div className="text-sm">
       <span className="mb-1 block text-gray-700">{label}</span>
-      <select className="w-full rounded-xl border px-3 py-2" value={value} onChange={(e) => onChange(e.target.value)}>
-        {options.map((o) => (
-          <option key={o} value={o}>{o || "Select"}</option>
-        ))}
-      </select>
-    </label>
+
+      <Listbox value={value} onChange={onChange}>
+        <div className="relative">
+          <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+            {value || "Select"}
+            <ChevronDown className="h-4 w-4 text-gray-400" />
+          </Listbox.Button>
+
+          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+            {options.map((o) => (
+              <Listbox.Option
+                key={o}
+                value={o}
+                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
+              >
+                {({ selected }) => (
+                  <div className="flex items-center justify-between">
+                    <span>{o}</span>
+                    {selected && <Check className="h-4 w-4 text-gray-600" />}
+                  </div>
+                )}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </div>
+      </Listbox>
+    </div>
   );
 }
+
 
 function Checkbox({ label, checked, onChange }: { label: React.ReactNode; checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -905,6 +1100,56 @@ function MultiCheckboxWithObject({ label, options, values, onChange }: { label: 
     </div>
   );
 }
+
+function MultiSelect({
+  label,
+  options,
+  values,
+  onChange,
+}: {
+  label: string;
+  options: { id: string; name: string }[];
+  values: string[];
+  onChange: (next: string[]) => void;
+}) {
+  function toggle(val: string) {
+    const set = new Set(values);
+    set.has(val) ? set.delete(val) : set.add(val);
+    onChange(Array.from(set));
+  }
+
+  return (
+    <div className="text-sm">
+      <span className="mb-1 block text-gray-700">{label}</span>
+      <Listbox value={values} onChange={onChange} multiple>
+        <div className="relative">
+          <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20">
+            {values.length
+              ? options
+                  .filter((o) => values.includes(o.id))
+                  .map((o) => o.name)
+                  .join(", ")
+              : "Select..."}
+            <ChevronDown className="h-4 w-4 text-gray-400" />
+          </Listbox.Button>
+          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+            {options.map((opt) => (
+              <Listbox.Option key={opt.id} value={opt.id}>
+                {({ selected }) => (
+                  <div className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span>{opt.name}</span>
+                    {selected && <Check className="h-4 w-4 text-black" />}
+                  </div>
+                )}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </div>
+      </Listbox>
+    </div>
+  );
+}
+
 
 function TagInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
