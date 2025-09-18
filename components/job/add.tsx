@@ -238,7 +238,6 @@ function OnboardingForm({ }) {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium">Ends at</label>
                     <Input
                         label="Ends at"
                         type="date"
@@ -275,7 +274,7 @@ function OnboardingForm({ }) {
                     />
                 </div>
             </div>
-            <Section title="Verification">
+            {/* <Section title="Verification">
                 <div className="grid gap-4 sm:grid-cols-3">
                     <Switch
                         label="First Aid Verified"
@@ -293,7 +292,7 @@ function OnboardingForm({ }) {
                         onChange={(v) => update((d) => (d.verified = v))}
                     />
                 </div>
-            </Section>
+            </Section> */}
 
             <div className="flex items-center justify-end ">
                 {/* <div className="text-sm text-red-600">{errors[0] || ""}</div> */}
@@ -353,12 +352,16 @@ export function RichTextEditor({ label, value, onChange, required }: RichTextEdi
                 {label}
                 {required && <span className="text-red-600">*</span>}
             </span>
-            <div className="rounded-xl  bg-white">
+            <div>
                 <ReactQuill
                     theme="snow"
                     value={value}
                     onChange={onChange}
-                    className="min-h-[120px] [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:p-2"
+                    className=" rounded-xl border
+                        [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-b
+                        [&_.ql-container]:rounded-b-xl
+                        [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:p-2
+                        focus-within:border-black"
 
                 />
             </div>
