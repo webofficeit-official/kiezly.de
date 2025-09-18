@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/lib/context/auth-context";
 import { useCollections } from "@/lib/react-query/queries/user/account";
 import { getProfile, updateProfile } from "@/lib/react-query/queries/user/profile";
 import React, { useMemo, useState, useEffect } from "react";
@@ -52,6 +53,8 @@ export type Verification = {
 };
 
 export type Availability = {
+  lat: number;
+  lng: number;
   radiusKm: number; // service radius from base address
   weekdays: string[]; // e.g., ["Mon", "Tue", "Wed"]
   timeWindows: string[]; // e.g., ["Morning", "Afternoon", "Evening", "Weekend"]
@@ -68,6 +71,8 @@ export type Address = {
   postcode?: string;
   city?: string;
   districtOrKiez?: string; // free text like "Weststadt"
+  state?: string;
+  country?: string;
 };
 
 export type UserRole = 'client' | 'helper'
@@ -91,11 +96,25 @@ export type UserProfile = {
     org_name?: string | null;
     rate?: number | null;
     website?: string | null;
+    radius: number;
     lat?: number | null;
     lng?: number | null;
     has_first_aid?: boolean | null;
+    first_aid: {
+      provider: string | null;
+      certificateId: string | null;
+      completionDate: string | null;
+      expiryDate: string | null;
+      fileUrl: string | null;
+    }
     education_level?: string | null;
     police_verified?: boolean | null;
+    police_certificate: {
+      level: string | null;
+      issueDate: string | null;
+      expiryDate: string | null;
+      fileUrl: string | null;
+    }
     avatar_url?: string | null;
     geom?: any | null;
     display_name: string | null;
@@ -104,7 +123,7 @@ export type UserProfile = {
     fixed_price: boolean;
     min_hours: number | null;
     work_permit: boolean | null;
-    issue_involve: boolean;
+    issue_invoice: boolean;
     experience: number | null;
     certificates: string | null;
     skills: Tag[];
@@ -113,6 +132,10 @@ export type UserProfile = {
     time_windows: any[];
     created_at: Date;
     updated_at: Date;
+    socialLinks: {
+      platform: string;
+      url: string;
+    }[];
   }
 
 export type User = {
@@ -190,7 +213,7 @@ export default function MyProfile() {
   }, [])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="text-3xl font-semibold tracking-tight">My Profile</h1>
       {/* <p className="mt-1 text-sm text-gray-600">Create your account and build a strong profile. Badges like ID, First Aid and Police Certificate help clients hire confidently.</p> */}
 
@@ -228,89 +251,60 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
   const pofile = getProfile();
   const updatePofile = updateProfile();
 
-  useEffect(() => {
-    pofile.mutate('', {
-      onSuccess: (data) => {
-        console.log(data);    
-        const updatedDateOfBirth = new Date(data.user.date_of_birth);    
-        const formatted = `${(updatedDateOfBirth.getUTCMonth() + 1).toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCDate().toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCFullYear()}`;
-        setForm({
-          ...form,
-          firstName: data.user.first_name,
-          lastName: data.user.last_name,
-          displayName: data.user.display_name,
-          email: data.user.email,
-          phone: data.user.phone,
-          dateOfBirth: formatted,
-          gender: data.user.gender,
-          photoUrl: data.user.avatar_url,
-          about: data.user.bio,
-          address: {
-            city: data.user.city,
-            street: data.user.street,
-            postcode: data.user.postal_code,
-            districtOrKiez: data.user.district,
-          },
-          rate: {
-            hourlyEUR: data.user.rate,
-            fixedPriceAvailable: data.user.fixed_price,
-            minHoursPerBooking: data.user.min_hours
-          },
-          categories: data.user.skills.map(skill => skill.id),
-          languages: data.user.languages.map(lan => lan.id),
-          availability: {
-            weekdays: data.user.weekdays,
-            timeWindows: data.user.time_windows,
-            radiusKm: 10
-          },
-          verification: {
-            firstAid: {
-              completed: data.user.has_first_aid
-            },
-            idVerified: data.user.is_email_verified,
-            policeCertificate: {
-              hasCertificate: data.user.police_verified
-            }
-          },
-          hasWorkPermit: data.user.work_permit,
-          canInvoice: data.user.issue_involve,
-          experienceYears: data.user.experience,
-          certificates: data.user.certificates.split(",")
-        })
-      },
-      onError: (err: any) => {
-      }
-    });
-  }, [])
+  const myProfile = useAuth()
+  
+  const updatedDateOfBirth = new Date(myProfile?.user?.date_of_birth ?? '');    
+  const formatted = `${(updatedDateOfBirth.getUTCMonth() + 1).toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCDate().toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCFullYear()}`;
 
   const [form, setForm] = useState<User>({
-    email: "",
-    password: "",
-    role: "helper",
-    firstName: "",
-    lastName: "",
-    displayName: "",
-    phone: "",
-    dateOfBirth: "",
-    gender: "",
-    about: "",
-    photoUrl: "",
-    address: { street: "", postcode: "", city: "", districtOrKiez: "" },
-    categories: [],
-    languages: [],
-    hasWorkPermit: true,
-    canInvoice: false,
-    availability: { radiusKm: 5, weekdays: [], timeWindows: [] },
-    rate: { hourlyEUR: 15, fixedPriceAvailable: false, minHoursPerBooking: 2 },
-    experienceYears: 0,
-    education: [],
-    certificates: [],
-    verification: {
-      idVerified: false,
-      firstAid: { completed: false },
-      policeCertificate: { hasCertificate: false, level: "Enhanced" },
+    firstName: myProfile?.user?.first_name ?? '',
+    lastName: myProfile?.user?.last_name ?? '',
+    displayName: myProfile?.user?.display_name ?? '',
+    email: myProfile?.user?.email ?? '',
+    phone: myProfile?.user?.phone ?? '',
+    dateOfBirth: formatted ?? '',
+    gender: myProfile?.user?.gender ?? '',
+    photoUrl: myProfile?.user?.avatar_url ?? '',
+    about: myProfile?.user?.bio ?? '',
+    address: {
+      city: myProfile?.user?.city ?? '',
+      street: myProfile?.user?.street ?? '',
+      postcode: myProfile?.user?.postal_code ?? '',
+      districtOrKiez: myProfile?.user?.district ?? '',
+      state: myProfile?.user?.state ?? '',
+      country: myProfile?.user?.country ?? '',
     },
-    socials: {},
+    rate: {
+      hourlyEUR: myProfile?.user?.rate ?? 0,
+      fixedPriceAvailable: myProfile?.user?.fixed_price ?? false,
+      minHoursPerBooking: myProfile?.user?.min_hours ?? 0
+    },
+    categories: myProfile?.user?.skills?.map(skill => skill.id),
+    languages: myProfile?.user?.languages?.map(lan => lan.id),
+    availability: {
+      weekdays: myProfile?.user?.weekdays ?? [],
+      timeWindows: myProfile?.user?.time_windows ?? [],
+      radiusKm: myProfile?.user?.radius ?? 5,
+      lat: myProfile?.user?.lat ?? 0,
+      lng: myProfile?.user?.lng ?? 0,
+    },
+    verification: {
+      firstAid: {
+        completed: myProfile?.user?.has_first_aid
+      },
+      idVerified: myProfile?.user?.is_email_verified,
+      policeCertificate: {
+        hasCertificate: myProfile?.user?.police_verified
+      }
+    },
+    hasWorkPermit: myProfile?.user?.work_permit,
+    canInvoice: myProfile?.user?.issue_invoice,
+    experienceYears: myProfile?.user?.experience ?? 0,
+    certificates: myProfile?.user?.certificates?.split(","),
+    password: '',
+    education: [],
+    role: myProfile?.user?.role ?? 'helper',
+    socials: {}
   });
 
   // push form updates to parent in real-time (also triggers once on mount)
@@ -347,16 +341,30 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       phone: form.phone,
       date_of_birth: form.dateOfBirth,
       bio: form.about,
-      country: 'Germany',
-      state: form.address.districtOrKiez,
+      state: form.address.state,
+      country: form.address.country,
       city: form.address.city,
       postal_code: form.address.postcode,
       street: form.address.street,
-      lat: 0,
-      lng: 0,
+      radius: form.availability.radiusKm,
+      lat: form.availability.lat,
+      lng: form.availability.lng,
       has_first_aid: form.verification.firstAid.completed,
+      first_aid: {
+        provider: form.verification.firstAid.provider,
+        certificateId: form.verification.firstAid.certificateId,
+        completionDate: form.verification.firstAid.completionDate,
+        expiryDate: form.verification.firstAid.expiryDate,
+        fileUrl: form.verification.firstAid.fileUrl,
+      },
       education_level: '',
       police_verified: form.verification.policeCertificate.hasCertificate,
+      police_certificate: {
+        level: form.verification.policeCertificate.level,
+        issueDate: form.verification.policeCertificate.issueDate,
+        expiryDate: form.verification.policeCertificate.expiryDate,
+        fileUrl: form.verification.policeCertificate.fileUrl,
+      },
       avatar_url: '',
       org_name: '',
       website: '',
@@ -374,8 +382,10 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       languages: form.languages,
       weekdays: form.availability.weekdays,
       time_windows: form.availability.timeWindows,
+      socialLinks: [],
     }, {
       onSuccess: (data) => {
+        myProfile.loadUser()
         toast.custom((t) => (
           <div
             className={`${t.visible ? "animate-enter" : "animate-leave"
@@ -405,11 +415,11 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
   
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* Basic info */}
       <Section title="Basic information" description="This appears on your public profile.">
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="First name" value={form.firstName} onChange={(v) => update((d) => (d.firstName = v))} required />
+          {/* <Input label="First name" value={form.firstName} onChange={(v) => update((d) => (d.firstName = v))} required /> */}
           <Input label="Last name" value={form.lastName} onChange={(v) => update((d) => (d.lastName = v))} required />
           <Input label="Display name (optional)" value={form.displayName || ""} onChange={(v) => update((d) => (d.displayName = v))} />
           <Input label="Phone" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
@@ -427,8 +437,12 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Input label="Postcode" value={form.address.postcode || ""} onChange={(v) => update((d) => (d.address.postcode = v))} />
           <Input label="City" value={form.address.city || ""} onChange={(v) => update((d) => (d.address.city = v))} required />
           <Input label="District / Kiez" value={form.address.districtOrKiez || ""} onChange={(v) => update((d) => (d.address.districtOrKiez = v))} />
+          <Input label="State" value={form.address.state || ""} onChange={(v) => update((d) => (d.address.state = v))} />
+          <Input label="Country" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
+          <Input label="Latitude" type="number" value={form.availability.lat} onChange={(v) => update((d) => (d.availability.lat = Number(v)))} />
+          <Input label="Longitude" type="number" value={form.availability.lng} onChange={(v) => update((d) => (d.availability.lng = Number(v)))} />
           <Input label="Service radius (km)" type="number" min={1} max={100} value={form.availability.radiusKm} onChange={(v) => update((d) => (d.availability.radiusKm = Number(v)))} />
           <MultiCheckbox label="Available days" values={form.availability.weekdays} onChange={(vals) => update((d) => (d.availability.weekdays = vals))} options={Array.from(weekdays)} />
         </div>
@@ -443,12 +457,12 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Switch label="Fixed price available" checked={form.rate.fixedPriceAvailable} onChange={(v) => update((d) => (d.rate.fixedPriceAvailable = v))} />
           <Input label="Min hours per booking" type="number" min={1} max={12} value={form.rate.minHoursPerBooking || 1} onChange={(v) => update((d) => (d.rate.minHoursPerBooking = Number(v)))} />
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
           <MultiCheckboxWithObject label="Languages" values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(languages)} />
+        <div className="grid gap-4 md:grid-cols-2">
           <Switch label="Has work permit" checked={!!form.hasWorkPermit} onChange={(v) => update((d) => (d.hasWorkPermit = v))} />
           <Switch label="Can issue invoice" checked={!!form.canInvoice} onChange={(v) => update((d) => (d.canInvoice = v))} />
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <Input label="Years of experience" type="number" min={0} max={40} value={form.experienceYears || 0} onChange={(v) => update((d) => (d.experienceYears = Number(v)))} />
           <TagInput label="Certificates (comma separated)" placeholder="HACCP, Pflegebasiskurs…" value={(form.certificates || []).join(", ")}
             onChange={(v) => update((d) => (d.certificates = v.split(",").map((s) => s.trim()).filter(Boolean)))} />
@@ -522,7 +536,7 @@ function PublicProfile({ user, jobCategories, languages }: { user: User, jobCate
 }[] }) {
   const hasName = (user.displayName && user.displayName.trim()) || (user.firstName || user.lastName);
   const name = hasName ? (user.displayName || `${user.firstName} ${user.lastName}`.trim()) : "New helper";
-  const cityLine = [user.address?.city, user.address?.districtOrKiez].filter(Boolean).join(" • ");  
+  const cityLine = [user.address?.city, user.address?.districtOrKiez, user.address?.state, user.address?.country].filter(Boolean).join(" • ");  
 
   return (
     <div className="space-y-6">
@@ -761,7 +775,7 @@ function MultiCheckbox({ label, options, values, onChange }: { label: string; op
       <div className="text-sm text-gray-700">{label}</div>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
-          <button type="button" key={opt} onClick={() => toggle(opt)} className={classNames("rounded-full border px-3 py-1 text-sm", values.includes(opt) ? "bg-black text-white" : "")}>{opt}</button>
+          <button type="button" key={opt} onClick={() => toggle(opt)} className={classNames("rounded-full border px-3 py-1 text-sm", values?.includes(opt) ? "bg-black text-white" : "")}>{opt}</button>
         ))}
       </div>
     </div>
@@ -782,7 +796,7 @@ function MultiCheckboxWithObject({ label, options, values, onChange }: { label: 
       <div className="text-sm text-gray-700">{label}</div>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
-          <button type="button" key={opt.id} onClick={() => toggle(opt.id)} className={classNames("rounded-full border px-3 py-1 text-sm", values.includes(opt.id) ? "bg-black text-white" : "")}>{opt.name}</button>
+          <button type="button" key={opt.id} onClick={() => toggle(opt.id)} className={classNames("rounded-full border px-3 py-1 text-sm", values?.includes(opt.id) ? "bg-black text-white" : "")}>{opt.name}</button>
         ))}
       </div>
     </div>

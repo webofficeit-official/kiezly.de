@@ -29,9 +29,9 @@ export default function Header() {
                 className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm font-medium hover:bg-gray-100"
               >
                 <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
-                  {user?.email?.[0].toUpperCase() || <User className="w-4 h-4" />}
+                  {(user?.display_name || user?.first_name)?.[0].toUpperCase() || <User className="w-4 h-4" />}
                 </div>
-                <span>{user?.email}</span>
+                <span>{user?.display_name || `${user?.first_name} ${user?.last_name}` }</span>
               </button>
 
               {/* Dropdown */}

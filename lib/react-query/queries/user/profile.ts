@@ -19,11 +19,25 @@ export interface UpdateProfileData {
   city: string;
   postal_code: string;
   street: string;
+  radius: number;
   lat: number;
   lng: number;
   has_first_aid: boolean;
+  first_aid: {
+    provider: string;
+    certificateId: string;
+    completionDate: string;
+    expiryDate: string;
+    fileUrl: string;
+  }
   education_level: string;
   police_verified: boolean;
+  police_certificate: {
+    level: string;
+    issueDate: string;
+    expiryDate: string;
+    fileUrl: string;
+  }
   avatar_url: string;
   org_name: string;
   website: string;
@@ -41,6 +55,10 @@ export interface UpdateProfileData {
   languages: any[];
   weekdays: any[];
   time_windows: any[];
+  socialLinks: {
+    platform: string;
+    url: string;
+  }[];
 }
 
 interface UpdateProfileResponse {
