@@ -5,7 +5,7 @@ import { useCollections } from "@/lib/react-query/queries/user/account";
 import { getProfile, updateProfile, uploadDocument } from "@/lib/react-query/queries/user/profile";
 import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaTrash } from "react-icons/fa";
 import { Button } from "./ui/button";
 
 /**
@@ -141,6 +141,7 @@ export type UserProfile = {
       platform: string;
       url: string;
     }[];
+    education?: Education[];
   }
 
 export type User = {
@@ -316,7 +317,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     experienceYears: myProfile?.user?.experience ?? 0,
     certificates: myProfile?.user?.certificates?.split(","),
     password: '',
-    education: [],
+    education: myProfile?.user?.education,
     role: myProfile?.user?.role ?? 'helper',
     socials: {
       website: myProfile?.user?.social_links?.find((link) => link.platform === "website")?.url || "",
@@ -324,7 +325,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       x: myProfile?.user?.social_links?.find((link) => link.platform === "x")?.url || "",
       instagram: myProfile?.user?.social_links?.find((link) => link.platform === "instagram")?.url || "",
       facebook: myProfile?.user?.social_links?.find((link) => link.platform === "facebook")?.url || "",
-    }
+    },
   });
 
   // push form updates to parent in real-time (also triggers once on mount)
@@ -406,6 +407,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       socialLinks: Object.entries(form.socials)
         .filter(([_, url]) => url)
         .map(([platform, url]) => ({ platform, url })),
+      education: form.education
     }, {
       onSuccess: (data) => {
         myProfile.loadUser()
@@ -539,18 +541,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             <Input label="Certificate ID" value={form.verification.firstAid.certificateId || ""} onChange={(v) => update((d) => (d.verification.firstAid.certificateId = v))} />
             <Input label="Completion date" type="date" value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
             <Input label="Expiry date (optional)" type="date" value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
-            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />
-            {form.verification.firstAid.fileUrl ? (
-              <button
-                type="button"
-                className="border hover:bg-gray-200 mt-6 px-3 py-2 rounded-xl text-sm"
-                onClick={() => window.open(form.verification.firstAid.fileUrl, "_blank")}
-              >
-                View File
-              </button>
-            ) : (
-              <p className="mt-2 text-gray-500 text-sm">No file uploaded yet</p>
-            )}          
+            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />       
           </div>
         )}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -562,17 +553,6 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             <Input label="Issue date" type="date" value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
             <Input label="Expiry date" type="date" value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
             <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
-            {form.verification.policeCertificate.fileUrl ? (
-              <button
-                type="button"
-                className="border hover:bg-gray-200 mt-6 px-3 py-2 rounded-xl text-sm"
-                onClick={() => window.open(form.verification.policeCertificate.fileUrl, "_blank")}
-              >
-                View File
-              </button>
-            ) : (
-              <></>
-            )}
           </div>
         )}
         <p className="mt-2 text-xs text-gray-500">Note: For childcare, the enhanced police certificate (Erweitertes Führungszeugnis) is recommended.</p>
@@ -735,7 +715,7 @@ function EducationEditor({ value, onChange }: { value: Education[]; onChange: (v
     const next = items.filter((_, i) => i !== index);
     setItems(next);
     onChange(next);
-  }
+  }  
 
   return (
     <div className="space-y-3">
@@ -746,7 +726,7 @@ function EducationEditor({ value, onChange }: { value: Education[]; onChange: (v
           <Input label="Institution" value={ed.institution || ""} onChange={(v) => updateAt(i, { institution: v })} />
           <div className="flex items-end gap-2">
             <Input label="Year" type="number" value={ed.year || ""} onChange={(v) => updateAt(i, { year: v })} />
-            <button type="button" onClick={() => remove(i)} className="h-10 rounded-lg border px-3 text-sm">Remove</button>
+            <button type="button" onClick={() => remove(i)} className="h-10 rounded-lg border px-3 text-sm"><FaTrash /></button>
           </div>
         </div>
       ))}

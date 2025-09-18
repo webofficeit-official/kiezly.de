@@ -1,4 +1,4 @@
-import { UserProfile } from "@/components/MyProfile";
+import { Education, UserProfile } from "@/components/MyProfile";
 import apiClient from "@/lib/config/axios-client";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 
@@ -61,6 +61,7 @@ export interface UpdateProfileData {
     platform: string;
     url: string;
   }[];
+  education: Education[]
 }
 
 interface UploadResponse {
