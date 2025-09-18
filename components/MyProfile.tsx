@@ -2,10 +2,11 @@
 
 import { useAuth } from "@/lib/context/auth-context";
 import { useCollections } from "@/lib/react-query/queries/user/account";
-import { getProfile, updateProfile } from "@/lib/react-query/queries/user/profile";
+import { getProfile, updateProfile, uploadDocument } from "@/lib/react-query/queries/user/profile";
 import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
+import { Button } from "./ui/button";
 
 /**
  * Kiezly – User Creation & Profile (fixed)
@@ -41,6 +42,7 @@ export type Verification = {
     certificateId?: string;
     completionDate?: string; // YYYY-MM-DD
     expiryDate?: string; // optional
+    fileId?: string; // uploaded proof
     fileUrl?: string; // uploaded proof
   };
   policeCertificate: {
@@ -106,6 +108,7 @@ export type UserProfile = {
       completionDate: string | null;
       expiryDate: string | null;
       fileUrl: string | null;
+      fileId: string | null;
     }
     education_level?: string | null;
     police_verified?: boolean | null;
@@ -246,10 +249,8 @@ export type OnboardingFormProps = {
 // Onboarding Form
 // ----------------------------
 function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, languages }: OnboardingFormProps) {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
-  const pofile = getProfile();
   const updatePofile = updateProfile();
+  const uploadMutation = uploadDocument();
 
   const myProfile = useAuth()
   
@@ -290,7 +291,13 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     },
     verification: {
       firstAid: {
-        completed: myProfile?.user?.has_first_aid
+        completed: myProfile?.user?.has_first_aid,
+        provider: myProfile?.user?.first_aid?.provider,
+        certificateId: myProfile?.user?.first_aid?.certificateId,
+        completionDate: myProfile?.user?.first_aid?.completionDate,
+        expiryDate: myProfile?.user?.first_aid?.expiryDate,
+        fileUrl: myProfile?.user?.first_aid?.fileUrl,
+        fileId: myProfile?.user?.first_aid?.fileId,
       },
       idVerified: myProfile?.user?.is_email_verified,
       policeCertificate: {
@@ -334,7 +341,6 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
   function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
     if (errors.length) return;
-    console.log("Submitted user:", form);
     updatePofile.mutate({
       first_name: form.firstName,
       last_name: form.lastName,
@@ -356,6 +362,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
         completionDate: form.verification.firstAid.completionDate,
         expiryDate: form.verification.firstAid.expiryDate,
         fileUrl: form.verification.firstAid.fileUrl,
+        fileId: form.verification.firstAid.fileId
       },
       education_level: '',
       police_verified: form.verification.policeCertificate.hasCertificate,
@@ -412,6 +419,30 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       }
     });
   }
+  function handleFileUpload(file: File | File[] | null, type: string) {
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+
+    if (Array.isArray(file)) {
+      console.log("Multiple files:", file, type);
+    } else {
+      uploadMutation.mutate(
+        { file, type: "first_aid" },
+        {
+          onSuccess: (data) => {
+            update((d) => (d.verification.firstAid.fileUrl = data.document.file_url))
+            update((d) => (d.verification.firstAid.fileId = data.document.id))
+          },
+          onError: (err) => {
+            console.error("Upload failed:", err);
+          },
+        }
+      );
+    }
+  }
+
   
 
   return (
@@ -486,7 +517,18 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             <Input label="Certificate ID" value={form.verification.firstAid.certificateId || ""} onChange={(v) => update((d) => (d.verification.firstAid.certificateId = v))} />
             <Input label="Completion date" type="date" value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
             <Input label="Expiry date (optional)" type="date" value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
-            <Input label="Proof file URL (temporary)" placeholder="https://…/first-aid.pdf" value={form.verification.firstAid.fileUrl || ""} onChange={(v) => update((d) => (d.verification.firstAid.fileUrl = v))} />
+            <FileInput label="Proof file URL (temporary)" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />
+            {form.verification.firstAid.fileUrl ? (
+              <button
+                type="button"
+                className="bg-gray-400 h-10 hover:bg-gray-800 mt-6 rounded text-white w-2/5"
+                onClick={() => window.open(form.verification.firstAid.fileUrl, "_blank")}
+              >
+                View File
+              </button>
+            ) : (
+              <p className="mt-2 text-gray-500 text-sm">No file uploaded yet</p>
+            )}          
           </div>
         )}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -719,6 +761,38 @@ function Input({ label, value, onChange, type = "text", required, placeholder, m
     </label>
   );
 }
+
+function FileInput({ label, onChange, required, accept, multiple }: {
+  label: string;
+  onChange: (file: File | File[] | null) => void;
+  required?: boolean;
+  accept?: string;
+  multiple?: boolean;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="mb-1 block text-gray-700">
+        {label}{required && <span className="text-red-600">*</span>}
+      </span>
+      <input
+        className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black file:mr-3 file:rounded-lg file:border file:border-gray-300 file:bg-gray-50 file:px-3 file:py-1 file:text-sm file:text-gray-700 hover:file:bg-gray-100"
+        type="file"
+        onChange={(e) => {
+          const files = e.target.files;
+          if (!files || files.length === 0) {
+            onChange(null);
+          } else {
+            onChange(multiple ? Array.from(files) : files[0]);
+          }
+        }}
+        required={required}
+        accept={accept}
+        multiple={multiple}
+      />
+    </label>
+  );
+}
+
 
 function Textarea({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (

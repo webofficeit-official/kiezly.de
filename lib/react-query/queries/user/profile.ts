@@ -29,6 +29,7 @@ export interface UpdateProfileData {
     completionDate: string;
     expiryDate: string;
     fileUrl: string;
+    fileId: string;
   }
   education_level: string;
   police_verified: boolean;
@@ -61,6 +62,19 @@ export interface UpdateProfileData {
   }[];
 }
 
+interface UploadResponse {
+  success: boolean;
+  message: string; // adjust to your backend response
+  document: {
+    id: string
+    user_id: string
+    kind: string
+    file_url: string
+    mime_type: string
+    uploaded_at: string
+  }
+}
+
 interface UpdateProfileResponse {
   success: boolean;
   message: string;
@@ -85,5 +99,30 @@ export const updateProfile = (): UseMutationResult<
   return useMutation({
     mutationFn: (data: UpdateProfileData) =>
       apiClient.put("/profile/me", data).then(res => res.data),
+  });
+};
+
+export const uploadDocument = (): UseMutationResult<
+  UploadResponse,
+  Error,
+  { file: File; type: string }
+> => {
+  return useMutation({
+    mutationFn: async ({ file, type }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await apiClient.post(
+        `/document/upload?type=${encodeURIComponent(type)}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return res.data;
+    },
   });
 };
