@@ -9,14 +9,14 @@ import apiClient, {
 import { LoginResponse } from "@/lib/react-query/queries/user/account";
 import { useRouter, usePathname } from "next/navigation";
 import { getCookie } from "cookies-next";
-
-type User = { id: string; email: string; role?: string } | null;
+import { UserProfile } from "@/components/MyProfile";
 
 type AuthContextType = {
-    user: User;
+    user: UserProfile;
     login: (email: string, password: string, opts?: { onSuccess?: () => void; onError?: (err: any) => void }) => void;
     logout: () => Promise<void>;
     loading: boolean;
+    loadUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +28,7 @@ export const useAuth = () => {
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User>(null);
+    const [user, setUser] = useState<UserProfile>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
@@ -43,23 +43,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setLoading(false);
             return;
         }
-        async function loadUser() {
-            try {
-                const res = await apiClient.get("/profile/me");
-                setUser({
-                    id: res?.data?.user?.id,
-                    email: res?.data?.user?.email,
-                    role: res?.data?.user?.role,
-                });
-            } catch {
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        }
 
         loadUser();
     }, []);
+
+    async function loadUser() {
+        try {
+            const res = await apiClient.get("/profile/me");
+            setUser(res?.data?.user);
+        } catch {
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     useEffect(() => {
         if (loading) return;
@@ -88,11 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 onSuccess: (data: LoginResponse) => {
                     if (data?.token?.access) setAccessToken(data.token.access);
                     if (data?.token?.refresh) setRefreshToken(data.token.refresh);
-                    setUser({
-                        id: data.data.id,
-                        email: data.data.email,
-                        role: data.data.role,
-                    });
+
+                    loadUser();
 
                     opts?.onSuccess?.();
                 },
@@ -118,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, loadUser }}>
             {loading ? (
                 <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
                     {/* Simple Tailwind spinner */}

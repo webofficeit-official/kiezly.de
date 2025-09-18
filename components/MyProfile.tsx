@@ -1,10 +1,12 @@
 "use client";
 
+import { useAuth } from "@/lib/context/auth-context";
 import { useCollections } from "@/lib/react-query/queries/user/account";
-import { getProfile, updateProfile } from "@/lib/react-query/queries/user/profile";
+import { getProfile, updateProfile, uploadDocument, uploadProfilePic } from "@/lib/react-query/queries/user/profile";
 import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaTrash } from "react-icons/fa";
+import { Button } from "./ui/button";
 
 /**
  * Kiezly – User Creation & Profile (fixed)
@@ -40,18 +42,22 @@ export type Verification = {
     certificateId?: string;
     completionDate?: string; // YYYY-MM-DD
     expiryDate?: string; // optional
+    fileId?: string; // uploaded proof
     fileUrl?: string; // uploaded proof
   };
   policeCertificate: {
     hasCertificate: boolean;
-    level?: "Normal" | "Enhanced"; // (Erweitertes Führungszeugnis)
+    level?: string; // (Erweitertes Führungszeugnis)
     issueDate?: string; // YYYY-MM-DD
     expiryDate?: string; // policy-dependent
     fileUrl?: string;
+    fileId?: string; // uploaded proof
   };
 };
 
 export type Availability = {
+  lat: number;
+  lng: number;
   radiusKm: number; // service radius from base address
   weekdays: string[]; // e.g., ["Mon", "Tue", "Wed"]
   timeWindows: string[]; // e.g., ["Morning", "Afternoon", "Evening", "Weekend"]
@@ -68,6 +74,8 @@ export type Address = {
   postcode?: string;
   city?: string;
   districtOrKiez?: string; // free text like "Weststadt"
+  state?: string;
+  country?: string;
 };
 
 export type UserRole = 'client' | 'helper'
@@ -91,11 +99,27 @@ export type UserProfile = {
     org_name?: string | null;
     rate?: number | null;
     website?: string | null;
+    radius: number;
     lat?: number | null;
     lng?: number | null;
     has_first_aid?: boolean | null;
+    first_aid: {
+      provider: string | null;
+      certificateId: string | null;
+      completionDate: string | null;
+      expiryDate: string | null;
+      fileUrl: string | null;
+      fileId: string | null;
+    }
     education_level?: string | null;
     police_verified?: boolean | null;
+    police_certificate: {
+      level: string | null;
+      issueDate: string | null;
+      expiryDate: string | null;
+      fileUrl: string | null;
+      fileId: string | null;
+    }
     avatar_url?: string | null;
     geom?: any | null;
     display_name: string | null;
@@ -104,7 +128,7 @@ export type UserProfile = {
     fixed_price: boolean;
     min_hours: number | null;
     work_permit: boolean | null;
-    issue_involve: boolean;
+    issue_invoice: boolean;
     experience: number | null;
     certificates: string | null;
     skills: Tag[];
@@ -113,6 +137,11 @@ export type UserProfile = {
     time_windows: any[];
     created_at: Date;
     updated_at: Date;
+    social_links: {
+      platform: string;
+      url: string;
+    }[];
+    education?: Education[];
   }
 
 export type User = {
@@ -137,7 +166,7 @@ export type User = {
   lng?: number;
 
   // helper-specific
-  categories: number[]; // e.g., ["Childcare", "Cleaning"]
+  categories: any[]; // e.g., ["Childcare", "Cleaning"]
   languages: string[]; // e.g., ["German", "English"]
   hasWorkPermit?: boolean;
   canInvoice?: boolean; // if offers invoice (for non-mini job gigs)
@@ -190,7 +219,7 @@ export default function MyProfile() {
   }, [])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="text-3xl font-semibold tracking-tight">My Profile</h1>
       {/* <p className="mt-1 text-sm text-gray-600">Create your account and build a strong profile. Badges like ID, First Aid and Police Certificate help clients hire confidently.</p> */}
 
@@ -215,102 +244,89 @@ export type OnboardingFormProps = {
   onChange: (u: User, weekdays: any[], timeWindows: any[], jobCategories: object[], languages: object[]) => void;
   weekdays: any[];
   timeWindows: any[];
-  jobCategories: object[];
-  languages: object[];
+  jobCategories: { id: string; name: string; }[];
+  languages: { id: string; name: string; }[];
 };
 
 // ----------------------------
 // Onboarding Form
 // ----------------------------
 function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, languages }: OnboardingFormProps) {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
-  const pofile = getProfile();
   const updatePofile = updateProfile();
+  const uploadMutation = uploadDocument();
+  const uploadProfile = uploadProfilePic();
 
-  useEffect(() => {
-    pofile.mutate('', {
-      onSuccess: (data) => {
-        console.log(data);    
-        const updatedDateOfBirth = new Date(data.user.date_of_birth);    
-        const formatted = `${(updatedDateOfBirth.getUTCMonth() + 1).toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCDate().toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCFullYear()}`;
-        setForm({
-          ...form,
-          firstName: data.user.first_name,
-          lastName: data.user.last_name,
-          displayName: data.user.display_name,
-          email: data.user.email,
-          phone: data.user.phone,
-          dateOfBirth: formatted,
-          gender: data.user.gender,
-          photoUrl: data.user.avatar_url,
-          about: data.user.bio,
-          address: {
-            city: data.user.city,
-            street: data.user.street,
-            postcode: data.user.postal_code,
-            districtOrKiez: data.user.district,
-          },
-          rate: {
-            hourlyEUR: data.user.rate,
-            fixedPriceAvailable: data.user.fixed_price,
-            minHoursPerBooking: data.user.min_hours
-          },
-          categories: data.user.skills.map(skill => skill.id),
-          languages: data.user.languages.map(lan => lan.id),
-          availability: {
-            weekdays: data.user.weekdays,
-            timeWindows: data.user.time_windows,
-            radiusKm: 10
-          },
-          verification: {
-            firstAid: {
-              completed: data.user.has_first_aid
-            },
-            idVerified: data.user.is_email_verified,
-            policeCertificate: {
-              hasCertificate: data.user.police_verified
-            }
-          },
-          hasWorkPermit: data.user.work_permit,
-          canInvoice: data.user.issue_involve,
-          experienceYears: data.user.experience,
-          certificates: data.user.certificates.split(",")
-        })
-      },
-      onError: (err: any) => {
-      }
-    });
-  }, [])
+  const myProfile = useAuth()
+  
+  const updatedDateOfBirth = new Date(myProfile?.user?.date_of_birth ?? '');    
+  const formatted = `${(updatedDateOfBirth.getUTCMonth() + 1).toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCDate().toString().padStart(2, '0')}/${updatedDateOfBirth.getUTCFullYear()}`;
 
   const [form, setForm] = useState<User>({
-    email: "",
-    password: "",
-    role: "helper",
-    firstName: "",
-    lastName: "",
-    displayName: "",
-    phone: "",
-    dateOfBirth: "",
-    gender: "",
-    about: "",
-    photoUrl: "",
-    address: { street: "", postcode: "", city: "", districtOrKiez: "" },
-    categories: [],
-    languages: [],
-    hasWorkPermit: true,
-    canInvoice: false,
-    availability: { radiusKm: 5, weekdays: [], timeWindows: [] },
-    rate: { hourlyEUR: 15, fixedPriceAvailable: false, minHoursPerBooking: 2 },
-    experienceYears: 0,
-    education: [],
-    certificates: [],
-    verification: {
-      idVerified: false,
-      firstAid: { completed: false },
-      policeCertificate: { hasCertificate: false, level: "Enhanced" },
+    firstName: myProfile?.user?.first_name ?? '',
+    lastName: myProfile?.user?.last_name ?? '',
+    displayName: myProfile?.user?.display_name ?? '',
+    email: myProfile?.user?.email ?? '',
+    phone: myProfile?.user?.phone ?? '',
+    dateOfBirth: formatted ?? '',
+    gender: myProfile?.user?.gender ?? '',
+    photoUrl: myProfile?.user?.avatar_url ?? '',
+    about: myProfile?.user?.bio ?? '',
+    address: {
+      city: myProfile?.user?.city ?? '',
+      street: myProfile?.user?.street ?? '',
+      postcode: myProfile?.user?.postal_code ?? '',
+      districtOrKiez: myProfile?.user?.district ?? '',
+      state: myProfile?.user?.state ?? '',
+      country: myProfile?.user?.country ?? '',
     },
-    socials: {},
+    rate: {
+      hourlyEUR: myProfile?.user?.rate ?? 0,
+      fixedPriceAvailable: myProfile?.user?.fixed_price ?? false,
+      minHoursPerBooking: myProfile?.user?.min_hours ?? 0
+    },
+    categories: myProfile?.user?.skills?.map(skill => skill.id),
+    languages: myProfile?.user?.languages?.map(lan => lan.id),
+    availability: {
+      weekdays: myProfile?.user?.weekdays ?? [],
+      timeWindows: myProfile?.user?.time_windows ?? [],
+      radiusKm: myProfile?.user?.radius ?? 5,
+      lat: myProfile?.user?.lat ?? 0,
+      lng: myProfile?.user?.lng ?? 0,
+    },
+    verification: {
+      firstAid: {
+        completed: myProfile?.user?.has_first_aid,
+        provider: myProfile?.user?.first_aid?.provider,
+        certificateId: myProfile?.user?.first_aid?.certificateId,
+        completionDate: myProfile?.user?.first_aid?.completionDate,
+        expiryDate: myProfile?.user?.first_aid?.expiryDate,
+        fileUrl: myProfile?.user?.first_aid?.fileUrl,
+        fileId: myProfile?.user?.first_aid?.fileId,
+      },
+      idVerified: myProfile?.user?.is_email_verified,
+      policeCertificate: {
+        hasCertificate: myProfile?.user?.police_verified,
+        level: myProfile?.user?.police_certificate?.level,
+        issueDate: myProfile?.user?.police_certificate?.issueDate,
+        expiryDate: myProfile?.user?.police_certificate?.expiryDate,
+        fileUrl: myProfile?.user?.police_certificate?.fileUrl,
+        fileId: myProfile?.user?.police_certificate?.fileId,
+      }
+    },
+    hasWorkPermit: myProfile?.user?.work_permit,
+    canInvoice: myProfile?.user?.issue_invoice,
+    experienceYears: myProfile?.user?.experience ?? 0,
+    certificates: myProfile?.user?.certificates?.split(","),
+    password: '',
+    education: myProfile?.user?.education,
+    role: myProfile?.user?.role ?? 'helper',
+    socials: {
+      website: myProfile?.user?.social_links?.find((link) => link.platform === "website")?.url || "",
+      linkedin: myProfile?.user?.social_links?.find((link) => link.platform === "linkedin")?.url || "",
+      x: myProfile?.user?.social_links?.find((link) => link.platform === "x")?.url || "",
+      instagram: myProfile?.user?.social_links?.find((link) => link.platform === "instagram")?.url || "",
+      facebook: myProfile?.user?.social_links?.find((link) => link.platform === "facebook")?.url || "",
+    },
   });
 
   // push form updates to parent in real-time (also triggers once on mount)
@@ -340,24 +356,39 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
   function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
     if (errors.length) return;
-    console.log("Submitted user:", form);
     updatePofile.mutate({
       first_name: form.firstName,
       last_name: form.lastName,
       phone: form.phone,
       date_of_birth: form.dateOfBirth,
       bio: form.about,
-      country: 'Germany',
-      state: form.address.districtOrKiez,
+      state: form.address.state,
+      country: form.address.country,
       city: form.address.city,
       postal_code: form.address.postcode,
       street: form.address.street,
-      lat: 0,
-      lng: 0,
+      radius: form.availability.radiusKm,
+      lat: form.availability.lat,
+      lng: form.availability.lng,
       has_first_aid: form.verification.firstAid.completed,
+      first_aid: {
+        provider: form.verification.firstAid.provider,
+        certificateId: form.verification.firstAid.certificateId,
+        completionDate: form.verification.firstAid.completionDate,
+        expiryDate: form.verification.firstAid.expiryDate,
+        fileUrl: form.verification.firstAid.fileUrl,
+        fileId: form.verification.firstAid.fileId
+      },
       education_level: '',
       police_verified: form.verification.policeCertificate.hasCertificate,
-      avatar_url: '',
+      police_certificate: {
+        level: form.verification.policeCertificate.level,
+        issueDate: form.verification.policeCertificate.issueDate,
+        expiryDate: form.verification.policeCertificate.expiryDate,
+        fileUrl: form.verification.policeCertificate.fileUrl,
+        fileId: form.verification.policeCertificate.fileId
+      },
+      avatar_url: form.photoUrl,
       org_name: '',
       website: '',
       rate: form.rate.hourlyEUR,
@@ -374,8 +405,13 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       languages: form.languages,
       weekdays: form.availability.weekdays,
       time_windows: form.availability.timeWindows,
+      socialLinks: Object.entries(form.socials)
+        .filter(([_, url]) => url)
+        .map(([platform, url]) => ({ platform, url })),
+      education: form.education
     }, {
       onSuccess: (data) => {
+        myProfile.loadUser()
         toast.custom((t) => (
           <div
             className={`${t.visible ? "animate-enter" : "animate-leave"
@@ -402,10 +438,55 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       }
     });
   }
+  function handleFileUpload(file: File | File[] | null, type: string) {
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+
+    if (Array.isArray(file)) {
+      console.log("Multiple files:", file, type);
+    } else {
+      if(type == 'profile_pic') {
+        uploadProfile.mutate(
+          { file },
+          {
+            onSuccess: (data) => {
+              update((d) => (form.photoUrl = data.data.filePath))
+            },
+            onError: (err) => {
+              console.error("Upload failed:", err);
+            },
+          }
+        );
+      } else {
+        uploadMutation.mutate(
+          { file, type },
+          {
+            onSuccess: (data) => {
+              if(type == 'police_clearance') {
+                update((d) => (d.verification.policeCertificate.fileUrl = data.document.file_url))
+                update((d) => (d.verification.policeCertificate.fileId = data.document.id))
+              }
+              if(type == 'first_aid') {
+                update((d) => (d.verification.firstAid.fileUrl = data.document.file_url))
+                update((d) => (d.verification.firstAid.fileId = data.document.id))
+              }
+            },
+            onError: (err) => {
+              console.error("Upload failed:", err);
+            },
+          }
+        );
+      }
+      
+    }
+  }
+
   
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* Basic info */}
       <Section title="Basic information" description="This appears on your public profile.">
         <div className="grid gap-4 md:grid-cols-2">
@@ -417,7 +498,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Select label="Gender" value={form.gender || ""} onChange={(v) => update((d) => (d.gender = v))} options={["", "Female", "Male", "Non-binary", "Prefer not to say"]} />
         </div>
         <Textarea label="About you" placeholder="A short intro, experience, strengths…" value={form.about || ""} onChange={(v) => update((d) => (d.about = v))} />
-        <Input label="Profile photo URL" placeholder="https://…" value={form.photoUrl || ""} onChange={(v) => update((d) => (d.photoUrl = v))} />
+        <FileInput label="Profile photo" accept=".png,.jpeg,.jpg" onChange={(v) => handleFileUpload(v, 'profile_pic')} />
       </Section>
 
       {/* Location */}
@@ -427,8 +508,12 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Input label="Postcode" value={form.address.postcode || ""} onChange={(v) => update((d) => (d.address.postcode = v))} />
           <Input label="City" value={form.address.city || ""} onChange={(v) => update((d) => (d.address.city = v))} required />
           <Input label="District / Kiez" value={form.address.districtOrKiez || ""} onChange={(v) => update((d) => (d.address.districtOrKiez = v))} />
+          <Input label="State" value={form.address.state || ""} onChange={(v) => update((d) => (d.address.state = v))} />
+          <Input label="Country" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
+          <Input label="Latitude" type="number" value={form.availability.lat} onChange={(v) => update((d) => (d.availability.lat = Number(v)))} />
+          <Input label="Longitude" type="number" value={form.availability.lng} onChange={(v) => update((d) => (d.availability.lng = Number(v)))} />
           <Input label="Service radius (km)" type="number" min={1} max={100} value={form.availability.radiusKm} onChange={(v) => update((d) => (d.availability.radiusKm = Number(v)))} />
           <MultiCheckbox label="Available days" values={form.availability.weekdays} onChange={(vals) => update((d) => (d.availability.weekdays = vals))} options={Array.from(weekdays)} />
         </div>
@@ -443,12 +528,12 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Switch label="Fixed price available" checked={form.rate.fixedPriceAvailable} onChange={(v) => update((d) => (d.rate.fixedPriceAvailable = v))} />
           <Input label="Min hours per booking" type="number" min={1} max={12} value={form.rate.minHoursPerBooking || 1} onChange={(v) => update((d) => (d.rate.minHoursPerBooking = Number(v)))} />
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
           <MultiCheckboxWithObject label="Languages" values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(languages)} />
+        <div className="grid gap-4 md:grid-cols-2">
           <Switch label="Has work permit" checked={!!form.hasWorkPermit} onChange={(v) => update((d) => (d.hasWorkPermit = v))} />
           <Switch label="Can issue invoice" checked={!!form.canInvoice} onChange={(v) => update((d) => (d.canInvoice = v))} />
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <Input label="Years of experience" type="number" min={0} max={40} value={form.experienceYears || 0} onChange={(v) => update((d) => (d.experienceYears = Number(v)))} />
           <TagInput label="Certificates (comma separated)" placeholder="HACCP, Pflegebasiskurs…" value={(form.certificates || []).join(", ")}
             onChange={(v) => update((d) => (d.certificates = v.split(",").map((s) => s.trim()).filter(Boolean)))} />
@@ -472,7 +557,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             <Input label="Certificate ID" value={form.verification.firstAid.certificateId || ""} onChange={(v) => update((d) => (d.verification.firstAid.certificateId = v))} />
             <Input label="Completion date" type="date" value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
             <Input label="Expiry date (optional)" type="date" value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
-            <Input label="Proof file URL (temporary)" placeholder="https://…/first-aid.pdf" value={form.verification.firstAid.fileUrl || ""} onChange={(v) => update((d) => (d.verification.firstAid.fileUrl = v))} />
+            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />       
           </div>
         )}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -483,7 +568,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Input label="Issue date" type="date" value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
             <Input label="Expiry date" type="date" value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
-            <Input label="Proof file URL (temporary)" placeholder="https://…/police-certificate.pdf" value={form.verification.policeCertificate.fileUrl || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.fileUrl = v))} />
+            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
           </div>
         )}
         <p className="mt-2 text-xs text-gray-500">Note: For childcare, the enhanced police certificate (Erweitertes Führungszeugnis) is recommended.</p>
@@ -522,7 +607,7 @@ function PublicProfile({ user, jobCategories, languages }: { user: User, jobCate
 }[] }) {
   const hasName = (user.displayName && user.displayName.trim()) || (user.firstName || user.lastName);
   const name = hasName ? (user.displayName || `${user.firstName} ${user.lastName}`.trim()) : "New helper";
-  const cityLine = [user.address?.city, user.address?.districtOrKiez].filter(Boolean).join(" • ");  
+  const cityLine = [user.address?.city, user.address?.districtOrKiez, user.address?.state, user.address?.country].filter(Boolean).join(" • ");  
 
   return (
     <div className="space-y-6">
@@ -646,7 +731,7 @@ function EducationEditor({ value, onChange }: { value: Education[]; onChange: (v
     const next = items.filter((_, i) => i !== index);
     setItems(next);
     onChange(next);
-  }
+  }  
 
   return (
     <div className="space-y-3">
@@ -657,7 +742,7 @@ function EducationEditor({ value, onChange }: { value: Education[]; onChange: (v
           <Input label="Institution" value={ed.institution || ""} onChange={(v) => updateAt(i, { institution: v })} />
           <div className="flex items-end gap-2">
             <Input label="Year" type="number" value={ed.year || ""} onChange={(v) => updateAt(i, { year: v })} />
-            <button type="button" onClick={() => remove(i)} className="h-10 rounded-lg border px-3 text-sm">Remove</button>
+            <button type="button" onClick={() => remove(i)} className="h-10 rounded-lg border px-3 text-sm"><FaTrash /></button>
           </div>
         </div>
       ))}
@@ -705,6 +790,38 @@ function Input({ label, value, onChange, type = "text", required, placeholder, m
     </label>
   );
 }
+
+function FileInput({ label, onChange, required, accept, multiple }: {
+  label: string;
+  onChange: (file: File | File[] | null) => void;
+  required?: boolean;
+  accept?: string;
+  multiple?: boolean;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="mb-1 block text-gray-700">
+        {label}{required && <span className="text-red-600">*</span>}
+      </span>
+      <input
+        className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black file:mr-3 file:rounded-lg file:border file:border-gray-300 file:bg-gray-50 file:px-3 file:py-1 file:text-sm file:text-gray-700 hover:file:bg-gray-100"
+        type="file"
+        onChange={(e) => {
+          const files = e.target.files;
+          if (!files || files.length === 0) {
+            onChange(null);
+          } else {
+            onChange(multiple ? Array.from(files) : files[0]);
+          }
+        }}
+        required={required}
+        accept={accept}
+        multiple={multiple}
+      />
+    </label>
+  );
+}
+
 
 function Textarea({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
@@ -761,7 +878,7 @@ function MultiCheckbox({ label, options, values, onChange }: { label: string; op
       <div className="text-sm text-gray-700">{label}</div>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
-          <button type="button" key={opt} onClick={() => toggle(opt)} className={classNames("rounded-full border px-3 py-1 text-sm", values.includes(opt) ? "bg-black text-white" : "")}>{opt}</button>
+          <button type="button" key={opt} onClick={() => toggle(opt)} className={classNames("rounded-full border px-3 py-1 text-sm", values?.includes(opt) ? "bg-black text-white" : "")}>{opt}</button>
         ))}
       </div>
     </div>
@@ -771,7 +888,7 @@ function MultiCheckbox({ label, options, values, onChange }: { label: string; op
 function MultiCheckboxWithObject({ label, options, values, onChange }: { label: string; options: {
   id: string;
   name: string;
-}[]; values: string[]; onChange: (next: string[]) => void }) {
+}[]; values: any[]; onChange: (next: string[]) => void }) {
   function toggle(val: string) {
     const set = new Set(values);
     if (set.has(val)) set.delete(val); else set.add(val);
@@ -782,7 +899,7 @@ function MultiCheckboxWithObject({ label, options, values, onChange }: { label: 
       <div className="text-sm text-gray-700">{label}</div>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
-          <button type="button" key={opt.id} onClick={() => toggle(opt.id)} className={classNames("rounded-full border px-3 py-1 text-sm", values.includes(opt.id) ? "bg-black text-white" : "")}>{opt.name}</button>
+          <button type="button" key={opt.id} onClick={() => toggle(opt.id)} className={classNames("rounded-full border px-3 py-1 text-sm", values?.includes(opt.id) ? "bg-black text-white" : "")}>{opt.name}</button>
         ))}
       </div>
     </div>
