@@ -38,6 +38,7 @@ export interface UpdateProfileData {
     issueDate: string;
     expiryDate: string;
     fileUrl: string;
+    fileId: string;
   }
   avatar_url: string;
   org_name: string;

@@ -47,10 +47,11 @@ export type Verification = {
   };
   policeCertificate: {
     hasCertificate: boolean;
-    level?: "Normal" | "Enhanced"; // (Erweitertes Führungszeugnis)
+    level?: string; // (Erweitertes Führungszeugnis)
     issueDate?: string; // YYYY-MM-DD
     expiryDate?: string; // policy-dependent
     fileUrl?: string;
+    fileId?: string; // uploaded proof
   };
 };
 
@@ -117,6 +118,7 @@ export type UserProfile = {
       issueDate: string | null;
       expiryDate: string | null;
       fileUrl: string | null;
+      fileId: string | null;
     }
     avatar_url?: string | null;
     geom?: any | null;
@@ -301,7 +303,12 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       },
       idVerified: myProfile?.user?.is_email_verified,
       policeCertificate: {
-        hasCertificate: myProfile?.user?.police_verified
+        hasCertificate: myProfile?.user?.police_verified,
+        level: myProfile?.user?.police_certificate?.level,
+        issueDate: myProfile?.user?.police_certificate?.issueDate,
+        expiryDate: myProfile?.user?.police_certificate?.expiryDate,
+        fileUrl: myProfile?.user?.police_certificate?.fileUrl,
+        fileId: myProfile?.user?.police_certificate?.fileId,
       }
     },
     hasWorkPermit: myProfile?.user?.work_permit,
@@ -371,6 +378,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
         issueDate: form.verification.policeCertificate.issueDate,
         expiryDate: form.verification.policeCertificate.expiryDate,
         fileUrl: form.verification.policeCertificate.fileUrl,
+        fileId: form.verification.policeCertificate.fileId
       },
       avatar_url: '',
       org_name: '',
@@ -429,11 +437,17 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       console.log("Multiple files:", file, type);
     } else {
       uploadMutation.mutate(
-        { file, type: "first_aid" },
+        { file, type },
         {
           onSuccess: (data) => {
-            update((d) => (d.verification.firstAid.fileUrl = data.document.file_url))
-            update((d) => (d.verification.firstAid.fileId = data.document.id))
+            if(type == 'police_clearance') {
+              update((d) => (d.verification.policeCertificate.fileUrl = data.document.file_url))
+              update((d) => (d.verification.policeCertificate.fileId = data.document.id))
+            }
+            if(type == 'first_aid') {
+              update((d) => (d.verification.firstAid.fileUrl = data.document.file_url))
+              update((d) => (d.verification.firstAid.fileId = data.document.id))
+            }
           },
           onError: (err) => {
             console.error("Upload failed:", err);
@@ -521,7 +535,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             {form.verification.firstAid.fileUrl ? (
               <button
                 type="button"
-                className="bg-gray-400 h-10 hover:bg-gray-800 mt-6 rounded text-white w-2/5"
+                className="border hover:bg-gray-200 mt-6 px-3 py-2 rounded-xl text-sm"
                 onClick={() => window.open(form.verification.firstAid.fileUrl, "_blank")}
               >
                 View File
@@ -539,7 +553,18 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Input label="Issue date" type="date" value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
             <Input label="Expiry date" type="date" value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
-            <Input label="Proof file URL (temporary)" placeholder="https://…/police-certificate.pdf" value={form.verification.policeCertificate.fileUrl || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.fileUrl = v))} />
+            <FileInput label="Proof file URL (temporary)" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
+            {form.verification.policeCertificate.fileUrl ? (
+              <button
+                type="button"
+                className="border hover:bg-gray-200 mt-6 px-3 py-2 rounded-xl text-sm"
+                onClick={() => window.open(form.verification.policeCertificate.fileUrl, "_blank")}
+              >
+                View File
+              </button>
+            ) : (
+              <></>
+            )}
           </div>
         )}
         <p className="mt-2 text-xs text-gray-500">Note: For childcare, the enhanced police certificate (Erweitertes Führungszeugnis) is recommended.</p>
