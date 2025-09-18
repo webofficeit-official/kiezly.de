@@ -137,7 +137,7 @@ export type UserProfile = {
     time_windows: any[];
     created_at: Date;
     updated_at: Date;
-    socialLinks: {
+    social_links: {
       platform: string;
       url: string;
     }[];
@@ -318,7 +318,13 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     password: '',
     education: [],
     role: myProfile?.user?.role ?? 'helper',
-    socials: {}
+    socials: {
+      website: myProfile?.user?.social_links?.find((link) => link.platform === "website")?.url || "",
+      linkedin: myProfile?.user?.social_links?.find((link) => link.platform === "linkedin")?.url || "",
+      x: myProfile?.user?.social_links?.find((link) => link.platform === "x")?.url || "",
+      instagram: myProfile?.user?.social_links?.find((link) => link.platform === "instagram")?.url || "",
+      facebook: myProfile?.user?.social_links?.find((link) => link.platform === "facebook")?.url || "",
+    }
   });
 
   // push form updates to parent in real-time (also triggers once on mount)
@@ -397,7 +403,9 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       languages: form.languages,
       weekdays: form.availability.weekdays,
       time_windows: form.availability.timeWindows,
-      socialLinks: [],
+      socialLinks: Object.entries(form.socials)
+        .filter(([_, url]) => url)
+        .map(([platform, url]) => ({ platform, url })),
     }, {
       onSuccess: (data) => {
         myProfile.loadUser()
@@ -531,7 +539,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             <Input label="Certificate ID" value={form.verification.firstAid.certificateId || ""} onChange={(v) => update((d) => (d.verification.firstAid.certificateId = v))} />
             <Input label="Completion date" type="date" value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
             <Input label="Expiry date (optional)" type="date" value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
-            <FileInput label="Proof file URL (temporary)" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />
+            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />
             {form.verification.firstAid.fileUrl ? (
               <button
                 type="button"
@@ -553,7 +561,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Input label="Issue date" type="date" value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
             <Input label="Expiry date" type="date" value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
-            <FileInput label="Proof file URL (temporary)" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
+            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
             {form.verification.policeCertificate.fileUrl ? (
               <button
                 type="button"
