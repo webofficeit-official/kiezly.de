@@ -260,8 +260,13 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
 
   const myProfile = useAuth()
   
-  const updatedDateOfBirth = new Date(myProfile?.user?.date_of_birth ?? '');  
-  const formatted = updatedDateOfBirth.toISOString().split("T")[0];  
+  let formatted = ''
+  if(myProfile?.user?.date_of_birth) {
+    const updatedDateOfBirth = new Date(myProfile?.user?.date_of_birth || ''); 
+    formatted = updatedDateOfBirth?.toISOString().split("T")[0] ?? '' 
+  }
+  
+   
   
   useEffect(() => {
     setForm({
@@ -1124,7 +1129,7 @@ function MultiSelect({
       <Listbox value={values} onChange={onChange} multiple>
         <div className="relative">
           <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20">
-            {values.length
+            {values?.length
               ? options
                   .filter((o) => values.includes(o.id))
                   .map((o) => o.name)
