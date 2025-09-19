@@ -6,7 +6,13 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { AuthProvider } from "@/lib/context/auth-context";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   return (
