@@ -4,36 +4,62 @@ import { Toaster } from "react-hot-toast";
 import * as React from "react";
 
 export const metadata = {
+  metadataBase: new URL("https://kiezly.de"),
   title: {
-    default: "Browse Mini‑Job Categories | Mini‑Helfer",
-    template: "%s | Mini‑Helfer",
+    default: "Kiezly – Mini-Jobs & Helfer in deiner Nähe",
+    template: "%s | Kiezly",
   },
-  description: "Find trusted local help for babysitting, cleaning, pet care, senior support, errands, gardening and events. Post a mini‑job for free and get applications in minutes.",
-  keywords: ["mini jobs", "babysitting", "cleaning", "pet sitting", "senior support", "Braunschweig mini jobs", "Haushaltshilfe", "Nebenjob"],
+  description:
+    "Finde geprüfte Helfer für Babysitting, Umzug, Garten & mehr – oder biete selbst Mini-Jobs in deiner Nachbarschaft an. Schnell, sicher, lokal.",
+  keywords: [
+    "Mini-Jobs",
+    "Babysitter",
+    "Umzugshilfe",
+    "Haushaltshilfe",
+    "Nachbarschaft",
+    "Helfer finden",
+    "Kiez",
+    "Braunschweig",
+    "Deutschland",
+  ],
+  applicationName: "Kiezly",
+  themeColor: "#0ea5e9",
+  authors: [{ name: "Kiezly" }],
   alternates: {
-    canonical: "https://www.mini-helfer.de/categories",
+    canonical: "/",
   },
   openGraph: {
     type: "website",
-    url: "https://www.mini-helfer.de/categories",
-    siteName: "Mini‑Helfer",
-    title: "Browse Mini‑Job Categories",
-    description: "Babysitting, cleaning, pet care, senior support and more — book local, verified helpers.",
+    url: "https://kiezly.de/",
+    siteName: "Kiezly",
+    title: "Kiezly – Mini-Jobs & Helfer in deiner Nähe",
+    description:
+      "Finde geprüfte Helfer für Babysitting, Umzug, Garten & mehr – oder biete selbst Mini-Jobs an.",
     images: [
       {
-        url: "https://via.placeholder.com/1200x630.png?text=Mini-Helfer+Categories",
+        url: "/images/Kiezly_OG_1200 X 630.png", // place a 1200x630 image in /public/og/
         width: 1200,
         height: 630,
-        alt: "Mini‑Helfer categories overview (dummy image)",
+        alt: "Kiezly – Mini-Jobs & Helfer",
       },
     ],
-    locale: "de_DE",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Browse Mini‑Job Categories | Mini‑Helfer",
-    description: "Babysitting, cleaning, pet care, senior support and more — book local, verified helpers.",
-    images: ["https://via.placeholder.com/1200x630.png?text=Mini-Helfer+Categories"],
+    title: "Kiezly – Mini-Jobs & Helfer in deiner Nähe",
+    description:
+      "Finde geprüfte Helfer für Babysitting, Umzug, Garten & mehr – oder biete selbst Mini-Jobs an.",
+    images: ["/images/Kiezly_OG_1200 X 630.jpg"],
+    creator: "@kiezly", // if you have one
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   robots: {
     index: true,
@@ -41,10 +67,16 @@ export const metadata = {
     googleBot: {
       index: true,
       follow: true,
-      maxImagePreview: "large",
-      maxSnippet: -1,
-      maxVideoPreview: -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+      "max-snippet": -1,
     },
+  },
+  category: "marketplace",
+  verification: {
+    google: "YOUR_GOOGLE_SITE_VERIFICATION_CODE",
+    yandex: "",
+    other: { "ahrefs-site-verification": [""] },
   },
 } as const;
 
@@ -73,7 +105,7 @@ function CategoriesSeoJsonLd() {
   } as const;
 
   return (
-    <script type= "application/ld+json" dangerouslySetInnerHTML = {{ __html: JSON.stringify(jsonLd) }} suppressHydrationWarning />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} suppressHydrationWarning />
   );
 }
 
