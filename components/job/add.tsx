@@ -5,63 +5,12 @@ import "react-quill/dist/quill.snow.css";
 import { useCollections } from "@/lib/react-query/queries/user/account";
 import { Combobox } from "@headlessui/react";
 import { ChevronsUpDownIcon } from "lucide-react";
-import Section from "../shared-ui/section/section";
+import type { CreateJobData } from "@/lib/types/job";
 
 // Dynamically import to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 
-
-export type JobFormValues = {
-    title: string;
-    subtitle?: string;
-    description?: string;
-    category_id: number | null;
-    price_type: string;
-    price_value_min: string;
-    price_value_max: string;
-    currency: string;
-    country: string;
-    state: string;
-    city: string;
-    postal_code: string;
-    street: string;
-    lat: string;
-    lng: string;
-    starts_at: Date;
-    ends_at: Date;
-    job_experience: "junior" | "middle" | "experienced";
-    job_type: "part_time" | "on_demand" | "full_time";
-    first_aid_verified: boolean;
-    police_verified: boolean;
-    verified: boolean;
-
-};
-
-const DEFAULT_JOB: JobFormValues = {
-    title: "",
-    subtitle: "",
-    description: "",
-    category_id: null,
-    price_type: "fixed",
-    price_value_min: "",
-    price_value_max: "",
-    currency: "EUR",
-    country: "",
-    state: "",
-    city: "",
-    postal_code: "",
-    street: "",
-    lat: "",
-    lng: "",
-    starts_at: new Date(),
-    ends_at: new Date(),
-    job_experience: "junior",
-    job_type: "part_time",
-    first_aid_verified: false,
-    police_verified: false,
-    verified: false,
-};
 
 function classNames(...xs: Array<string | false | undefined | null>) {
     return xs.filter(Boolean).join(" ");
@@ -92,7 +41,7 @@ function OnboardingForm({ }) {
     const collections = useCollections();
     const [jobCategories, setJobCategories] = React.useState([])
     const [priceType, setPriceType] = React.useState([{ id: 1, name: "Fixed" }, { id: 1, name: "Hourly" }])
-    const [form, setForm] = useState<JobFormValues>({
+    const [form, setForm] = useState<CreateJobData>({
         title: "",
         subtitle: "",
         description: "",
@@ -127,9 +76,9 @@ function OnboardingForm({ }) {
         });
     }, [])
 
-    function update<T>(path: (draft: JobFormValues) => void) {
+    function update<T>(path: (draft: CreateJobData) => void) {
         setForm((prev) => {
-            const draft: JobFormValues = JSON.parse(JSON.stringify(prev));
+            const draft: CreateJobData = JSON.parse(JSON.stringify(prev));
             path(draft);
             return draft;
         });
@@ -265,7 +214,7 @@ function OnboardingForm({ }) {
                         label="Job Type"
                         placeholder="Select type"
                         value={{ id: form.job_type, name: form.job_type.replace("_", " ") }}
-                        onChange={(opt) => update((d) => (d.job_type = opt ? (opt.id as JobFormValues["job_type"]) : "part_time"))}
+                        onChange={(opt) => update((d) => (d.job_type = opt ? (opt.id as CreateJobData["job_type"]) : "part_time"))}
                         options={[
                             { id: "part_time", name: "Part Time" },
                             { id: "on_demand", name: "On Demand" },
