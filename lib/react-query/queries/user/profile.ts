@@ -1,4 +1,4 @@
-import { UserProfile } from "@/components/MyProfile";
+import { Education, UserProfile } from "@/components/MyProfile";
 import apiClient from "@/lib/config/axios-client";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 
@@ -19,11 +19,27 @@ export interface UpdateProfileData {
   city: string;
   postal_code: string;
   street: string;
+  radius: number;
   lat: number;
   lng: number;
   has_first_aid: boolean;
+  first_aid: {
+    provider: string;
+    certificateId: string;
+    completionDate: string;
+    expiryDate: string;
+    fileUrl: string;
+    fileId: string;
+  }
   education_level: string;
   police_verified: boolean;
+  police_certificate: {
+    level: string;
+    issueDate: string;
+    expiryDate: string;
+    fileUrl: string;
+    fileId: string;
+  }
   avatar_url: string;
   org_name: string;
   website: string;
@@ -41,6 +57,32 @@ export interface UpdateProfileData {
   languages: any[];
   weekdays: any[];
   time_windows: any[];
+  socialLinks: {
+    platform: string;
+    url: string;
+  }[];
+  education: Education[]
+}
+
+interface UploadResponse {
+  success: boolean;
+  message: string; // adjust to your backend response
+  document: {
+    id: string
+    user_id: string
+    kind: string
+    file_url: string
+    mime_type: string
+    uploaded_at: string
+  }
+}
+
+interface UploadProfilePicResponse {
+  success: boolean;
+  message: string; // adjust to your backend response
+  data: {
+    filePath: string
+  }
 }
 
 interface UpdateProfileResponse {
@@ -67,5 +109,55 @@ export const updateProfile = (): UseMutationResult<
   return useMutation({
     mutationFn: (data: UpdateProfileData) =>
       apiClient.put("/profile/me", data).then(res => res.data),
+  });
+};
+
+export const uploadDocument = (): UseMutationResult<
+  UploadResponse,
+  Error,
+  { file: File; type: string }
+> => {
+  return useMutation({
+    mutationFn: async ({ file, type }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await apiClient.post(
+        `/upload/document?type=${encodeURIComponent(type)}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return res.data;
+    },
+  });
+};
+
+export const uploadProfilePic = (): UseMutationResult<
+  UploadProfilePicResponse,
+  Error,
+  { file: File }
+> => {
+  return useMutation({
+    mutationFn: async ({ file }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await apiClient.post(
+        `/upload/image`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return res.data;
+    },
   });
 };
