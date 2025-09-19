@@ -9,11 +9,35 @@ import "react-quill/dist/quill.snow.css";
 import { Combobox } from "@headlessui/react";
 import { ChevronsUpDownIcon } from "lucide-react";
 import type { CreateJobData } from "@/lib/types/job";
-import { useJobCollections } from "@/lib/react-query/queries/useJob";
+import { useCreateJob, useJobCollections } from "@/lib/react-query/queries/useJob";
 import toast from "react-hot-toast";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-
+const initalForm: CreateJobData = {
+    title: "",
+    subtitle: "",
+    description: "",
+    category_id: null,
+    price_type: "",
+    price_min: null,
+    price_max: null,
+    currency: "EUR",
+    country: "",
+    state: "",
+    city: "",
+    postal_code: "",
+    street: "",
+    lat: "",
+    lng: "",
+    starts_at: new Date().toISOString().split("T")[0],
+    ends_at: new Date().toISOString().split("T")[0],
+    job_experience: [],
+    job_type: [],
+    first_aid_verified: false,
+    police_verified: false,
+    status: 'open',
+    tag_ids: []
+}
 
 
 function classNames(...xs: Array<string | false | undefined | null>) {
@@ -43,32 +67,10 @@ export default function CreateJobForm() {
 // ----------------------------
 function OnboardingForm({ }) {
     const { data: collections, isLoading, isError, error } = useJobCollections();
+    const createJobMutation = useCreateJob();
     const [priceType, setPriceType] = React.useState([{ id: 1, name: "Fixed" }, { id: 1, name: "Hourly" }])
-    const [form, setForm] = useState<CreateJobData>({
-        title: "",
-        subtitle: "",
-        description: "",
-        category_id: null,
-        price_type: "",
-        price_min: null,
-        price_max: null,
-        currency: "EUR",
-        country: "",
-        state: "",
-        city: "",
-        postal_code: "",
-        street: "",
-        lat: "",
-        lng: "",
-        starts_at: new Date().toISOString().split("T")[0],
-        ends_at: new Date().toISOString().split("T")[0],
-        job_experience: [],
-        job_type: [],
-        first_aid_verified: false,
-        police_verified: false,
-        status: 'open',
-        tag_ids: []
-    });
+
+    const [form, setForm] = useState<CreateJobData>(initalForm);
 
     React.useEffect(() => {
         if (isError) {
@@ -86,8 +88,18 @@ function OnboardingForm({ }) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(form)
-        //    Api call here
+        e.preventDefault();
+
+        // Call the mutation with form data
+        createJobMutation.mutate(form, {
+            onSuccess: () => {
+                toast.success("Job created successfully!");
+                setForm(initalForm)
+            },
+            onError: (error: any) => {
+                toast.error(error?.message || "Failed to create job");
+            },
+        });
     };
 
 
