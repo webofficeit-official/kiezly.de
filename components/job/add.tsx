@@ -68,7 +68,6 @@ export default function CreateJobForm() {
 function OnboardingForm({ }) {
     const { data: collections, isLoading, isError, error } = useJobCollections();
     const createJobMutation = useCreateJob();
-    const [priceType, setPriceType] = React.useState([{ id: 1, name: "Fixed" }, { id: 1, name: "Hourly" }])
 
     const [form, setForm] = useState<CreateJobData>(initalForm);
 
@@ -123,30 +122,64 @@ function OnboardingForm({ }) {
                 // required
                 />
             </div>
-            <div>
-                <SingleSelect
-                    label="Job Category"
-                    placeholder="e.g. Cleaning, Babysitting, Gardening"
-                    value={
-                        collections?.jobCategories.find((c) => c.id === form.category_id) || null
-                    }
-                    onChange={(opt) => update((d) => (d.category_id = opt ? Number(opt.id) : null))}
-                    options={collections?.jobCategories || []}
-                />
+            <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <SingleSelect
+                        label="Job Category"
+                        placeholder="e.g. Cleaning, Babysitting, Gardening"
+                        value={
+                            collections?.jobCategories.find((c) => c.id === form.category_id) || null
+                        }
+                        onChange={(opt) => update((d) => (d.category_id = opt ? Number(opt.id) : null))}
+                        options={collections?.jobCategories || []}
+                    />
+                </div>
 
+                <div>
+                    <MultiSelect
+                        label="Job Type"
+                        options={collections?.jobType.map(type => ({ id: type, name: type })) || []}
+                        values={form.job_type}
+                        onChange={(selected) => update(d => d.job_type = selected)}
+                    />
+
+                </div>
+
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+
+
+                    <MultiSelect
+                        label="Job Experience"
+                        options={collections?.jobExperience.map(type => ({ id: type, name: type })) || []}
+                        values={form.job_experience}
+                        onChange={(selected) => update(d => d.job_experience = selected)}
+                    />
+
+
+
+
+                </div>
+
+                <div>
+                    <MultiSelect
+                        label="Job Tags"
+                        options={collections?.jobTags || []} // { id: number, name: string }
+                        values={form.tag_ids}
+                        onChange={(selected) => update(d => d.tag_ids = selected)}
+                    />
+
+
+                </div>
             </div>
 
 
             {/* Pricing */}
             <div className="grid sm:grid-cols-3 gap-4">
                 <div>
-                    <SingleSelect
-                        label="Price Type"
-                        placeholder="e.g.hr,fixed"
-                        value={priceType.find((c) => c.name === form?.price_type) || null}
-                        onChange={(opt) => update((d) => (d.price_type = opt ? opt.name : null))}
-                        options={priceType}
-                    />
+                    <Input label="Price Type" value={form?.price_type} onChange={(v) => update((d) => (d.price_type = v))} required />
                 </div>
                 <div>
                     <Input label="Min (€)" value={form?.price_min} onChange={(v) => update((d) => (d.price_min = Number(v)))} required />
@@ -167,6 +200,17 @@ function OnboardingForm({ }) {
                 </div>
 
 
+            </div>
+
+            {/* Dates */}
+            <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+
+                    <DateInput label="Starts at" value={form.starts_at || ""} onChange={(v) => update((d) => (d.starts_at = v))} />
+                </div>
+                <div>
+                    <DateInput label="Ends at" value={form.ends_at || ""} onChange={(v) => update((d) => (d.ends_at = v))} />
+                </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
@@ -192,51 +236,8 @@ function OnboardingForm({ }) {
                 </div>
             </div>
 
-            {/* Dates */}
-            <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-
-                    <DateInput label="Starts at" value={form.starts_at || ""} onChange={(v) => update((d) => (d.starts_at = v))} />
-                </div>
-                <div>
-                    <DateInput label="Ends at" value={form.ends_at || ""} onChange={(v) => update((d) => (d.ends_at = v))} />
-                </div>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-4">
-                <div>
 
 
-                    <MultiSelect
-                        label="Job Experience"
-                        options={collections?.jobExperience.map(type => ({ id: type, name: type })) || []}
-                        values={form.job_experience}
-                        onChange={(selected) => update(d => d.job_experience = selected)}
-                    />
-
-
-
-
-                </div>
-                <div>
-                    <MultiSelect
-                        label="Job Type"
-                        options={collections?.jobType.map(type => ({ id: type, name: type })) || []}
-                        values={form.job_type}
-                        onChange={(selected) => update(d => d.job_type = selected)}
-                    />
-
-                </div>
-                <div>
-                    <MultiSelect
-                        label="Job Tags"
-                        options={collections?.jobTags || []} // { id: number, name: string }
-                        values={form.tag_ids}
-                        onChange={(selected) => update(d => d.tag_ids = selected)}
-                    />
-
-
-                </div>
-            </div>
             {/* <Section title="Verification">
                 <div className="grid gap-4 sm:grid-cols-3">
                     <Switch
@@ -533,6 +534,7 @@ function DateInput({
                         ))}
                         {days.map((day) => (
                             <button
+                                type="button"  // <- important
                                 key={day.toISOString()}
                                 onClick={() => onChange(format(day, "yyyy-MM-dd"))}
                                 className={`rounded-lg px-2 py-1 text-sm hover:bg-gray-100 ${value && isSameDay(new Date(value), day)
