@@ -124,9 +124,16 @@ function OnboardingForm({ }) {
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <SingleSelect
+                    {/* <SingleSelect
                         label="Job Category"
                         placeholder="e.g. Cleaning, Babysitting, Gardening"
+                        value={
+                            collections?.jobCategories.find((c) => c.id === form.category_id) || null
+                        }
+                        onChange={(opt) => update((d) => (d.category_id = opt ? Number(opt.id) : null))}
+                        options={collections?.jobCategories || []}
+                    /> */}
+                    <Select label="Job Category"
                         value={
                             collections?.jobCategories.find((c) => c.id === form.category_id) || null
                         }
@@ -182,25 +189,15 @@ function OnboardingForm({ }) {
                     <Input label="Price Type" value={form?.price_type} onChange={(v) => update((d) => (d.price_type = v))} required />
                 </div>
                 <div>
-                    <Input label="Min (€)" value={form?.price_min} onChange={(v) => update((d) => (d.price_min = Number(v)))} required />
+                    <Input label="Min (€)" type="number" value={form?.price_min??""} onChange={(v) => update((d) => (d.price_min = Number(v)))} required />
                 </div>
                 <div>
 
-                    <Input label="Max (€)" value={form?.price_max} onChange={(v) => update((d) => (d.price_max = Number(v)))} required />
+                    <Input label="Max (€)" type="number" value={form?.price_max??""} onChange={(v) => update((d) => (d.price_max = Number(v)))} required />
                 </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                    <Input label="Country" value={form?.country} onChange={(v) => update((d) => (d.country = v))} required />
-                </div>
-                <div>
 
-                    <Input label="State" value={form?.state} onChange={(v) => update((d) => (d.state = v))} required />
-                </div>
-
-
-            </div>
 
             {/* Dates */}
             <div className="grid sm:grid-cols-2 gap-4">
@@ -211,6 +208,17 @@ function OnboardingForm({ }) {
                 <div>
                     <DateInput label="Ends at" value={form.ends_at || ""} onChange={(v) => update((d) => (d.ends_at = v))} />
                 </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <Input label="Country" value={form?.country} onChange={(v) => update((d) => (d.country = v))} required />
+                </div>
+                <div>
+
+                    <Input label="State" value={form?.state} onChange={(v) => update((d) => (d.state = v))} required />
+                </div>
+
+
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
@@ -548,6 +556,49 @@ function DateInput({
                     </div>
                 </Popover.Panel>
             </Popover>
+        </div>
+    );
+}
+
+function Select<T extends { id: number; name: string }>({
+    label,
+    value,
+    onChange,
+    options,
+}: {
+    label: string;
+    value: T | null;
+    onChange: (v: T | null) => void;
+    options: T[];
+}) {
+    return (
+        <div className="text-sm">
+            <span className="mb-1 block text-gray-700">{label}</span>
+            <Listbox value={value} onChange={onChange}>
+                <div className="relative">
+                    <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+                        {value?.name || "Select"}
+                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                    </Listbox.Button>
+
+                    <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+                        {options.map((o) => (
+                            <Listbox.Option
+                                key={o.id}
+                                value={o}
+                                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
+                            >
+                                {({ selected }) => (
+                                    <div className="flex items-center justify-between">
+                                        <span>{o.name}</span>
+                                        {selected && <Check className="h-4 w-4 text-gray-600" />}
+                                    </div>
+                                )}
+                            </Listbox.Option>
+                        ))}
+                    </Listbox.Options>
+                </div>
+            </Listbox>
         </div>
     );
 }
