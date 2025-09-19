@@ -347,25 +347,27 @@ type RichTextEditorProps = {
 
 export function RichTextEditor({ label, value, onChange, required }: RichTextEditorProps) {
     return (
-        <label className="block text-sm">
-            <span className="mb-1 block text-gray-700">
-                {label}
-                {required && <span className="text-red-600">*</span>}
-            </span>
+        <>
+            <label className="block text-sm">
+                <span className="mb-1 block text-gray-700">
+                    {label}
+                    {required && <span className="text-red-600">*</span>}
+                </span>
+            </label>
             <div>
                 <ReactQuill
                     theme="snow"
                     value={value}
                     onChange={onChange}
-                    className=" rounded-xl border
-                        [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-b
-                        [&_.ql-container]:rounded-b-xl
-                        [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:p-2
-                        focus-within:border-black"
+                    className="w-full rounded-xl  outline-none ring-0 focus-within:border-black
+                                [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-b
+                                [&_.ql-container]:rounded-b-xl
+                                [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:p-2"
 
                 />
             </div>
-        </label>
+        </>
+
     );
 }
 
@@ -452,26 +454,3 @@ export function SingleSelect({
 }
 
 
-function Switch({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-    return (
-        <div className="flex items-center justify-between rounded-xl border px-3 py-2">
-            <span className="text-sm">{label}</span>
-            <button
-                type="button"
-                onClick={() => onChange(!checked)}
-                className={classNames(
-                    "h-6 w-11 rounded-full border p-0.5 text-left",
-                    checked ? "bg-black" : "bg-gray-200"
-                )}
-                aria-pressed={checked}
-            >
-                <span
-                    className={classNames(
-                        "block h-5 w-5 rounded-full bg-white transition",
-                        checked ? "translate-x-5" : "translate-x-0"
-                    )}
-                />
-            </button>
-        </div>
-    );
-}
