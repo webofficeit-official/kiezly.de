@@ -23,31 +23,33 @@ export interface Job {
   police_verified: boolean;
   verified: boolean;
 }
-
 export interface CreateJobData {
   title: string;
   subtitle: string;
   description: string;
-  category_id: number | null;
-  price_type: string;
-  price_value_min: string;
-  price_value_max: string;
+  category_id: number;              
+  tag_ids: number[];                
+  price_type: string;   
+  price_min: number;               
+  price_max: number;                
   currency: string;
   country: string;
   state: string;
   city: string;
   postal_code: string;
   street: string;
-  lat: string;
+  lat: string;                      
   lng: string;
-  starts_at: Date;
-  ends_at: Date;
-  job_experience: string;
-  job_type: string;
+  starts_at: string;                
+  ends_at: string;                  
+  job_type: string[];               
+  job_experience: string[];         
   first_aid_verified: boolean;
   police_verified: boolean;
-  verified: boolean;
+  status: "open" | "closed" | "draft"; 
 }
+
+
 
 export interface CreateJobResponse {
   status: boolean;
@@ -72,9 +74,10 @@ export interface JobTag {
   name: string;
 }
 
+
 export interface JobCollections {
-  jobType: string[];         // e.g. ["part_time", "full_time"]
-  jobExperience: string[];   // e.g. ["junior", "middle"]
+  jobType: string[];         
+  jobExperience: string[];   
   jobCategories: JobCategory[];
   jobTags: JobTag[];
 }

@@ -15,6 +15,6 @@ export const getJobApi = async (id: string) => {
 };
 
 export async function getJobCollectionsApi(): Promise<JobCollectionsResponse["data"]> {
-  const { data } = await apiClient.get<JobCollectionsResponse>("/collections/job");
+  const { data } = await apiClient.get<JobCollectionsResponse>("/collection/job");
   return data.data;
 }
