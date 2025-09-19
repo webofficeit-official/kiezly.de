@@ -21,7 +21,7 @@ export default function Header() {
             <>
               {/* Avatar button */}
               {user?.role === 'client' && (<>
-                <a href="#" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</a>
+                <a href="/job/post-job" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</a>
               </>)
               }
               <button
