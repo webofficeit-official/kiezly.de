@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FaCheckCircle, FaTrash } from "react-icons/fa";
 import { Listbox, Popover, } from "@headlessui/react";
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
@@ -70,12 +70,39 @@ function OnboardingForm({ }) {
     const createJobMutation = useCreateJob();
 
     const [form, setForm] = useState<CreateJobData>(initalForm);
+    const [submitted, setSubmitted] = useState(false);
+
 
     React.useEffect(() => {
         if (isError) {
             toast.error("Failed to load job collections");
         }
     }, [isError, error]);
+
+    const fieldErrors = useMemo(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const startDate = new Date(form.starts_at + "T00:00:00");
+        const endDate = new Date(form.ends_at + "T00:00:00");
+        return {
+            title: !form.title.trim() ? "Job Title is Required" : "",
+            description: !form.description.trim() ? "Job Description is Required" : "",
+            category_id: !form.category_id ? "Job Category is Required" : "",
+            price_type: !form.price_type ? "Price Type is Required" : "",
+            price_min: !form.price_min ? "Minimum Price is Required" : "",
+            price_max: !form.price_max ? "Maximum Price is Required" : "",
+            country: !form.country.trim() ? "Country is Required" : "",
+            state: !form.state.trim() ? "State is Required" : "",
+            city: !form.city.trim() ? "City is Required" : "",
+            postal_code: !form.postal_code.trim() ? "Postal Code is Required" : "",
+            street: !form.street.trim() ? "Street is Required" : "",
+            lat: !form.lat ? "Latitude is Required" : "",
+            lng: !form.lng ? "Longitude is Required" : "",
+            starts_at: startDate < today ? "Start date cannot be before today" : "",
+            ends_at: endDate < startDate ? "End date cannot be before start date" : "",
+        };
+    }, [form]);
 
     function update<T>(path: (draft: CreateJobData) => void) {
         setForm((prev) => {
@@ -87,13 +114,14 @@ function OnboardingForm({ }) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        e.preventDefault();
-
+        setSubmitted(true);
+        if (Object.values(fieldErrors).some(Boolean)) return;
         // Call the mutation with form data
         createJobMutation.mutate(form, {
             onSuccess: () => {
                 toast.success("Job created successfully!");
-                setForm(initalForm)
+                setForm(initalForm);
+                setSubmitted(false);
             },
             onError: (error: any) => {
                 toast.error(error?.message || "Failed to create job");
@@ -108,7 +136,7 @@ function OnboardingForm({ }) {
         <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-6 rounded-2xl shadow space-y-8">
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <Input label="Title" value={form?.title} onChange={(v) => update((d) => (d.title = v))} required />
+                    <Input label="Title" value={form?.title} onChange={(v) => update((d) => (d.title = v))} required error={submitted && fieldErrors.title} />
                 </div>
                 <div>
                     <Input label="Subtitle" value={form?.subtitle} onChange={(v) => update((d) => (d.subtitle = v))} />
@@ -119,26 +147,20 @@ function OnboardingForm({ }) {
                     label="Description"
                     value={form?.description}
                     onChange={(v) => update((d) => (d.description = v))}
-                // required
+                    required
+                    error={submitted && fieldErrors.description}
                 />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                    {/* <SingleSelect
-                        label="Job Category"
-                        placeholder="e.g. Cleaning, Babysitting, Gardening"
-                        value={
-                            collections?.jobCategories.find((c) => c.id === form.category_id) || null
-                        }
-                        onChange={(opt) => update((d) => (d.category_id = opt ? Number(opt.id) : null))}
-                        options={collections?.jobCategories || []}
-                    /> */}
                     <Select label="Job Category"
                         value={
                             collections?.jobCategories.find((c) => c.id === form.category_id) || null
                         }
                         onChange={(opt) => update((d) => (d.category_id = opt ? Number(opt.id) : null))}
                         options={collections?.jobCategories || []}
+                        required
+                        error={submitted && fieldErrors.category_id}
                     />
                 </div>
 
@@ -156,18 +178,12 @@ function OnboardingForm({ }) {
 
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-
-
                     <MultiSelect
                         label="Job Experience"
                         options={collections?.jobExperience.map(type => ({ id: type, name: type })) || []}
                         values={form.job_experience}
                         onChange={(selected) => update(d => d.job_experience = selected)}
                     />
-
-
-
-
                 </div>
 
                 <div>
@@ -177,8 +193,6 @@ function OnboardingForm({ }) {
                         values={form.tag_ids}
                         onChange={(selected) => update(d => d.tag_ids = selected)}
                     />
-
-
                 </div>
             </div>
 
@@ -186,14 +200,14 @@ function OnboardingForm({ }) {
             {/* Pricing */}
             <div className="grid sm:grid-cols-3 gap-4">
                 <div>
-                    <Input label="Price Type" value={form?.price_type} onChange={(v) => update((d) => (d.price_type = v))} required />
+                    <Input label="Price Type" value={form?.price_type} onChange={(v) => update((d) => (d.price_type = v))} required error={submitted && fieldErrors.price_type} />
                 </div>
                 <div>
-                    <Input label="Min (€)" type="number" value={form?.price_min??""} onChange={(v) => update((d) => (d.price_min = Number(v)))} required />
+                    <Input label="Min (€)" type="number" value={form?.price_min ?? ""} onChange={(v) => update((d) => (d.price_min = Number(v)))} required error={submitted && fieldErrors.price_min} />
                 </div>
                 <div>
 
-                    <Input label="Max (€)" type="number" value={form?.price_max??""} onChange={(v) => update((d) => (d.price_max = Number(v)))} required />
+                    <Input label="Max (€)" type="number" value={form?.price_max ?? ""} onChange={(v) => update((d) => (d.price_max = Number(v)))} required error={submitted && fieldErrors.price_max} />
                 </div>
             </div>
 
@@ -203,68 +217,87 @@ function OnboardingForm({ }) {
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
 
-                    <DateInput label="Starts at" value={form.starts_at || ""} onChange={(v) => update((d) => (d.starts_at = v))} />
+                    <DateInput label="Starts at" value={form.starts_at || ""} onChange={(v) => update((d) => (d.starts_at = v))} minDate={new Date()} error={fieldErrors.starts_at} />
                 </div>
                 <div>
-                    <DateInput label="Ends at" value={form.ends_at || ""} onChange={(v) => update((d) => (d.ends_at = v))} />
+                    <DateInput label="Ends at" value={form.ends_at || ""} onChange={(v) => update((d) => (d.ends_at = v))} minDate={form.starts_at ? new Date(form.starts_at) : new Date()} error={fieldErrors.ends_at} />
                 </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <Input label="Country" value={form?.country} onChange={(v) => update((d) => (d.country = v))} required />
+                    <Input label="Country" value={form?.country} onChange={(v) => update((d) => (d.country = v))} required error={submitted && fieldErrors.country} />
                 </div>
                 <div>
 
-                    <Input label="State" value={form?.state} onChange={(v) => update((d) => (d.state = v))} required />
+                    <Input label="State" value={form?.state} onChange={(v) => update((d) => (d.state = v))} required error={submitted && fieldErrors.state} />
                 </div>
 
 
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                    <Input label="City" value={form?.city} onChange={(v) => update((d) => (d.city = v))} required />
-                </div>
-                <div>
-
-                    <Input label="Street" value={form?.street} onChange={(v) => update((d) => (d.street = v))} required />
-                </div>
-
-            </div>
-
             <div className="grid sm:grid-cols-3 gap-4">
                 <div>
-                    <Input label="Postcode" value={form?.postal_code} onChange={(v) => update((d) => (d.postal_code = v))} required />
+                    <Input label="Postcode" value={form?.postal_code} onChange={(v) => update((d) => (d.postal_code = v))} required error={submitted && fieldErrors.postal_code} />
                 </div>
                 <div>
-                    <Input type="number" label="lat" value={form?.lat} onChange={(v) => update((d) => (d.lat = v))} required />
+                    <Input label="City" value={form?.city} onChange={(v) => update((d) => (d.city = v))} required error={submitted && fieldErrors.city} />
                 </div>
                 <div>
 
-                    <Input type="number" label="lng" value={form?.lng} onChange={(v) => update((d) => (d.lng = v))} required />
+                    <Input label="Street" value={form?.street} onChange={(v) => update((d) => (d.street = v))} required error={submitted && fieldErrors.street} />
                 </div>
+
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-4 items-end">
+                <div>
+                    <Input
+                        type="number"
+                        label="lat"
+                        value={form?.lat}
+                        onChange={(v) => update((d) => (d.lat = v))}
+                        required
+                        error={submitted && fieldErrors.lat}
+                    />
+                </div>
+                <div>
+                    <Input
+                        type="number"
+                        label="lng"
+                        value={form?.lng}
+                        onChange={(v) => update((d) => (d.lng = v))}
+                        required
+                        error={submitted && fieldErrors.lng}
+                    />
+                </div>
+                {/* <div className="flex flex-col justify-end">
+                    <button
+                        type="button"
+                        className="h-[40px] w-full rounded-xl border bg-gray-200 hover:bg-gray-300 text-sm px-3"
+                        onClick={() => {
+                            if (!navigator.geolocation) {
+                                toast.error("Geolocation is not supported by your browser");
+                                return;
+                            }
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    update((d) => {
+                                        d.lat = position.coords.latitude.toString();
+                                        d.lng = position.coords.longitude.toString();
+                                    });
+                                    toast.success("Location set!");
+                                },
+                                (error) => {
+                                    toast.error("Failed to get location: " + error.message);
+                                }
+                            );
+                        }}
+                    >
+                        Get My Location
+                    </button>
+                </div> */}
             </div>
 
 
-
-            {/* <Section title="Verification">
-                <div className="grid gap-4 sm:grid-cols-3">
-                    <Switch
-                        label="First Aid Verified"
-                        checked={form.first_aid_verified}
-                        onChange={(v) => update((d) => (d.first_aid_verified = v))}
-                    />
-                    <Switch
-                        label="Police Verified"
-                        checked={form.police_verified}
-                        onChange={(v) => update((d) => (d.police_verified = v))}
-                    />
-                    <Switch
-                        label="Verified"
-                        checked={form.verified}
-                        onChange={(v) => update((d) => (d.verified = v))}
-                    />
-                </div>
-            </Section> */}
 
             <div className="flex items-center justify-end ">
                 {/* <div className="text-sm text-red-600">{errors[0] || ""}</div> */}
@@ -283,7 +316,7 @@ function OnboardingForm({ }) {
     );
 }
 
-function Input({ label, value, onChange, type = "text", required, placeholder, min, max }: {
+function Input({ label, value, onChange, type = "text", required, placeholder, min, max, error }: {
     label: string;
     value: any;
     onChange: (v: string) => void;
@@ -292,10 +325,13 @@ function Input({ label, value, onChange, type = "text", required, placeholder, m
     placeholder?: string;
     min?: number;
     max?: number;
+    error?: string;
 }) {
     return (
-        <label className="block text-sm">
-            <span className="mb-1 block text-gray-700">{label}{required && <span className="text-red-600">*</span>}</span>
+        <>
+            <label className="block text-sm">
+                <span className="mb-1 block text-gray-700">{label}{required && <span className="text-red-600">*</span>}</span>
+            </label>
             <input
                 className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black"
                 type={type}
@@ -304,9 +340,10 @@ function Input({ label, value, onChange, type = "text", required, placeholder, m
                 placeholder={placeholder}
                 min={min}
                 max={max}
-                required={required}
+            // required={required}
             />
-        </label>
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        </>
     );
 }
 
@@ -315,9 +352,10 @@ type RichTextEditorProps = {
     value: string;
     onChange: (v: string) => void;
     required?: boolean;
+    error?: string;
 };
 
-export function RichTextEditor({ label, value, onChange, required }: RichTextEditorProps) {
+export function RichTextEditor({ label, value, onChange, required, error }: RichTextEditorProps) {
     return (
         <>
             <label className="block text-sm">
@@ -337,6 +375,7 @@ export function RichTextEditor({ label, value, onChange, required }: RichTextEdi
                                 [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:p-2"
 
                 />
+                {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
             </div>
         </>
 
@@ -358,6 +397,7 @@ interface SingleSelectProps {
     options: Option[];
     required?: boolean;
     placeholder?: string;
+    error?: string;
 }
 
 export function SingleSelect({
@@ -367,6 +407,7 @@ export function SingleSelect({
     options,
     required,
     placeholder = "Select one...",
+    error
 }: SingleSelectProps) {
     const [query, setQuery] = useState("");
     const [open, setOpen] = useState(false);
@@ -421,6 +462,7 @@ export function SingleSelect({
                     )}
                 </div>
             </Combobox>
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         </div>
     );
 }
@@ -436,6 +478,8 @@ interface MultiSelectProps<T extends string | number> {
     options: MultiSelectOption<T>[];
     values: T[];
     onChange: (next: T[]) => void;
+    required?: string;
+    error?: string;
 }
 
 function MultiSelect<T extends string | number>({
@@ -443,10 +487,15 @@ function MultiSelect<T extends string | number>({
     options,
     values,
     onChange,
+    required,
+    error
 }: MultiSelectProps<T>) {
     return (
         <div className="text-sm">
-            <span className="mb-1 block text-gray-700">{label}</span>
+            <span className="mb-1 block text-gray-700">
+                {label}
+                {required && <span className="text-red-600">*</span>}
+            </span>
             <Listbox value={values} onChange={onChange} multiple>
                 <div className="relative">
                     <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20">
@@ -477,6 +526,7 @@ function MultiSelect<T extends string | number>({
                     </Listbox.Options>
                 </div>
             </Listbox>
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         </div>
     );
 }
@@ -487,11 +537,15 @@ function DateInput({
     value,
     onChange,
     required,
+    error,
+    minDate
 }: {
     label: string;
     value: string | null;
     onChange: (v: string) => void;
     required?: boolean;
+    error?: string;
+    minDate?: Date; // <-- add this
 }) {
     const [month, setMonth] = useState(new Date());
 
@@ -514,7 +568,6 @@ function DateInput({
                 </Popover.Button>
 
                 <Popover.Panel className="absolute z-10 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
-                    {/* Month navigation */}
                     <div className="mb-2 flex items-center justify-between">
                         <button
                             type="button"
@@ -533,47 +586,55 @@ function DateInput({
                         </button>
                     </div>
 
-                    {/* Calendar grid */}
                     <div className="grid grid-cols-7 gap-1 text-center text-xs">
                         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                            <div key={d} className="font-medium text-gray-500">
-                                {d}
-                            </div>
+                            <div key={d} className="font-medium text-gray-500">{d}</div>
                         ))}
-                        {days.map((day) => (
-                            <button
-                                type="button"  // <- important
-                                key={day.toISOString()}
-                                onClick={() => onChange(format(day, "yyyy-MM-dd"))}
-                                className={`rounded-lg px-2 py-1 text-sm hover:bg-gray-100 ${value && isSameDay(new Date(value), day)
-                                    ? "bg-black text-white"
-                                    : "text-gray-700"
-                                    }`}
-                            >
-                                {format(day, "d")}
-                            </button>
-                        ))}
+                        {days.map((day) => {
+                            const isDisabled = minDate ? day < minDate : false;
+
+                            return (
+                                <button
+                                    type="button"
+                                    key={day.toISOString()}
+                                    onClick={() => !isDisabled && onChange(format(day, "yyyy-MM-dd"))}
+                                    disabled={isDisabled}
+                                    className={`rounded-lg px-2 py-1 text-sm ${isDisabled ? "text-gray-300 cursor-not-allowed" : value && isSameDay(new Date(value), day) ? "bg-black text-white" : "text-gray-700"} hover:bg-gray-100`}
+                                >
+                                    {format(day, "d")}
+                                </button>
+                            );
+                        })}
                     </div>
                 </Popover.Panel>
             </Popover>
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         </div>
     );
 }
 
-function Select<T extends { id: number; name: string }>({
+
+function Select<T extends { id: number; name: string, error?: string, required?: boolean }>({
     label,
     value,
     onChange,
     options,
+    error,
+    required
 }: {
     label: string;
     value: T | null;
     onChange: (v: T | null) => void;
     options: T[];
+    error?: string
+    required?: boolean
 }) {
     return (
         <div className="text-sm">
-            <span className="mb-1 block text-gray-700">{label}</span>
+            <span className="mb-1 block text-gray-700">
+                {label}
+                {required && <span className="text-red-600">*</span>}
+            </span>
             <Listbox value={value} onChange={onChange}>
                 <div className="relative">
                     <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
@@ -599,6 +660,7 @@ function Select<T extends { id: number; name: string }>({
                     </Listbox.Options>
                 </div>
             </Listbox>
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         </div>
     );
 }
