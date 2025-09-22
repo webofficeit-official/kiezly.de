@@ -10,6 +10,7 @@ import { LoginResponse } from "@/lib/react-query/queries/user/account";
 import { useRouter, usePathname } from "next/navigation";
 import { getCookie } from "cookies-next";
 import { UserProfile } from "@/components/MyProfile";
+import { Loader } from "@/components/ui/loader";
 
 type AuthContextType = {
     user: UserProfile;
@@ -113,11 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading, loadUser }}>
-            {loading ? (
-                <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-                    {/* Simple Tailwind spinner */}
-                    <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-                </div>
+            {loading || (user && ["/signin", "/signup"].includes(pathname)) ? (
+                <Loader />
             ) : (
                 children
             )}
