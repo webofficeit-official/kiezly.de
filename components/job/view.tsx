@@ -12,19 +12,20 @@ import {
     GraduationCap,
     CheckCircle2,
     ExternalLink,
+    Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { Separator } from "@/components/ui/separator";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogTrigger,
-// } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -41,56 +42,19 @@ dayjs.extend(relativeTime);
 // with an inline "Apply" flow using shadcn/ui components + Tailwind. Everything is client-side for mock/demo.
 
 export default function JobDetail() {
-    
+
     const [submitted, setSubmitted] = React.useState(false);
     const [open, setOpen] = React.useState(false);
 
     const { id } = useParams(); // get /jobs/[id]
     const { data, isLoading, isError } = useJob(id as string);
 
-    if (isLoading) return <Loader/>;
+    if (isLoading) return <Loader />;
     if (isError) return <p className="p-8 text-red-600">Failed to load job.</p>;
 
-    const jobDetails= data?.job;
+    const jobDetails = data?.job;
 
-     const job = {
-        title: "Babysitter / Childcare Helper",
-        company: "The Müller Family",
-        location: "Braunschweig, Germany (Gliesmarode)",
-        type: "Part-time / On-demand",
-        level: "Experienced",
-        salary: "€15–€20 / hour",
-        posted: "3 days ago",
-        tags: [
-            "Babysitting",
-            "Childcare",
-            "First Aid",
-            "German A2+",
-            "Evenings & Weekends",
-        ],
-        description:
-            "We are looking for a warm, reliable babysitter to look after two children (3 and 6) a few evenings per week and occasional weekends. Tasks include playtime, simple meals, bedtime routine, and light tidying related to the children.",
-        responsibilities: [
-            "Engage kids with age-appropriate play and activities.",
-            "Prepare simple meals/snacks and assist with feeding.",
-            "Handle bath and bedtime routine; read stories.",
-            "Ensure safety at all times and keep common areas tidy.",
-            "Communicate updates to parents via WhatsApp/SMS.",
-        ],
-        requirements: [
-            "Proven babysitting/childcare experience with references.",
-            "Valid first-aid certificate for children (or willingness to obtain).",
-            "Clean police clearance (Führungszeugnis) preferred.",
-            "Basic German (A2+) or good English; friendly and patient.",
-            "Non-smoker; comfortable with a friendly dog.",
-        ],
-        benefits: [
-            "Flexible scheduling; mostly evenings/weekends",
-            "Fair hourly rate; transport reimbursement by arrangement",
-            "Snacks/meal provided during longer shifts",
-            "Friendly, respectful family environment",
-        ],
-    } as const;
+
 
     const handleApplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -102,7 +66,7 @@ export default function JobDetail() {
 
 
     return (
-        <main className="mx-auto max-w-6xl px-4 py-8">
+        <main className="flex-1 min-h-screen mx-auto max-w-6xl px-4 py-8">
             {/* Success banner after submit */}
             {submitted && (
                 <div className="mb-6 rounded-2xl border bg-green-50 p-4 text-sm text-green-900">
@@ -121,14 +85,63 @@ export default function JobDetail() {
                         <CardHeader className="pb-4">
                             <div className="flex flex-wrap items-start justify-between gap-4">
                                 <div>
-                                    <h1 data-testid="job-title" className="text-2xl font-semibold tracking-tight">{jobDetails.title}</h1>
+                                    <h1 data-testid="job-title" className="text-2xl font-semibold tracking-tight">{jobDetails?.title}</h1>
+                                    {jobDetails?.subtitle && (
+                                        <h2 className="text-sm text-muted-foreground mt-1">
+                                            {jobDetails.subtitle}
+                                        </h2>
+                                    )}
                                     <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                                        <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" />{job.company}</span>
-                                        <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" />{job.location}</span>
-                                        <span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" />{job.type} · {job.level}</span>
-                                        <span className="inline-flex items-center gap-1"><DollarSign className="h-4 w-4" />{job.salary}</span>
-                                        <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" />Posted {dayjs(jobDetails.created_at).fromNow()}</span>
+                                        {jobDetails?.company && (<span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" />{jobDetails?.company}</span>)}
+                                        {(jobDetails?.street || jobDetails?.city || jobDetails?.state || jobDetails?.postal_code || jobDetails?.country) && (
+                                            <span className="inline-flex items-center gap-1">
+                                                <MapPin className="h-4 w-4" />
+                                                {[
+                                                    jobDetails?.street,
+                                                    jobDetails?.city,
+                                                    jobDetails?.state,
+                                                    jobDetails?.postal_code,
+                                                    jobDetails?.country
+                                                ].filter(Boolean).join(", ")}
+                                            </span>
+                                        )}
+
+
+                                        {jobDetails?.job_type && (<span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {jobDetails?.job_type.join(", ")} {jobDetails?.job_experience ? `. ${jobDetails?.job_experience}` : ""}</span>)}
+                                        <span className="inline-flex items-center gap-1"><DollarSign className="h-4 w-4" />
+                                            {jobDetails?.price_min && jobDetails?.price_max
+                                                ? `${jobDetails?.currency} ${jobDetails?.price_min}–${jobDetails?.price_max}`
+                                                : jobDetails?.price_min
+                                                    ? `${jobDetails?.currency} ${jobDetails?.price_min}`
+                                                    : jobDetails?.price_max
+                                                        ? `${jobDetails?.currency} ${jobDetails?.price_max}`
+                                                        : "Not specified"}
+                                        </span>
+                                        {jobDetails?.price_type && <span className="inline-flex items-center gap-1">/ {jobDetails?.price_type}</span>}
+                                        <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" />Posted {dayjs(jobDetails?.created_at).fromNow()}</span>
+
+                                        {jobDetails?.category?.name && (
+                                            <span className="inline-flex items-center gap-1">
+                                                <CheckCircle2 className="h-3 w-3" /> {jobDetails.category.name}
+                                            </span>
+                                        )}
+
+                                        {jobDetails?.starts_at && (
+                                            <span className="inline-flex items-center gap-1">
+                                                <Clock className="h-3 w-3" /> Start: {dayjs(jobDetails.starts_at).format("MMM D, YYYY")}
+                                            </span>
+                                        )}
+
+                                        {jobDetails?.ends_at && (
+                                            <span className="inline-flex items-center gap-1">
+                                                <Clock className="h-3 w-3" /> End: {dayjs(jobDetails.ends_at).format("MMM D, YYYY")}
+                                            </span>
+                                        )}
                                     </div>
+
+
+
+
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button variant="outline" className="rounded-xl"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
@@ -137,42 +150,21 @@ export default function JobDetail() {
                             </div>
 
                             <div className="mt-4 flex flex-wrap gap-2">
-                                {job.tags.map((t) => (
+                                {jobDetails.tags.map((t) => (
                                     <>
-                                        {/* <Badge key={t} variant="secondary" className="rounded-full px-3 py-1"> */}
-                                        {t}
-                                        {/* </Badge> */}
+                                        <Badge key={t} variant="secondary" className="rounded-full px-3 py-1">
+                                            {t?.name}
+                                        </Badge>
                                     </>
                                 ))}
                             </div>
                         </CardHeader>
 
-                        {/* <Separator /> */}
+                        <Separator />
 
                         <CardContent className="prose prose-sm max-w-none py-6">
-                            <h3>About the role</h3>
-                            <p>{job.description}</p>
-
-                            <h3>Responsibilities</h3>
-                            <ul>
-                                {job.responsibilities.map((r) => (
-                                    <li key={r}>{r}</li>
-                                ))}
-                            </ul>
-
-                            <h3>Requirements</h3>
-                            <ul>
-                                {job.requirements.map((r) => (
-                                    <li key={r}>{r}</li>
-                                ))}
-                            </ul>
-
-                            <h3>Benefits</h3>
-                            <ul>
-                                {job.benefits.map((b) => (
-                                    <li key={b}>{b}</li>
-                                ))}
-                            </ul>
+                            <h3 className="">About the role</h3>
+                            <div dangerouslySetInnerHTML={{ __html: jobDetails?.description || "" }} />
                         </CardContent>
                     </Card>
 
@@ -180,7 +172,7 @@ export default function JobDetail() {
                     <div className="mt-6">
                         <Card className="shadow-sm">
                             <CardHeader>
-                                <CardTitle className="text-base">About {job.company}</CardTitle>
+                                <CardTitle className="text-base">About {jobDetails?.company}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm text-muted-foreground">
                                 {/* <p>
