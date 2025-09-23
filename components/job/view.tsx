@@ -50,7 +50,11 @@ export default function JobDetail() {
     const { data, isLoading, isError } = useJob(id as string);
 
     if (isLoading) return <Loader />;
-    if (isError) return <p className="p-8 text-red-600">Failed to load job.</p>;
+    if (isError) return (
+        <div className="flex items-center justify-center min-h-screen">
+            <p className="text-red-600 text-lg">Failed to load job.</p>
+        </div>
+    )
 
     const jobDetails = data?.job;
 

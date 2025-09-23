@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createJobApi, getJobApi, getJobCollectionsApi } from "../api-handler/job-api";
-import { CreateJobData, CreateJobResponse, JobCollections } from "@/lib/types/job";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import { createJobApi, getJobApi, getJobCollectionsApi, getJobsApi } from "../api-handler/job-api";
+import { CreateJobData, CreateJobResponse, JobApiResponse, JobCollections } from "@/lib/types/job";
 
 // Create job
 export function useCreateJob() {
@@ -35,3 +35,10 @@ export function useJobCollections() {
   });
 }
 
+export const useJobs = (filters: Record<string, any>) => {
+  return useQuery<JobApiResponse>({
+    queryKey: ["jobs", filters],
+    queryFn: () => getJobsApi(filters),
+    keepPreviousData: true, // works here
+  } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
+};

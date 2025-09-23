@@ -1,4 +1,5 @@
 'use client'
+import { useJobs } from "@/lib/react-query/queries/useJob";
 import React, { useEffect, useMemo, useState } from "react";
 
 // Standalone, native-input filter + job list page for Mini‑Helfer.
@@ -198,6 +199,12 @@ export default function JobFilterPage({
 
     // Debounce high-churn fields (search query)
     const debouncedFilters = useDebounced(filters, 300);
+
+    const apiFilters = useMemo(() => ({ ...filters, page, page_size: pageSize }), [filters, page, pageSize]);
+
+    const { data, isLoading, error } = useJobs(apiFilters);
+
+    console.log(data)
 
     // Emit to parent when filters change
     useEffect(() => {

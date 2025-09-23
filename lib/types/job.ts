@@ -87,3 +87,16 @@ export interface JobCollectionsResponse {
   message: string;
   data: JobCollections;
 }
+
+
+export type JobApiResponse = {
+  status: boolean;
+  message: string;
+  data: {
+    items: Job[];
+    page: number;
+    page_size: number;
+    total_items: number;
+    total_pages: number;
+  };
+};
