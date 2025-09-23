@@ -120,8 +120,8 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
 
             <input type="hidden" name={name} value={value.map((tag) => tag.id).join(",")} />
 
-            <div className={`w-full rounded-xl border px-2 py-1 ${error ? "border-red-400 ring-2 ring-red-100" : "border-gray-300"}`} onClick={() => inputRef.current?.focus()}>
-                <div className="flex flex-wrap gap-2">
+            <div className={`w-full flex flex-wrap gap-2 rounded-xl border px-3 py-1.5 ${error ? "border-red-400 ring-2 ring-red-100" : "border-gray-300"}`} onClick={() => inputRef.current?.focus()}>
+                {/* <div className="flex flex-wrap gap-2"> */}
                     {value.map((tag) => (
                         <span key={tag.id} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs">
                             {tag.name}
@@ -144,7 +144,7 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
                         aria-controls={`${name}-listbox`}
                         aria-expanded={open}
                     />
-                </div>
+                {/* </div> */}
             </div>
 
             {error && <p className="mt-1 text-xs text-red-600">{error}</p>}

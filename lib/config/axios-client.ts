@@ -89,8 +89,10 @@ apiClient.interceptors.response.use(
         processQueue(err, null);
         setAccessToken(null);
         setRefreshToken(null);
-        if (typeof window !== "undefined") {         
-          window.location.href = "/signin";
+        if (!originalRequest.url?.includes("/verify-email")) {
+          if (typeof window !== "undefined") {
+            window.location.href = "/signin";
+          }
         }
         return Promise.reject(err);
       } finally {

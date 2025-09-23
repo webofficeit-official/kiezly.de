@@ -23,7 +23,6 @@ export const metadata = {
     "Deutschland",
   ],
   applicationName: "Kiezly",
-  themeColor: "#0ea5e9",
   authors: [{ name: "Kiezly" }],
   alternates: {
     canonical: "/",
@@ -80,17 +79,21 @@ export const metadata = {
   },
 } as const;
 
+export const viewport = {
+  themeColor: "#0ea5e9",
+};
+
 function CategoriesSeoJsonLd() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Browse Mini‑Job Categories",
-    description: "Find trusted local help for everyday mini‑jobs: babysitting, cleaning, pet care, senior support, errands, gardening and events.",
-    url: "https://www.mini-helfer.de/categories",
+    name: "Browse kiezly Categories",
+    description: "Finde geprüfte Helfer für Babysitting, Umzug, Garten, Haustiere, Seniorenbetreuung, Besorgungen und Events in deiner Nähe.",
+    url: "https://www.kiezly.de/jobs",
     isPartOf: {
       "@type": "WebSite",
-      name: "Mini‑Helfer",
-      url: "https://www.mini-helfer.de",
+      name: "Kiezly",
+      url: "https://kiezly.de",
     },
     about: [
       { "@type": "Thing", name: "Childcare" },

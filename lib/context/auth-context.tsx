@@ -11,6 +11,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { getCookie } from "cookies-next";
 import { UserProfile } from "@/components/MyProfile";
 import { Loader } from "@/components/ui/loader";
+import toast from "react-hot-toast";
 
 type AuthContextType = {
     user: UserProfile;
@@ -99,11 +100,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function logout() {
+        const toastId = toast.loading("Logging out...");
         try {
             await apiClient.post("/auth/logout");
-
+            toast.success("Logged out successfully!", { id: toastId });
         } catch (err) {
             console.error("Server logout failed:", err);
+            toast.error("Logout failed. Please try again.", { id: toastId });
         } finally {
             setAccessToken(null);
             setRefreshToken(null);
