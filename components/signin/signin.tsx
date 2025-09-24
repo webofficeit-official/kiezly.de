@@ -131,7 +131,7 @@ function LoginPage() {
                         </div>
                     ));
 
-                    router.push("/my-profile");
+                    router.push("/jobs/list");
                 },
                 onError: (err) => {
                     toast.error(getErrorMessage(err) || "Could not sign in.");

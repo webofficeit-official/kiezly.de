@@ -18,3 +18,10 @@ export async function getJobCollectionsApi(): Promise<JobCollectionsResponse["da
   const { data } = await apiClient.get<JobCollectionsResponse>("/collection/job");
   return data.data;
 }
+
+
+
+export const getJobsApi = async (params: Record<string, any>) => {
+  const response = await apiClient.get("/jobs", { params });
+  return response.data;
+};

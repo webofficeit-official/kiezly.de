@@ -1,87 +1,92 @@
 'use client'
+import { useJobCollections, useJobs } from "@/lib/react-query/queries/useJob";
+import { JobList } from "@/lib/types/job";
+import dayjs from "dayjs";
+import { Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
-
-// Standalone, native-input filter + job list page for Mini‑Helfer.
-// - Safe URL syncing (guards replaceState in sandbox/about:srcdoc)
-// - Client-side filtering, sorting, and pagination
-// - Optional external data via props; falls back to mock dataset for preview/demo
-// - Inline dev tests (no external runner)
-
+import { DateInput } from "./add";
+import { useAuth } from "@/lib/context/auth-context";
 // ---- Types ----
-export type SortBy = "relevance" | "newest" | "pay_desc" | "pay_asc";
-export type DatePosted = "any" | "24h" | "7d" | "30d";
+export type SortBy = "new" | "price_desc" | "price_asc";
+export type DatePosted = "any" | "1" | "7" | "30";
 
 export type Filters = {
     q: string;
-    location: string;
-    category: "cleaning" | "babysitting" | "gardening" | "delivery" | "other" | "";
-    jobTypes: Array<"one_time" | "recurring" | "remote">;
-    minPay: string; // keep as string to match native input value
-    maxPay: string;
-    datePosted: DatePosted;
-    availability: Array<"mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun">;
-    distanceKm: number; // 0..50
-    sortBy: SortBy;
+    city: string;
+    category_id: number[];
+    job_type: string[];
+    job_experience: string[];
+    job_tags: number[];
+    min_price: string;
+    max_price: string;
+    posted: DatePosted;
+    radius_km: number; // 0..50
+    sort: SortBy;
+    starts_at?: string;
+    ends_at?: string;
+    lat?: number,
+    lng?: number
 };
 
-export type Job = {
-    id: string;
-    title: string;
-    description: string;
-    category: Filters["category"];
-    jobType: "one_time" | "recurring" | "remote";
-    payPerHour: number; // €
-    postedAt: string; // ISO date
-    location: string; // free text city / area
-    distanceKm: number; // from user's chosen location (mocked)
-    availability: Filters["availability"];
-};
+
 
 const DEFAULT_FILTERS: Filters = {
     q: "",
-    location: "",
-    category: "",
-    jobTypes: [],
-    minPay: "",
-    maxPay: "",
-    datePosted: "any",
-    availability: [],
-    distanceKm: 10,
-    sortBy: "relevance",
+    city: "",
+    category_id: [],
+    job_type: [],
+    job_experience: [],
+    job_tags: [],
+    min_price: "",
+    max_price: "",
+    posted: "any",
+    radius_km: 10,
+    sort: "new",
+    starts_at: undefined,
+    ends_at: undefined,
 };
 
 // ---- Utilities ----
 export const toQuery = (f: Filters) => {
     const p = new URLSearchParams();
     if (f.q) p.set("q", f.q);
-    if (f.location) p.set("loc", f.location);
-    if (f.category) p.set("cat", f.category);
-    if (f.jobTypes.length) p.set("types", f.jobTypes.join(","));
-    if (f.minPay) p.set("min", f.minPay);
-    if (f.maxPay) p.set("max", f.maxPay);
-    if (f.datePosted && f.datePosted !== "any") p.set("when", f.datePosted);
-    if (f.availability.length) p.set("days", f.availability.join(","));
-    if (f.distanceKm) p.set("dist", String(f.distanceKm));
-    if (f.sortBy && f.sortBy !== "relevance") p.set("sort", f.sortBy);
+    if (f.city) p.set("city", f.city);
+    if (f.category_id.length) p.set("category_id", f.category_id.join(","));
+    if (f.job_type.length) p.set("job_type", f.job_type.join(","));
+    if (f.job_experience.length) p.set("job_experience", f.job_experience.join(","));
+    if (f.job_tags.length) p.set("job_tag", f.job_tags.join(","));
+    if (f.min_price) p.set("min", f.min_price);
+    if (f.max_price) p.set("max", f.max_price);
+    if (f.posted && f.posted !== "any") p.set("posted", f.posted);
+    if (f.radius_km) p.set("radius_km", String(f.radius_km));
+    if (f.sort && f.sort !== "new") p.set("sort", f.sort);
+    if (f.starts_at) p.set("starts_at", f.starts_at);
+    if (f.ends_at) p.set("ends_at", f.ends_at);
     return p.toString();
 };
 
 export const fromQuery = (qs: string): Filters => {
     const p = new URLSearchParams(qs);
-    const types = (p.get("types") || "").split(",").filter(Boolean) as Filters["jobTypes"];
-    const days = (p.get("days") || "").split(",").filter(Boolean) as Filters["availability"];
+    const types = (p.get("job_type") || "").split(",").filter(Boolean) as Filters["job_type"];
+    const jobExperience = (p.get("job_experience") || "").split(",").filter(Boolean) as Filters["job_experience"];
+    const jobTag = (p.get("job_tags") || "").split(",").filter(Boolean).map(Number).filter((v) => !isNaN(v));
+    const category_id = (p.get("category_id") || "").split(",").filter(Boolean).map(Number).filter((v) => !isNaN(v));
     return {
         ...DEFAULT_FILTERS,
         q: p.get("q") || "",
-        location: p.get("loc") || "",
-        category: (p.get("cat") as Filters["category"]) || "",
-        jobTypes: types,
-        minPay: p.get("min") || "",
-        maxPay: p.get("max") || "",
-        datePosted: (p.get("when") as DatePosted) || "any",
-        availability: days,
-        distanceKm: Number(p.get("dist") || DEFAULT_FILTERS.distanceKm),
-        sortBy: (p.get("sort") as SortBy) || "relevance",
+        city: p.get("city") || "",
+        category_id,
+        job_type: types,
+        job_experience: jobExperience,
+        job_tags: jobTag,
+        min_price: p.get("min_price") || "",
+        max_price: p.get("max") || "",
+        posted: (p.get("posted") as DatePosted) || "any",
+        radius_km: Number(p.get("radius_km") || DEFAULT_FILTERS.radius_km),
+        sort: (p.get("sort") as SortBy) || "new",
+        starts_at: p.get("starts_at") || undefined,
+        ends_at: p.get("ends_at") || undefined,
     };
 };
 
@@ -93,7 +98,6 @@ function useDebounced<T>(value: T, delay = 300) {
     }, [value, delay]);
     return v;
 }
-
 // Tiny helper to detect whether history.replaceState can be safely used
 function useCanModifyHistory() {
     return useMemo(() => {
@@ -110,73 +114,6 @@ function useCanModifyHistory() {
     }, []);
 }
 
-// Mock data (used if no jobs prop is provided)
-const CATEGORIES: Filters["category"][] = ["cleaning", "babysitting", "gardening", "delivery", "other"];
-const JOB_TYPES: Array<Job["jobType"]> = ["one_time", "recurring", "remote"];
-const LOCATIONS = ["Braunschweig", "Wolfsburg", "Hannover", "Gifhorn", "Peine", "Salzgitter"];
-
-function daysAgo(n: number): string {
-    const d = new Date();
-    d.setDate(d.getDate() - n);
-    return d.toISOString();
-}
-
-function makeMockJobs(count = 48): Job[] {
-    const arr: Job[] = [];
-    for (let i = 0; i < count; i++) {
-        const cat = CATEGORIES[i % CATEGORIES.length] || "other";
-        const jt = JOB_TYPES[i % JOB_TYPES.length];
-        const loc = LOCATIONS[i % LOCATIONS.length];
-        const pay = 12 + ((i * 7) % 23); // 12..34
-        const dist = (i * 3) % 51; // 0..50
-        const posted = daysAgo((i * 2) % 28);
-        const avail: Filters["availability"] = ["mon", "wed", "fri"].filter((_, idx) => (i + idx) % 2 === 0) as any;
-
-        arr.push({
-            id: `J${i + 1}`,
-            title: `${cat[0].toUpperCase() + cat.slice(1)} helper #${i + 1}`,
-            description: `Looking for ${cat} support. Tools provided. Reference ${i + 1}.`,
-            category: cat,
-            jobType: jt,
-            payPerHour: pay,
-            postedAt: posted,
-            location: loc,
-            distanceKm: dist,
-            availability: avail,
-        });
-    }
-    return arr;
-}
-
-// ---- Scoring & filtering ----
-function normalize(s: string) {
-    return s.toLowerCase();
-}
-
-function relevanceScore(job: Job, q: string) {
-    if (!q) return 0;
-    const terms = normalize(q).split(/\s+/).filter(Boolean);
-    const hay = `${normalize(job.title)} ${normalize(job.description)} ${normalize(job.location)} ${job.category}`;
-    let score = 0;
-    for (const t of terms) {
-        if (hay.includes(t)) score += 10;
-        if (normalize(job.title).includes(t)) score += 10;
-    }
-    return score;
-}
-
-function withinDate(postedAt: string, win: DatePosted) {
-    if (win === "any") return true;
-    const now = new Date();
-    const d = new Date(postedAt);
-    const diffDays = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
-    if (win === "24h") return diffDays <= 1;
-    if (win === "7d") return diffDays <= 7;
-    if (win === "30d") return diffDays <= 30;
-    return true;
-}
-
-// ---- Component ----
 export default function JobFilterPage({
     onChange,
     persistToUrl = true, // allow caller to disable URL syncing
@@ -185,47 +122,115 @@ export default function JobFilterPage({
 }: {
     onChange?: (f: Filters) => void;
     persistToUrl?: boolean;
-    jobs?: Job[];
+    jobs?: JobList[];
     pageSize?: number;
 }) {
+    const { user } = useAuth();
     const [filters, setFilters] = useState<Filters>(() => {
         if (typeof window === "undefined") return DEFAULT_FILTERS;
-        return fromQuery(window.location.search);
+        const initial = fromQuery(window.location.search);
+        // If user has lat/lng in context, override them with defaults
+        if (user && user?.lat && user?.lng) {
+            return {
+                ...initial,
+                lat: user.lat,
+                lng: user.lng,
+                radius_km: user?.lat && user?.lng ? (initial.radius_km || DEFAULT_FILTERS.radius_km) : undefined,
+            };
+        }
+
+        return initial;
     });
+
+    useEffect(() => {
+        if (user?.lat && user?.lng) {
+            setFilters((f) => ({
+                ...f,
+                lat: user.lat,
+                lng: user.lng,
+                radius_km: f.radius_km || DEFAULT_FILTERS.radius_km,
+            }));
+        }
+    }, [user]);
+
     const [page, setPage] = useState(1);
+    const [localPageSize, setLocalPageSize] = useState(pageSize);
+    const router = useRouter();
+    const buildApiFilters = (filters: Filters, page: number, pageSize: number) => {
+        const payload: Record<string, any> = { page, page_size: pageSize };
+
+        if (filters.q) payload.q = filters.q;
+        if (filters.city) payload.city = filters.city;
+        if (filters.category_id.length) payload.category_id = filters.category_id.join(",");
+        if (filters.job_type.length) payload.job_type = filters.job_type.join(",");
+        if (filters.job_experience.length) payload.job_experience = filters.job_experience.join(",");
+        if (filters.job_tags.length) payload.job_tags = filters.job_tags.join(",");
+        if (filters.min_price) payload.min = filters.min_price;
+        if (filters.max_price) payload.max = filters.max_price;
+        if (filters.posted && filters.posted !== "any") payload.posted = filters.posted;
+        if (user?.lat && filters.radius_km) payload.radius_km = filters.radius_km;
+        if (filters.sort && filters.sort !== "new") payload.sort = filters.sort;
+        if (filters.starts_at) payload.starts_at = filters.starts_at;
+        if (filters.ends_at) payload.ends_at = filters.ends_at;
+        if (filters.lat) payload.lat = filters.lat;
+        if (filters.lng) payload.lng = filters.lng;
+
+        return payload;
+    };
+
+    const apiFilters = useMemo(() => buildApiFilters(filters, page, localPageSize), [filters, page, localPageSize]);
+    const { data: collections, isLoading: isCollectionsLoading, isError: isCollectionsError } = useJobCollections();
+    const { data, isLoading, error } = useJobs(apiFilters);
+    const total = data?.data?.total_items ?? 0;
+    const totalPages = data?.data?.total_pages ?? 1;
 
     const canModifyHistory = useCanModifyHistory();
 
     // Debounce high-churn fields (search query)
     const debouncedFilters = useDebounced(filters, 300);
 
-    // Emit to parent when filters change
     useEffect(() => {
         onChange?.(debouncedFilters);
     }, [debouncedFilters, onChange]);
 
-    // Reset to page 1 when filters change
     useEffect(() => {
         setPage(1);
     }, [debouncedFilters]);
 
+
+    useEffect(() => {
+        onChange?.(filters);
+    }, [filters, onChange]);
+
+
+    useEffect(() => {
+        setPage(1);
+    }, [
+        filters.q,
+        filters.category_id.join(","),
+        filters.city,
+        filters.job_type.join(","),
+        filters.job_experience.join(","),
+        filters.job_tags.join(","),
+        filters.min_price,
+        filters.max_price,
+        filters.posted,
+        filters.radius_km,
+        filters.sort]);
+
     // Sync filters -> URL (shallow, no reload)
     useEffect(() => {
-        if (typeof window === "undefined") return;
-        if (!persistToUrl) return;
-        if (!canModifyHistory) return; // avoid SecurityError in sandbox/about:srcdoc
+        if (!persistToUrl || !canModifyHistory) return;
         try {
-            const qs = toQuery(filters);
+            const qs = toQuery({ ...filters, radius_km: user?.lat && user?.lng ? filters.radius_km : undefined, });
             const url = `${window.location.pathname}${qs ? "?" + qs : ""}`;
             window.history.replaceState(window.history.state, "", url);
-        } catch (err) {
-            // Ignore if environment forbids it
-        }
+        } catch { }
     }, [filters, persistToUrl, canModifyHistory]);
 
     const update = (patch: Partial<Filters>) => setFilters((f) => ({ ...f, ...patch }));
 
-    function toggleInArray<T extends string>(key: keyof Filters, val: T) {
+    function toggleInArray<T extends string | number>(key: keyof Filters, val: T) {
         setFilters((f) => {
             const arr = new Set(f[key] as unknown as T[]);
             arr.has(val) ? arr.delete(val) : arr.add(val);
@@ -235,147 +240,33 @@ export default function JobFilterPage({
 
     const resetAll = () => setFilters(DEFAULT_FILTERS);
 
-    // ---- Data pipeline: filter -> sort -> paginate ----
-    const dataSource = useMemo<Job[]>(() => (jobs && jobs.length ? jobs : makeMockJobs(48)), [jobs]);
 
-    const filtered = useMemo(() => {
-        const minPay = filters.minPay ? parseFloat(filters.minPay) : -Infinity;
-        const maxPay = filters.maxPay ? parseFloat(filters.maxPay) : Infinity;
-        const wantedDays = new Set(filters.availability);
-        const locTerm = normalize(filters.location);
+    const dataSource: JobList[] = useMemo(() => {
+        if (data?.data?.items) return data.data.items as JobList[];
+        if (jobs && jobs.length) return jobs;
+        return []
+    }, [data, jobs]);
 
-        return dataSource.filter((job) => {
-            if (filters.category && job.category !== filters.category) return false;
-            if (filters.jobTypes.length && !filters.jobTypes.includes(job.jobType)) return false;
-            if (job.payPerHour < minPay || job.payPerHour > maxPay) return false;
-            if (!withinDate(job.postedAt, filters.datePosted)) return false;
-            if (wantedDays.size) {
-                const hasAny = job.availability.some((d) => wantedDays.has(d));
-                if (!hasAny) return false;
-            }
-            // Distance: treat remote as always within range
-            if (job.jobType !== "remote" && job.distanceKm > filters.distanceKm) return false;
-            // Location: simple contains check
-            if (locTerm && !normalize(job.location).includes(locTerm)) return false;
-            // Query: basic contains (title/desc)
-            if (filters.q) {
-                const q = normalize(filters.q);
-                const hay = `${normalize(job.title)} ${normalize(job.description)}`;
-                if (!hay.includes(q)) return false;
-            }
-            return true;
-        });
-    }, [dataSource, filters]);
 
-    const sorted = useMemo(() => {
-        const arr = [...filtered];
-        if (filters.sortBy === "newest") {
-            arr.sort((a, b) => +new Date(b.postedAt) - +new Date(a.postedAt));
-        } else if (filters.sortBy === "pay_desc") {
-            arr.sort((a, b) => b.payPerHour - a.payPerHour);
-        } else if (filters.sortBy === "pay_asc") {
-            arr.sort((a, b) => a.payPerHour - b.payPerHour);
-        } else {
-            // relevance
-            arr.sort((a, b) => relevanceScore(b, filters.q) - relevanceScore(a, filters.q));
-        }
-        return arr;
-    }, [filtered, filters.sortBy, filters.q]);
-
-    const total = sorted.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-    // Clamp page if filters reduced the result count
-    useEffect(() => {
-        setPage((p) => Math.min(Math.max(1, p), totalPages));
-    }, [totalPages]);
-
-    const pageSlice = useMemo(() => {
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        return sorted.slice(start, end);
-    }, [sorted, page, pageSize]);
-
+    const pageSlice = dataSource;
     const activeCount = useMemo(() => {
-        const { q, location, category, jobTypes, minPay, maxPay, datePosted, availability, distanceKm, sortBy } = filters;
+        const { q, city, category_id, job_type, job_experience, job_tags, min_price, max_price, posted, radius_km, sort } = filters;
         let c = 0;
         if (q) c++;
-        if (location) c++;
-        if (category) c++;
-        if (jobTypes.length) c++;
-        if (minPay || maxPay) c++;
-        if (datePosted !== "any") c++;
-        if (availability.length) c++;
-        if (distanceKm !== DEFAULT_FILTERS.distanceKm) c++;
-        if (sortBy !== "relevance") c++;
+        if (city) c++;
+        if (category_id.length) c++;
+        if (job_type.length) c++;
+        if (job_experience.length) c++;
+        if (job_tags.length) c++;
+        if (min_price || max_price) c++;
+        if (posted !== "any") c++;
+        if (radius_km !== DEFAULT_FILTERS.radius_km) c++;
+        if (sort !== "new") c++;
         return c;
     }, [filters]);
 
-    // --- Dev tests (visible panel) ---
-    type TestResult = { name: string; ok: boolean; detail?: string };
-    const testResults: TestResult[] = useMemo(() => {
-        const results: TestResult[] = [];
-
-        try {
-            const sample: Filters = {
-                q: "window cleaning",
-                location: "Braunschweig",
-                category: "cleaning",
-                jobTypes: ["one_time", "remote"],
-                minPay: "14",
-                maxPay: "25",
-                datePosted: "7d",
-                availability: ["sat", "sun"],
-                distanceKm: 10,
-                sortBy: "newest",
-            };
-            const qs = toQuery(sample);
-            const round = fromQuery("?" + qs);
-            const ok = JSON.stringify(sample) === JSON.stringify(round);
-            results.push({ name: "roundtrip toQuery/fromQuery", ok, detail: ok ? "" : `got ${JSON.stringify(round)}` });
-        } catch (e: any) {
-            results.push({ name: "roundtrip toQuery/fromQuery", ok: false, detail: String(e) });
-        }
-
-        try {
-            const withZero: Filters = { ...DEFAULT_FILTERS, distanceKm: 0 };
-            const qs = toQuery(withZero);
-            const ok = !new URLSearchParams(qs).has("dist");
-            results.push({ name: "distance 0 omitted in query", ok, detail: ok ? "" : `qs='${qs}'` });
-        } catch (e: any) {
-            results.push({ name: "distance 0 omitted in query", ok: false, detail: String(e) });
-        }
-
-        try {
-            const withAny: Filters = { ...DEFAULT_FILTERS, datePosted: "any" };
-            const qs = toQuery(withAny);
-            const ok = !new URLSearchParams(qs).has("when");
-            results.push({ name: "datePosted any omitted in query", ok, detail: ok ? "" : `qs='${qs}'` });
-        } catch (e: any) {
-            results.push({ name: "datePosted any omitted in query", ok: false, detail: String(e) });
-        }
-
-        try {
-            // Pagination clamp test: with tiny pageSize, page should clamp to totalPages
-            const totalItems = 3;
-            const ps = 2;
-            const tp = Math.max(1, Math.ceil(totalItems / ps));
-            const ok = tp === 2; // expected for 3 items with page size 2
-            results.push({ name: "pagination totalPages calc", ok, detail: ok ? "" : `got ${tp}` });
-        } catch (e: any) {
-            results.push({ name: "pagination totalPages calc", ok: false, detail: String(e) });
-        }
-
-        return results;
-    }, [filters]);
-
-    // ---- UI ----
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900">
-            {/* Header */}
-
-
-            {/* Content */}
+        <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
             <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left: Filters */}
                 <section className="lg:col-span-1">
@@ -408,7 +299,7 @@ export default function JobFilterPage({
                                 inputMode="search"
                                 value={filters.q}
                                 onChange={(e) => update({ q: e.target.value })}
-                                placeholder="Keyword, skill, task…"
+                                placeholder="Keyword.."
                                 className="mt-2 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                             />
                         </div>
@@ -416,71 +307,72 @@ export default function JobFilterPage({
                         {/* Location + Distance */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                             <div className="sm:col-span-2">
-                                <label htmlFor="loc" className="block text-sm font-medium">Location</label>
+                                <label htmlFor="city" className="block text-sm font-medium">Location</label>
                                 <input
-                                    id="loc"
+                                    id="city"
                                     type="text"
-                                    value={filters.location}
-                                    onChange={(e) => update({ location: e.target.value })}
+                                    value={filters.city}
+                                    onChange={(e) => update({ city: e.target.value })}
                                     placeholder="City or postcode"
                                     className="mt-2 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                                 />
                             </div>
-                            <div>
-                                <label htmlFor="dist" className="block text-sm font-medium">Distance (km)</label>
-                                <input
-                                    id="dist"
-                                    type="range"
-                                    min={0}
-                                    max={50}
-                                    step={1}
-                                    value={filters.distanceKm}
-                                    onChange={(e) => update({ distanceKm: Number(e.target.value) })}
-                                    className="mt-2 w-full"
-                                />
-                                <div className="text-xs text-gray-600 mt-1">{filters.distanceKm} km</div>
-                            </div>
+                            {user?.lat && user?.lng &&
+                                (<div>
+
+                                    <label htmlFor="radius_km" className="block text-sm font-medium">Distance (km)</label>
+                                    <input
+                                        id="radius_km"
+                                        type="range"
+                                        min={0}
+                                        max={50}
+                                        step={1}
+                                        value={filters.radius_km ?? 10}
+                                        onChange={(e) => update({ radius_km: Number(e.target.value) })}
+                                        className="mt-2 w-full"
+                                    />
+                                    <div className="text-xs text-gray-600 mt-1">{filters.radius_km ?? 10} km</div>
+                                </div>)
+                            }
                         </div>
 
                         {/* Category */}
-                        <div>
-                            <label htmlFor="cat" className="block text-sm font-medium">Category</label>
-                            <select
-                                id="cat"
-                                value={filters.category}
-                                onChange={(e) => update({ category: e.target.value as Filters["category"] })}
-                                className="mt-2 w-full rounded-xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                            >
-                                <option value="">Any</option>
-                                <option value="cleaning">Cleaning</option>
-                                <option value="babysitting">Babysitting</option>
-                                <option value="gardening">Gardening</option>
-                                <option value="delivery">Delivery</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
+                        {collections?.jobCategories.length > 0 && (
+                            <fieldset>
+                                <legend className="block text-sm font-medium">Category</legend>
+                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {collections?.jobCategories?.map((cat) => (
+                                        <label key={cat.id} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={filters.category_id.includes(cat.id)}
+                                                onChange={() => toggleInArray("category_id", cat.id)}
+                                            />
+                                            <span className="text-sm">{cat.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+                        )}
 
                         {/* Job type */}
-                        <fieldset>
-                            <legend className="block text-sm font-medium">Job type</legend>
-                            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {([
-                                    ["one_time", "One‑time"],
-                                    ["recurring", "Recurring"],
-                                    ["remote", "Remote"],
-                                ] as const).map(([val, label]) => (
-                                    <label key={val} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={filters.jobTypes.includes(val)}
-                                            onChange={() => toggleInArray("jobTypes", val)}
-                                        />
-                                        <span className="text-sm">{label}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </fieldset>
-
+                        {collections?.jobType.length > 0 && (
+                            <fieldset>
+                                <legend className="block text-sm font-medium">Job Type</legend>
+                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {collections?.jobType?.map((type) => (
+                                        <label key={type} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={filters.job_type.includes(type)}
+                                                onChange={() => toggleInArray("job_type", type)}
+                                            />
+                                            <span className="text-sm">{type}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+                        )}
                         {/* Pay range */}
                         <div>
                             <span className="block text-sm font-medium">Hourly pay (€)</span>
@@ -492,8 +384,8 @@ export default function JobFilterPage({
                                         inputMode="decimal"
                                         pattern="[0-9]*"
                                         placeholder="Min"
-                                        value={filters.minPay}
-                                        onChange={(e) => update({ minPay: e.target.value })}
+                                        value={filters.min_price}
+                                        onChange={(e) => update({ min_price: e.target.value })}
                                         className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                                     />
                                 </div>
@@ -504,68 +396,105 @@ export default function JobFilterPage({
                                         inputMode="decimal"
                                         pattern="[0-9]*"
                                         placeholder="Max"
-                                        value={filters.maxPay}
-                                        onChange={(e) => update({ maxPay: e.target.value })}
+                                        value={filters.max_price}
+                                        onChange={(e) => update({ max_price: e.target.value })}
                                         className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                                     />
                                 </div>
                             </div>
                         </div>
 
+                        {/* Job Expierience */}
+                        {collections?.jobExperience.length > 0 &&
+                            (<fieldset>
+                                <legend className="block text-sm font-medium">Job Experience</legend>
+                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {collections?.jobExperience?.map((type) => (
+                                        <label key={type} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={filters.job_experience.includes(type)}
+                                                onChange={() => toggleInArray("job_experience", type)}
+                                            />
+                                            <span className="text-sm">{type}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>)
+                        }
+
+                        {/* Job Tag */}
+                        {collections?.jobTags.length > 0 &&
+                            (<fieldset>
+                                <legend className="block text-sm font-medium">Job Tag</legend>
+                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {collections?.jobTags?.map((tag) => (
+                                        <label key={tag.id} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={filters.job_tags.includes(tag.id)}
+                                                onChange={() => toggleInArray("job_tags", tag.id)}
+                                            />
+                                            <span className="text-sm">{tag.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>)
+                        }
+
+                        {/* start_at and ends_at filter */}
+                        <div className="mt-2 grid grid-cols-2 gap-3">
+                            <DateInput
+                                label="Start Date"
+                                value={filters.starts_at || null}
+                                onChange={(v) => {
+                                    update({ starts_at: v });
+                                    // Optional: auto-adjust end date if it's before the new start
+                                    if (filters.ends_at && dayjs(v).isAfter(dayjs(filters.ends_at))) {
+                                        update({ ends_at: v });
+                                    }
+                                }}
+                            />
+
+                            <DateInput
+                                label="End Date"
+                                value={filters.ends_at || null}
+                                onChange={(v) => update({ ends_at: v })}
+                                minDate={filters.starts_at ? dayjs(filters.starts_at).toDate() : undefined}
+                            />
+                        </div>
+
                         {/* Date posted */}
                         <div>
-                            <label htmlFor="when" className="block text-sm font-medium">Date posted</label>
+                            <label htmlFor="posted" className="block text-sm font-medium">Date posted</label>
                             <select
-                                id="when"
-                                value={filters.datePosted}
-                                onChange={(e) => update({ datePosted: e.target.value as DatePosted })}
+                                id="posted"
+                                value={filters.posted}
+                                onChange={(e) => update({ posted: e.target.value as DatePosted })}
                                 className="mt-2 w-full rounded-xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black"
                             >
                                 <option value="any">Any time</option>
-                                <option value="24h">Last 24 hours</option>
-                                <option value="7d">Last 7 days</option>
-                                <option value="30d">Last 30 days</option>
+                                <option value="1">Last 24 hours</option>
+                                <option value="7">Last 7 days</option>
+                                <option value="30">Last 30 days</option>
                             </select>
                         </div>
 
-                        {/* Availability (days) */}
-                        <fieldset>
-                            <legend className="block text-sm font-medium">Availability</legend>
-                            <div className="mt-2 grid grid-cols-3 gap-2">
-                                {([
-                                    ["mon", "Mon"],
-                                    ["tue", "Tue"],
-                                    ["wed", "Wed"],
-                                    ["thu", "Thu"],
-                                    ["fri", "Fri"],
-                                    ["sat", "Sat"],
-                                    ["sun", "Sun"],
-                                ] as const).map(([val, label]) => (
-                                    <label key={val} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={filters.availability.includes(val)}
-                                            onChange={() => toggleInArray("availability", val)}
-                                        />
-                                        <span className="text-sm">{label}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </fieldset>
+
+
 
                         {/* Sort by */}
                         <div>
                             <label htmlFor="sort" className="block text-sm font-medium">Sort by</label>
                             <select
                                 id="sort"
-                                value={filters.sortBy}
-                                onChange={(e) => update({ sortBy: e.target.value as SortBy })}
+                                value={filters.sort}
+                                onChange={(e) => update({ sort: e.target.value as SortBy })}
                                 className="mt-2 w-full rounded-xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black"
                             >
-                                <option value="relevance">Relevance</option>
-                                <option value="newest">Newest</option>
-                                <option value="pay_desc">Pay: High → Low</option>
-                                <option value="pay_asc">Pay: Low → High</option>
+                                <option value="new">Newest</option>
+                                <option value="price_desc">Pay: High → Low</option>
+                                <option value="price_asc">Pay: Low → High</option>
                             </select>
                         </div>
 
@@ -601,8 +530,12 @@ export default function JobFilterPage({
                             <label className="text-sm text-gray-700" htmlFor="pageSize">Per page</label>
                             <select
                                 id="pageSize"
-                                value={pageSize}
-                                onChange={(e) => setPage(1)}
+                                value={localPageSize}
+                                onChange={(e) => {
+                                    const newSize = Number(e.target.value);
+                                    setLocalPageSize(newSize);  // update local state
+                                    setPage(1);                 // reset page to 1
+                                }}
                                 className="rounded-xl border px-3 py-2"
                                 disabled
                                 title="pageSize is set via prop"
@@ -620,17 +553,55 @@ export default function JobFilterPage({
                             <article key={job.id} className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                                 <div className="flex-1 min-w-0">
                                     <h3 className="text-base sm:text-lg font-semibold truncate">{job.title}</h3>
+                                    {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
                                     <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
-                                        <span className="inline-flex items-center">€{job.payPerHour}/h</span>
-                                        <span>• {job.location}{job.jobType !== "remote" ? ` · ${job.distanceKm} km` : " · remote"}</span>
-                                        <span>• {job.category}</span>
-                                        <span>• {job.jobType.replace("_", " ")}</span>
+                                        <span className="inline-flex items-center">
+                                            {job?.price_min && job?.price_max
+                                                ? `${job.currency} ${job.price_min} – ${job.price_max}`
+                                                : job?.price_min
+                                                    ? `${job.currency} ${job.price_min}+`
+                                                    : job?.price_max
+                                                        ? `Up to ${job.currency} ${job.price_max}`
+                                                        : "Not specified"}
+                                            {job?.price_type && <span className="inline-flex items-center gap-1">/ {job?.price_type}</span>}
+                                        </span>
+                                        <span>•   {[
+                                            job?.street,
+                                            job?.city,
+                                            job?.state,
+                                            job?.postal_code,
+                                            job?.country
+                                        ].filter(Boolean).join(", ")}</span>
+                                        {job?.distance && (<span>• {(job.distance / 1000).toFixed(2)} km away</span>)}
+                                        {job?.category_name && (<span>• {job?.category_name}</span>)}
+                                        {job?.job_type && (<span>• {job.job_type.join(",")}</span>)}
+                                        {job?.job_experience.length > 0 && (<span>• {job.job_experience.join(",")}</span>)}
+                                        {job?.starts_at && (
+                                            <span className="inline-flex items-center gap-1">
+                                                <Clock className="h-3 w-3" /> Start: {dayjs(job?.starts_at).format("MMM D, YYYY")}
+                                            </span>
+                                        )}
+
+                                        {job?.ends_at && (
+                                            <span className="inline-flex items-center gap-1">
+                                                <Clock className="h-3 w-3" /> End: {dayjs(job?.ends_at).format("MMM D, YYYY")}
+                                            </span>
+                                        )}
                                     </div>
-                                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">{job.description}</p>
+                                    {/* Job tag badges */}
+
+                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+
+                                        {job.tags?.length > 0 && job.tags.map((tag) => (
+                                            <span key={tag.id} className="px-2 py-1 bg-gray-100 rounded-full">{tag.name}</span>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-2 text-sm text-gray-600 line-clamp-2" dangerouslySetInnerHTML={{ __html: job.description }} />
                                 </div>
                                 <div className="sm:text-right">
-                                    <div className="text-xs text-gray-500">Posted {new Date(job.postedAt).toLocaleDateString()}</div>
-                                    <button className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50">View</button>
+                                    <div className="text-xs text-gray-500">Posted {new Date(job?.created_at).toLocaleDateString()}</div>
+                                    <button className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50" onClick={() => router.push(`/jobs/details/${job.id}`)}>View</button>
                                 </div>
                             </article>
                         ))}
@@ -670,30 +641,10 @@ export default function JobFilterPage({
                         </button>
                     </nav>
 
-                    {/* Debug preview (can be removed in prod) */}
-                    {/* <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6"> */}
-                    {/* <h3 className="text-md font-semibold">Current filters (debug)</h3>
-                        <pre className="bg-gray-900 text-gray-100 rounded-xl p-4 text-xs overflow-auto" data-testid="filters-json">
-                            {JSON.stringify(filters, null, 2)}
-                        </pre> */}
-
-                    {/* Dev Tests Panel */}
-                    {/* <details className="mt-6">
-                            <summary className="cursor-pointer select-none text-sm font-medium">Dev tests (inline)</summary>
-                            <ul className="mt-3 space-y-1 text-sm">
-                                {testResults.map((t, i) => (
-                                    <li key={i} className={t.ok ? "text-green-700" : "text-red-700"}>
-                                        <span className="font-medium">{t.ok ? "PASS" : "FAIL"}:</span> {t.name}
-                                        {t.detail ? <span className="text-gray-600"> — {t.detail}</span> : null}
-                                    </li>
-                                ))}
-                            </ul>
-                        </details> */}
-                    {/* </div> */}
                 </section>
             </main>
 
-            {/* Sticky mobile apply
+            {/* Sticky mobile apply */}
             <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
                 <div className="bg-white border shadow-xl rounded-2xl p-3 flex items-center justify-between">
                     <div className="text-sm">
@@ -708,7 +659,7 @@ export default function JobFilterPage({
                         Apply
                     </button>
                 </div>
-            </div> */}
+            </div>
         </div>
     );
 }
