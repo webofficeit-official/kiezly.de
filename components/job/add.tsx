@@ -94,6 +94,12 @@ function OnboardingForm({ }) {
             price_type: !form.price_type ? "Price Type is Required" : "",
             price_min: !form.price_min ? "Minimum Price is Required" : "",
             price_max: !form.price_max ? "Maximum Price is Required" : "",
+            price_range:
+                form.price_min != null &&
+                    form.price_max != null &&
+                    form.price_max < form.price_min
+                    ? "Maximum price cannot be less than minimum price"
+                    : "",
             country: !form.country.trim() ? "Country is Required" : "",
             state: !form.state.trim() ? "State is Required" : "",
             city: !form.city.trim() ? "City is Required" : "",
@@ -205,11 +211,11 @@ function OnboardingForm({ }) {
                     <Input label="Price Type" value={form?.price_type} onChange={(v) => update((d) => (d.price_type = v))} required error={submitted && fieldErrors.price_type} />
                 </div>
                 <div>
-                    <Input label="Min (€)" type="number" value={form?.price_min ?? ""} onChange={(v) => update((d) => (d.price_min = Number(v)))} required error={submitted && fieldErrors.price_min} />
+                    <Input label="Min (€)" type="number" value={form?.price_min ?? ""} onChange={(v) => update((d) => (d.price_min = Number(v)))} required error={submitted && (fieldErrors.price_min || fieldErrors.price_range)} />
                 </div>
                 <div>
 
-                    <Input label="Max (€)" type="number" value={form?.price_max ?? ""} onChange={(v) => update((d) => (d.price_max = Number(v)))} required error={submitted && fieldErrors.price_max} />
+                    <Input label="Max (€)" type="number" value={form?.price_max ?? ""} onChange={(v) => update((d) => (d.price_max = Number(v)))} required error={submitted && (fieldErrors.price_max  || fieldErrors.price_range)} />
                 </div>
             </div>
 
@@ -301,7 +307,7 @@ function OnboardingForm({ }) {
 
 
             </div>
- <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
                     <input
                         type="checkbox"
@@ -328,7 +334,7 @@ function OnboardingForm({ }) {
                     </label>
                 </div>
 
-                 {/* <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                     <input
                         type="checkbox"
                         id="police_verified"
@@ -341,7 +347,7 @@ function OnboardingForm({ }) {
                     </label>
                 </div> */}
             </div>
-           
+
 
 
 
