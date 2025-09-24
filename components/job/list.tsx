@@ -56,8 +56,8 @@ export const toQuery = (f: Filters) => {
     if (f.job_type.length) p.set("job_type", f.job_type.join(","));
     if (f.job_experience.length) p.set("job_experience", f.job_experience.join(","));
     if (f.job_tags.length) p.set("job_tag", f.job_tags.join(","));
-    if (f.min_price) p.set("min", f.min_price);
-    if (f.max_price) p.set("max", f.max_price);
+    if (f.min_price) p.set("min_price", f.min_price);
+    if (f.max_price) p.set("max_price", f.max_price);
     if (f.posted && f.posted !== "any") p.set("posted", f.posted);
     if (f.radius_km) p.set("radius_km", String(f.radius_km));
     if (f.sort && f.sort !== "new") p.set("sort", f.sort);
@@ -81,7 +81,7 @@ export const fromQuery = (qs: string): Filters => {
         job_experience: jobExperience,
         job_tags: jobTag,
         min_price: p.get("min_price") || "",
-        max_price: p.get("max") || "",
+        max_price: p.get("max_price") || "",
         posted: (p.get("posted") as DatePosted) || "any",
         radius_km: Number(p.get("radius_km") || DEFAULT_FILTERS.radius_km),
         sort: (p.get("sort") as SortBy) || "new",
@@ -165,8 +165,8 @@ export default function JobFilterPage({
         if (filters.job_type.length) payload.job_type = filters.job_type.join(",");
         if (filters.job_experience.length) payload.job_experience = filters.job_experience.join(",");
         if (filters.job_tags.length) payload.job_tags = filters.job_tags.join(",");
-        if (filters.min_price) payload.min = filters.min_price;
-        if (filters.max_price) payload.max = filters.max_price;
+        if (filters.min_price) payload.min_price = filters.min_price;
+        if (filters.max_price) payload.max_price = filters.max_price;
         if (filters.posted && filters.posted !== "any") payload.posted = filters.posted;
         if (user?.lat && filters.radius_km) payload.radius_km = filters.radius_km;
         if (filters.sort && filters.sort !== "new") payload.sort = filters.sort;
@@ -378,24 +378,24 @@ export default function JobFilterPage({
                             <span className="block text-sm font-medium">Hourly pay (€)</span>
                             <div className="mt-2 grid grid-cols-2 gap-3">
                                 <div>
-                                    <label htmlFor="min" className="sr-only">Min</label>
+                                    <label htmlFor="min_price" className="sr-only">Min</label>
                                     <input
-                                        id="min"
+                                        id="min_price"
                                         inputMode="decimal"
                                         pattern="[0-9]*"
-                                        placeholder="Min"
+                                        placeholder="Min Price"
                                         value={filters.min_price}
                                         onChange={(e) => update({ min_price: e.target.value })}
                                         className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="max" className="sr-only">Max</label>
+                                    <label htmlFor="max_price" className="sr-only">Max</label>
                                     <input
-                                        id="max"
+                                        id="max_price"
                                         inputMode="decimal"
                                         pattern="[0-9]*"
-                                        placeholder="Max"
+                                        placeholder="Max Price"
                                         value={filters.max_price}
                                         onChange={(e) => update({ max_price: e.target.value })}
                                         className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -536,8 +536,8 @@ export default function JobFilterPage({
                                     setLocalPageSize(newSize);  // update local state
                                     setPage(1);                 // reset page to 1
                                 }}
-                                className="rounded-xl border px-3 py-2"
-                                disabled
+                                // className="rounded-xl border px-3 py-2"
+                                // disabled
                                 title="pageSize is set via prop"
                             >
                                 <option value={10}>10</option>
