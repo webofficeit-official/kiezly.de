@@ -38,8 +38,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 // Extend dayjs with the plugin
 dayjs.extend(relativeTime);
 
-// Drop this file into a Next.js route (e.g., app/jobs/[id]/page.tsx) and it will render a modern Job Detail screen
-// with an inline "Apply" flow using shadcn/ui components + Tailwind. Everything is client-side for mock/demo.
+
 
 export default function JobDetail() {
 
@@ -154,7 +153,7 @@ export default function JobDetail() {
                             </div>
 
                             <div className="mt-4 flex flex-wrap gap-2">
-                                {jobDetails.tags.map((t) => (
+                                {jobDetails.tags.length > 0 && jobDetails.tags.map((t) => (
                                     <>
                                         <Badge key={t} variant="secondary" className="rounded-full px-3 py-1">
                                             {t?.name}
@@ -266,8 +265,8 @@ export default function JobDetail() {
 
                     {/* Mini facts */}
                     <div className="mt-6 space-y-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> ID verified family</div>
-                        <div className="flex items-center gap-2"><GraduationCap className="h-4 w-4" /> First-aid certified preferred</div>
+                        {jobDetails?.police_verified &&(<div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Police Verified</div>)}
+                        {jobDetails?.first_aid_verified&& (<div className="flex items-center gap-2"><GraduationCap className="h-4 w-4" /> First-aid certified preferred</div>)}
                     </div>
                 </aside>
             </section>

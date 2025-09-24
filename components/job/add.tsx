@@ -11,6 +11,7 @@ import { ChevronsUpDownIcon } from "lucide-react";
 import type { CreateJobData } from "@/lib/types/job";
 import { useCreateJob, useJobCollections } from "@/lib/react-query/queries/useJob";
 import toast from "react-hot-toast";
+import dayjs from "dayjs";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 const initalForm: CreateJobData = {
@@ -29,12 +30,13 @@ const initalForm: CreateJobData = {
     street: "",
     lat: "",
     lng: "",
-    starts_at: new Date().toISOString().split("T")[0],
-    ends_at: new Date().toISOString().split("T")[0],
+    starts_at: undefined,
+    ends_at: undefined,
     job_experience: [],
     job_type: [],
     first_aid_verified: false,
     police_verified: false,
+    verified: false,
     status: 'open',
     tag_ids: []
 }
@@ -295,7 +297,51 @@ function OnboardingForm({ }) {
                         Get My Location
                     </button>
                 </div> */}
+
+
+
             </div>
+ <div className="grid sm:grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        id="first_aid_verified"
+                        checked={form.first_aid_verified}
+                        onChange={(e) => update(d => d.first_aid_verified = e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    />
+                    <label htmlFor="first_aid_verified" className="text-sm text-gray-700">
+                        First Aid Verified
+                    </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        id="police_verified"
+                        checked={form.police_verified}
+                        onChange={(e) => update(d => d.police_verified = e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    />
+                    <label htmlFor="police_verified" className="text-sm text-gray-700">
+                        Police Verified
+                    </label>
+                </div>
+
+                 {/* <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        id="police_verified"
+                        checked={form.verified}
+                        onChange={(e) => update(d => d.verified = e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    />
+                    <label htmlFor="police_verified" className="text-sm text-gray-700">
+                        ID Verified
+                    </label>
+                </div> */}
+            </div>
+           
 
 
 
@@ -532,13 +578,14 @@ function MultiSelect<T extends string | number>({
 }
 
 
-function DateInput({
+export function DateInput({
     label,
     value,
     onChange,
     required,
     error,
-    minDate
+    minDate,
+    maxDate
 }: {
     label: string;
     value: string | null;
@@ -546,6 +593,7 @@ function DateInput({
     required?: boolean;
     error?: string;
     minDate?: Date; // <-- add this
+    maxDate?: Date
 }) {
     const [month, setMonth] = useState(new Date());
 
@@ -564,7 +612,21 @@ function DateInput({
             <Popover className="relative">
                 <Popover.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-left shadow-sm focus:border-black">
                     {value ? format(new Date(value), "yyyy-MM-dd") : "Select date"}
-                    <CalendarIcon className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-1">
+                        {value && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation(); // prevent opening the calendar
+                                    onChange("");
+                                }}
+                                className="text-gray-400 hover:text-red-500 text-xs px-1"
+                            >
+                                ✕
+                            </button>
+                        )}
+                        <CalendarIcon className="h-4 w-4 text-gray-400" />
+                    </div>
                 </Popover.Button>
 
                 <Popover.Panel className="absolute z-10 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
@@ -591,7 +653,14 @@ function DateInput({
                             <div key={d} className="font-medium text-gray-500">{d}</div>
                         ))}
                         {days.map((day) => {
-                            const isDisabled = minDate ? day < minDate : false;
+                            const dayDate = dayjs(day).startOf("day");
+                            const min = minDate ? dayjs(minDate).startOf("day") : null;
+                            const max = maxDate ? dayjs(maxDate).startOf("day") : null;
+
+                            const isDisabled =
+                                (min ? dayDate.isBefore(min, "day") : false) ||
+                                (max ? dayDate.isAfter(max, "day") : false);
+
 
                             return (
                                 <button
