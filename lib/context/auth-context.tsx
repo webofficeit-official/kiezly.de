@@ -10,6 +10,8 @@ import { LoginResponse } from "@/lib/react-query/queries/user/account";
 import { useRouter, usePathname } from "next/navigation";
 import { getCookie } from "cookies-next";
 import { UserProfile } from "@/components/MyProfile";
+import { Loader } from "@/components/ui/loader";
+import toast from "react-hot-toast";
 
 type AuthContextType = {
     user: UserProfile;
@@ -66,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (user && isPublic) {
             // logged in but trying to access signin/signup
-            router.replace("/my-profile");
+            router.replace("/jobs/list");
         }
 
 
@@ -98,11 +100,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function logout() {
+        const toastId = toast.loading("Logging out...");
         try {
             await apiClient.post("/auth/logout");
-
+            toast.success("Logged out successfully!", { id: toastId });
         } catch (err) {
             console.error("Server logout failed:", err);
+            toast.error("Logout failed. Please try again.", { id: toastId });
         } finally {
             setAccessToken(null);
             setRefreshToken(null);
@@ -113,11 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading, loadUser }}>
-            {loading ? (
-                <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-                    {/* Simple Tailwind spinner */}
-                    <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-                </div>
+            {loading || (user && ["/signin", "/signup"].includes(pathname)) ? (
+                <Loader />
             ) : (
                 children
             )}
