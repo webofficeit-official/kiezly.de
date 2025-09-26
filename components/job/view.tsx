@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Briefcase,
     MapPin,
@@ -13,6 +13,7 @@ import {
     CheckCircle2,
     ExternalLink,
     Home,
+    BookmarkCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +35,8 @@ import { useJob } from "@/lib/react-query/queries/useJob";
 import { Loader } from "../ui/loader";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { JobList } from "@/lib/types/job";
+import { addJobAsFavorite, getSavedJobs, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
 
 // Extend dayjs with the plugin
 dayjs.extend(relativeTime);
@@ -44,6 +47,14 @@ export default function JobDetail() {
 
     const [submitted, setSubmitted] = React.useState(false);
     const [open, setOpen] = React.useState(false);
+        
+    const [savedJobs, setSavedJobs] = React.useState([]);
+
+    useEffect(() => {
+        getSavedJobs().then((data) => {
+            setSavedJobs(data.jobs)
+        }).catch((err) => console.log(err))
+    }, [])
 
     const { slug } = useParams(); // get /jobs/[slug]
     const { data, isLoading, isError } = useJob(slug as string);
@@ -64,6 +75,26 @@ export default function JobDetail() {
         // Simulate a submit and show a success state
         setSubmitted(true);
         setOpen(false);
+    };
+    
+    const handleSaveJob = async (jobId: string) => {
+        try {
+            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
+            await addJobAsFavorite({ jobId });
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+        }
+    };
+
+    const handleUnSaveJob = async (jobId: string) => {
+        try {
+            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+            await unsaveJobAsFavorite(jobId);
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
+        }
     };
 
 
@@ -148,7 +179,11 @@ export default function JobDetail() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button variant="outline" className="rounded-xl"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
-                                    <Button variant="outline" className="rounded-xl"><Bookmark className="mr-2 h-4 w-4" /> Save</Button>
+                                    {savedJobs.some((j) => j.id === jobDetails.id) ? (
+                                        <Button variant="outline" className="rounded-xl" onClick={() => handleUnSaveJob(jobDetails.id)}><BookmarkCheck className="mr-2 h-4 w-4" /> Saved</Button>
+                                    ) : (
+                                        <Button variant="outline" className="rounded-xl" onClick={() => handleSaveJob(jobDetails.id)}><Bookmark className="mr-2 h-4 w-4" /> Save</Button>
+                                    )}
                                 </div>
                             </div>
 

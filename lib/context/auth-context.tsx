@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (user && isPublic) {
             // logged in but trying to access signin/signup
-            router.replace("/jobs/list");
+            router.replace("/jobs");
         }
 
 
