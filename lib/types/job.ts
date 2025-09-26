@@ -23,33 +23,36 @@ export interface Job {
   police_verified: boolean;
   verified: boolean;
 }
-export interface CreateJobData {
+
+export type CreateJobData = {
   title: string;
   subtitle: string;
   description: string;
-  category_id: number;              
-  tag_ids: number[];                
-  price_type: string;   
-  price_min: number;               
-  price_max: number;                
+  category_id: number | null;
+  price_type: string;
+  price_min: number | null;
+  price_max: number | null;
   currency: string;
   country: string;
   state: string;
   city: string;
   postal_code: string;
   street: string;
-  lat: string;                      
+  lat: string;
   lng: string;
-  starts_at: string;                
-  ends_at: string;                  
-  job_type: string[];               
-  job_experience: string[];         
+  starts_at?: string;
+  ends_at?: string;
+  job_experience: string[];
+  job_type: string[];
   first_aid_verified: boolean;
   police_verified: boolean;
-  verified?:boolean;
-  status: "open" | "closed" | "draft"; 
-}
-
+  verified: boolean;
+  status: "open" | "closed";
+  tag_ids: number[];
+  tasks?: string;
+  requirements?: string;
+  languages?: number[];
+};
 
 
 export interface CreateJobResponse {
