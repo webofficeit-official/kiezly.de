@@ -10,3 +10,8 @@ export const getSavedJobs = async () => {
     const res = await apiClient.get(`/jobs/favorite`);
     return res.data;
 };
+
+export const unsaveJobAsFavorite = async (jobId: string): Promise<SaveJobResponse> => {
+  const { data } = await apiClient.delete(`/jobs/favorite/${jobId}`);
+  return data;
+};

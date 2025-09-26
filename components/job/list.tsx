@@ -9,7 +9,7 @@ import { DateInput } from "./add";
 import { useAuth } from "@/lib/context/auth-context";
 import { Listbox } from "@headlessui/react";
 import { Button } from "../ui/button";
-import { addJobAsFavorite, getSavedJobs } from "@/lib/react-query/api-handler/job-save-api";
+import { addJobAsFavorite, getSavedJobs, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
 // ---- Types ----
 export type SortBy = "new" | "price_desc" | "price_asc";
 export type DatePosted = "any" | "1" | "7" | "30";
@@ -306,15 +306,21 @@ export default function JobFilterPage({
 
     const handleSaveJob = async (jobId: string) => {
         try {
-          setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
-        
-          await addJobAsFavorite({ jobId });
-        
+            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
+            await addJobAsFavorite({ jobId });
         } catch (error) {
-          console.error("Failed to save job:", error);
-        
-          // 3️⃣ Rollback on error
-          setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+        }
+    };
+
+    const handleUnSaveJob = async (jobId: string) => {
+        try {
+            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+            await unsaveJobAsFavorite(jobId);
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
         }
     };
 
@@ -658,6 +664,7 @@ export default function JobFilterPage({
                                             <Button
                                                 variant="default"
                                                 className="rounded-xl px-2 py-1 text-xs flex items-center gap-1 bg-green-50 text-green-700 border border-green-200"
+                                                onClick={() => handleUnSaveJob(job.id)}
                                             >
                                                 <BookmarkCheck className="h-3 w-3" />
                                             </Button>
