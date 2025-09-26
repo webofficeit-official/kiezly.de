@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useRouter } from 'next/navigation'
 
 const CATEGORIES = [
   { key: 'childcare', label: 'Childcare', icon: Baby },
@@ -18,9 +19,13 @@ const CATEGORIES = [
 ]
 
 export default function Page() {
+  const router = useRouter();
   const [what, setWhat] = React.useState('')
   const [where, setWhere] = React.useState('')
-  const doSearch = () => { /* demo only */ }
+  
+  const doSearch = () => { 
+    window.location.href = `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`;
+  }
 
   return (
     <main>
