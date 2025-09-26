@@ -25,3 +25,8 @@ export const getJobsApi = async (params: Record<string, any>) => {
   const response = await apiClient.get("/jobs", { params });
   return response.data;
 };
+
+export const getMyJobsApi = async (params: Record<string, any>) => {
+  const response = await apiClient.get("/jobs/myJobs", { params });
+  return response.data;
+};

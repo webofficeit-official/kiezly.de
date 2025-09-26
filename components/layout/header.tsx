@@ -58,6 +58,13 @@ export default function Header() {
                   >
                     My Profile
                   </a>
+                  <a
+                    href="/my-jobs"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    My Jobs
+                  </a>
                   <button
                     onClick={() => {
                       logout()
