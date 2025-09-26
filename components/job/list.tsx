@@ -2,11 +2,12 @@
 import { useJobCollections, useJobs } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
 import dayjs from "dayjs";
-import { Clock } from "lucide-react";
+import { Check, ChevronDown, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { DateInput } from "./add";
 import { useAuth } from "@/lib/context/auth-context";
+import { Listbox } from "@headlessui/react";
 // ---- Types ----
 export type SortBy = "new" | "price_desc" | "price_asc";
 export type DatePosted = "any" | "1" | "7" | "30";
@@ -46,6 +47,26 @@ const DEFAULT_FILTERS: Filters = {
     starts_at: undefined,
     ends_at: undefined,
 };
+
+const postedOptions = [
+  { label: "Any time", value: "any" },
+  { label: "Last 24 hours", value: "1" },
+  { label: "Last 7 days", value: "7" },
+  { label: "Last 30 days", value: "30" },
+];
+
+const sortByOptions = [
+  { label: "Newest", value: "new" },
+  { label: "Pay: High → Low", value: "price_desc" },
+  { label: "Pay: Low → High", value: "price_asc" },
+];
+
+const perPageOptions = [
+  { label: "5", value: "5" },
+  { label: "10", value: "10" },
+  { label: "25", value: "25" },
+  { label: "50", value: "50" },
+];
 
 // ---- Utilities ----
 export const toQuery = (f: Filters) => {
@@ -466,18 +487,12 @@ export default function JobFilterPage({
 
                         {/* Date posted */}
                         <div>
-                            <label htmlFor="posted" className="block text-sm font-medium">Date posted</label>
-                            <select
-                                id="posted"
+                            <Select
+                                label="Date posted"
                                 value={filters.posted}
-                                onChange={(e) => update({ posted: e.target.value as DatePosted })}
-                                className="mt-2 w-full rounded-xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                            >
-                                <option value="any">Any time</option>
-                                <option value="1">Last 24 hours</option>
-                                <option value="7">Last 7 days</option>
-                                <option value="30">Last 30 days</option>
-                            </select>
+                                onChange={(v: string) => update({ posted: v as DatePosted })}
+                                options={postedOptions}
+                            />
                         </div>
 
 
@@ -485,17 +500,12 @@ export default function JobFilterPage({
 
                         {/* Sort by */}
                         <div>
-                            <label htmlFor="sort" className="block text-sm font-medium">Sort by</label>
-                            <select
-                                id="sort"
+                            <Select
+                                label="Sort by"
                                 value={filters.sort}
-                                onChange={(e) => update({ sort: e.target.value as SortBy })}
-                                className="mt-2 w-full rounded-xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                            >
-                                <option value="new">Newest</option>
-                                <option value="price_desc">Pay: High → Low</option>
-                                <option value="price_asc">Pay: Low → High</option>
-                            </select>
+                                onChange={(v: string) => update({ sort: v as SortBy })}
+                                options={sortByOptions}
+                            />
                         </div>
 
                         {/* Actions */}
@@ -527,23 +537,16 @@ export default function JobFilterPage({
                             <p className="text-sm text-gray-600">Page {page} of {totalPages}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <label className="text-sm text-gray-700" htmlFor="pageSize">Per page</label>
-                            <select
-                                id="pageSize"
-                                value={localPageSize}
-                                onChange={(e) => {
-                                    const newSize = Number(e.target.value);
-                                    setLocalPageSize(newSize);  // update local state
-                                    setPage(1);                 // reset page to 1
-                                }}
-                                // className="rounded-xl border px-3 py-2"
-                                // disabled
-                                title="pageSize is set via prop"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={50}>50</option>
-                            </select>
+                            <Select
+                              label="Per page"
+                              value={String(localPageSize)}
+                              onChange={(v: string) => {
+                                const newSize = Number(v);
+                                setLocalPageSize(newSize); // update local state
+                                setPage(1);                 // reset page to 1
+                              }}
+                              options={perPageOptions}
+                            />
                         </div>
                     </div>
 
@@ -556,12 +559,10 @@ export default function JobFilterPage({
                                     {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
                                     <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
                                         <span className="inline-flex items-center">
-                                            {job?.price_min && job?.price_max
+                                            {job?.price_type == 'range' && job?.price_min && job?.price_max
                                                 ? `${job.currency} ${job.price_min} – ${job.price_max}`
-                                                : job?.price_min
-                                                    ? `${job.currency} ${job.price_min}+`
-                                                    : job?.price_max
-                                                        ? `Up to ${job.currency} ${job.price_max}`
+                                                : job?.price_value
+                                                    ? `${job.currency} ${job.price_value}`
                                                         : "Not specified"}
                                             {job?.price_type && <span className="inline-flex items-center gap-1">/ {job?.price_type}</span>}
                                         </span>
@@ -662,4 +663,50 @@ export default function JobFilterPage({
             </div>
         </div>
     );
+}
+
+type Option = { label: string; value: string };
+
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Option[];
+}) {
+  return (
+    <div className="text-sm">
+      <span className="mb-1 block text-gray-700">{label}</span>
+
+      <Listbox value={value} onChange={onChange}>
+        <div className="relative">
+          <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+            {options.find((o) => o.value === value)?.label || "Select"}
+            <ChevronDown className="h-4 w-4 text-gray-400" />
+          </Listbox.Button>
+
+          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+            {options.map((o) => (
+              <Listbox.Option
+                key={o.value}
+                value={o.value}
+                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
+              >
+                {({ selected }) => (
+                  <div className="flex items-center justify-between">
+                    <span>{o.label}</span>
+                    {selected && <Check className="h-4 w-4 text-gray-600" />}
+                  </div>
+                )}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </div>
+      </Listbox>
+    </div>
+  );
 }
