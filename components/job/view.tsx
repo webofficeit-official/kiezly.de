@@ -45,8 +45,8 @@ export default function JobDetail() {
     const [submitted, setSubmitted] = React.useState(false);
     const [open, setOpen] = React.useState(false);
 
-    const { id } = useParams(); // get /jobs/[id]
-    const { data, isLoading, isError } = useJob(id as string);
+    const { slug } = useParams(); // get /jobs/[slug]
+    const { data, isLoading, isError } = useJob(slug as string);
 
     if (isLoading) return <Loader />;
     if (isError) return (

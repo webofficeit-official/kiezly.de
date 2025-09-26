@@ -94,6 +94,7 @@ export interface JobList {
   id: string;
   client_id: string;
   title: string;
+  slug: string;
   subtitle: string;
   description: string; // HTML string
   category_id: number;
