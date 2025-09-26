@@ -1,15 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import { CreateJobData } from "@/lib/types/job";
-import { useCreateJob, useUpdateJob } from "@/lib/react-query/queries/useJob";
+import { useCreateJob } from "@/lib/react-query/queries/useJob";
 import toast from "react-hot-toast";
+import { Input } from "../shared-ui/input/input";
+import { Select } from "../shared-ui/custom-select/custom-select";
+import MultiSelect from "../shared-ui/multi-select/multi-select";
+import { RichTextEditor } from "../shared-ui/rich-text-editor/rich-text-editor";
+import { DateInput } from "../shared-ui/custom-date/custom-date";
 
 // Dummy imports, replace with your actual components
-import Input from "./Input";
-import RichTextEditor from "./RichTextEditor";
-import Select from "./Select";
-import MultiSelect from "./MultiSelect";
-import DateInput from "./DateInput";
+
 
 const initialForm: CreateJobData = {
   title: "",

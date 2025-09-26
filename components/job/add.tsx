@@ -10,7 +10,6 @@ import MultiSelect from "../shared-ui/multi-select/multi-select";
 import { DateInput } from "../shared-ui/custom-date/custom-date";
 import { Select } from "../shared-ui/custom-select/custom-select";
 
-
 const initalForm: CreateJobData = {
     title: "",
     subtitle: "",
@@ -141,7 +140,7 @@ function OnboardingForm({ }) {
         <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-6 rounded-2xl shadow space-y-8">
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <Input label="Title" value={form?.title} onChange={(v) => update((d) => (d.title = v))} required error={submitted && fieldErrors.title} />
+                    <Input label="Title" value={form?.title} onChange={(v) => update((d) => (d.title = v))} required error={submitted && fieldErrors.title||undefined} />
                 </div>
                 <div>
                     <Input label="Subtitle" value={form?.subtitle} onChange={(v) => update((d) => (d.subtitle = v))} />
@@ -153,7 +152,7 @@ function OnboardingForm({ }) {
                     value={form?.description}
                     onChange={(v) => update((d) => (d.description = v))}
                     required
-                    error={submitted && fieldErrors.description}
+                    error={submitted && fieldErrors.description ||undefined}
                 />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -165,7 +164,7 @@ function OnboardingForm({ }) {
                         onChange={(opt) => update((d) => (d.category_id = opt ? Number(opt.id) : null))}
                         options={collections?.jobCategories || []}
                         required
-                        error={submitted && fieldErrors.category_id}
+                        error={submitted && fieldErrors.category_id ||undefined}
                     />
                 </div>
 
@@ -205,14 +204,14 @@ function OnboardingForm({ }) {
             {/* Pricing */}
             <div className="grid sm:grid-cols-3 gap-4">
                 <div>
-                    <Input label="Price Type" value={form?.price_type} onChange={(v) => update((d) => (d.price_type = v))} required error={submitted && fieldErrors.price_type} />
+                    <Input label="Price Type" value={form?.price_type} onChange={(v) => update((d) => (d.price_type = v))} required error={submitted && fieldErrors.price_type || undefined} />
                 </div>
                 <div>
-                    <Input label="Min (€)" type="number" value={form?.price_min ?? ""} onChange={(v) => update((d) => (d.price_min = Number(v)))} required error={submitted && (fieldErrors.price_min || fieldErrors.price_range)} />
+                    <Input label="Min (€)" type="number" value={form?.price_min ?? ""} onChange={(v) => update((d) => (d.price_min = Number(v)))} required error={submitted && (fieldErrors.price_min || fieldErrors.price_range)||undefined} />
                 </div>
                 <div>
 
-                    <Input label="Max (€)" type="number" value={form?.price_max ?? ""} onChange={(v) => update((d) => (d.price_max = Number(v)))} required error={submitted && (fieldErrors.price_max  || fieldErrors.price_range)} />
+                    <Input label="Max (€)" type="number" value={form?.price_max ?? ""} onChange={(v) => update((d) => (d.price_max = Number(v)))} required error={submitted && (fieldErrors.price_max  || fieldErrors.price_range)||undefined} />
                 </div>
             </div>
 

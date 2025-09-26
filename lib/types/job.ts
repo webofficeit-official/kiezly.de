@@ -27,11 +27,11 @@ export interface CreateJobData {
   title: string;
   subtitle: string;
   description: string;
-  category_id: number;              
+  category_id: number |null;              
   tag_ids: number[];                
   price_type: string;   
-  price_min: number;               
-  price_max: number;                
+  price_min: number |null;               
+  price_max: number |null;                
   currency: string;
   country: string;
   state: string;
@@ -40,8 +40,8 @@ export interface CreateJobData {
   street: string;
   lat: string;                      
   lng: string;
-  starts_at: string;                
-  ends_at: string;                  
+  starts_at?: string;                
+  ends_at?: string;                  
   job_type: string[];               
   job_experience: string[];         
   first_aid_verified: boolean;
