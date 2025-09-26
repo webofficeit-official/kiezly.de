@@ -7,25 +7,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
-
-const CATEGORIES = [
-  { key: 'childcare', label: 'Childcare', icon: Baby },
-  { key: 'cleaning', label: 'Cleaning', icon: Sparkles },
-  { key: 'petcare', label: 'Pet care', icon: Dog },
-  { key: 'seniors', label: 'Senior support', icon: Users },
-  { key: 'errands', label: 'Errands', icon: ShoppingCart },
-  { key: 'garden', label: 'Garden', icon: Leaf },
-  { key: 'events', label: 'Events', icon: PartyPopper },
-]
+import { useCollections } from '@/lib/react-query/queries/user/account'
 
 export default function Page() {
+  const collections = useCollections();
   const router = useRouter();
   const [what, setWhat] = React.useState('')
   const [where, setWhere] = React.useState('')
+  const [categories, setCategories] = React.useState([]);
   
   const doSearch = () => { 
     window.location.href = `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`;
   }
+
+  React.useEffect(() => {
+    collections.mutate({}, {
+      onSuccess: (data) => {
+        setCategories(data.data.jobCategories)
+      },
+      onError: (err: any) => {
+      }
+    });
+  }, [])
 
   return (
     <main>
@@ -76,9 +79,9 @@ export default function Page() {
                 <CardTitle className="text-base text-neutral-700">Popular right now near you</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3">
-                {CATEGORIES.map(({ key, label, icon: Icon }) => (
-                  <div key={key} className="rounded-2xl border p-3 hover:shadow-sm">
-                    <div className="mb-2 flex items-center gap-2"><Icon className="h-4 w-4" /><span className="text-sm font-medium">{label}</span></div>
+                {categories.map(({ id, name }) => (
+                  <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`}>
+                    <div className="mb-2 flex items-center gap-2"><Baby className="h-4 w-4" /><span className="text-sm font-medium">{name}</span></div>
                     <div className="text-xs text-neutral-500">from €15/h</div>
                   </div>
                 ))}
@@ -130,16 +133,16 @@ export default function Page() {
           <p className="text-neutral-600">From quick chores to recurring help.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {CATEGORIES.map(({ key, label, icon: Icon }) => (
-            <Card key={key} className="group hover:shadow-sm">
+          {categories.map(({ id, name }) => (
+            <Card key={id} className="group hover:shadow-sm">
               <CardContent className="p-5">
                 <div className="mb-2 flex items-center gap-2">
-                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white"><Icon className="h-4 w-4" /></div>
-                  <h3 className="font-medium">{label}</h3>
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white"><Baby className="h-4 w-4" /></div>
+                  <h3 className="font-medium">{name}</h3>
                 </div>
                 <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
                 <div className="mt-3">
-                  <button className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Post a {label} job</button>
+                  <button className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Post a {name} job</button>
                 </div>
               </CardContent>
             </Card>

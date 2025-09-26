@@ -15,6 +15,7 @@ export default function Header() {
           <a href="/how-it-works" className="hover:opacity-80">How it works</a>
           <a href="/#categories" className="hover:opacity-80">Categories</a>
           <a href="/#trust" className="hover:opacity-80">Trust & Safety</a>
+          <a href="/jobs" className="hover:opacity-80">Jobs</a>
         </nav>
         <div className="flex items-center gap-2 relative">
           {user ? (

@@ -601,7 +601,7 @@ export default function JobFilterPage({
                                 </div>
                                 <div className="sm:text-right">
                                     <div className="text-xs text-gray-500">Posted {new Date(job?.created_at).toLocaleDateString()}</div>
-                                    <button className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50" onClick={() => router.push(`/jobs/details/${job.id}`)}>View</button>
+                                    <button className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50" onClick={() => router.push(`/jobs/${job.slug}`)}>View</button>
                                 </div>
                             </article>
                         ))}
