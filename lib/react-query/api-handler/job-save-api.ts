@@ -5,3 +5,8 @@ export const addJobAsFavorite = async (job: SaveJobData): Promise<SaveJobRespons
   const { data } = await apiClient.post("/jobs/favorite", job);
   return data;
 };
+
+export const getSavedJobs = async () => {
+    const res = await apiClient.get(`/jobs/favorite`);
+    return res.data;
+};

@@ -1,6 +1,6 @@
-import { SaveJobData, SaveJobResponse } from "@/lib/types/JobSave";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addJobAsFavorite } from "../api-handler/job-save-api";
+import { getSavedJobResponse, SaveJobData, SaveJobResponse } from "@/lib/types/JobSave";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addJobAsFavorite, getSavedJobs } from "../api-handler/job-save-api";
 
 export function userSaveJob() {
   return useMutation<SaveJobResponse, Error, SaveJobData>({

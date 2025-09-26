@@ -2,14 +2,14 @@
 import { useJobCollections, useJobs } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
 import dayjs from "dayjs";
-import { Bookmark, Check, ChevronDown, Clock } from "lucide-react";
+import { Bookmark, BookmarkCheck, BookmarkCheckIcon, Check, ChevronDown, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { DateInput } from "./add";
 import { useAuth } from "@/lib/context/auth-context";
 import { Listbox } from "@headlessui/react";
 import { Button } from "../ui/button";
-import { addJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
+import { addJobAsFavorite, getSavedJobs } from "@/lib/react-query/api-handler/job-save-api";
 // ---- Types ----
 export type SortBy = "new" | "price_desc" | "price_asc";
 export type DatePosted = "any" | "1" | "7" | "30";
@@ -215,6 +215,8 @@ export default function JobFilterPage({
     const { data, isLoading, error } = useJobs(apiFilters);
     const total = data?.data?.total_items ?? 0;
     const totalPages = data?.data?.total_pages ?? 1;
+    
+    const [savedJobs, setSavedJobs] = useState([]);
 
     const canModifyHistory = useCanModifyHistory();
 
@@ -229,6 +231,11 @@ export default function JobFilterPage({
         setPage(1);
     }, [debouncedFilters]);
 
+    useEffect(() => {
+        getSavedJobs().then((data) => {
+            setSavedJobs(data.jobs)
+        }).catch((err) => console.log(err))
+    }, [])
 
     useEffect(() => {
         onChange?.(filters);
@@ -296,6 +303,20 @@ export default function JobFilterPage({
         if (sort !== "new") c++;
         return c;
     }, [filters]);
+
+    const handleSaveJob = async (jobId: string) => {
+        try {
+          setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
+        
+          await addJobAsFavorite({ jobId });
+        
+        } catch (error) {
+          console.error("Failed to save job:", error);
+        
+          // 3️⃣ Rollback on error
+          setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -633,7 +654,16 @@ export default function JobFilterPage({
                                         ) : (
                                             "Posted " + new Date(job?.created_at).toLocaleDateString()
                                         )}
-                                        <Button variant="outline" className="rounded-xl px-2 py-1 text-xs flex items-center gap-1" onClick={() => addJobAsFavorite({ jobId: job.id })}><Bookmark className="h-3 w-3" /></Button>
+                                        {savedJobs.some((j) => j.id === job.id) ? (
+                                            <Button
+                                                variant="default"
+                                                className="rounded-xl px-2 py-1 text-xs flex items-center gap-1 bg-green-50 text-green-700 border border-green-200"
+                                            >
+                                                <BookmarkCheck className="h-3 w-3" />
+                                            </Button>
+                                        ) : (
+                                            <Button variant="outline" className="rounded-xl px-2 py-1 text-xs flex items-center gap-1" onClick={() => handleSaveJob(job.id)}><Bookmark className="h-3 w-3" /></Button>
+                                        )}
                                     </div>
                                     <button
                                       className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
