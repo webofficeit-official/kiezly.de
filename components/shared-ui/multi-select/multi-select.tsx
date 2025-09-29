@@ -10,7 +10,7 @@ interface MultiSelectProps<T extends string | number> {
     options: MultiSelectOption<T>[];
     values: T[];
     onChange: (next: T[]) => void;
-    required?: string;
+    required?: boolean;
     error?: string;
 }
 
@@ -28,11 +28,11 @@ export default function MultiSelect<T extends string | number>({
                 {label}
                 {required && <span className="text-red-600">*</span>}
             </span>
-            <Listbox value={values} onChange={onChange} multiple>
+            <Listbox value={values  || []} onChange={onChange} multiple>
                 <div className="relative">
                     <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20">
                         <span className="truncate">
-                            {values.length
+                            {values || [].length
                                 ? options
                                     .filter(o => values.includes(o.id))
                                     .map(o => o.name)
