@@ -54,6 +54,7 @@ export interface CollectionResponse {
   success: boolean;
   message: string;
   data: {
+    countries: [];
     jobCategories: [];
     weekdays: [];
     timeWindows: [];

@@ -4,6 +4,7 @@ import { SignupData, useCollections, useSignup } from "@/lib/react-query/queries
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
+import { SelectWithFilter } from "../input/select";
 
 // Simple Link shim so this runs outside Next.js too
 function Link({ href = "#", className = "", children, ...props }) {
@@ -169,7 +170,6 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
     );
 }
 
-
 export default function RegisterPage() {
     const [role, setRole] = React.useState("helper");
     const [showPassword, setShowPassword] = React.useState(false);
@@ -180,6 +180,8 @@ export default function RegisterPage() {
     const [errors, setErrors] = React.useState({});
     const [skills, setSkills] = React.useState<Tag[]>([]);
     const [jobCategories, setJobCategories] = React.useState([])
+    const [countries, setCountries] = React.useState([])
+    const [country, setCountry] = React.useState(countries?.find(c => c.name == "Germany")?.id || "")
 
     const signup = useSignup();
     const collections = useCollections();
@@ -189,6 +191,7 @@ export default function RegisterPage() {
             onSuccess: (data) => {
                 console.log(data);
                 setJobCategories(data.data.jobCategories)
+                setCountries(data.data.countries)
             },
             onError: (err: any) => {
             }
@@ -267,8 +270,6 @@ export default function RegisterPage() {
         const city = typeof cityVal === "string" ? cityVal.trim() : "";
         const zipVal = form.get("zip");
         const zip = typeof zipVal === "string" ? zipVal.trim() : "";
-        const countryVal = form.get("country");
-        const country = typeof countryVal === "string" ? countryVal.trim() : "";
         const orgNameVal = form.get("orgName");
         const orgName = typeof orgNameVal === "string" ? orgNameVal.trim() : "";
         const websiteVal = form.get("website");
@@ -474,16 +475,15 @@ export default function RegisterPage() {
 
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                             <div>
-                                <label htmlFor="city" className="mb-1 block text-sm font-medium">City</label>
-                                <input id="city" name="city" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
-                            </div>
-                            <div>
                                 <label htmlFor="zip" className="mb-1 block text-sm font-medium">ZIP</label>
                                 <input id="zip" name="zip" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
                             </div>
                             <div>
-                                <label htmlFor="country" className="mb-1 block text-sm font-medium">Country</label>
-                                <input id="country" name="country" defaultValue="Germany" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
+                                <label htmlFor="city" className="mb-1 block text-sm font-medium">City</label>
+                                <input id="city" name="city" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
+                            </div>
+                            <div>
+                                <SelectWithFilter label="Country" value={country} onChange={(v) => setCountry(v)} options={countries} />
                             </div>
                         </div>
 
