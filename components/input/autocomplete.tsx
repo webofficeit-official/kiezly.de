@@ -1,0 +1,71 @@
+import { Combobox } from "@headlessui/react";
+import React from "react";
+import { Zipcode } from "@/lib/react-query/queries/user/account";
+
+interface ZipAutocompleteProps {
+  label?: string;
+  zip: string;
+  setZip: (zip: string) => void;
+  city: string;
+  setCity: (city: string) => void;
+  zipOptions: Zipcode[];
+  onZipChange: (zip: string) => void; // triggered on typing
+  placeholder?: string;
+}
+
+export default function ZipAutocomplete({
+  label = "ZIP",
+  zip,
+  setZip,
+  city,
+  setCity,
+  zipOptions,
+  onZipChange,
+  placeholder = "Enter ZIP code",
+}: ZipAutocompleteProps) {
+  return (
+    <div className="w-full">
+      <Combobox
+        value={zip}
+        onChange={(selected: string) => {
+          setZip(selected);
+          const selectedZip = zipOptions.find((z) => z.zipcode === selected);
+          if (selectedZip) setCity(selectedZip.city);
+        }}
+      >
+        {label && (
+          <Combobox.Label className="mb-1 block text-sm font-medium">
+            {label}
+          </Combobox.Label>
+        )}
+
+        <div className="relative">
+          <Combobox.Input
+            className="w-full rounded-xl border border-gray-300 px-3 py-2"
+            onChange={(e) => onZipChange(e.target.value)}
+            displayValue={(zip: string) => zip}
+            placeholder={placeholder}
+          />
+
+          <Combobox.Options className="absolute z-10 mt-1 w-full overflow-auto rounded-xl bg-white border border-gray-300 shadow-lg text-sm">
+            {zipOptions.length === 0 && zip !== "" ? (
+              <></>
+            ) : (
+              zipOptions.map((z) => (
+                <Combobox.Option
+                  key={z.id}
+                  value={z.zipcode}
+                  className={({ active }) =>
+                    `cursor-pointer select-none px-4 py-2`
+                  }
+                >
+                  {z.zipcode} - {z.city}
+                </Combobox.Option>
+              ))
+            )}
+          </Combobox.Options>
+        </div>
+      </Combobox>
+    </div>
+  );
+}

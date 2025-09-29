@@ -1,10 +1,11 @@
 "use client";
 
-import { SignupData, useCollections, useSignup } from "@/lib/react-query/queries/user/account";
+import { getCityByZip, SignupData, useCollections, useSignup, Zipcode } from "@/lib/react-query/queries/user/account";
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
 import { SelectWithFilter } from "../input/select";
+import ZipAutocomplete from "../input/autocomplete";
 
 // Simple Link shim so this runs outside Next.js too
 function Link({ href = "#", className = "", children, ...props }) {
@@ -182,9 +183,14 @@ export default function RegisterPage() {
     const [jobCategories, setJobCategories] = React.useState([])
     const [countries, setCountries] = React.useState([])
     const [country, setCountry] = React.useState(countries?.find(c => c.name == "Germany")?.id || "")
+    const [zip, setZip] = React.useState("");
+    const [city, setCity] = React.useState("");
+    const [zipOptions, setZipOptions] = React.useState<[]>([]);
+    const [selectedZip, setSelectedZip] = React.useState<{} | null>(null);
 
     const signup = useSignup();
     const collections = useCollections();
+    const getCity = getCityByZip();
 
     React.useEffect(() => {
         collections.mutate({}, {
@@ -248,6 +254,27 @@ export default function RegisterPage() {
             setFieldError(name, validateField(name, val));
         }
     }
+    
+    const handleZip = (z: string) => {
+        setZip(z)
+        getCity.mutate({
+            zip: z,
+            country: country
+        }, {
+            onSuccess: (data) => {
+                console.log(data);
+                setZipOptions(data.data.zipcode);
+            },
+            onError: (err: any) => {
+            }
+        });
+    }
+
+     const handleZipSelect = (zipItem: Zipcode) => {
+        setSelectedZip(zipItem);
+        setZip(zipItem.zipcode); // update input
+        setCity(zipItem.city); // update city automatically
+    };
 
     const pwdInput = typeof password === "string" ? password : "";
     const rawScore = React.useMemo(() => computePwdScore(pwdInput), [pwdInput]);
@@ -268,8 +295,6 @@ export default function RegisterPage() {
         const lastName = typeof lastNameVal === "string" ? lastNameVal.trim() : "";
         const cityVal = form.get("city");
         const city = typeof cityVal === "string" ? cityVal.trim() : "";
-        const zipVal = form.get("zip");
-        const zip = typeof zipVal === "string" ? zipVal.trim() : "";
         const orgNameVal = form.get("orgName");
         const orgName = typeof orgNameVal === "string" ? orgNameVal.trim() : "";
         const websiteVal = form.get("website");
@@ -475,15 +500,22 @@ export default function RegisterPage() {
 
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                             <div>
-                                <label htmlFor="zip" className="mb-1 block text-sm font-medium">ZIP</label>
-                                <input id="zip" name="zip" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
+                                <SelectWithFilter label="Country" value={country} onChange={(v) => setCountry(v)} options={countries} />
+                            </div>
+                            <div>
+                                <ZipAutocomplete
+                                  zip={zip}
+                                  setZip={setZip}
+                                  city={city}
+                                  setCity={setCity}
+                                  zipOptions={zipOptions}
+                                  onZipChange={handleZip}
+                                  label="ZIP"
+                                />
                             </div>
                             <div>
                                 <label htmlFor="city" className="mb-1 block text-sm font-medium">City</label>
-                                <input id="city" name="city" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
-                            </div>
-                            <div>
-                                <SelectWithFilter label="Country" value={country} onChange={(v) => setCountry(v)} options={countries} />
+                                <input id="city" name="city" value={city} className="w-full rounded-xl border border-gray-300 px-3 py-2" />
                             </div>
                         </div>
 
