@@ -7,8 +7,10 @@ export function SelectWithFilter({
   value,
   onChange,
   options,
+  labelClass = "mb-1 block text-sm font-medium text-gray-700"
 }: {
   label: string;
+  labelClass: string;
   value: string;
   onChange: (v: string) => void;
   options: {
@@ -23,16 +25,16 @@ export function SelectWithFilter({
     query === ""
       ? options
       : options.filter((o) =>
-          o.name.toLowerCase().includes(query.toLowerCase())
-        );
+        o.name.toLowerCase().includes(query.toLowerCase())
+      );
 
-    const selected = options.find((op) => op.id === value);
+  const selected = options.find((op) => op.id == value);
 
   return (
     <div className="text-sm">
       <label
         htmlFor={label}
-        className="mb-1 block text-sm font-medium text-gray-700"
+        className={labelClass}
       >
         {label}
       </label>

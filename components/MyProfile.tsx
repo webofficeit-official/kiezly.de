@@ -9,6 +9,7 @@ import { FaCheckCircle, FaTrash } from "react-icons/fa";
 import { Listbox, Popover } from "@headlessui/react";
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay } from "date-fns";
+import { SelectWithFilter } from "./input/select";
 
 /**
  * Kiezly – User Creation & Profile (fixed)
@@ -206,6 +207,8 @@ export default function MyProfile() {
   const [timeWindows, setTimeWindows] = useState([]);
   const [jobCategories, setJobCategories] = React.useState([])
   const [languages, setLanguages] = React.useState([])
+  
+  const [countries, setCountries] = React.useState([])
 
   useEffect(() => {
     collections.mutate({}, {
@@ -214,6 +217,7 @@ export default function MyProfile() {
         setTimeWindows(data.data.timeWindows)
         setJobCategories(data.data.jobCategories)
         setLanguages(data.data.languages)
+        setCountries(data.data.countries)
       },
       onError: (err: any) => {
       }
@@ -227,7 +231,7 @@ export default function MyProfile() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="rounded-2xl border p-6 shadow-sm">
-          <OnboardingForm onChange={setData} weekdays={weekdays} timeWindows={timeWindows} jobCategories={jobCategories} languages={languages} />
+          <OnboardingForm onChange={setData} weekdays={weekdays} timeWindows={timeWindows} jobCategories={jobCategories} languages={languages} countries={countries} />
         </div>
         <div className="rounded-2xl border p-6 shadow-sm">
           <h2 className="mb-4 text-xl font-semibold">Live profile preview</h2>
@@ -248,12 +252,13 @@ export type OnboardingFormProps = {
   timeWindows: any[];
   jobCategories: { id: string; name: string; }[];
   languages: { id: string; name: string; }[];
+  countries: { id: string; name: string; }[];
 };
 
 // ----------------------------
 // Onboarding Form
 // ----------------------------
-function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, languages }: OnboardingFormProps) {
+function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, languages, countries }: OnboardingFormProps) {
   const updatePofile = updateProfile();
   const uploadMutation = uploadDocument();
   const uploadProfile = uploadProfilePic();
@@ -418,7 +423,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     if (!form.lastName) e.push("Last name required");
     if (!form.address.city) e.push("City required");
     // if (!form.categories.length) e.push("Select at least one category");
-    if (form.rate.hourlyEUR < 12) e.push("Hourly rate must be ≥ 12 € (min wage)");
+    // if (form.rate.hourlyEUR < 12) e.push("Hourly rate must be ≥ 12 € (min wage)");
     return e;
   }, [form]);
 
@@ -477,7 +482,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       work_permit: form.hasWorkPermit,
       issue_invoice: form.canInvoice,
       experience: form.experienceYears,
-      certificates: form.certificates.map(c => c).join(', '),
+      certificates: form.certificates?.map(c => c).join(', '),
       skills: form.categories,
       languages: form.languages,
       weekdays: form.availability.weekdays,
@@ -586,7 +591,8 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           <Input label="City" value={form.address.city || ""} onChange={(v) => update((d) => (d.address.city = v))} required />
           <Input label="District / Kiez" value={form.address.districtOrKiez || ""} onChange={(v) => update((d) => (d.address.districtOrKiez = v))} />
           <Input label="State" value={form.address.state || ""} onChange={(v) => update((d) => (d.address.state = v))} />
-          <Input label="Country" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} />
+          {/* <Input label="Country" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} /> */}
+          <SelectWithFilter label="Country" labelClass="mb-1 block text-gray-700" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} options={countries} />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="Latitude" type="number" value={form.availability.lat} onChange={(v) => update((d) => (d.availability.lat = Number(v)))} />
@@ -667,7 +673,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       </Section>
 
       <div className="flex items-center justify-between gap-4">
-        {/* <div className="text-sm text-red-600">{errors[0] || ""}</div> */}
+        <div className="text-sm text-red-600">{errors[0] || ""}</div>
         <button type="submit" className={classNames("rounded-xl px-5 py-2 text-white", errors.length ? "bg-gray-400" : "bg-black hover:bg-gray-800")} disabled={!!errors.length}>
           Update account
         </button>

@@ -532,7 +532,7 @@ export default function RegisterPage() {
 
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                             <div>
-                                <SelectWithFilter label="Country" value={country} onChange={(v) => setCountry(v)} options={countries} />
+                                <SelectWithFilter label="Country" labelClass="mb-1 block text-sm font-medium text-gray-700" value={country} onChange={(v) => setCountry(v)} options={countries} />
                             </div>
                             <div>
                                 <ZipAutocomplete
