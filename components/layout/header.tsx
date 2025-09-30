@@ -39,7 +39,7 @@ export default function Header() {
                     (
                       <>
                         <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
-                          {(user?.avatar_url || user?.avatar_url)?.[0].toUpperCase() || <User className="w-4 h-4" />}
+                          {(user?.avatar_url || "https://placehold.co/96x96")?.[0].toUpperCase() || <User className="w-4 h-4" />}
                         </div>
                       </>
                     )

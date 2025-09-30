@@ -1,9 +1,11 @@
 "use client";
 
-import { SignupData, useCollections, useSignup } from "@/lib/react-query/queries/user/account";
+import { getCityByZip, SignupData, useCollections, useSignup, Zipcode } from "@/lib/react-query/queries/user/account";
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
+import { SelectWithFilter } from "../input/select";
+import ZipAutocomplete from "../input/autocomplete";
 
 // Simple Link shim so this runs outside Next.js too
 function Link({ href = "#", className = "", children, ...props }) {
@@ -19,6 +21,15 @@ type Tag = {
     slug: string;
     name: string;
 };
+
+interface Country {
+  id: string | number;
+  name: string;
+}
+
+interface ApiResponse {
+  countries: Country[];
+}
 
 interface TagInputProps {
     name: string;
@@ -143,6 +154,7 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
                         aria-autocomplete="list"
                         aria-controls={`${name}-listbox`}
                         aria-expanded={open}
+                        autoComplete="off"
                     />
                 {/* </div> */}
             </div>
@@ -169,7 +181,6 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
     );
 }
 
-
 export default function RegisterPage() {
     const [role, setRole] = React.useState("helper");
     const [showPassword, setShowPassword] = React.useState(false);
@@ -180,20 +191,48 @@ export default function RegisterPage() {
     const [errors, setErrors] = React.useState({});
     const [skills, setSkills] = React.useState<Tag[]>([]);
     const [jobCategories, setJobCategories] = React.useState([])
+    const [countries, setCountries] = React.useState([])
+    const [country, setCountry] = React.useState(countries?.find(c => c.name == "Germany")?.id || "")
+    const [zip, setZip] = React.useState("");
+    const [city, setCity] = React.useState("");
+    const [state, setState] = React.useState("");
+    const [latitude, setLatitude] = React.useState("");
+    const [longitude, setLongitude] = React.useState("");
+    const [zipOptions, setZipOptions] = React.useState<[]>([]);
+    const [selectedZip, setSelectedZip] = React.useState<Zipcode>({
+        city,
+        state,
+        latitude,
+        longitude,
+        country_id: country,
+        zipcode: zip,
+        street: "",
+        id: 0,
+    });
 
     const signup = useSignup();
     const collections = useCollections();
+    const getCity = getCityByZip();
 
     React.useEffect(() => {
         collections.mutate({}, {
             onSuccess: (data) => {
                 console.log(data);
                 setJobCategories(data.data.jobCategories)
+                setCountries(data.data.countries)
+                setCountry((data.data as ApiResponse).countries?.find(c => c.name == "Germany")?.id || "")                
             },
             onError: (err: any) => {
             }
         });
     }, [])
+
+    React.useEffect(() => {
+        setCity(selectedZip?.city ?? "")
+        setState(selectedZip?.state ?? "")
+        setLatitude(selectedZip?.latitude ?? "")
+        setLongitude(selectedZip?.longitude ?? "")
+    }, [selectedZip])
 
     const setFieldError = React.useCallback((name, error) => {
         setErrors((prev) => ({ ...prev, [name]: error || undefined }));
@@ -245,6 +284,21 @@ export default function RegisterPage() {
             setFieldError(name, validateField(name, val));
         }
     }
+    
+    const handleZip = (z: string) => {
+        setZip(z)
+        getCity.mutate({
+            zip: z,
+            country: country
+        }, {
+            onSuccess: (data) => {
+                console.log(data);
+                setZipOptions(data.data.zipcode);
+            },
+            onError: (err: any) => {
+            }
+        });
+    }
 
     const pwdInput = typeof password === "string" ? password : "";
     const rawScore = React.useMemo(() => computePwdScore(pwdInput), [pwdInput]);
@@ -263,12 +317,6 @@ export default function RegisterPage() {
         const firstName = typeof firstNameVal === "string" ? firstNameVal.trim() : "";
         const lastNameVal = form.get("lastName");
         const lastName = typeof lastNameVal === "string" ? lastNameVal.trim() : "";
-        const cityVal = form.get("city");
-        const city = typeof cityVal === "string" ? cityVal.trim() : "";
-        const zipVal = form.get("zip");
-        const zip = typeof zipVal === "string" ? zipVal.trim() : "";
-        const countryVal = form.get("country");
-        const country = typeof countryVal === "string" ? countryVal.trim() : "";
         const orgNameVal = form.get("orgName");
         const orgName = typeof orgNameVal === "string" ? orgNameVal.trim() : "";
         const websiteVal = form.get("website");
@@ -310,11 +358,15 @@ export default function RegisterPage() {
                 city,
                 country,
                 zip,
+                state,
+                latitude,
+                longitude,
                 org_name: orgName,
                 website,
                 skills: skills.map((s) => s.id),
                 rate
             };
+            const formEl = e.currentTarget;
             signup.mutate(newPayload, {
                 onSuccess: (data) => {
                     toast.custom((t) => (
@@ -341,13 +393,19 @@ export default function RegisterPage() {
                     setErrors({});
                     setSubmitting(false);
                     setPassword("");
+                    setCity("")
+                    setState("")
+                    setLatitude("")
+                    setLongitude("")
+                    setZip("")
+                    setSkills([])
+                    formEl.reset();
                 },
                 onError: (err: any) => {
                     toast.error(err?.response?.data?.message || "Registration failed!")
                     setSubmitting(false);
                 }
             });
-            if (e.currentTarget && typeof e.currentTarget.reset === "function") e.currentTarget.reset();
         } catch (err) {
             setMessage({ type: "error", text: (err && err.message) || "Something went wrong." });
         } finally {
@@ -474,16 +532,22 @@ export default function RegisterPage() {
 
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                             <div>
+                                <SelectWithFilter label="Country" labelClass="mb-1 block text-sm font-medium text-gray-700" value={country} onChange={(v) => setCountry(v)} options={countries} />
+                            </div>
+                            <div>
+                                <ZipAutocomplete
+                                  zip={zip}
+                                  setZip={setZip}
+                                  selectedObject={selectedZip}
+                                  setSelectedObject={setSelectedZip}
+                                  zipOptions={zipOptions}
+                                  onZipChange={handleZip}
+                                  label="ZIP"
+                                />
+                            </div>
+                            <div>
                                 <label htmlFor="city" className="mb-1 block text-sm font-medium">City</label>
-                                <input id="city" name="city" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
-                            </div>
-                            <div>
-                                <label htmlFor="zip" className="mb-1 block text-sm font-medium">ZIP</label>
-                                <input id="zip" name="zip" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
-                            </div>
-                            <div>
-                                <label htmlFor="country" className="mb-1 block text-sm font-medium">Country</label>
-                                <input id="country" name="country" defaultValue="Germany" className="w-full rounded-xl border border-gray-300 px-3 py-2" />
+                                <input id="city" name="city" value={city} onChange={(e) => setCity(e.target.value)} className="w-full rounded-xl border border-gray-300 px-3 py-2" />
                             </div>
                         </div>
 
