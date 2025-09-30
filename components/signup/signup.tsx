@@ -228,10 +228,10 @@ export default function RegisterPage() {
     }, [])
 
     React.useEffect(() => {
-        setCity(selectedZip.city)
-        setState(selectedZip.state)
-        setLatitude(selectedZip.latitude)
-        setLongitude(selectedZip.longitude)
+        setCity(selectedZip?.city ?? "")
+        setState(selectedZip?.state ?? "")
+        setLatitude(selectedZip?.latitude ?? "")
+        setLongitude(selectedZip?.longitude ?? "")
     }, [selectedZip])
 
     const setFieldError = React.useCallback((name, error) => {
@@ -366,6 +366,7 @@ export default function RegisterPage() {
                 skills: skills.map((s) => s.id),
                 rate
             };
+            const formEl = e.currentTarget;
             signup.mutate(newPayload, {
                 onSuccess: (data) => {
                     toast.custom((t) => (
@@ -392,13 +393,19 @@ export default function RegisterPage() {
                     setErrors({});
                     setSubmitting(false);
                     setPassword("");
+                    setCity("")
+                    setState("")
+                    setLatitude("")
+                    setLongitude("")
+                    setZip("")
+                    setSkills([])
+                    formEl.reset();
                 },
                 onError: (err: any) => {
                     toast.error(err?.response?.data?.message || "Registration failed!")
                     setSubmitting(false);
                 }
             });
-            if (e.currentTarget && typeof e.currentTarget.reset === "function") e.currentTarget.reset();
         } catch (err) {
             setMessage({ type: "error", text: (err && err.message) || "Something went wrong." });
         } finally {
