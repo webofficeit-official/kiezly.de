@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/context/auth-context";
 import { Listbox } from "@headlessui/react";
 import { Button } from "../ui/button";
 
-export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired";
+export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
 export type Filters = {
     status?: Status
@@ -25,6 +25,7 @@ const perPageOptions = [
   { label: "Closed", value: "closed" },
   { label: "Rejected", value: "rejected" },
   { label: "Expired", value: "expired" },
+  { label: "Saved", value: "saved" },
 ];
 
 // ---- Utilities ----

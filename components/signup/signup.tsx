@@ -186,7 +186,6 @@ export default function RegisterPage() {
     const [zip, setZip] = React.useState("");
     const [city, setCity] = React.useState("");
     const [zipOptions, setZipOptions] = React.useState<[]>([]);
-    const [selectedZip, setSelectedZip] = React.useState<{} | null>(null);
 
     const signup = useSignup();
     const collections = useCollections();
@@ -270,12 +269,6 @@ export default function RegisterPage() {
         });
     }
 
-     const handleZipSelect = (zipItem: Zipcode) => {
-        setSelectedZip(zipItem);
-        setZip(zipItem.zipcode); // update input
-        setCity(zipItem.city); // update city automatically
-    };
-
     const pwdInput = typeof password === "string" ? password : "";
     const rawScore = React.useMemo(() => computePwdScore(pwdInput), [pwdInput]);
     const pwdScore = Number.isFinite(rawScore) ? Math.max(0, Math.min(5, rawScore)) : 0;
@@ -293,8 +286,6 @@ export default function RegisterPage() {
         const firstName = typeof firstNameVal === "string" ? firstNameVal.trim() : "";
         const lastNameVal = form.get("lastName");
         const lastName = typeof lastNameVal === "string" ? lastNameVal.trim() : "";
-        const cityVal = form.get("city");
-        const city = typeof cityVal === "string" ? cityVal.trim() : "";
         const orgNameVal = form.get("orgName");
         const orgName = typeof orgNameVal === "string" ? orgNameVal.trim() : "";
         const websiteVal = form.get("website");
