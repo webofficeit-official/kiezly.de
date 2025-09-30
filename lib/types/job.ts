@@ -2,7 +2,7 @@ export interface Job {
   id: string;
   client_id: string;
   title: string;
-  description: string;
+  description: any | null;
   category_id: number;
   price_type: string;
   price_value: string;
@@ -28,7 +28,7 @@ export interface Job {
   first_aid_verified: boolean | null;
   police_verified: boolean | null;
   verified: boolean;
-  slug: string;
+  slug?: string;
   tasks: any | null;
   requirements: any | null;
   work_mode: string;
@@ -56,7 +56,7 @@ export interface Job {
     name: string;
   }[];
 
-   languages?: {
+  languages?: {
     id: number;
     slug: string;
     name: string;
@@ -70,6 +70,7 @@ export type CreateJobData = {
   description: string;
   category_id: number | null;
   price_type: string;
+  price_value: number | null;
   price_min: number | null;
   price_max: number | null;
   currency: string;
@@ -92,6 +93,7 @@ export type CreateJobData = {
   tasks?: string;
   requirements?: string;
   languages?: number[];
+  slug?: string;
 };
 
 
@@ -123,13 +125,18 @@ export interface JobTag {
   name: string;
 }
 
+export interface JobMode {
+  key: string;
+  label: string;
+}
 
 export interface JobCollections {
   jobType: string[];
   jobExperience: string[];
   jobCategories: JobCategory[];
   jobTags: JobTag[];
-  languages:jobLanguage[]
+  languages: jobLanguage[]
+  jobMode: JobMode[];
 }
 
 export interface JobCollectionsResponse {

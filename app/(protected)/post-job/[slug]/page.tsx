@@ -8,18 +8,13 @@ import React, { Suspense } from "react";
 
 export default function Page() {
     const params = useParams();
-    const slug = params.slug;
+    const slugParam  = params.slug;
+    const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
+    const { data, isLoading, isError } = useJob(slug || ""); // use your React Query fetch
 
-    
-    // fetch the job
-     const { data, isLoading, isError } = useJob(slug as string); // use your React Query fetch
-
-
+    if (isLoading || !data) return <Loader />;
     if (isLoading) return <Loader />;
-    return (
-        <Suspense fallback={<Loader />}>
-            {/* <CreateJobForm />  */}
-            <CreateEditJobForm mode="edit" initialData={data} />
-        </Suspense>
-    );
+    return <CreateEditJobForm mode="edit" initialData={data}  />
+
+
 }
