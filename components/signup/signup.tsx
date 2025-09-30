@@ -22,6 +22,15 @@ type Tag = {
     name: string;
 };
 
+interface Country {
+  id: string | number;
+  name: string;
+}
+
+interface ApiResponse {
+  countries: Country[];
+}
+
 interface TagInputProps {
     name: string;
     label?: string;
@@ -145,6 +154,7 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
                         aria-autocomplete="list"
                         aria-controls={`${name}-listbox`}
                         aria-expanded={open}
+                        autoComplete="off"
                     />
                 {/* </div> */}
             </div>
@@ -185,7 +195,20 @@ export default function RegisterPage() {
     const [country, setCountry] = React.useState(countries?.find(c => c.name == "Germany")?.id || "")
     const [zip, setZip] = React.useState("");
     const [city, setCity] = React.useState("");
+    const [state, setState] = React.useState("");
+    const [latitude, setLatitude] = React.useState("");
+    const [longitude, setLongitude] = React.useState("");
     const [zipOptions, setZipOptions] = React.useState<[]>([]);
+    const [selectedZip, setSelectedZip] = React.useState<Zipcode>({
+        city,
+        state,
+        latitude,
+        longitude,
+        country_id: country,
+        zipcode: zip,
+        street: "",
+        id: 0,
+    });
 
     const signup = useSignup();
     const collections = useCollections();
@@ -197,11 +220,19 @@ export default function RegisterPage() {
                 console.log(data);
                 setJobCategories(data.data.jobCategories)
                 setCountries(data.data.countries)
+                setCountry((data.data as ApiResponse).countries?.find(c => c.name == "Germany")?.id || "")                
             },
             onError: (err: any) => {
             }
         });
     }, [])
+
+    React.useEffect(() => {
+        setCity(selectedZip.city)
+        setState(selectedZip.state)
+        setLatitude(selectedZip.latitude)
+        setLongitude(selectedZip.longitude)
+    }, [selectedZip])
 
     const setFieldError = React.useCallback((name, error) => {
         setErrors((prev) => ({ ...prev, [name]: error || undefined }));
@@ -327,6 +358,9 @@ export default function RegisterPage() {
                 city,
                 country,
                 zip,
+                state,
+                latitude,
+                longitude,
                 org_name: orgName,
                 website,
                 skills: skills.map((s) => s.id),
@@ -497,8 +531,8 @@ export default function RegisterPage() {
                                 <ZipAutocomplete
                                   zip={zip}
                                   setZip={setZip}
-                                  city={city}
-                                  setCity={setCity}
+                                  selectedObject={selectedZip}
+                                  setSelectedObject={setSelectedZip}
                                   zipOptions={zipOptions}
                                   onZipChange={handleZip}
                                   label="ZIP"
@@ -506,7 +540,7 @@ export default function RegisterPage() {
                             </div>
                             <div>
                                 <label htmlFor="city" className="mb-1 block text-sm font-medium">City</label>
-                                <input id="city" name="city" value={city} className="w-full rounded-xl border border-gray-300 px-3 py-2" />
+                                <input id="city" name="city" value={city} onChange={(e) => setCity(e.target.value)} className="w-full rounded-xl border border-gray-300 px-3 py-2" />
                             </div>
                         </div>
 

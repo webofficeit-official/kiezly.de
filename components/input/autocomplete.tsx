@@ -6,8 +6,8 @@ interface ZipAutocompleteProps {
   label?: string;
   zip: string;
   setZip: (zip: string) => void;
-  city: string;
-  setCity: (city: string) => void;
+  selectedObject: object;
+  setSelectedObject: (setZip: object) => void;
   zipOptions: Zipcode[];
   onZipChange: (zip: string) => void; // triggered on typing
   placeholder?: string;
@@ -17,8 +17,8 @@ export default function ZipAutocomplete({
   label = "ZIP",
   zip,
   setZip,
-  city,
-  setCity,
+  selectedObject,
+  setSelectedObject,
   zipOptions,
   onZipChange,
   placeholder = "Enter ZIP code",
@@ -29,8 +29,7 @@ export default function ZipAutocomplete({
         value={zip}
         onChange={(selected: string) => {
           setZip(selected);
-          const selectedZip = zipOptions.find((z) => z.zipcode === selected);
-          if (selectedZip) setCity(selectedZip.city);
+          setSelectedObject(zipOptions.find((z) => z.zipcode === selected));
         }}
       >
         {label && (
@@ -45,6 +44,7 @@ export default function ZipAutocomplete({
             onChange={(e) => onZipChange(e.target.value)}
             displayValue={(zip: string) => zip}
             placeholder={placeholder}
+            autoComplete="off"
           />
 
           <Combobox.Options className="absolute z-10 mt-1 w-full overflow-auto rounded-xl bg-white border border-gray-300 shadow-lg text-sm">

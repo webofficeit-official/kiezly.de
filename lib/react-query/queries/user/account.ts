@@ -9,6 +9,9 @@ export interface SignupData {
   role: string;
   city: string;
   zip: string;
+  state: string;
+  latitude: string;
+  longitude: string;
   country: string;
   org_name: string;
   website: string;
