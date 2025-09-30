@@ -1,12 +1,78 @@
 export interface Job {
   id: string;
+  client_id: string;
+  title: string;
+  description: any | null;
+  category_id: number;
+  price_type: string;
+  price_value: string;
+  currency: string | null;
+  status: string;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  postal_code: string | null;
+  street: string | null;
+  lat: number | null;
+  lng: number | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  created_at: string;
+  updated_at: string;
+  geom: any | null;
+  subtitle: string;
+  price_min: string;
+  price_max: string;
+  job_type: string[];
+  job_experience: string[];
+  first_aid_verified: boolean | null;
+  police_verified: boolean | null;
+  verified: boolean;
+  slug?: string;
+  tasks: any | null;
+  requirements: any | null;
+  work_mode: string;
+  rate_hourly: number | null;
+  budget_fixed: number | null;
+  rrule: any | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  contact_link: string | null;
+  contact_method: string | null;
+  views_count: number;
+  saves_count: number;
+  reports_count: number;
+  published_at: string | null;
+  expires_at: string | null;
+
+  // Add these:
+  category?: {
+    id: number;
+    slug: string;
+    name: string;
+  };
+  tags?: {
+    id: number;
+    name: string;
+  }[];
+
+  languages?: {
+    id: number;
+    slug: string;
+    name: string;
+  }[];
+}
+
+
+export type CreateJobData = {
   title: string;
   subtitle: string;
   description: string;
   category_id: number | null;
   price_type: string;
-  price_value_min: string;
-  price_value_max: string;
+  price_value: number | null;
+  price_min: number | null;
+  price_max: number | null;
   currency: string;
   country: string;
   state: string;
@@ -15,41 +81,20 @@ export interface Job {
   street: string;
   lat: string;
   lng: string;
-  starts_at: string; // ISO date
-  ends_at: string;   // ISO date
-  job_experience: string;
-  job_type: string;
+  starts_at?: string;
+  ends_at?: string;
+  job_experience: string[];
+  job_type: string[];
   first_aid_verified: boolean;
   police_verified: boolean;
   verified: boolean;
-}
-export interface CreateJobData {
-  title: string;
-  subtitle: string;
-  description: string;
-  category_id: number;              
-  tag_ids: number[];                
-  price_type: string;   
-  price_min: number;               
-  price_max: number;                
-  currency: string;
-  country: string;
-  state: string;
-  city: string;
-  postal_code: string;
-  street: string;
-  lat: string;                      
-  lng: string;
-  starts_at: string;                
-  ends_at: string;                  
-  job_type: string[];               
-  job_experience: string[];         
-  first_aid_verified: boolean;
-  police_verified: boolean;
-  verified?:boolean;
-  status: "open" | "closed" | "draft"; 
-}
-
+  status: "open" | "closed";
+  tag_ids: number[];
+  tasks?: string;
+  requirements?: string;
+  languages?: number[];
+  slug?: string;
+};
 
 
 export interface CreateJobResponse {
@@ -70,17 +115,28 @@ export interface JobCategory {
   name: string;
 }
 
+export interface jobLanguage {
+  id: number;
+  name: string;
+}
+
 export interface JobTag {
   id: number;
   name: string;
 }
 
+export interface JobMode {
+  key: string;
+  label: string;
+}
 
 export interface JobCollections {
-  jobType: string[];         
-  jobExperience: string[];   
+  jobType: string[];
+  jobExperience: string[];
   jobCategories: JobCategory[];
   jobTags: JobTag[];
+  languages: jobLanguage[]
+  jobMode: JobMode[];
 }
 
 export interface JobCollectionsResponse {
@@ -94,6 +150,7 @@ export interface JobList {
   id: string;
   client_id: string;
   title: string;
+  slug: string;
   subtitle: string;
   description: string; // HTML string
   category_id: number;
@@ -121,7 +178,7 @@ export interface JobList {
   first_aid_verified: boolean;
   police_verified: boolean;
   verified: boolean;
-  distance?:number;
+  distance?: number;
   tags: {
     id: number;
     slug: string;
@@ -141,3 +198,5 @@ export type JobApiResponse = {
     total_pages: number;
   };
 };
+
+

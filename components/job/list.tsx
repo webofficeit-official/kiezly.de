@@ -2,11 +2,14 @@
 import { useJobCollections, useJobs } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
 import dayjs from "dayjs";
-import { Clock } from "lucide-react";
+import { Bookmark, BookmarkCheck, BookmarkCheckIcon, Check, ChevronDown, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { DateInput } from "./add";
 import { useAuth } from "@/lib/context/auth-context";
+import { Listbox } from "@headlessui/react";
+import { Button } from "../ui/button";
+import { addJobAsFavorite, getSavedJobs, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
 // ---- Types ----
 export type SortBy = "new" | "price_desc" | "price_asc";
 export type DatePosted = "any" | "1" | "7" | "30";
@@ -46,6 +49,26 @@ const DEFAULT_FILTERS: Filters = {
     starts_at: undefined,
     ends_at: undefined,
 };
+
+const postedOptions = [
+  { label: "Any time", value: "any" },
+  { label: "Last 24 hours", value: "1" },
+  { label: "Last 7 days", value: "7" },
+  { label: "Last 30 days", value: "30" },
+];
+
+const sortByOptions = [
+  { label: "Newest", value: "new" },
+  { label: "Pay: High → Low", value: "price_desc" },
+  { label: "Pay: Low → High", value: "price_asc" },
+];
+
+const perPageOptions = [
+  { label: "5", value: "5" },
+  { label: "10", value: "10" },
+  { label: "25", value: "25" },
+  { label: "50", value: "50" },
+];
 
 // ---- Utilities ----
 export const toQuery = (f: Filters) => {
@@ -89,6 +112,15 @@ export const fromQuery = (qs: string): Filters => {
         ends_at: p.get("ends_at") || undefined,
     };
 };
+
+const isNew = (created_at: string) => {
+  if (!created_at) return false;
+  const createdAt = new Date(created_at).getTime();
+  const now = Date.now();
+  const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
+  return diffHours <= 72; // less than or equal 72 hours
+};
+
 
 function useDebounced<T>(value: T, delay = 300) {
     const [v, setV] = useState(value);
@@ -183,6 +215,8 @@ export default function JobFilterPage({
     const { data, isLoading, error } = useJobs(apiFilters);
     const total = data?.data?.total_items ?? 0;
     const totalPages = data?.data?.total_pages ?? 1;
+    
+    const [savedJobs, setSavedJobs] = useState([]);
 
     const canModifyHistory = useCanModifyHistory();
 
@@ -197,6 +231,11 @@ export default function JobFilterPage({
         setPage(1);
     }, [debouncedFilters]);
 
+    useEffect(() => {
+        getSavedJobs().then((data) => {
+            setSavedJobs(data.jobs)
+        }).catch((err) => console.log(err))
+    }, [])
 
     useEffect(() => {
         onChange?.(filters);
@@ -264,6 +303,26 @@ export default function JobFilterPage({
         if (sort !== "new") c++;
         return c;
     }, [filters]);
+
+    const handleSaveJob = async (jobId: string) => {
+        try {
+            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
+            await addJobAsFavorite({ jobId });
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+        }
+    };
+
+    const handleUnSaveJob = async (jobId: string) => {
+        try {
+            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+            await unsaveJobAsFavorite(jobId);
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -466,18 +525,12 @@ export default function JobFilterPage({
 
                         {/* Date posted */}
                         <div>
-                            <label htmlFor="posted" className="block text-sm font-medium">Date posted</label>
-                            <select
-                                id="posted"
+                            <Select
+                                label="Date posted"
                                 value={filters.posted}
-                                onChange={(e) => update({ posted: e.target.value as DatePosted })}
-                                className="mt-2 w-full rounded-xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                            >
-                                <option value="any">Any time</option>
-                                <option value="1">Last 24 hours</option>
-                                <option value="7">Last 7 days</option>
-                                <option value="30">Last 30 days</option>
-                            </select>
+                                onChange={(v: string) => update({ posted: v as DatePosted })}
+                                options={postedOptions}
+                            />
                         </div>
 
 
@@ -485,17 +538,12 @@ export default function JobFilterPage({
 
                         {/* Sort by */}
                         <div>
-                            <label htmlFor="sort" className="block text-sm font-medium">Sort by</label>
-                            <select
-                                id="sort"
+                            <Select
+                                label="Sort by"
                                 value={filters.sort}
-                                onChange={(e) => update({ sort: e.target.value as SortBy })}
-                                className="mt-2 w-full rounded-xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                            >
-                                <option value="new">Newest</option>
-                                <option value="price_desc">Pay: High → Low</option>
-                                <option value="price_asc">Pay: Low → High</option>
-                            </select>
+                                onChange={(v: string) => update({ sort: v as SortBy })}
+                                options={sortByOptions}
+                            />
                         </div>
 
                         {/* Actions */}
@@ -527,81 +575,109 @@ export default function JobFilterPage({
                             <p className="text-sm text-gray-600">Page {page} of {totalPages}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <label className="text-sm text-gray-700" htmlFor="pageSize">Per page</label>
-                            <select
-                                id="pageSize"
-                                value={localPageSize}
-                                onChange={(e) => {
-                                    const newSize = Number(e.target.value);
-                                    setLocalPageSize(newSize);  // update local state
-                                    setPage(1);                 // reset page to 1
-                                }}
-                                // className="rounded-xl border px-3 py-2"
-                                // disabled
-                                title="pageSize is set via prop"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={50}>50</option>
-                            </select>
+                            <Select
+                              label="Per page"
+                              value={String(localPageSize)}
+                              onChange={(v: string) => {
+                                const newSize = Number(v);
+                                setLocalPageSize(newSize); // update local state
+                                setPage(1);                 // reset page to 1
+                              }}
+                              options={perPageOptions}
+                            />
                         </div>
                     </div>
 
                     {/* Job cards */}
                     <div className="grid grid-cols-1 gap-4">
                         {pageSlice.map((job) => (
-                            <article key={job.id} className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                            <article
+                                key={job.id}
+                                className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
+                            >
+                                {/* Main content */}
                                 <div className="flex-1 min-w-0">
                                     <h3 className="text-base sm:text-lg font-semibold truncate">{job.title}</h3>
                                     {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
+
                                     <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
                                         <span className="inline-flex items-center">
-                                            {job?.price_min && job?.price_max
+                                            {job?.price_type === "range" && job?.price_min && job?.price_max
                                                 ? `${job.currency} ${job.price_min} – ${job.price_max}`
-                                                : job?.price_min
-                                                    ? `${job.currency} ${job.price_min}+`
-                                                    : job?.price_max
-                                                        ? `Up to ${job.currency} ${job.price_max}`
-                                                        : "Not specified"}
-                                            {job?.price_type && <span className="inline-flex items-center gap-1">/ {job?.price_type}</span>}
+                                                : job?.price_value
+                                                ? `${job.currency} ${job.price_value}`
+                                                : "Not specified"}
+                                            {job?.price_type && (
+                                                <span className="inline-flex items-center gap-1">/ {job.price_type}</span>
+                                            )}
                                         </span>
-                                        <span>•   {[
-                                            job?.street,
-                                            job?.city,
-                                            job?.state,
-                                            job?.postal_code,
-                                            job?.country
-                                        ].filter(Boolean).join(", ")}</span>
-                                        {job?.distance && (<span>• {(job.distance / 1000).toFixed(2)} km away</span>)}
-                                        {job?.category_name && (<span>• {job?.category_name}</span>)}
-                                        {job?.job_type && (<span>• {job.job_type.join(",")}</span>)}
-                                        {job?.job_experience.length > 0 && (<span>• {job.job_experience.join(",")}</span>)}
+                                        <span>
+                                            •{" "}
+                                            {[job?.street, job?.city, job?.state, job?.postal_code, job?.country]
+                                              .filter(Boolean)
+                                              .join(", ")}
+                                        </span>
+                                        {job?.distance && <span>• {(job.distance / 1000).toFixed(2)} km away</span>}
+                                        {job?.category_name && <span>• {job.category_name}</span>}
+                                        {job?.job_type && <span>• {job.job_type.join(", ")}</span>}
+                                        {job?.job_experience.length > 0 && (
+                                            <span>• {job.job_experience.join(", ")}</span>
+                                        )}
                                         {job?.starts_at && (
                                             <span className="inline-flex items-center gap-1">
-                                                <Clock className="h-3 w-3" /> Start: {dayjs(job?.starts_at).format("MMM D, YYYY")}
+                                                <Clock className="h-3 w-3" /> Start: {dayjs(job.starts_at).format("MMM D, YYYY")}
                                             </span>
                                         )}
-
                                         {job?.ends_at && (
                                             <span className="inline-flex items-center gap-1">
-                                                <Clock className="h-3 w-3" /> End: {dayjs(job?.ends_at).format("MMM D, YYYY")}
+                                                <Clock className="h-3 w-3" /> End: {dayjs(job.ends_at).format("MMM D, YYYY")}
                                             </span>
                                         )}
                                     </div>
+                                    
                                     {/* Job tag badges */}
-
                                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
-
-                                        {job.tags?.length > 0 && job.tags.map((tag) => (
-                                            <span key={tag.id} className="px-2 py-1 bg-gray-100 rounded-full">{tag.name}</span>
-                                        ))}
+                                        {job.tags?.length > 0 &&
+                                            job.tags.map((tag) => (
+                                                <span key={tag.id} className="px-2 py-1 bg-gray-100 rounded-full">
+                                                    {tag.name}
+                                                </span>
+                                            )
+                                        )}
                                     </div>
-
-                                    <div className="mt-2 text-sm text-gray-600 line-clamp-2" dangerouslySetInnerHTML={{ __html: job.description }} />
+                                      
+                                    <div
+                                        className="mt-2 text-sm text-gray-600 line-clamp-2"
+                                        dangerouslySetInnerHTML={{ __html: job.description }}
+                                    />
                                 </div>
-                                <div className="sm:text-right">
-                                    <div className="text-xs text-gray-500">Posted {new Date(job?.created_at).toLocaleDateString()}</div>
-                                    <button className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50" onClick={() => router.push(`/jobs/details/${job.id}`)}>View</button>
+                                    
+                                {/* Right-side container: posted date top, button bottom */}
+                                <div className="flex flex-col justify-between items-end min-h-[80px]">
+                                    <div className="text-xs text-gray-500">
+                                        {isNew(job?.created_at) ? (
+                                            <Button variant="outline" className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"><span className="h-3">New </span></Button>
+                                        ) : (
+                                            "Posted " + new Date(job?.created_at).toLocaleDateString()
+                                        )}
+                                        {savedJobs.some((j) => j.id === job.id) ? (
+                                            <Button
+                                                variant="default"
+                                                className="rounded-xl px-2 py-1 text-xs flex items-center gap-1 bg-green-50 text-green-700 border border-green-200"
+                                                onClick={() => handleUnSaveJob(job.id)}
+                                            >
+                                                <BookmarkCheck className="h-3 w-3" />
+                                            </Button>
+                                        ) : (
+                                            <Button variant="outline" className="rounded-xl px-2 py-1 text-xs flex items-center gap-1" onClick={() => handleSaveJob(job.id)}><Bookmark className="h-3 w-3" /></Button>
+                                        )}
+                                    </div>
+                                    <button
+                                      className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+                                      onClick={() => router.push(`/jobs/${job.slug}`)}
+                                    >
+                                        View
+                                    </button>
                                 </div>
                             </article>
                         ))}
@@ -662,4 +738,50 @@ export default function JobFilterPage({
             </div>
         </div>
     );
+}
+
+type Option = { label: string; value: string };
+
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Option[];
+}) {
+  return (
+    <div className="text-sm">
+      <span className="mb-1 block text-gray-700">{label}</span>
+
+      <Listbox value={value} onChange={onChange}>
+        <div className="relative">
+          <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+            {options.find((o) => o.value === value)?.label || "Select"}
+            <ChevronDown className="h-4 w-4 text-gray-400" />
+          </Listbox.Button>
+
+          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+            {options.map((o) => (
+              <Listbox.Option
+                key={o.value}
+                value={o.value}
+                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
+              >
+                {({ selected }) => (
+                  <div className="flex items-center justify-between">
+                    <span>{o.label}</span>
+                    {selected && <Check className="h-4 w-4 text-gray-600" />}
+                  </div>
+                )}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </div>
+      </Listbox>
+    </div>
+  );
 }

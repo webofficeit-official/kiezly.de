@@ -7,11 +7,28 @@ export const createJobApi = async (job: CreateJobData): Promise<CreateJobRespons
   return data;
 };
 
+export const updateJobApi = async (
+  jobId: string,
+  job: Partial<CreateJobData>
+): Promise<CreateJobResponse> => {
+  try {
+    const { data } = await apiClient.patch(`/jobs/${jobId}`, job);
+    return data;
+  } catch (err: any) {
+    console.error(err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const generateSlugApi = async (title: string): Promise<{ slug: string }> => {
+  const { data } = await apiClient.post("/jobs/generate-slug", { title });
+  return data;
+};
 
 // Get job by ID
 export const getJobApi = async (id: string) => {
-    const res = await apiClient.get(`/jobs/${id}`);
-    return res.data;
+  const res = await apiClient.get(`/jobs/${id}`);
+  return res.data;
 };
 
 export async function getJobCollectionsApi(): Promise<JobCollectionsResponse["data"]> {
@@ -23,5 +40,10 @@ export async function getJobCollectionsApi(): Promise<JobCollectionsResponse["da
 
 export const getJobsApi = async (params: Record<string, any>) => {
   const response = await apiClient.get("/jobs", { params });
+  return response.data;
+};
+
+export const getMyJobsApi = async (params: Record<string, any>) => {
+  const response = await apiClient.get("/jobs/myJobs", { params });
   return response.data;
 };
