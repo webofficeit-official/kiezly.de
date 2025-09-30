@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/context/auth-context";
-import { useCollections } from "@/lib/react-query/queries/user/account";
+import { getCityByZip, useCollections, Zipcode } from "@/lib/react-query/queries/user/account";
 import { getProfile, updateProfile, uploadDocument, uploadProfilePic } from "@/lib/react-query/queries/user/profile";
 import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import { Listbox, Popover } from "@headlessui/react";
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay } from "date-fns";
 import { SelectWithFilter } from "./input/select";
+import ZipAutocomplete from "./input/autocomplete";
 
 /**
  * Kiezly – User Creation & Profile (fixed)
@@ -264,6 +265,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
   const uploadProfile = uploadProfilePic();
 
   const myProfile = useAuth()
+      const getCity = getCityByZip();
   
   let formatted = ''
   if(myProfile?.user?.date_of_birth) {
@@ -410,6 +412,54 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       facebook: myProfile?.user?.social_links?.find((link) => link.platform === "facebook")?.url || "",
     },
   });
+      const [zipOptions, setZipOptions] = React.useState<[]>([]);
+      const [selectedZip, setSelectedZip] = React.useState<Zipcode>({
+          city: form?.address?.city ?? myProfile?.user?.city,
+          state: form?.address?.state ?? myProfile?.user?.state,
+          latitude: `${form?.availability?.lat ?? myProfile?.user?.lat}`,
+          longitude: `${form?.availability?.lng ?? myProfile?.user?.lng}`,
+          country_id: Number(form?.address?.country ?? myProfile?.user?.country),
+          zipcode: form?.address?.postcode ?? myProfile?.user?.postal_code,
+          street:  myProfile?.user?.street,
+          id: 0,
+      });
+    
+    const handleZip = (z: string) => {
+        setForm({
+          ...form,
+          address: {
+            ...form.address,
+            postcode: z
+          }
+        })
+        getCity.mutate({
+            zip: z,
+            country: form.address.country
+        }, {
+            onSuccess: (data) => {
+                setZipOptions(data.data.zipcode);
+            },
+            onError: (err: any) => {
+            }
+        });
+    }
+    
+        React.useEffect(() => {
+          setForm({
+            ...form,
+            address: {
+              ...form.address,
+              city: selectedZip?.city ?? form.address.city,
+              state: selectedZip?.state ?? form.address.state,
+              districtOrKiez: selectedZip?.city ?? form.address.districtOrKiez,
+            },
+            availability: {
+              ...form.availability,
+              lat: Number(selectedZip?.latitude) ?? form.availability.lat,
+              lng: Number(selectedZip?.longitude) ?? form.availability.lng,
+            }
+          })
+        }, [selectedZip])
 
   // push form updates to parent in real-time (also triggers once on mount)
   useEffect(() => {
@@ -587,7 +637,17 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       <Section title="Location">
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="Street" value={form.address.street || ""} onChange={(v) => update((d) => (d.address.street = v))} />
-          <Input label="Postcode" value={form.address.postcode || ""} onChange={(v) => update((d) => (d.address.postcode = v))} />
+          <ZipAutocomplete
+            zip={form.address.postcode}
+            setZip={(v) => update((d) => (d.address.postcode = v))}
+            selectedObject={selectedZip}
+            setSelectedObject={setSelectedZip}
+            zipOptions={zipOptions}
+            onZipChange={handleZip}
+            label="Postcode"
+            labelClass="mb-1 block text-gray-700 text-sm"
+            className="w-full rounded-xl border px-2 py-1.5 outline-none ring-0 focus:border-black"
+          />
           <Input label="City" value={form.address.city || ""} onChange={(v) => update((d) => (d.address.city = v))} required />
           <Input label="District / Kiez" value={form.address.districtOrKiez || ""} onChange={(v) => update((d) => (d.address.districtOrKiez = v))} />
           <Input label="State" value={form.address.state || ""} onChange={(v) => update((d) => (d.address.state = v))} />

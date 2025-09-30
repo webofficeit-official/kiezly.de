@@ -11,6 +11,8 @@ interface ZipAutocompleteProps {
   zipOptions: Zipcode[];
   onZipChange: (zip: string) => void; // triggered on typing
   placeholder?: string;
+  labelClass?: string
+  className?: string
 }
 
 export default function ZipAutocomplete({
@@ -22,6 +24,8 @@ export default function ZipAutocomplete({
   zipOptions,
   onZipChange,
   placeholder = "Enter ZIP code",
+  labelClass = "mb-1 block text-sm font-medium",
+  className = "w-full rounded-xl border border-gray-300 px-3 py-2"
 }: ZipAutocompleteProps) {
   return (
     <div className="w-full">
@@ -33,14 +37,14 @@ export default function ZipAutocomplete({
         }}
       >
         {label && (
-          <Combobox.Label className="mb-1 block text-sm font-medium">
+          <Combobox.Label className={labelClass}>
             {label}
           </Combobox.Label>
         )}
 
         <div className="relative">
           <Combobox.Input
-            className="w-full rounded-xl border border-gray-300 px-3 py-2"
+            className={className}
             onChange={(e) => onZipChange(e.target.value)}
             displayValue={(zip: string) => zip}
             placeholder={placeholder}
