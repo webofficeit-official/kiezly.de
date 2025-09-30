@@ -232,10 +232,17 @@ export default function JobFilterPage({
     }, [debouncedFilters]);
 
     useEffect(() => {
-        getSavedJobs().then((data) => {
-            setSavedJobs(data.jobs)
-        }).catch((err) => console.log(err))
-    }, [])
+        if(user) {
+            getSavedJobs().then((data) => {
+                setSavedJobs(data.jobs)
+            }).catch((err) => console.log(err))
+        } else {
+            const localStoredJobs = localStorage.getItem("saved-jobs")
+            if(localStoredJobs) {
+                setSavedJobs(JSON.parse(localStoredJobs))
+            }
+        }
+    }, [user])
 
     useEffect(() => {
         onChange?.(filters);
@@ -307,7 +314,16 @@ export default function JobFilterPage({
     const handleSaveJob = async (jobId: string) => {
         try {
             setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
-            await addJobAsFavorite({ jobId });
+            if(user) {
+                await addJobAsFavorite({ jobId });
+            } else {
+                const localStoredJobs = localStorage.getItem("saved-jobs")
+                let savedJobsLocal = []
+                if(localStoredJobs) {
+                    savedJobsLocal = JSON.parse(localStoredJobs)
+                }
+                localStorage.setItem('saved-jobs', JSON.stringify([...savedJobsLocal, { id: jobId }]))
+            }
         } catch (error) {
             console.error("Failed to save job:", error);
             setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
@@ -317,7 +333,16 @@ export default function JobFilterPage({
     const handleUnSaveJob = async (jobId: string) => {
         try {
             setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
-            await unsaveJobAsFavorite(jobId);
+            if(user) {
+                await unsaveJobAsFavorite(jobId);
+            } else {
+                const localStoredJobs = localStorage.getItem("saved-jobs")
+                let savedJobsLocal = []
+                if(localStoredJobs) {
+                    savedJobsLocal = JSON.parse(localStoredJobs)
+                }
+                localStorage.setItem('saved-jobs', JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId)))
+            }
         } catch (error) {
             console.error("Failed to save job:", error);
             setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
