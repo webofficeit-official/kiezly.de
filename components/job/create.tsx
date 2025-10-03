@@ -1,6 +1,6 @@
 "use client";
 import { CreateJobData, JobMode, JobResponse } from "@/lib/types/job";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../shared-ui/input/input";
 import { Select } from "../shared-ui/custom-select/custom-select";
 import { RichTextEditor } from "../shared-ui/rich-text-editor/rich-text-editor";
@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import Switch from "../shared-ui/switch/switch";
 import { useCollection, useZipcodes } from "@/lib/react-query/queries/collection";
 
-import { Zipcode } from "@/lib/types/zip-type";
 
 /* ----------------------------- Type Definitions ---------------------------- */
 export interface ZipOption {
@@ -156,16 +155,16 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
     const [titleValue, setTitleValue] = useState(formData.title || "");
     const [slugEdited, setSlugEdited] = useState(false);
     const [zipOptions, setZipOptions] = useState<ZipOption[]>([]);
-    const [countryCode, setCountryId] = useState<string | undefined>(undefined);
+    const [countryCode, setCountryCode] = useState<string | undefined>(undefined);
 
 
 
     const { mutateAsync } = useZipcodes();
 
     const fetchZipOptions = async (query: string, countryId?: string): Promise<ZipOption[]> => {
-        // if (!query || !countryId) return [];
-        console.log(query)
-        const res = await mutateAsync({ zip: query, country: countryCode ? countryCode : countryId }); // pass country_id to backend
+
+
+        const res = await mutateAsync({ zip: query, country: countryId }); // pass country_id to backend
 
         const list: ZipOption[] = res.data.zipcode.map((z: any) => ({
             id: String(z.id),
@@ -187,17 +186,20 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
         if (mode === "edit" && initialData && collections) {
             const job = initialData.job;
 
-            const tag_idsdata = (job?.tags || []).map(t => ({
-                id: t.id.toString(),
-                name: t.name
-            }))
+            const selectedCountry = countries.find(c => c.name === job.country);
+            if (selectedCountry) {
+                setCountryCode(selectedCountry.id.toString()); // for fetchZipOptions
+                fetchZipOptions(job.postal_code ? job.postal_code : null, selectedCountry.id.toString())
+            }
             setFormData({
                 title: job.title || "",
                 subtitle: job.subtitle || "",
                 description: job.description || "",
                 tasks: job.tasks || "",
                 requirements: job.requirements || "",
-                country: job.country || "",
+                country: selectedCountry
+                    ? { id: selectedCountry.id.toString(), name: selectedCountry.name }
+                    : null,
                 state: job.state || "",
                 city: job.city || "",
                 postal_code: job.postal_code || "",
@@ -263,7 +265,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
             });
         }
 
-    }, [mode, initialData, collections?.jobType, collections?.jobExperience, collections?.jobTags, collections?.languages, collections?.jobMode]);
+    }, [mode, initialData, collections?.jobType, collections?.jobExperience, collections?.jobTags, collections?.languages, collections?.jobMode, countries]);
 
 
 
@@ -350,28 +352,11 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                             label: "Country",
                             type: "select",
                             options: countries.map(c => ({ id: c.id.toString(), name: c.name })),
-                            value: formData.country,
+                            value: (() => {
+                                const selected = countries.find(c => c.name === formData.country);
+                                return selected ? selected.id.toString() : "";
+                            })(),
                             required: true,
-                            onChangeValue: val => {
-
-                                const selectedCountry = countries.find(c => String(c.id) === String(val));
-
-
-                                if (!selectedCountry) return;
-
-                                setCountryId(selectedCountry.id.toString()); // number
-                                fetchZipOptions(null, selectedCountry?.id.toString());
-
-                                update(d => {
-                                    d.country = String(selectedCountry?.name);
-                                    d.postal_code = null;
-                                    d.street = "";
-                                    d.city = "";
-                                    d.state = "";
-                                    d.lat = "";
-                                    d.lng = "";
-                                });
-                            }
 
                         }
 
@@ -383,10 +368,15 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                             component: DynamicAutocomplete,
                             placeholder: "Type postal code",
                             value: formData.postal_code,
-                            fetchOptions: (query: string) => fetchZipOptions(query, countryCode),
+                            // fetchOptions: (query: string) => fetchZipOptions(query, countryCode),
                             onChangeValue: val => update(d => (d.postal_code = val)),
                             onSelectOption: (zip: ZipOption) => {
+                                const selectedCountry = countries.find(
+                                    c => String(c.id) === String(zip.country_id)
+                                );
+
                                 update(d => {
+                                    // d.country = selectedCountry ? selectedCountry.name : "";
                                     d.postal_code = zip.zipcode;
                                     d.street = zip.street || "";
                                     d.city = zip.city || "";
@@ -529,7 +519,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                     ]
                 }
             ]
-        }, [collections]
+        }, [collections, countries]
     );
 
 
@@ -604,47 +594,90 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
 
+    // function normalizeJobPayload(data: Record<string, any>) {
+    //     return {
+    //         ...data,
+    //         // category_id -> number
+    //         category_id: data.category_id
+    //             ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
+    //             : null,
+
+    //         // tag_ids -> number[]
+    //         tag_ids: Array.isArray(data.tag_ids)
+    //             ? data.tag_ids.map((t: any) => Number(t.id ?? t))
+    //             : [],
+
+    //         // job_type -> string[]
+    //         job_type: Array.isArray(data.job_type)
+    //             ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
+    //             : [],
+
+    //         // job_experience -> string[]
+    //         job_experience: Array.isArray(data.job_experience)
+    //             ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
+    //             : [],
+
+    //         // languages -> number[]
+    //         languages: Array.isArray(data.languages)
+    //             ? data.languages.map((l: any) => Number(l.id ?? l))
+    //             : [],
+
+
+    //         price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
+    //         work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
+    //         currency: typeof data.currency === "object" ? data.currency.id : data.currency,
+    //         contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method.id,
+
+    //         // slug and status
+    //         slug: data.slug,
+    //         status: data.status ?? "draft",
+    //         starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
+    //         ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
+
+    //         country: data.country
+    //             ? typeof data.country === "object" ? data.country.name : data.country.name
+    //             : null,
+    //     };
+    // }
+
+
     function normalizeJobPayload(data: Record<string, any>) {
-        return {
-            ...data,
-            // category_id -> number
-            category_id: data.category_id
-                ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
-                : null,
+    return {
+        ...data,
 
-            // tag_ids -> number[]
-            tag_ids: Array.isArray(data.tag_ids)
-                ? data.tag_ids.map((t: any) => Number(t.id ?? t))
-                : [],
+        category_id: data.category_id
+            ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
+            : null,
 
-            // job_type -> string[]
-            job_type: Array.isArray(data.job_type)
-                ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
-                : [],
+        tag_ids: Array.isArray(data.tag_ids)
+            ? data.tag_ids.map((t: any) => (typeof t === "object" ? Number(t.id) : Number(t))).filter(Boolean)
+            : [],
 
-            // job_experience -> string[]
-            job_experience: Array.isArray(data.job_experience)
-                ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
-                : [],
+        job_type: Array.isArray(data.job_type)
+            ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
+            : [],
 
-            // languages -> number[]
-            languages: Array.isArray(data.languages)
-                ? data.languages.map((l: any) => Number(l.id ?? l))
-                : [],
+        job_experience: Array.isArray(data.job_experience)
+            ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
+            : [],
 
+        languages: Array.isArray(data.languages)
+            ? data.languages.map((l: any) => Number(l.id ?? l))
+            : [],
 
-            price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
-            work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
-            currency: typeof data.currency === "object" ? data.currency.id : data.currency,
-            contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method.id,
+        price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
+        work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
+        currency: typeof data.currency === "object" ? data.currency.id : data.currency,
+        contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method,
 
-            // slug and status
-            slug: data.slug,
-            status: data.status ?? "draft",
-            starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
-            ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
-        };
-    }
+        slug: data.slug,
+        status: data.status ?? "draft",
+        starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
+        ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
+
+        country: data.country ? (typeof data.country === "object" ? data.country.name : data.country) : null,
+    };
+}
 
 
 
@@ -688,10 +721,10 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                     const dateVal = new Date(val);
 
                     // Check date >= today
-                    if (dateVal < today) {
-                        errors[t.id] = `${t.label} cannot be in the past`;
-                        return;
-                    }
+                    // if (dateVal < today) {
+                    //     errors[t.id] = `${t.label} cannot be in the past`;
+                    //     return;
+                    // }
 
                     // Check ends_at >= starts_at
                     if (t.id === "ends_at" && formData.starts_at) {
@@ -812,6 +845,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                     setShowErrors(false);
                     setFormSubmitted(true); //  final success
                     sessionStorage.removeItem("currentStep")
+                    router.push('/my-jobs')
                 },
                 onError: (err) => toast.error(err?.message || "Failed to update job"),
             });
@@ -819,6 +853,9 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
     };
+
+ 
+
 
     const isLastStep = currentStep === steps.length - 1;
     function isEmptyEditorValue(value: string) {
@@ -912,7 +949,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
                 {/* Step Content */}
                 <div className="w-3/4 pt-2">
-                    {formSubmitted ? (
+                    {/* {formSubmitted ? (
                         <div className="p-8 border rounded-lg bg-green-50 shadow text-center">
                             <h3 className="text-2xl font-bold text-green-600 mb-2">
                                 Job {mode === "create" ? "Created" : "Updated"}!
@@ -921,7 +958,8 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                 All steps completed successfully. Thank you!
                             </p>
                         </div>
-                    ) : (
+                    ) : 
+                    ( */}
                         <>
                             <h3 className="text-xl font-bold mb-2">
                                 {steps[currentStep].title}
@@ -1025,7 +1063,24 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                 <Select
                                                     label={topic.label}
                                                     value={formData?.[topic.id] || null}
-                                                    onChange={opt => update(d => (d[topic.id] = opt))}
+                                                    onChange={opt => {
+                                                        update(d => (d[topic.id] = opt))
+
+                                                        if (topic.id === "country") {
+                                                            const selectedCountry = countries.find(c => String(c.id) === String(opt?.id));
+                                                            setCountryCode(selectedCountry.id.toString());
+                                                            // fetchZipOptions(null,String(selectedCountry?.id))
+                                                            update(d => {
+                                                                // d.country = selectedCountry.name;
+                                                                d.postal_code = "";
+                                                                d.street = "";
+                                                                d.city = "";
+                                                                d.state = "";
+                                                                d.lat = "";
+                                                                d.lng = "";
+                                                            });
+                                                        }
+                                                    }}
                                                     options={
                                                         topic.options?.map(o =>
                                                             typeof o === "string"
@@ -1100,7 +1155,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                     label={topic.label}
                                                     value={formData.postal_code}
                                                     placeholder={topic.placeholder || "Type postal code"}
-                                                    fetchOptions={topic.fetchOptions!}        // we provided it in subTopic
+                                                    fetchOptions={(query: string) => fetchZipOptions(query, countryCode)}      // we provided it in subTopic
                                                     onChangeValue={val => update(d => (d.postal_code = val))}
                                                     onSelectOption={topic.onSelectOption}     // also passed from subTopic
                                                 />
@@ -1149,7 +1204,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                 )}
                             </div>
                         </>
-                    )}
+                    {/* )} */}
                 </div>
             </div>
         </div>
@@ -1170,10 +1225,16 @@ interface DynamicAutocompleteProps {
 }
 
 const DynamicAutocomplete: React.FC<DynamicAutocompleteProps> = ({
-    label, value, fetchOptions, onSelectOption, placeholder, onChangeValue
+    label,
+    value,
+    fetchOptions,
+    onSelectOption,
+    placeholder,
+    onChangeValue
 }) => {
     const [options, setOptions] = useState<ZipOption[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isFocused, setIsFocused] = useState(false); // track input focus
 
     const handleInputChange = async (val: string) => {
         onChangeValue(val);
@@ -1185,25 +1246,36 @@ const DynamicAutocomplete: React.FC<DynamicAutocompleteProps> = ({
     };
 
     return (
-        <div>
-            <label>{label}</label>
-            <input
-                value={value}
-                onChange={e => handleInputChange(e.target.value)}
-                placeholder={placeholder}
-                className="border p-2 rounded w-full"
-            />
-            <ul>
-                {options.map(opt => (
-                    <li key={opt.id} onClick={() => {
-                        onSelectOption(opt);
-                        onChangeValue(opt.zipcode); // set input to selected value
-                        setOptions([]);             // close dropdown
-                    }}>
-                        {opt.zipcode} - {opt.street}
-                    </li>
-                ))}
-            </ul>
+        <div className="text-sm">
+            <span className="mb-1 block text-gray-700">{label}</span>
+            <div className="relative">
+                <input
+                    value={value}
+                    onChange={e => handleInputChange(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} // delay to allow click on list
+                    placeholder={placeholder}
+                    className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black"
+                />
+                {isFocused && options.length > 0 && (
+                    <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
+                        {options.map(opt => (
+                            <li
+                                key={opt.id}
+                                onMouseDown={() => {
+                                    // use onMouseDown instead of onClick to prevent blur
+                                    onSelectOption(opt);
+                                    onChangeValue(opt.zipcode);
+                                    setOptions([]);
+                                }}
+                                className="cursor-pointer px-3 py-2 hover:bg-gray-100"
+                            >
+                                {opt.zipcode} - {opt.street}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
         </div>
     );
 };
