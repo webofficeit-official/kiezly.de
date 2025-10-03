@@ -1,5 +1,5 @@
 import apiClient from "@/lib/config/axios-client";
-import { CreateJobData, CreateJobResponse, JobCollectionsResponse } from "@/lib/types/job";
+import { CreateJobData, CreateJobResponse, JobCollectionsResponse, JobResponse } from "@/lib/types/job";
 
 
 export const createJobApi = async (job: CreateJobData): Promise<CreateJobResponse> => {
@@ -10,7 +10,7 @@ export const createJobApi = async (job: CreateJobData): Promise<CreateJobRespons
 export const updateJobApi = async (
   jobId: string,
   job: Partial<CreateJobData>
-): Promise<CreateJobResponse> => {
+): Promise<JobResponse> => {
   try {
     const { data } = await apiClient.patch(`/jobs/${jobId}`, job);
     return data;

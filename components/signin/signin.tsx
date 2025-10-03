@@ -118,18 +118,32 @@ function LoginPage() {
                     toast.custom((t) => (
                         <div
                             className={`${t.visible ? "animate-enter" : "animate-leave"
-                                } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+                                } inline-flex items-center bg-white shadow-lg rounded-xl pointer-events-auto ring-1 ring-black ring-opacity-5`}
                         >
-                            <div className="flex items-center justify-center p-4">
+                            {/* Icon */}
+                            <div className="flex-shrink-0 p-3">
                                 <FaCheckCircle className="text-green-500 w-6 h-6" />
                             </div>
-                            <div className="flex-1 w-0 p-4">
+
+                            {/* Message */}
+                            <div className="flex-1 p-3">
                                 <p className="text-sm font-semibold text-green-600">
                                     Login successful!
                                 </p>
                             </div>
+
+                            {/* Close Button */}
+                            <div className="flex-shrink-0 p-1">
+                                <button
+                                    onClick={() => toast.dismiss(t.id)}
+                                    className="text-gray-400 hover:text-gray-600 font-bold text-lg"
+                                >
+                                    ✕
+                                </button>
+                            </div>
                         </div>
                     ));
+
 
                     router.push("/jobs");
                 },
