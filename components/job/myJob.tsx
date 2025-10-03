@@ -1,12 +1,13 @@
 'use client'
 import { myJobs } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Listbox } from "@headlessui/react";
 import { Button } from "../ui/button";
+import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -19,13 +20,13 @@ const DEFAULT_FILTERS: Filters = {
 };
 
 const perPageOptions = [
-  { label: "Draft", value: "draft" },
-  { label: "Pending Review", value: "pending_review" },
-  { label: "Published", value: "open" },
-  { label: "Closed", value: "closed" },
-  { label: "Rejected", value: "rejected" },
-  { label: "Expired", value: "expired" },
-  { label: "Saved", value: "saved" },
+    { label: "Draft", value: "draft" },
+    { label: "Pending Review", value: "pending_review" },
+    { label: "Published", value: "open" },
+    { label: "Closed", value: "closed" },
+    { label: "Rejected", value: "rejected" },
+    { label: "Expired", value: "expired" },
+    { label: "Saved", value: "saved" },
 ];
 
 // ---- Utilities ----
@@ -44,11 +45,11 @@ export const fromQuery = (qs: string): Filters => {
 };
 
 const isNew = (created_at: string) => {
-  if (!created_at) return false;
-  const createdAt = new Date(created_at).getTime();
-  const now = Date.now();
-  const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
-  return diffHours <= 72; // less than or equal 72 hours
+    if (!created_at) return false;
+    const createdAt = new Date(created_at).getTime();
+    const now = Date.now();
+    const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
+    return diffHours <= 72; // less than or equal 72 hours
 };
 
 
@@ -152,8 +153,8 @@ export default function MyJobs({
                                             {job?.price_type === "range" && job?.price_min && job?.price_max
                                                 ? `${job.currency} ${job.price_min} – ${job.price_max}`
                                                 : job?.price_value
-                                                ? `${job.currency} ${job.price_value}`
-                                                : "Not specified"}
+                                                    ? `${job.currency} ${job.price_value}`
+                                                    : "Not specified"}
                                             {job?.price_type && (
                                                 <span className="inline-flex items-center gap-1">/ {job.price_type}</span>
                                             )}
@@ -161,8 +162,8 @@ export default function MyJobs({
                                         <span>
                                             •{" "}
                                             {[job?.street, job?.city, job?.state, job?.postal_code, job?.country]
-                                              .filter(Boolean)
-                                              .join(", ")}
+                                                .filter(Boolean)
+                                                .join(", ")}
                                         </span>
                                         {job?.distance && <span>• {(job.distance / 1000).toFixed(2)} km away</span>}
                                         {job?.category_name && <span>• {job.category_name}</span>}
@@ -171,7 +172,7 @@ export default function MyJobs({
                                             <span>• {job.job_experience.join(", ")}</span>
                                         )}
                                     </div>
-                                    
+
                                     {/* Job tag badges */}
                                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                         {job.tags?.length > 0 &&
@@ -180,10 +181,10 @@ export default function MyJobs({
                                                     {tag.name}
                                                 </span>
                                             )
-                                        )}
+                                            )}
                                     </div>
                                 </div>
-                                    
+
                                 {/* Right-side container: posted date top, button bottom */}
                                 <div className="flex flex-col justify-between items-end min-h-[80px]">
                                     <div className="text-xs text-gray-500">
@@ -193,9 +194,24 @@ export default function MyJobs({
                                             "Posted " + new Date(job?.created_at).toLocaleDateString()
                                         )}
                                     </div>
+                                    <AlertBox
+                                        trigger={
+                                            <button className="p-2 rounded hover:bg-gray-100">
+                                                <Trash2 className="w-5 h-5 text-red-600" />
+                                            </button>
+                                        }
+                                        title="Close Job?"
+                                        description="Are you sure you want to close this job? This action cannot be undone."
+                                        confirmText="close"
+                                        cancelText="Cancel"
+                                        onConfirm={() => {
+                                           
+                                            console.log("close job...");
+                                        }}
+                                    />
                                     <button
-                                      className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
-                                      onClick={() => router.push(`/jobs/${job.slug}`)}
+                                        className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+                                        onClick={() => router.push(`/jobs/${job.slug}`)}
                                     >
                                         View
                                     </button>
@@ -218,53 +234,53 @@ export default function MyJobs({
 type Option = { label: string; value: string };
 
 function Select({
-  label,
-  value,
-  onChange,
-  options,
+    label,
+    value,
+    onChange,
+    options,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: Option[];
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    options: Option[];
 }) {
-  // If label is "Status" (or you want to show this option explicitly)
-  const finalOptions =
-    label.toLowerCase().includes("status") ||
-    label.toLowerCase().includes("review")
-      ? [{ label: "Pending review", value: "pending_review" }, ...options]
-      : options;
+    // If label is "Status" (or you want to show this option explicitly)
+    const finalOptions =
+        label.toLowerCase().includes("status") ||
+            label.toLowerCase().includes("review")
+            ? [{ label: "Pending review", value: "pending_review" }, ...options]
+            : options;
 
-  return (
-    <div className="text-sm">
-      <span className="mb-1 block text-gray-700">{label}</span>
+    return (
+        <div className="text-sm">
+            <span className="mb-1 block text-gray-700">{label}</span>
 
-      <Listbox value={value} onChange={onChange}>
-        <div className="relative">
-          {/* Fixed width */}
-          <Listbox.Button className="flex w-56 items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
-            {finalOptions.find((o) => o.value === value)?.label || "Select"}
-            <ChevronDown className="h-4 w-4 text-gray-400" />
-          </Listbox.Button>
+            <Listbox value={value} onChange={onChange}>
+                <div className="relative">
+                    {/* Fixed width */}
+                    <Listbox.Button className="flex w-56 items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+                        {finalOptions.find((o) => o.value === value)?.label || "Select"}
+                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                    </Listbox.Button>
 
-          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-56 overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
-            {finalOptions.map((o) => (
-              <Listbox.Option
-                key={o.value}
-                value={o.value}
-                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
-              >
-                {({ selected }) => (
-                  <div className="flex items-center justify-between">
-                    <span>{o.label}</span>
-                    {selected && <Check className="h-4 w-4 text-gray-600" />}
-                  </div>
-                )}
-              </Listbox.Option>
-            ))}
-          </Listbox.Options>
+                    <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-56 overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+                        {finalOptions.map((o) => (
+                            <Listbox.Option
+                                key={o.value}
+                                value={o.value}
+                                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
+                            >
+                                {({ selected }) => (
+                                    <div className="flex items-center justify-between">
+                                        <span>{o.label}</span>
+                                        {selected && <Check className="h-4 w-4 text-gray-600" />}
+                                    </div>
+                                )}
+                            </Listbox.Option>
+                        ))}
+                    </Listbox.Options>
+                </div>
+            </Listbox>
         </div>
-      </Listbox>
-    </div>
-  );
+    );
 }
