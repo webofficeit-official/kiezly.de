@@ -1,6 +1,6 @@
 "use client";
 import { CreateJobData, JobMode, JobResponse } from "@/lib/types/job";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../shared-ui/input/input";
 import { Select } from "../shared-ui/custom-select/custom-select";
 import { RichTextEditor } from "../shared-ui/rich-text-editor/rich-text-editor";
@@ -10,23 +10,66 @@ import { DateInput } from "../shared-ui/custom-date/custom-date";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Switch from "../shared-ui/switch/switch";
+import { useCollection, useZipcodes } from "@/lib/react-query/queries/collection";
+
 
 /* ----------------------------- Type Definitions ---------------------------- */
+export interface ZipOption {
+    id: string;         // always string, even if your API returns number
+    zipcode: string;
+    city: string;
+    state: string;
+    country_id: string;
+    latitude: number;
+    longitude: number;
+    street: string;
+}
+
+
+interface WizardSubTopic {
+    id: string;
+    label: string;
+    type:
+    | "input"
+    | "text"
+    | "textarea"
+    | "select"
+    | "number"
+    | "checkbox"
+    | "date"
+    | "auto-complete"
+    | "custom"
+    | "select_country";
+    options?: string[] | { id: string; name: string }[];
+    multiple?: boolean;
+    required?: boolean | ((form: any) => boolean);
+    colSpan?: string;
+    validate?: (value: any, formData: Record<string, any>) => string | null;
+
+    // for custom types only
+    component?: React.ComponentType<any>;
+    placeholder?: string;
+    onChangeValue?: (value: string) => void;
+    onSelectOption?: (option: any) => void;
+    value?: any;
+    fetchOptions?: (query: string) => Promise<any[]>;
+}
+
 interface WizardStep {
     id: string;
     title: string;
     subtitle?: string;
     layout?: string;
-    subTopics: Array<{
-        id: string;
-        label: string;
-        type: "input" | "text" | "textarea" | "select" | "number" | "checkbox" | "date";
-        options?: string[] | { id: string; name: string }[];
-        multiple?: boolean;
-        required?: boolean | ((form: any) => boolean);
-        colSpan?: string;
-        validate?: (value: any, formData: Record<string, any>) => string | null; // <-- new
-    }>;
+    subTopics: WizardSubTopic[];
+}
+
+
+
+interface Country {
+    id: number;
+    code?: string;
+    name: string;
+    currency?: string;
 }
 
 interface CreateEditJobFormProps {
@@ -37,7 +80,6 @@ interface CreateEditJobFormProps {
 interface OnboardingFormProps {
     mode: "create" | "edit";
     initialData?: JobResponse;
-    steps: WizardStep[];
     collections: {
         jobCategories: { id: number; name: string }[];
         jobTags: { id: number; name: string }[];
@@ -46,6 +88,7 @@ interface OnboardingFormProps {
         languages: { id: number; name: string }[];
         jobMode: JobMode[]
     };
+    countries?: Country[]
 }
 
 export function useDebounce<T>(value: T, delay: number) {
@@ -62,6 +105,170 @@ export function useDebounce<T>(value: T, delay: number) {
 /* ----------------------------- Create/Edit Wrapper ---------------------------- */
 export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFormProps) {
     const { data: collections } = useJobCollections();
+    const { data: countries } = useCollection<{ id: number; code?: string; name: string, currency?: string }>("countries");
+
+
+    return (
+        <div className="flex flex-col mx-auto max-w-5xl px-4 py-8">
+            <h1 className="text-3xl font-semibold tracking-tight">
+                {mode === "create" ? "Post a mini-job" : "Post a mini-job"}
+            </h1>
+            <div className="mt-2 bg-white">
+                <OnboardingForm mode={mode} initialData={initialData}
+                    collections={collections || {
+                        jobCategories: [],
+                        jobTags: [],
+                        jobType: [],
+                        jobExperience: [],
+                        languages: [],
+                        jobMode: [],
+                    }}
+                    countries={countries || []}
+                />
+            </div>
+        </div>
+    );
+}
+
+/* ----------------------------- OnboardingForm ---------------------------- */
+function OnboardingForm({ mode, initialData, collections, countries }: OnboardingFormProps) {
+    const [jobId, setJobId] = useState<string | null>(initialData?.job?.id || null);
+
+    const [currentStep, setCurrentStep] = useState(() => {
+        if (typeof window !== "undefined") {
+            if (mode === "edit" && jobId) {
+                const step = sessionStorage.getItem("currentStep");
+                return step ? Number(step) : 0;
+            }
+        }
+        return 0;
+    });
+
+    const [showErrors, setShowErrors] = useState(false);
+    const [formSubmitted, setFormSubmitted] = useState(false);
+    const [formData, setFormData] = useState<Record<string, any>>({
+        description: "",
+        tasks: "",
+        requirements: "",
+        country: ""
+    });
+    const [titleValue, setTitleValue] = useState(formData.title || "");
+    const [slugEdited, setSlugEdited] = useState(false);
+    const [zipOptions, setZipOptions] = useState<ZipOption[]>([]);
+    const [countryCode, setCountryCode] = useState<string | undefined>(undefined);
+
+
+
+    const { mutateAsync } = useZipcodes();
+
+    const fetchZipOptions = async (query: string, countryId?: string): Promise<ZipOption[]> => {
+
+
+        const res = await mutateAsync({ zip: query, country: countryId }); // pass country_id to backend
+
+        const list: ZipOption[] = res.data.zipcode.map((z: any) => ({
+            id: String(z.id),
+            country_id: String(z.country_id),
+            zipcode: z.zipcode,
+            street: z.street,
+            city: z.city,
+            state: z.state,
+            latitude: parseFloat(z.latitude),
+            longitude: parseFloat(z.longitude),
+        }));
+
+        setZipOptions(list);
+        return list;
+    };
+
+
+    useEffect(() => {
+        if (mode === "edit" && initialData && collections) {
+            const job = initialData.job;
+
+            const selectedCountry = countries.find(c => c.name === job.country);
+            if (selectedCountry) {
+                setCountryCode(selectedCountry.id.toString()); // for fetchZipOptions
+                fetchZipOptions(job.postal_code ? job.postal_code : null, selectedCountry.id.toString())
+            }
+            setFormData({
+                title: job.title || "",
+                subtitle: job.subtitle || "",
+                description: job.description || "",
+                tasks: job.tasks || "",
+                requirements: job.requirements || "",
+                country: selectedCountry
+                    ? { id: selectedCountry.id.toString(), name: selectedCountry.name }
+                    : null,
+                state: job.state || "",
+                city: job.city || "",
+                postal_code: job.postal_code || "",
+                street: job.street || "",
+                lat: job.lat || "",
+                lng: job.lng || "",
+                starts_at: job.starts_at ? new Date(job.starts_at) : null,
+                ends_at: job.ends_at ? new Date(job.ends_at) : null,
+                price_value: job.price_value || "",
+                price_min: job.price_min || "",
+                price_max: job.price_max || "",
+                currency: job.currency
+                    ? { id: job.currency, name: job.currency }  // wrap string as object for Select
+                    : null,
+                first_aid_verified: !!job.first_aid_verified,
+                police_verified: !!job.police_verified,
+                slug: job.slug,
+                status: job.status || "draft",
+                category_id: job.category
+                    ? { id: job.category.id.toString(), name: job.category.name }
+                    : null,
+                job_type: job?.job_type || [],
+                job_experience: job?.job_experience || [],
+                tag_ids: (job.tags || []).map(t => t.id.toString()),
+                languages: (job.languages || []).map(l => ({ id: l.id.toString(), name: l.name })),
+                work_mode: job.work_mode
+                    ? {
+                        id: job.work_mode,
+                        name: collections?.jobMode.find(m => m.key === job.work_mode)?.label || job.work_mode
+                    }
+                    : null,
+                price_type: job.price_type
+                    ? {
+                        id: job.price_type,
+                        // Map lowercase stored value to proper label
+                        name:
+                            job.price_type === "fixed"
+                                ? "Fixed"
+                                : job.price_type === "range"
+                                    ? "Range"
+                                    : job.price_type, // fallback
+                    }
+                    : null,
+                contact_method: job.contact_method
+                    ? {
+                        id: job.contact_method,
+                        name:
+                            job.contact_method === "email_relay"
+                                ? "Email Relay"
+                                : job.contact_method === "direct_email"
+                                    ? "Direct Email"
+                                    : job.contact_method === "phone"
+                                        ? "Phone"
+                                        : job.contact_method === "external_link"
+                                            ? "External Link"
+                                            : job.contact_method, // fallback
+                    }
+                    : null,
+
+                contact_email: job.contact_email || "",
+                contact_phone: job.contact_phone || "",
+                contact_link: job.contact_link || "",
+            });
+        }
+
+    }, [mode, initialData, collections?.jobType, collections?.jobExperience, collections?.jobTags, collections?.languages, collections?.jobMode, countries]);
+
+
+
 
     const steps: WizardStep[] = useMemo(
         () => {
@@ -140,15 +347,54 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
                     subtitle: "Provide location details",
                     layout: "grid sm:grid-cols-2 gap-4",
                     subTopics: [
-                        { id: "country", label: "Country", type: "input", required: true },
-                        { id: "state", label: "State", type: "input", required: true },
-                        { id: "city", label: "City", type: "input", required: true },
-                        { id: "postal_code", label: "Postal Code", type: "input", required: true },
-                        { id: "street", label: "Street", type: "input", required: true },
-                        { id: "lat", label: "Latitude", type: "input", required: true },
-                        { id: "lng", label: "Longitude", type: "input", required: true }
-                    ]
+                        {
+                            id: "country",
+                            label: "Country",
+                            type: "select",
+                            options: countries.map(c => ({ id: c.id.toString(), name: c.name })),
+                            value: (() => {
+                                const selected = countries.find(c => c.name === formData.country);
+                                return selected ? selected.id.toString() : "";
+                            })(),
+                            required: true,
+
+                        }
+
+                        ,
+                        {
+                            id: "postal_code",
+                            label: "Postal Code",
+                            type: "custom",
+                            component: DynamicAutocomplete,
+                            placeholder: "Type postal code",
+                            value: formData.postal_code,
+                            // fetchOptions: (query: string) => fetchZipOptions(query, countryCode),
+                            onChangeValue: val => update(d => (d.postal_code = val)),
+                            onSelectOption: (zip: ZipOption) => {
+                                const selectedCountry = countries.find(
+                                    c => String(c.id) === String(zip.country_id)
+                                );
+
+                                update(d => {
+                                    // d.country = selectedCountry ? selectedCountry.name : "";
+                                    d.postal_code = zip.zipcode;
+                                    d.street = zip.street || "";
+                                    d.city = zip.city || "";
+                                    d.state = zip.state || "";
+                                    d.lat = String(zip.latitude);
+                                    d.lng = String(zip.longitude);
+                                });
+                            },
+                        },
+
+                        { id: "street", label: "Street", type: "auto-complete", value: formData.street },
+                        { id: "city", label: "City", type: "auto-complete", value: formData.city },
+                        { id: "state", label: "State", type: "auto-complete", value: formData.state },
+                        { id: "lat", label: "Latitude", type: "auto-complete", value: formData.lat },
+                        { id: "lng", label: "Longitude", type: "auto-complete", value: formData.lng },
+                    ],
                 },
+
                 {
                     id: "pricing",
                     title: "Pricing",
@@ -162,8 +408,6 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
                             required: true,
                             options: [
                                 { id: "EUR", name: "EUR" },
-                                { id: "USD", name: "USD" },
-                                { id: "GBP", name: "GBP" }
                             ]
                         },
                         {
@@ -275,50 +519,10 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
                     ]
                 }
             ]
-        }, [collections]
+        }, [collections, countries]
     );
 
-    return (
-        <div className="flex flex-col mx-auto max-w-5xl px-4 py-8">
-            <h1 className="text-3xl font-semibold tracking-tight">
-                {mode === "create" ? "Post a mini-job" : "Post a mini-job"}
-            </h1>
-            <div className="mt-2 bg-white">
-                <OnboardingForm mode={mode} initialData={initialData} steps={steps} collections={collections || {
-                    jobCategories: [],
-                    jobTags: [],
-                    jobType: [],
-                    jobExperience: [],
-                    languages: [],
-                    jobMode: [],
-                }} />
-            </div>
-        </div>
-    );
-}
 
-/* ----------------------------- OnboardingForm ---------------------------- */
-function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFormProps) {
-    const [jobId, setJobId] = useState<string | null>(initialData?.job?.id || null);
-    const [currentStep, setCurrentStep] = useState(() => {
-        if (typeof window !== "undefined") {
-            if (mode === "edit" && jobId) {
-                const step = sessionStorage.getItem("currentStep");
-                return step ? Number(step) : 0;
-            }
-        }
-        return 0;
-    });
-
-    const [showErrors, setShowErrors] = useState(false);
-    const [formSubmitted, setFormSubmitted] = useState(false);
-    const [formData, setFormData] = useState<Record<string, any>>({
-        description: "",
-        tasks: "",
-        requirements: "",
-    });
-    const [titleValue, setTitleValue] = useState(formData.title || "");
-    const [slugEdited, setSlugEdited] = useState(false);
     const debouncedTitle = useDebounce(titleValue, 400); // wait 400ms after typing
 
     const router = useRouter()
@@ -341,87 +545,6 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
 
 
 
-    useEffect(() => {
-        if (mode === "edit" && initialData && collections) {
-            const job = initialData.job;
-
-            const tag_idsdata = (job?.tags || []).map(t => ({
-                id: t.id.toString(),
-                name: t.name
-            }))
-            setFormData({
-                title: job.title || "",
-                subtitle: job.subtitle || "",
-                description: job.description || "",
-                tasks: job.tasks || "",
-                requirements: job.requirements || "",
-                country: job.country || "",
-                state: job.state || "",
-                city: job.city || "",
-                postal_code: job.postal_code || "",
-                street: job.street || "",
-                lat: job.lat || "",
-                lng: job.lng || "",
-                starts_at: job.starts_at ? new Date(job.starts_at) : null,
-                ends_at: job.ends_at ? new Date(job.ends_at) : null,
-                price_value: job.price_value || "",
-                price_min: job.price_min || "",
-                price_max: job.price_max || "",
-                currency: job.currency
-                    ? { id: job.currency, name: job.currency }  // wrap string as object for Select
-                    : null,
-                first_aid_verified: !!job.first_aid_verified,
-                police_verified: !!job.police_verified,
-                slug: job.slug,
-                status: job.status || "draft",
-                category_id: job.category
-                    ? { id: job.category.id.toString(), name: job.category.name }
-                    : null,
-                job_type: job?.job_type || [],
-                job_experience: job?.job_experience || [],
-                tag_ids: (job.tags || []).map(t => t.id.toString()),
-                languages: (job.languages || []).map(l => ({ id: l.id.toString(), name: l.name })),
-                work_mode: job.work_mode
-                    ? {
-                        id: job.work_mode,
-                        name: collections?.jobMode.find(m => m.key === job.work_mode)?.label || job.work_mode
-                    }
-                    : null,
-                price_type: job.price_type
-                    ? {
-                        id: job.price_type,
-                        // Map lowercase stored value to proper label
-                        name:
-                            job.price_type === "fixed"
-                                ? "Fixed"
-                                : job.price_type === "range"
-                                    ? "Range"
-                                    : job.price_type, // fallback
-                    }
-                    : null,
-                contact_method: job.contact_method
-                    ? {
-                        id: job.contact_method,
-                        name:
-                            job.contact_method === "email_relay"
-                                ? "Email Relay"
-                                : job.contact_method === "direct_email"
-                                    ? "Direct Email"
-                                    : job.contact_method === "phone"
-                                        ? "Phone"
-                                        : job.contact_method === "external_link"
-                                            ? "External Link"
-                                            : job.contact_method, // fallback
-                    }
-                    : null,
-
-                contact_email: job.contact_email || "",
-                contact_phone: job.contact_phone || "",
-                contact_link: job.contact_link || "",
-            });
-        }
-
-    }, [mode, initialData, collections?.jobType, collections?.jobExperience, collections?.jobTags, collections?.languages, collections?.jobMode]);
 
     useEffect(() => {
         if (initialData?.job) {
@@ -471,47 +594,90 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
 
 
 
+    // function normalizeJobPayload(data: Record<string, any>) {
+    //     return {
+    //         ...data,
+    //         // category_id -> number
+    //         category_id: data.category_id
+    //             ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
+    //             : null,
+
+    //         // tag_ids -> number[]
+    //         tag_ids: Array.isArray(data.tag_ids)
+    //             ? data.tag_ids.map((t: any) => Number(t.id ?? t))
+    //             : [],
+
+    //         // job_type -> string[]
+    //         job_type: Array.isArray(data.job_type)
+    //             ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
+    //             : [],
+
+    //         // job_experience -> string[]
+    //         job_experience: Array.isArray(data.job_experience)
+    //             ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
+    //             : [],
+
+    //         // languages -> number[]
+    //         languages: Array.isArray(data.languages)
+    //             ? data.languages.map((l: any) => Number(l.id ?? l))
+    //             : [],
+
+
+    //         price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
+    //         work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
+    //         currency: typeof data.currency === "object" ? data.currency.id : data.currency,
+    //         contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method.id,
+
+    //         // slug and status
+    //         slug: data.slug,
+    //         status: data.status ?? "draft",
+    //         starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
+    //         ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
+
+    //         country: data.country
+    //             ? typeof data.country === "object" ? data.country.name : data.country.name
+    //             : null,
+    //     };
+    // }
+
+
     function normalizeJobPayload(data: Record<string, any>) {
-        return {
-            ...data,
-            // category_id -> number
-            category_id: data.category_id
-                ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
-                : null,
+    return {
+        ...data,
 
-            // tag_ids -> number[]
-            tag_ids: Array.isArray(data.tag_ids)
-                ? data.tag_ids.map((t: any) => Number(t.id ?? t))
-                : [],
+        category_id: data.category_id
+            ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
+            : null,
 
-            // job_type -> string[]
-            job_type: Array.isArray(data.job_type)
-                ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
-                : [],
+        tag_ids: Array.isArray(data.tag_ids)
+            ? data.tag_ids.map((t: any) => (typeof t === "object" ? Number(t.id) : Number(t))).filter(Boolean)
+            : [],
 
-            // job_experience -> string[]
-            job_experience: Array.isArray(data.job_experience)
-                ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
-                : [],
+        job_type: Array.isArray(data.job_type)
+            ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
+            : [],
 
-            // languages -> number[]
-            languages: Array.isArray(data.languages)
-                ? data.languages.map((l: any) => Number(l.id ?? l))
-                : [],
+        job_experience: Array.isArray(data.job_experience)
+            ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
+            : [],
 
+        languages: Array.isArray(data.languages)
+            ? data.languages.map((l: any) => Number(l.id ?? l))
+            : [],
 
-            price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
-            work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
-            currency: typeof data.currency === "object" ? data.currency.id : data.currency,
-            contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method.id,
+        price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
+        work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
+        currency: typeof data.currency === "object" ? data.currency.id : data.currency,
+        contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method,
 
-            // slug and status
-            slug: data.slug,
-            status: data.status ?? "draft",
-            starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
-            ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
-        };
-    }
+        slug: data.slug,
+        status: data.status ?? "draft",
+        starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
+        ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
+
+        country: data.country ? (typeof data.country === "object" ? data.country.name : data.country) : null,
+    };
+}
 
 
 
@@ -555,10 +721,10 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
                     const dateVal = new Date(val);
 
                     // Check date >= today
-                    if (dateVal < today) {
-                        errors[t.id] = `${t.label} cannot be in the past`;
-                        return;
-                    }
+                    // if (dateVal < today) {
+                    //     errors[t.id] = `${t.label} cannot be in the past`;
+                    //     return;
+                    // }
 
                     // Check ends_at >= starts_at
                     if (t.id === "ends_at" && formData.starts_at) {
@@ -679,6 +845,7 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
                     setShowErrors(false);
                     setFormSubmitted(true); //  final success
                     sessionStorage.removeItem("currentStep")
+                    router.push('/my-jobs')
                 },
                 onError: (err) => toast.error(err?.message || "Failed to update job"),
             });
@@ -686,6 +853,9 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
 
 
     };
+
+ 
+
 
     const isLastStep = currentStep === steps.length - 1;
     function isEmptyEditorValue(value: string) {
@@ -705,77 +875,6 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
     return (
         <div className="max-w-4xl mx-auto p-5 pb-1">
             <div className="flex gap-12">
-                {/* Stepper */}
-                {/* <div className="relative w-1/3 pt-2">
-
-                    <div className="space-y-12 relative">
-                        {steps.map((step, idx) => {
-                            const isCompleted = isStepCompleted(idx);
-                            const isActive = !formSubmitted && idx === currentStep;
-                            return (
-                                <div
-                                    key={step.id}
-                                    className="flex items-center gap-3 cursor-pointer"
-                                    onClick={() => {
-                                        if (!formSubmitted) {
-                                            // Find first invalid step up to clicked step
-                                            let firstInvalidStep = -1;
-                                            for (let i = 0; i <= idx; i++) {
-                                                const stepErrors = validateStep(i);
-                                                if (Object.keys(stepErrors).length > 0) {
-                                                    firstInvalidStep = i;
-                                                    break;
-                                                }
-                                            }
-
-                                            if (firstInvalidStep === -1 || firstInvalidStep === idx) {
-                                                // No errors before or at clicked step
-                                                setCurrentStep(idx);
-                                            } else {
-                                                // Jump to first invalid step
-                                                setCurrentStep(firstInvalidStep);
-                                                setShowErrors(true);
-                                                toast.error("Please fix the errors in the highlighted step.");
-                                            }
-                                        }
-                                    }}
-
-                                >
-                                    <div
-                                        className={`flex items-center justify-center rounded-full border w-8 h-8 ${isCompleted
-                                            ? "bg-green-500 text-white border-green-500"
-                                            : isActive
-                                                ? "bg-black text-white border-black"
-                                                : "border-gray-400 text-gray-400"
-                                            }`}
-                                    >
-                                        {isCompleted ? "✓" : idx + 1}
-                                    </div>
-                                    <div>
-                                        <div
-                                            className={`font-medium ${isCompleted
-                                                ? "text-green-600"
-                                                : isActive
-                                                    ? "text-black"
-                                                    : "text-gray-500"
-                                                }`}
-                                        >
-                                            {step.title}
-                                        </div>
-                                        <div className="text-xs text-gray-400">{step.subtitle}</div>
-                                    </div>
-                                    {idx < steps.length - 1 && (
-                                        <div
-                                            className={`absolute left-4 top-8 w-px h-[calc(100%-2rem)]
-                                            ${isCompleted ? "bg-green-500" : "bg-gray-300"}`}
-                                        />
-                                    )}
-
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div> */}
 
                 {/* Stepper */}
                 <div className="relative w-1/3 pt-2">
@@ -850,7 +949,7 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
 
                 {/* Step Content */}
                 <div className="w-3/4 pt-2">
-                    {formSubmitted ? (
+                    {/* {formSubmitted ? (
                         <div className="p-8 border rounded-lg bg-green-50 shadow text-center">
                             <h3 className="text-2xl font-bold text-green-600 mb-2">
                                 Job {mode === "create" ? "Created" : "Updated"}!
@@ -859,7 +958,8 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
                                 All steps completed successfully. Thank you!
                             </p>
                         </div>
-                    ) : (
+                    ) : 
+                    ( */}
                         <>
                             <h3 className="text-xl font-bold mb-2">
                                 {steps[currentStep].title}
@@ -963,7 +1063,24 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
                                                 <Select
                                                     label={topic.label}
                                                     value={formData?.[topic.id] || null}
-                                                    onChange={opt => update(d => (d[topic.id] = opt))}
+                                                    onChange={opt => {
+                                                        update(d => (d[topic.id] = opt))
+
+                                                        if (topic.id === "country") {
+                                                            const selectedCountry = countries.find(c => String(c.id) === String(opt?.id));
+                                                            setCountryCode(selectedCountry.id.toString());
+                                                            // fetchZipOptions(null,String(selectedCountry?.id))
+                                                            update(d => {
+                                                                // d.country = selectedCountry.name;
+                                                                d.postal_code = "";
+                                                                d.street = "";
+                                                                d.city = "";
+                                                                d.state = "";
+                                                                d.lat = "";
+                                                                d.lng = "";
+                                                            });
+                                                        }
+                                                    }}
                                                     options={
                                                         topic.options?.map(o =>
                                                             typeof o === "string"
@@ -973,8 +1090,38 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
                                                     }
                                                     required={!!topic.required}
                                                     error={showErrors && errors[topic.id]}
+                                                    searchable={
+                                                        topic.id === "country" ? true : false
+                                                    }
                                                 />
                                             )}
+
+                                            {topic.type === "select_country" && !topic.multiple && (
+                                                <Select
+                                                    label={topic.label}
+                                                    value={formData?.[topic.id] || null}
+                                                    onChange={opt => {
+
+
+                                                        // Call the subTopic's onChangeValue if it exists
+                                                        if (topic.onChangeValue) {
+                                                            const selectedVal = typeof opt === "object" ? opt.id : opt;
+                                                            topic.onChangeValue(selectedVal);
+                                                        }
+                                                    }}
+                                                    options={
+                                                        topic.options?.map(o =>
+                                                            typeof o === "string"
+                                                                ? { id: o, name: o }
+                                                                : { id: o.id, name: o.name }
+                                                        ) || []
+                                                    }
+                                                    required={!!topic.required}
+                                                    error={showErrors && errors[topic.id]}
+                                                    searchable={topic.id === "country"}
+                                                />
+                                            )}
+
 
                                             {topic.type === "checkbox" && (
                                                 <Switch
@@ -1002,6 +1149,30 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
                                                     }
                                                 />
                                             )}
+
+                                            {topic.type === "custom" && topic.component === DynamicAutocomplete && (
+                                                <DynamicAutocomplete
+                                                    label={topic.label}
+                                                    value={formData.postal_code}
+                                                    placeholder={topic.placeholder || "Type postal code"}
+                                                    fetchOptions={(query: string) => fetchZipOptions(query, countryCode)}      // we provided it in subTopic
+                                                    onChangeValue={val => update(d => (d.postal_code = val))}
+                                                    onSelectOption={topic.onSelectOption}     // also passed from subTopic
+                                                />
+                                            )}
+
+                                            {topic.type === "auto-complete" && (
+                                                <Input
+                                                    label={topic.label}
+                                                    value={formData?.[topic.id] || ""}
+                                                    onChange={v => {
+                                                        update(d => (d[topic.id] = v))
+                                                    }}
+                                                    required={!!topic.required}
+                                                    error={showErrors && errors[topic.id]}
+                                                />
+                                            )}
+
                                         </div>
                                     );
                                 })}
@@ -1033,7 +1204,7 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
                                 )}
                             </div>
                         </>
-                    )}
+                    {/* )} */}
                 </div>
             </div>
         </div>
@@ -1041,3 +1212,70 @@ function OnboardingForm({ mode, initialData, steps, collections }: OnboardingFor
 }
 
 
+
+
+
+interface DynamicAutocompleteProps {
+    label: string;
+    value: string;
+    fetchOptions: (query: string) => Promise<ZipOption[]>;
+    onSelectOption: (option: ZipOption) => void;
+    placeholder?: string;
+    onChangeValue: (val: string) => void;
+}
+
+const DynamicAutocomplete: React.FC<DynamicAutocompleteProps> = ({
+    label,
+    value,
+    fetchOptions,
+    onSelectOption,
+    placeholder,
+    onChangeValue
+}) => {
+    const [options, setOptions] = useState<ZipOption[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [isFocused, setIsFocused] = useState(false); // track input focus
+
+    const handleInputChange = async (val: string) => {
+        onChangeValue(val);
+        if (val.length < 2) return; // wait for at least 2 chars
+        setLoading(true);
+        const result = await fetchOptions(val);
+        setOptions(result);
+        setLoading(false);
+    };
+
+    return (
+        <div className="text-sm">
+            <span className="mb-1 block text-gray-700">{label}</span>
+            <div className="relative">
+                <input
+                    value={value}
+                    onChange={e => handleInputChange(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} // delay to allow click on list
+                    placeholder={placeholder}
+                    className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black"
+                />
+                {isFocused && options.length > 0 && (
+                    <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
+                        {options.map(opt => (
+                            <li
+                                key={opt.id}
+                                onMouseDown={() => {
+                                    // use onMouseDown instead of onClick to prevent blur
+                                    onSelectOption(opt);
+                                    onChangeValue(opt.zipcode);
+                                    setOptions([]);
+                                }}
+                                className="cursor-pointer px-3 py-2 hover:bg-gray-100"
+                            >
+                                {opt.zipcode} - {opt.street}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+        </div>
+    );
+};

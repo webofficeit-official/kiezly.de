@@ -9,6 +9,9 @@ export interface SignupData {
   role: string;
   city: string;
   zip: string;
+  state: string;
+  latitude: string;
+  longitude: string;
   country: string;
   org_name: string;
   website: string;
@@ -33,6 +36,12 @@ export interface LoginData {
   role?: string;
 }
 
+export interface LocationData {
+  zip: string;
+  country?: number;
+  limit?: string;
+}
+
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -54,11 +63,31 @@ export interface CollectionResponse {
   success: boolean;
   message: string;
   data: {
+    countries: [];
     jobCategories: [];
     weekdays: [];
     timeWindows: [];
     languages: [];
   };
+}
+
+export interface LocationResponse {
+  success: boolean;
+  message: string;
+  data: {
+    zipcode: [];
+  };
+}
+
+export interface Zipcode {
+  id: number;
+  country_id: number;
+  zipcode: string;
+  street: string;
+  city: string;
+  state: string;
+  latitude: string;
+  longitude: string;
 }
 
 export const useSignup = (): UseMutationResult<
@@ -105,5 +134,19 @@ export const useCollections = (): UseMutationResult<
   return useMutation({
     mutationFn: (data: LoginData) =>
       apiClient.get("/collection").then(res => res.data),
+  });
+};
+
+export const getCityByZip = (): UseMutationResult<
+  LocationResponse,
+  Error
+> => {
+  return useMutation({
+    mutationFn: (data: LocationData) =>
+      apiClient.post("/collection/zipcode", {
+        zip: data.zip,
+        country: data.country,
+        limit: 5
+      }).then(res => res.data),
   });
 };
