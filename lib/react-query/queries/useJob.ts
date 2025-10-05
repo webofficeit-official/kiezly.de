@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { createJobApi, generateSlugApi, getJobApi, getJobCollectionsApi, getJobsApi, getMyJobsApi, updateJobApi } from "../api-handler/job-api";
 import { CreateJobData, CreateJobResponse, JobApiResponse, JobCollections, JobSaveApiResponse } from "@/lib/types/job";
-import { getSavedJobs, getSavedJobsList, getSavedJobsListApi } from "../api-handler/job-save-api";
+import { closeJobApi, getSavedJobsListApi, unsaveJobAsFavorite } from "../api-handler/job-save-api";
 
 // Create job
 export function useCreateJob() {
@@ -26,7 +26,6 @@ export function useUpdateJob(jobId: string) {
   return useMutation<CreateJobResponse, Error, Partial<CreateJobData>>({
     mutationFn: (updatedData) => updateJobApi(jobId, updatedData),
     onSuccess: (data) => {
-      console.log("Job updated:", data);
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
     },
     onError: (err) => console.error("Update job failed:", err),
@@ -79,15 +78,39 @@ export const myJobs = (filters: Record<string, any>) => {
   } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
 };
 
-export const savedJobs = () => {
+export const useSavedJobs = () => {
   return useQuery<JobSaveApiResponse>({
-    queryKey: ["savedJobs"],      
-    queryFn: () => getSavedJobsListApi(), 
-    keepPreviousData: true,                
+    queryKey: ["savedJobs"],
+    queryFn: () => getSavedJobsListApi(),
+    keepPreviousData: true,
   } as UseQueryOptions<
     JobSaveApiResponse,
     unknown,
     JobSaveApiResponse,
     readonly unknown[]
   >);
+};
+
+
+export const useCloseJob = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (jobId: string) => closeJobApi(jobId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    },
+  });
+};
+
+export const useUnsaveJob = () => {
+  const queryClient = useQueryClient(); 
+
+  return useMutation({
+    mutationFn: (jobId: string) => unsaveJobAsFavorite(jobId),
+    onSuccess: () => {
+      // Re-fetch the saved jobs list after unsaving
+      queryClient.invalidateQueries({ queryKey: ['savedJobs'] });
+    },
+  });
 };

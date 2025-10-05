@@ -12,6 +12,7 @@ import { getCookie } from "cookies-next";
 import { UserProfile } from "@/components/MyProfile";
 import { Loader } from "@/components/ui/loader";
 import toast from "react-hot-toast";
+import { useSyncFavoritesOnLogin } from "../utils/saved-job-helper";
 
 type AuthContextType = {
     user: UserProfile;
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const loginMutation = useLogin();
-
+    useSyncFavoritesOnLogin(user);
 
     // Restore user on refresh
     useEffect(() => {

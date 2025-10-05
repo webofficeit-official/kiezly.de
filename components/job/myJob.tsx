@@ -1,5 +1,5 @@
 'use client'
-import { myJobs } from "@/lib/react-query/queries/useJob";
+import { myJobs, useCloseJob } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
 import { Check, ChevronDown, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/context/auth-context";
 import { Listbox } from "@headlessui/react";
 import { Button } from "../ui/button";
 import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
+import toast from "react-hot-toast";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -115,6 +116,8 @@ export default function MyJobs({
 
 
     const pageSlice = dataSource;
+    const closeJobMutation = useCloseJob();
+
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -205,8 +208,15 @@ export default function MyJobs({
                                         confirmText="close"
                                         cancelText="Cancel"
                                         onConfirm={() => {
-                                           
-                                            console.log("close job...");
+
+                                            closeJobMutation.mutate(job.id, {
+                                                onSuccess: () => {
+                                                    toast.success("Job closed successfully!");
+                                                },
+                                                onError: (error: any) => {
+                                                    toast.error(error.message || "Failed to close the job");
+                                                },
+                                            });
                                         }}
                                     />
                                     <button

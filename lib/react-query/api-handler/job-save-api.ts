@@ -7,16 +7,22 @@ export const addJobAsFavorite = async (job: SaveJobData): Promise<SaveJobRespons
 };
 
 export const getSavedJobs = async () => {
-    const res = await apiClient.get(`/jobs/favorite`);
-    return res.data;
+  const res = await apiClient.get(`/jobs/favorite`);
+  return res.data;
 };
 
 export const getSavedJobsListApi = async () => {
-    const res = await apiClient.get(`/jobs/favorite`);
-    return res.data;
+  const res = await apiClient.get(`/jobs/favorite`);
+  return res.data;
 };
 
 export const unsaveJobAsFavorite = async (jobId: string): Promise<SaveJobResponse> => {
   const { data } = await apiClient.delete(`/jobs/favorite/${jobId}`);
   return data;
+};
+
+
+export const closeJobApi = async (jobId: string) => {
+  const res = await apiClient.post(`/jobs/close`, { jobId });
+  return res.data; // return the response data
 };

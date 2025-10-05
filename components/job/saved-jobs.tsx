@@ -1,10 +1,11 @@
 'use client'
-import { savedJobs } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
 import { useRouter } from "next/navigation";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Button } from "../ui/button";
+import { Bookmark, BookmarkCheck } from "lucide-react";
+import { useSavedJobs, useUnsaveJob } from "@/lib/react-query/queries/useJob";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -59,6 +60,7 @@ export default function SavedJobs({
     onChange?: (f: Filters) => void;
     jobs?: JobList[];
 }) {
+    const [savedJobs, setSavedJobs] = useState([]);
     const { user } = useAuth();
 
 
@@ -67,17 +69,39 @@ export default function SavedJobs({
 
 
 
-    const { data, isLoading, error } = savedJobs();
+    const { data, isLoading, error } = useSavedJobs();
+    const unsaveMutation = useUnsaveJob();
 
     // Debounce high-churn fields (search query)
 
     const dataSource: JobList[] = useMemo(() => {
+        setSavedJobs(data?.jobs || [])
         if (data?.jobs) return data.jobs as JobList[];
         if (jobs && jobs.length) return jobs;
         return []
     }, [data, jobs]);
 
     const pageSlice = dataSource;
+
+
+    const handleUnSaveJob = async (jobId: string) => {
+        try {
+            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+            if (user) {
+                unsaveMutation.mutate(jobId);
+            } else {
+                const localStoredJobs = localStorage.getItem("saved-jobs")
+                let savedJobsLocal = []
+                if (localStoredJobs) {
+                    savedJobsLocal = JSON.parse(localStoredJobs)
+                }
+                localStorage.setItem('saved-jobs', JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId)))
+            }
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -143,6 +167,16 @@ export default function SavedJobs({
                                             <Button variant="outline" className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"><span className="h-3">New </span></Button>
                                         ) : (
                                             "Posted " + new Date(job?.created_at).toLocaleDateString()
+                                        )}
+
+                                        {savedJobs.some((j) => j.id === job.id) && (
+                                            <Button
+                                                variant="default"
+                                                className="rounded-xl px-2 py-1 text-xs flex items-center gap-1 bg-green-50 text-green-700 border border-green-200"
+                                                onClick={() => handleUnSaveJob(job.id)}
+                                            >
+                                                <BookmarkCheck className="h-3 w-3" />
+                                            </Button>
                                         )}
                                     </div>
                                     <button
