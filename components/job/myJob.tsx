@@ -1,7 +1,7 @@
 'use client'
 import { myJobs, useCloseJob } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
-import { Check, ChevronDown, Trash2 } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
@@ -9,6 +9,7 @@ import { Listbox } from "@headlessui/react";
 import { Button } from "../ui/button";
 import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
 import toast from "react-hot-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -118,6 +119,26 @@ export default function MyJobs({
     const pageSlice = dataSource;
     const closeJobMutation = useCloseJob();
 
+    const CloseJobButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(
+        ({ onClick }, ref) => (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button ref={ref} onClick={onClick} className="p-1 rounded hover:bg-gray-100">
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                        Close Job
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        )
+    );
+
+
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -188,43 +209,86 @@ export default function MyJobs({
                                     </div>
                                 </div>
 
+                                {/* Actions: just below badge */}
+
+
                                 {/* Right-side container: posted date top, button bottom */}
                                 <div className="flex flex-col justify-between items-end min-h-[80px]">
+
                                     <div className="text-xs text-gray-500">
                                         {isNew(job?.created_at) ? (
-                                            <Button variant="outline" className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"><span className="h-3">New </span></Button>
+                                            <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 font-medium px-2 py-1 rounded-full">
+                                                <span className="h-2 w-2 rounded-full bg-green-600 animate-pulse" />
+                                                New
+                                            </span>
                                         ) : (
-                                            "Posted " + new Date(job?.created_at).toLocaleDateString()
+                                            <span className="flex items-center gap-1 text-gray-500">
+                                                <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14A6 6 0 1110 4a6 6 0 010 12zm-.5-6V5h1v5h4v1h-5z" />
+                                                </svg>
+                                                Posted {new Date(job?.created_at).toLocaleDateString()}
+                                            </span>
                                         )}
                                     </div>
-                                    <AlertBox
-                                        trigger={
-                                            <button className="p-2 rounded hover:bg-gray-100">
-                                                <Trash2 className="w-5 h-5 text-red-600" />
-                                            </button>
-                                        }
-                                        title="Close Job?"
-                                        description="Are you sure you want to close this job? This action cannot be undone."
-                                        confirmText="close"
-                                        cancelText="Cancel"
-                                        onConfirm={() => {
+                                    <div className="flex items-center gap-1 mb-2">
+                                        {/* View */}
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        className="p-1 rounded hover:bg-gray-100"
+                                                        onClick={() => router.push(`/jobs/${job.slug}`)}
+                                                    >
+                                                        <Eye className="w-4 h-4 text-blue-600" />
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top" className="text-xs">
+                                                    View Job
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
 
-                                            closeJobMutation.mutate(job.id, {
-                                                onSuccess: () => {
-                                                    toast.success("Job closed successfully!");
-                                                },
-                                                onError: (error: any) => {
-                                                    toast.error(error.message || "Failed to close the job");
-                                                },
-                                            });
-                                        }}
-                                    />
-                                    <button
-                                        className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
-                                        onClick={() => router.push(`/jobs/${job.slug}`)}
-                                    >
-                                        View
-                                    </button>
+                                        {/* Edit */}
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        className="p-1 rounded hover:bg-gray-100"
+                                                        onClick={() => router.push(`/post-job/${job.slug}`)}
+                                                    >
+                                                        {job.status === "draft" ? (
+                                                            <ArrowRight className="w-4 h-4 text-amber-600" />
+                                                        ) : (
+                                                            <Pencil className="w-4 h-4 text-amber-600" />
+                                                        )}
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top" className="text-xs">
+                                                    {job.status === "draft" ? "Continue Job" : " Edit Job"}
+
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+
+                                        {/* Delete */}
+                                        <AlertBox
+                                            trigger={<CloseJobButton onClick={() => { }} />}
+                                            title="Close Job?"
+                                            description="Are you sure you want to close this job? This action cannot be undone."
+                                            confirmText="Close"
+                                            cancelText="Cancel"
+                                            onConfirm={() => {
+                                                closeJobMutation.mutate(job.id, {
+                                                    onSuccess: () => toast.success("Job closed successfully!"),
+                                                    onError: (error: any) => toast.error(error.message || "Failed to close the job"),
+                                                });
+                                            }}
+                                        />
+
+
+
+                                    </div>
+
                                 </div>
                             </article>
                         ))}
