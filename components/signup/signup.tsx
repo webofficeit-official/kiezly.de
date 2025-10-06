@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
 import { SelectWithFilter } from "../input/select";
 import ZipAutocomplete from "../input/autocomplete";
+import { useSearchParams } from "next/navigation";
 
 // Simple Link shim so this runs outside Next.js too
 function Link({ href = "#", className = "", children, ...props }) {
@@ -23,12 +24,12 @@ type Tag = {
 };
 
 interface Country {
-  id: string | number;
-  name: string;
+    id: string | number;
+    name: string;
 }
 
 interface ApiResponse {
-  countries: Country[];
+    countries: Country[];
 }
 
 interface TagInputProps {
@@ -133,29 +134,29 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
 
             <div className={`w-full flex flex-wrap gap-2 rounded-xl border px-3 py-1.5 ${error ? "border-red-400 ring-2 ring-red-100" : "border-gray-300"}`} onClick={() => inputRef.current?.focus()}>
                 {/* <div className="flex flex-wrap gap-2"> */}
-                    {value.map((tag) => (
-                        <span key={tag.id} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs">
-                            {tag.name}
-                            <button type="button" className="ml-1 rounded p-0.5 hover:bg-gray-200" aria-label={`Remove ${tag.name}`} onClick={() => removeTag(tag)}>
-                                ×
-                            </button>
-                        </span>
-                    ))}
-                    <input
-                        id={`${name}-input`}
-                        ref={inputRef}
-                        value={input}
-                        onChange={(e) => { setInput(e.target.value); setOpen(true); setActiveIndex(-1); }}
-                        onFocus={() => setOpen(true)}
-                        onBlur={() => setTimeout(() => setOpen(false), 100)}
-                        onKeyDown={onKeyDown}
-                        placeholder={placeholder}
-                        className="flex-1 min-w-[10ch] border-0 bg-transparent px-2 py-1 text-sm outline-none"
-                        aria-autocomplete="list"
-                        aria-controls={`${name}-listbox`}
-                        aria-expanded={open}
-                        autoComplete="off"
-                    />
+                {value.map((tag) => (
+                    <span key={tag.id} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs">
+                        {tag.name}
+                        <button type="button" className="ml-1 rounded p-0.5 hover:bg-gray-200" aria-label={`Remove ${tag.name}`} onClick={() => removeTag(tag)}>
+                            ×
+                        </button>
+                    </span>
+                ))}
+                <input
+                    id={`${name}-input`}
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => { setInput(e.target.value); setOpen(true); setActiveIndex(-1); }}
+                    onFocus={() => setOpen(true)}
+                    onBlur={() => setTimeout(() => setOpen(false), 100)}
+                    onKeyDown={onKeyDown}
+                    placeholder={placeholder}
+                    className="flex-1 min-w-[10ch] border-0 bg-transparent px-2 py-1 text-sm outline-none"
+                    aria-autocomplete="list"
+                    aria-controls={`${name}-listbox`}
+                    aria-expanded={open}
+                    autoComplete="off"
+                />
                 {/* </div> */}
             </div>
 
@@ -182,7 +183,8 @@ function TagInput({ name, label, value, onChange, suggestions = [], placeholder 
 }
 
 export default function RegisterPage() {
-    const [role, setRole] = React.useState("helper");
+    const searchParams = useSearchParams();
+    const [role, setRole] = React.useState(searchParams.get("role") || "helper");
     const [showPassword, setShowPassword] = React.useState(false);
     const [agree, setAgree] = React.useState(false);
     const [submitting, setSubmitting] = React.useState(false);
@@ -220,7 +222,7 @@ export default function RegisterPage() {
                 console.log(data);
                 setJobCategories(data.data.jobCategories)
                 setCountries(data.data.countries)
-                setCountry((data.data as ApiResponse).countries?.find(c => c.name == "Germany")?.id || "")                
+                setCountry((data.data as ApiResponse).countries?.find(c => c.name == "Germany")?.id || "")
             },
             onError: (err: any) => {
             }
@@ -284,7 +286,7 @@ export default function RegisterPage() {
             setFieldError(name, validateField(name, val));
         }
     }
-    
+
     const handleZip = (z: string) => {
         setZip(z)
         getCity.mutate({
@@ -536,13 +538,13 @@ export default function RegisterPage() {
                             </div>
                             <div>
                                 <ZipAutocomplete
-                                  zip={zip}
-                                  setZip={setZip}
-                                  selectedObject={selectedZip}
-                                  setSelectedObject={setSelectedZip}
-                                  zipOptions={zipOptions}
-                                  onZipChange={handleZip}
-                                  label="ZIP"
+                                    zip={zip}
+                                    setZip={setZip}
+                                    selectedObject={selectedZip}
+                                    setSelectedObject={setSelectedZip}
+                                    zipOptions={zipOptions}
+                                    onZipChange={handleZip}
+                                    label="ZIP"
                                 />
                             </div>
                             <div>

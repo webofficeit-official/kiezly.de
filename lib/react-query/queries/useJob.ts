@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { createJobApi, generateSlugApi, getJobApi, getJobCollectionsApi, getJobsApi, getMyJobsApi, updateJobApi } from "../api-handler/job-api";
-import { CreateJobData, CreateJobResponse, JobApiResponse, JobCollections, JobSaveApiResponse } from "@/lib/types/job";
+import { CreateJobData, CreateJobResponse, JobApiResponse, JobCollections, JobResponse, JobSaveApiResponse } from "@/lib/types/job";
 import { closeJobApi, getSavedJobsListApi, unsaveJobAsFavorite } from "../api-handler/job-save-api";
 
 // Create job
@@ -23,7 +23,7 @@ export function useCreateJob() {
 export function useUpdateJob(jobId: string) {
   const queryClient = useQueryClient();
 
-  return useMutation<CreateJobResponse, Error, Partial<CreateJobData>>({
+  return useMutation<JobResponse, Error, Partial<CreateJobData>>({
     mutationFn: (updatedData) => updateJobApi(jobId, updatedData),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });

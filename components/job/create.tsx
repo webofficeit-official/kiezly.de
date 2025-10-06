@@ -1,6 +1,6 @@
 "use client";
 import { CreateJobData, JobMode, JobResponse } from "@/lib/types/job";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Input from "../shared-ui/input/input";
 import { Select } from "../shared-ui/custom-select/custom-select";
 import { RichTextEditor } from "../shared-ui/rich-text-editor/rich-text-editor";
@@ -10,7 +10,8 @@ import { DateInput } from "../shared-ui/custom-date/custom-date";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Switch from "../shared-ui/switch/switch";
-import { useCollection, useZipcodes } from "@/lib/react-query/queries/collection";
+import { useZipcodes } from "@/lib/react-query/queries/collection";
+import { DynamicAutocomplete } from "../shared-ui/auto-complete/dynamic-auto-complete";
 
 
 /* ----------------------------- Type Definitions ---------------------------- */
@@ -105,7 +106,7 @@ export function useDebounce<T>(value: T, delay: number) {
 /* ----------------------------- Create/Edit Wrapper ---------------------------- */
 export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFormProps) {
     const { data: collections } = useJobCollections();
-    const { data: countries } = useCollection<{ id: number; code?: string; name: string, currency?: string }>("countries");
+    // const { data: countries } = useCollection<{ id: number; code?: string; name: string, currency?: string }>("countries");
 
 
     return (
@@ -123,7 +124,7 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
                         languages: [],
                         jobMode: [],
                     }}
-                    countries={countries || []}
+                    countries={collections?.countries || []}
                 />
             </div>
         </div>
@@ -161,6 +162,8 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
     const { mutateAsync } = useZipcodes();
 
+
+
     const fetchZipOptions = async (query: string, countryId?: string): Promise<ZipOption[]> => {
 
 
@@ -183,14 +186,24 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
     useEffect(() => {
+
         if (mode === "edit" && initialData && collections) {
             const job = initialData.job;
 
-            const selectedCountry = countries.find(c => c.name === job.country);
+            let selectedCountry =
+                countries.find(c => c.name === job?.country) ||
+                countries.find(c => c.name === "Germany" || c.code === "DE");
+
             if (selectedCountry) {
-                setCountryCode(selectedCountry.id.toString()); // for fetchZipOptions
-                fetchZipOptions(job.postal_code ? job.postal_code : null, selectedCountry.id.toString())
+                //  Store the country code for other components
+                setCountryCode(selectedCountry.id.toString());
+
+                // Pre-fetch zip options
+                fetchZipOptions(job?.postal_code || "", selectedCountry.id.toString());
             }
+
+            const selectedLanguages = (job.languages || []).map(l => l.id.toString());
+
             setFormData({
                 title: job.title || "",
                 subtitle: job.subtitle || "",
@@ -213,7 +226,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 price_max: job.price_max || "",
                 currency: job.currency
                     ? { id: job.currency, name: job.currency }  // wrap string as object for Select
-                    : null,
+                    : { id: "EUR", name: "EUR" },
                 first_aid_verified: !!job.first_aid_verified,
                 police_verified: !!job.police_verified,
                 slug: job.slug,
@@ -224,7 +237,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 job_type: job?.job_type || [],
                 job_experience: job?.job_experience || [],
                 tag_ids: (job.tags || []).map(t => t.id.toString()),
-                languages: (job.languages || []).map(l => ({ id: l.id.toString(), name: l.name })),
+                languages: selectedLanguages,
                 work_mode: job.work_mode
                     ? {
                         id: job.work_mode,
@@ -257,22 +270,50 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                             ? "External Link"
                                             : job.contact_method, // fallback
                     }
-                    : null,
+                    : { id: "email_relay", name: "Email Relay" },
 
                 contact_email: job.contact_email || "",
                 contact_phone: job.contact_phone || "",
                 contact_link: job.contact_link || "",
             });
+
+
+        }
+
+        if (mode === "create") {
+            let selectedCountry =
+                countries.find(c => c.name === "Germany" || c.code === "DE");
+
+            if (selectedCountry) {
+                //  Store the country code for other components
+                setCountryCode(selectedCountry.id.toString());
+
+                setFormData(prev => ({
+                    ...prev,                               // keep everything else the same
+                    country: {
+                        id: selectedCountry.id.toString(),
+                        name: selectedCountry.name
+                    },
+                    currency: { id: "EUR", name: "EUR" },
+                    price_type: { id: "fixed", name: "Fixed" },
+                    contact_method: { id: "email_relay", name: "Email Relay" },
+                }));
+
+                // Pre-fetch zip options
+                fetchZipOptions("", selectedCountry.id.toString());
+            }
+            window.history.replaceState(null, "", `/post-job`);
         }
 
     }, [mode, initialData, collections?.jobType, collections?.jobExperience, collections?.jobTags, collections?.languages, collections?.jobMode, countries]);
 
 
-
+    const allCurrencies = Array.from(
+        new Set(countries.map(c => c.currency))
+    ).map(curr => ({ id: curr, name: curr }));
 
     const steps: WizardStep[] = useMemo(
         () => {
-            // if (!collections) return [];
             return [
                 {
                     id: "basic",
@@ -371,9 +412,6 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                             // fetchOptions: (query: string) => fetchZipOptions(query, countryCode),
                             onChangeValue: val => update(d => (d.postal_code = val)),
                             onSelectOption: (zip: ZipOption) => {
-                                const selectedCountry = countries.find(
-                                    c => String(c.id) === String(zip.country_id)
-                                );
 
                                 update(d => {
                                     // d.country = selectedCountry ? selectedCountry.name : "";
@@ -385,6 +423,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                     d.lng = String(zip.longitude);
                                 });
                             },
+                            required: true,
                         },
 
                         { id: "street", label: "Street", type: "auto-complete", value: formData.street },
@@ -406,9 +445,14 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                             label: "Currency",
                             type: "select",
                             required: true,
-                            options: [
-                                { id: "EUR", name: "EUR" },
-                            ]
+                            options: allCurrencies,
+                            value: (() => {
+                                const country = countries.find(
+                                    c => c.id.toString() === formData.country?.id
+                                );
+                                const currency = country?.currency || "EUR"; // fallback
+                                return { id: currency, name: currency };
+                            })(),
                         },
                         {
                             id: "price_type",
@@ -513,9 +557,24 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                 { id: "external_link", name: "External Link" }
                             ]
                         },
-                        { id: "contact_email", label: "Email", type: "input" },
-                        { id: "contact_phone", label: "Phone", type: "input" },
-                        { id: "contact_link", label: "External Link", type: "input" }
+                        {
+                            id: "contact_email",
+                            label: "Email",
+                            type: "input",
+                            required: (formData) => formData.contact_method?.id === "email_relay" || formData.contact_method?.id === "direct_email",
+                        },
+                        {
+                            id: "contact_phone",
+                            label: "Phone",
+                            type: "input",
+                            required: (formData) => formData.contact_method?.id === "phone",
+                        },
+                        {
+                            id: "contact_link",
+                            label: "External Link",
+                            type: "input",
+                            required: (formData) => formData.contact_method?.id === "external_link",
+                        }
                     ]
                 }
             ]
@@ -560,20 +619,16 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
     useEffect(() => {
-        if (!slugEdited) {
-            if (!debouncedTitle) {
-                // Title is empty, clear slug
-                update(d => { d.slug = ""; });
-            } else {
-                // Title exists, generate slug
-                if (mode === "create" || (mode === "edit" && !formData.slug)) {
-                    generateSlugMutation.mutate(debouncedTitle, {
-                        onSuccess: res => update(d => { d.slug = res.slug; }),
-                    });
-                }
-            }
+        if (!debouncedTitle) return;
+
+        // Auto-generate slug only if user hasn't manually typed anything
+        if (!slugEdited && (!formData.slug || formData.slug === "")) {
+            generateSlugMutation.mutate(debouncedTitle, {
+                onSuccess: res => update(d => { d.slug = res.slug; }),
+            });
         }
-    }, [debouncedTitle, slugEdited, mode, formData.slug]);
+    }, [debouncedTitle, slugEdited, mode]);
+
 
     useEffect(() => {
         if (formData.price_type?.id === "fixed") {
@@ -589,95 +644,49 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
     }, [formData.price_type]);
 
 
-
-
-
-
-
-    // function normalizeJobPayload(data: Record<string, any>) {
-    //     return {
-    //         ...data,
-    //         // category_id -> number
-    //         category_id: data.category_id
-    //             ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
-    //             : null,
-
-    //         // tag_ids -> number[]
-    //         tag_ids: Array.isArray(data.tag_ids)
-    //             ? data.tag_ids.map((t: any) => Number(t.id ?? t))
-    //             : [],
-
-    //         // job_type -> string[]
-    //         job_type: Array.isArray(data.job_type)
-    //             ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
-    //             : [],
-
-    //         // job_experience -> string[]
-    //         job_experience: Array.isArray(data.job_experience)
-    //             ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
-    //             : [],
-
-    //         // languages -> number[]
-    //         languages: Array.isArray(data.languages)
-    //             ? data.languages.map((l: any) => Number(l.id ?? l))
-    //             : [],
-
-
-    //         price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
-    //         work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
-    //         currency: typeof data.currency === "object" ? data.currency.id : data.currency,
-    //         contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method.id,
-
-    //         // slug and status
-    //         slug: data.slug,
-    //         status: data.status ?? "draft",
-    //         starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
-    //         ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
-
-    //         country: data.country
-    //             ? typeof data.country === "object" ? data.country.name : data.country.name
-    //             : null,
-    //     };
-    // }
-
-
     function normalizeJobPayload(data: Record<string, any>) {
-    return {
-        ...data,
+        return {
+            ...data,
 
-        category_id: data.category_id
-            ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
-            : null,
+            category_id: data.category_id
+                ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
+                : null,
 
-        tag_ids: Array.isArray(data.tag_ids)
-            ? data.tag_ids.map((t: any) => (typeof t === "object" ? Number(t.id) : Number(t))).filter(Boolean)
-            : [],
+            tag_ids: Array.isArray(data.tag_ids)
+                ? data.tag_ids.map((t: any) => (typeof t === "object" ? Number(t.id) : Number(t))).filter(Boolean)
+                : [],
 
-        job_type: Array.isArray(data.job_type)
-            ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
-            : [],
+            job_type: Array.isArray(data.job_type)
+                ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
+                : [],
 
-        job_experience: Array.isArray(data.job_experience)
-            ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
-            : [],
+            job_experience: Array.isArray(data.job_experience)
+                ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
+                : [],
 
-        languages: Array.isArray(data.languages)
-            ? data.languages.map((l: any) => Number(l.id ?? l))
-            : [],
+            languages: Array.isArray(data.languages)
+                ? data.languages.map(l =>
+                    typeof l === 'object' && l !== null
+                        ? Number(l.id)
+                        : Number(l)
+                )
+                : [],
 
-        price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
-        work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
-        currency: typeof data.currency === "object" ? data.currency.id : data.currency,
-        contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method,
 
-        slug: data.slug,
-        status: data.status ?? "draft",
-        starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
-        ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
 
-        country: data.country ? (typeof data.country === "object" ? data.country.name : data.country) : null,
-    };
-}
+            price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
+            currency: typeof data.currency === "object" ? data.currency.id : data.currency,
+            work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
+            contact_method: data.contact_method?.id ?? data.contact_method,
+
+            slug: data.slug,
+            status: data.status ?? "draft",
+            starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
+            ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
+
+            country: data.country ? (typeof data.country === "object" ? data.country.name : data.country) : null,
+        };
+    }
 
 
 
@@ -707,6 +716,10 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                     }
                 }
                 if (t.type === "checkbox") return;
+                if (t.type === "custom" && (!val || val.trim() === "")) {
+                    errors[t.id] = `${t.label} is required`;
+                    return;
+                }
                 if ((t.type === "input" || t.type === "textarea" || t.type === "date") && (!val || val === "")) {
                     errors[t.id] = `${t.label} is required`;
                     return;
@@ -793,7 +806,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
         steps[currentStep].subTopics.forEach(t => (stepData[t.id] = formData[t.id]));
 
         // Create mode, first step
-        if (mode === "create" && currentStep === 0) {
+        if (mode === "create" && currentStep === 0 && !jobId) {
             const normalized = normalizeJobPayload(stepData);
             createJobMutation.mutate(normalized, {
                 onSuccess: (data: any) => {
@@ -822,6 +835,8 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 onError: (err) => toast.error(err?.message || "Failed to update job"),
             });
         }
+
+
     };
 
 
@@ -840,12 +855,12 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 status: formData.status || 'pending_review'
             });
             updateJobMutation.mutate(normalized, {
-                onSuccess: () => {
+                onSuccess: (data) => {
                     toast.success("Job Updated successfully!");
                     setShowErrors(false);
                     setFormSubmitted(true); //  final success
                     sessionStorage.removeItem("currentStep")
-                    router.push('/my-jobs')
+                    router.push(`/jobs/${data?.job?.slug}`)
                 },
                 onError: (err) => toast.error(err?.message || "Failed to update job"),
             });
@@ -854,7 +869,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
     };
 
- 
+
 
 
     const isLastStep = currentStep === steps.length - 1;
@@ -869,6 +884,14 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
         const errors = validateStep(stepIdx);
         return Object.keys(errors).length === 0; // No errors = completed
+    }
+
+    const handleDefaultCurrency = (countryId: string) => {
+        const country = countries.find(c => c.id.toString() === countryId);
+        setFormData(prev => ({
+            ...prev,
+            currency: { id: country.currency, name: country.currency },
+        }));
     }
 
     /* ----------------------------- Render ---------------------------- */
@@ -960,41 +983,42 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                         </div>
                     ) : 
                     ( */}
-                        <>
-                            <h3 className="text-xl font-bold mb-2">
-                                {steps[currentStep].title}
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-6">
-                                {steps[currentStep].subtitle}
-                            </p>
+                    <>
+                        <h3 className="text-xl font-bold mb-2">
+                            {steps[currentStep].title}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                            {steps[currentStep].subtitle}
+                        </p>
 
-                            <div
-                                className={`p-4 border rounded-lg bg-white shadow ${steps[currentStep].layout || "space-y-4"
-                                    }`}
-                            >
-                                {steps[currentStep].subTopics.map(topic => {
-                                    const errors = showErrors ? validateStep(currentStep) : {};
-                                    const shouldShowField = () => {
-                                        if (topic.id === "price_value") return formData.price_type?.id === "fixed";
-                                        if (topic.id === "price_min" || topic.id === "price_max") return formData.price_type?.id === "range";
+                        <div
+                            className={`p-4 border rounded-lg bg-white shadow ${steps[currentStep].layout || "space-y-4"
+                                }`}
+                        >
+                            {steps[currentStep].subTopics.map(topic => {
+                                const errors = showErrors ? validateStep(currentStep) : {};
+                                const shouldShowField = () => {
+                                    if (topic.id === "price_value") return formData.price_type?.id === "fixed";
+                                    if (topic.id === "price_min" || topic.id === "price_max") return formData.price_type?.id === "range";
 
-                                        if (topic.id === "contact_email") return ["email_relay", "direct_email"].includes(formData.contact_method?.id);
-                                        if (topic.id === "contact_phone") return formData.contact_method?.id === "phone";
-                                        if (topic.id === "contact_link") return formData.contact_method?.id === "external_link";
+                                    if (topic.id === "contact_email") return ["email_relay", "direct_email"].includes(formData.contact_method?.id);
+                                    if (topic.id === "contact_phone") return formData.contact_method?.id === "phone";
+                                    if (topic.id === "contact_link") return formData.contact_method?.id === "external_link";
 
-                                        return true;
-                                    };
+                                    return true;
+                                };
 
-                                    if (["contact_email", "contact_phone", "contact_link"].includes(topic.id)) {
-                                        if (topic.id === "contact_email" && !["email_relay", "direct_email"].includes(formData.contact_method?.id)) return null;
-                                        if (topic.id === "contact_phone" && formData.contact_method?.id !== "phone") return null;
-                                        if (topic.id === "contact_link" && formData.contact_method?.id !== "external_link") return null;
-                                    }
+                                if (["contact_email", "contact_phone", "contact_link"].includes(topic.id)) {
+                                    if (topic.id === "contact_email" && !["email_relay", "direct_email"].includes(formData.contact_method?.id)) return null;
+                                    if (topic.id === "contact_phone" && formData.contact_method?.id !== "phone") return null;
+                                    if (topic.id === "contact_link" && formData.contact_method?.id !== "external_link") return null;
+                                }
 
-                                    if (!shouldShowField()) return null;
-                                    return (
-                                        <div key={topic.id} className={topic.colSpan || ""}>
-                                            {topic.type === "input" && (
+                                if (!shouldShowField()) return null;
+                                return (
+                                    <div key={topic.id} className={topic.colSpan || ""}>
+                                        {topic.type === "input" && (
+                                            <>
                                                 <Input
                                                     label={topic.label}
                                                     value={formData?.[topic.id] || ""}
@@ -1013,197 +1037,210 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                         }
 
                                                         if (topic.id === "slug") {
+
+                                                            // User typed something → mark as manually edited
                                                             setSlugEdited(true);
 
-                                                            if (!v.trim()) {
-                                                                setSlugEdited(false);
-                                                                if (titleValue.trim()) {
-                                                                    generateSlugMutation.mutate(titleValue, {
-                                                                        onSuccess: res => update(d => (d.slug = res.slug))
-                                                                    });
-                                                                }
-                                                            }
                                                         }
+
                                                     }}
                                                     required={!!topic.required}
                                                     error={showErrors && errors[topic.id]}
                                                 />
-                                            )}
-
-                                            {topic.type === "textarea" && (
-
-                                                <RichTextEditor
-                                                    key={topic.id}
-                                                    label={topic.label}
-                                                    value={formData[topic.id] || ""}
-                                                    onChange={v => update(d => (d[topic.id] = isEmptyEditorValue(v) ? "" : v))}
-                                                    required={!!topic.required}
-                                                    error={errors[topic.id]}
-                                                />
-                                            )}
-
-                                            {topic.type === "select" && topic.multiple && (
-                                                <MultiSelect
-                                                    label={topic.label}
-                                                    values={formData?.[topic.id] || []}
-                                                    onChange={opt => update(d => (d[topic.id] = opt))}
-                                                    options={
-                                                        topic.options?.map(o =>
-                                                            typeof o === "string"
-                                                                ? { id: o, name: o }
-                                                                : { id: o.id, name: o.name }
-                                                        ) || []
-                                                    }
-                                                    required={!!topic.required}
-                                                    error={showErrors && errors[topic.id]}
-                                                />
-                                            )}
-
-                                            {topic.type === "select" && !topic.multiple && (
-                                                <Select
-                                                    label={topic.label}
-                                                    value={formData?.[topic.id] || null}
-                                                    onChange={opt => {
-                                                        update(d => (d[topic.id] = opt))
-
-                                                        if (topic.id === "country") {
-                                                            const selectedCountry = countries.find(c => String(c.id) === String(opt?.id));
-                                                            setCountryCode(selectedCountry.id.toString());
-                                                            // fetchZipOptions(null,String(selectedCountry?.id))
-                                                            update(d => {
-                                                                // d.country = selectedCountry.name;
-                                                                d.postal_code = "";
-                                                                d.street = "";
-                                                                d.city = "";
-                                                                d.state = "";
-                                                                d.lat = "";
-                                                                d.lng = "";
+                                                {slugEdited && topic.id === "slug" && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSlugEdited(false);
+                                                            generateSlugMutation.mutate(titleValue, {
+                                                                onSuccess: res => update(d => (d.slug = res.slug))
                                                             });
-                                                        }
-                                                    }}
-                                                    options={
-                                                        topic.options?.map(o =>
-                                                            typeof o === "string"
-                                                                ? { id: o, name: o }
-                                                                : { id: o.id, name: o.name }
-                                                        ) || []
+                                                        }}
+                                                        className="text-gray-600 text-sm underline"
+                                                    >
+                                                        ↻ Auto-generate
+                                                    </button>)}
+                                            </>
+                                        )}
+
+                                        {topic.type === "textarea" && (
+
+                                            <RichTextEditor
+                                                key={topic.id}
+                                                label={topic.label}
+                                                value={formData[topic.id] || ""}
+                                                onChange={v => update(d => (d[topic.id] = isEmptyEditorValue(v) ? "" : v))}
+                                                required={!!topic.required}
+                                                error={errors[topic.id]}
+                                            />
+                                        )}
+
+                                        {topic.type === "select" && topic.multiple && (
+                                            <MultiSelect
+                                                label={topic.label}
+                                                values={formData?.[topic.id] || []}
+                                                onChange={opt => update(d => (d[topic.id] = opt))}
+                                                options={
+                                                    topic.options?.map(o =>
+                                                        typeof o === "string"
+                                                            ? { id: o, name: o }
+                                                            : { id: o.id, name: o.name }
+                                                    ) || []
+                                                }
+                                                required={!!topic.required}
+                                                error={showErrors && errors[topic.id]}
+                                            />
+                                        )}
+
+                                        {topic.type === "select" && !topic.multiple && (
+                                            <Select
+                                                label={topic.label}
+                                                value={formData?.[topic.id] || null}
+                                                onChange={opt => {
+                                                    update(d => (d[topic.id] = opt))
+
+                                                    if (topic.id === "country") {
+                                                        const selectedCountry = countries.find(c => String(c.id) === String(opt?.id));
+                                                        setCountryCode(selectedCountry.id.toString());
+                                                        // fetchZipOptions(null, String(selectedCountry?.id))
+                                                        handleDefaultCurrency(selectedCountry.id.toString());
+                                                        update(d => {
+                                                            // d.country = selectedCountry.name;
+                                                            d.postal_code = "";
+                                                            d.street = "";
+                                                            d.city = "";
+                                                            d.state = "";
+                                                            d.lat = "";
+                                                            d.lng = "";
+
+                                                        });
                                                     }
-                                                    required={!!topic.required}
-                                                    error={showErrors && errors[topic.id]}
-                                                    searchable={
-                                                        topic.id === "country" ? true : false
+                                                }}
+                                                options={
+                                                    topic.options?.map(o =>
+                                                        typeof o === "string"
+                                                            ? { id: o, name: o }
+                                                            : { id: o.id, name: o.name }
+                                                    ) || []
+                                                }
+                                                required={!!topic.required}
+                                                error={showErrors && errors[topic.id]}
+                                                searchable={
+                                                    topic.id === "country" ? true : false
+                                                }
+                                            />
+                                        )}
+
+                                        {topic.type === "select_country" && !topic.multiple && (
+                                            <Select
+                                                label={topic.label + "ff"}
+                                                value={formData?.[topic.id] || null}
+                                                onChange={opt => {
+
+
+                                                    // Call the subTopic's onChangeValue if it exists
+                                                    if (topic.onChangeValue) {
+                                                        const selectedVal = typeof opt === "object" ? opt.id : opt;
+                                                        topic.onChangeValue(selectedVal);
                                                     }
-                                                />
-                                            )}
-
-                                            {topic.type === "select_country" && !topic.multiple && (
-                                                <Select
-                                                    label={topic.label}
-                                                    value={formData?.[topic.id] || null}
-                                                    onChange={opt => {
-
-
-                                                        // Call the subTopic's onChangeValue if it exists
-                                                        if (topic.onChangeValue) {
-                                                            const selectedVal = typeof opt === "object" ? opt.id : opt;
-                                                            topic.onChangeValue(selectedVal);
-                                                        }
-                                                    }}
-                                                    options={
-                                                        topic.options?.map(o =>
-                                                            typeof o === "string"
-                                                                ? { id: o, name: o }
-                                                                : { id: o.id, name: o.name }
-                                                        ) || []
-                                                    }
-                                                    required={!!topic.required}
-                                                    error={showErrors && errors[topic.id]}
-                                                    searchable={topic.id === "country"}
-                                                />
-                                            )}
+                                                }}
+                                                options={
+                                                    topic.options?.map(o =>
+                                                        typeof o === "string"
+                                                            ? { id: o, name: o }
+                                                            : { id: o.id, name: o.name }
+                                                    ) || []
+                                                }
+                                                required={!!topic.required}
+                                                error={showErrors && errors[topic.id]}
+                                                searchable={topic.id === "country"}
+                                            />
+                                        )}
 
 
-                                            {topic.type === "checkbox" && (
-                                                <Switch
-                                                    label={topic.label}
-                                                    checked={formData?.[topic.id] || false}
-                                                    onChange={(value) =>
-                                                        update((d) => {
-                                                            d[topic.id] = value;
-                                                        })
-                                                    }
-                                                />
-                                            )}
+                                        {topic.type === "checkbox" && (
+                                            <Switch
+                                                label={topic.label}
+                                                checked={formData?.[topic.id] || false}
+                                                onChange={(value) =>
+                                                    update((d) => {
+                                                        d[topic.id] = value;
+                                                    })
+                                                }
+                                            />
+                                        )}
 
-                                            {topic.type === "date" && (
-                                                <DateInput
-                                                    label={topic.label}
-                                                    value={formData?.[topic.id] || null}
-                                                    onChange={v => update(d => (d[topic.id] = v ?? null))}
-                                                    required={!!topic.required}
-                                                    error={showErrors && errors[topic.id]}
-                                                    minDate={
-                                                        topic.id === "starts_at"
-                                                            ? new Date() // starts_at cannot be in the past
-                                                            : formData.starts_at || new Date() // ends_at cannot be before start
-                                                    }
-                                                />
-                                            )}
+                                        {topic.type === "date" && (
+                                            <DateInput
+                                                label={topic.label}
+                                                value={formData?.[topic.id] || null}
+                                                onChange={v => update(d => (d[topic.id] = v ?? null))}
+                                                required={!!topic.required}
+                                                error={showErrors && errors[topic.id]}
+                                                minDate={
+                                                    topic.id === "starts_at"
+                                                        ? new Date() // starts_at cannot be in the past
+                                                        : formData.starts_at || new Date() // ends_at cannot be before start
+                                                }
+                                            />
+                                        )}
 
-                                            {topic.type === "custom" && topic.component === DynamicAutocomplete && (
-                                                <DynamicAutocomplete
-                                                    label={topic.label}
-                                                    value={formData.postal_code}
-                                                    placeholder={topic.placeholder || "Type postal code"}
-                                                    fetchOptions={(query: string) => fetchZipOptions(query, countryCode)}      // we provided it in subTopic
-                                                    onChangeValue={val => update(d => (d.postal_code = val))}
-                                                    onSelectOption={topic.onSelectOption}     // also passed from subTopic
-                                                />
-                                            )}
+                                        {topic.type === "custom" && topic.component === DynamicAutocomplete && (
+                                            <DynamicAutocomplete
+                                                label={topic.label}
+                                                value={formData.postal_code}
+                                                placeholder={topic.placeholder || "Type postal code"}
+                                                fetchOptions={(query: string) => fetchZipOptions(query, countryCode)}      // we provided it in subTopic
+                                                onChangeValue={val => update(d => (d.postal_code = val))}
+                                                onSelectOption={topic.onSelectOption}
+                                                required={!!topic.required}
+                                                error={showErrors ? errors[topic.id] : undefined}
+                                            />
+                                        )}
 
-                                            {topic.type === "auto-complete" && (
-                                                <Input
-                                                    label={topic.label}
-                                                    value={formData?.[topic.id] || ""}
-                                                    onChange={v => {
-                                                        update(d => (d[topic.id] = v))
-                                                    }}
-                                                    required={!!topic.required}
-                                                    error={showErrors && errors[topic.id]}
-                                                />
-                                            )}
+                                        {topic.type === "auto-complete" && (
+                                            <Input
+                                                label={topic.label}
+                                                value={formData?.[topic.id] || ""}
+                                                onChange={v => {
+                                                    update(d => (d[topic.id] = v))
+                                                }}
+                                                required={!!topic.required}
+                                                error={showErrors && errors[topic.id]}
+                                            />
+                                        )}
 
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
 
-                            <div className="flex justify-between mt-6">
-                                {currentStep > 0 ? (
-                                    <button onClick={prevStep} className="px-4 py-2 bg-gray-200 rounded">
-                                        Prev
-                                    </button>
-                                ) : (
-                                    <div />
-                                )}
+                        <div className="flex justify-between mt-6">
+                            {currentStep > 0 ? (
+                                <button onClick={prevStep} className="px-4 py-2 bg-gray-200 rounded">
+                                    Prev
+                                </button>
+                            ) : (
+                                <div />
+                            )}
 
-                                {isLastStep ? (
-                                    <button
-                                        onClick={handleSubmit}
-                                        className="rounded-xl w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
-                                    >
-                                        {mode === "create" ? "Create Job" : "Update Job"}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={nextStep}
-                                        className="rounded-xl w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
-                                    >
-                                        Next
-                                    </button>
-                                )}
-                            </div>
-                        </>
+                            {isLastStep ? (
+                                <button
+                                    onClick={handleSubmit}
+                                    className="rounded-xl w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
+                                >
+                                    {mode === "create" ? "Create Job" : "Update Job"}
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={nextStep}
+                                    className="rounded-xl w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
+                                >
+                                    Next
+                                </button>
+                            )}
+                        </div>
+                    </>
                     {/* )} */}
                 </div>
             </div>
@@ -1215,67 +1252,3 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
 
-interface DynamicAutocompleteProps {
-    label: string;
-    value: string;
-    fetchOptions: (query: string) => Promise<ZipOption[]>;
-    onSelectOption: (option: ZipOption) => void;
-    placeholder?: string;
-    onChangeValue: (val: string) => void;
-}
-
-const DynamicAutocomplete: React.FC<DynamicAutocompleteProps> = ({
-    label,
-    value,
-    fetchOptions,
-    onSelectOption,
-    placeholder,
-    onChangeValue
-}) => {
-    const [options, setOptions] = useState<ZipOption[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [isFocused, setIsFocused] = useState(false); // track input focus
-
-    const handleInputChange = async (val: string) => {
-        onChangeValue(val);
-        if (val.length < 2) return; // wait for at least 2 chars
-        setLoading(true);
-        const result = await fetchOptions(val);
-        setOptions(result);
-        setLoading(false);
-    };
-
-    return (
-        <div className="text-sm">
-            <span className="mb-1 block text-gray-700">{label}</span>
-            <div className="relative">
-                <input
-                    value={value}
-                    onChange={e => handleInputChange(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} // delay to allow click on list
-                    placeholder={placeholder}
-                    className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black"
-                />
-                {isFocused && options.length > 0 && (
-                    <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
-                        {options.map(opt => (
-                            <li
-                                key={opt.id}
-                                onMouseDown={() => {
-                                    // use onMouseDown instead of onClick to prevent blur
-                                    onSelectOption(opt);
-                                    onChangeValue(opt.zipcode);
-                                    setOptions([]);
-                                }}
-                                className="cursor-pointer px-3 py-2 hover:bg-gray-100"
-                            >
-                                {opt.zipcode} - {opt.street}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-        </div>
-    );
-};

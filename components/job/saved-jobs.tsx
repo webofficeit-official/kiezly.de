@@ -115,7 +115,7 @@ export default function SavedJobs({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {pageSlice.map((job) => (
                             <article
-                                key={job.id}
+                                key={`${job.id}-${job.slug}`}
                                 className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
                             >
                                 {/* Main content */}
@@ -151,8 +151,8 @@ export default function SavedJobs({
                                     {/* Job tag badges */}
                                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                         {job.tags?.length > 0 &&
-                                            job.tags.map((tag) => (
-                                                <span key={tag.id} className="px-2 py-1 bg-gray-100 rounded-full">
+                                            job.tags.map((tag,index) => (
+                                                <span key={index} className="px-2 py-1 bg-gray-100 rounded-full">
                                                     {tag.name}
                                                 </span>
                                             )
