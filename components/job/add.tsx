@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 const initalForm: CreateJobData = {
-    price_value: null,
+    price_value: null, 
     title: "",
     subtitle: "",
     description: "",
