@@ -1,12 +1,15 @@
 'use client'
-import { myJobs } from "@/lib/react-query/queries/useJob";
+import { myJobs, useCloseJob } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
-import { Check, ChevronDown } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Listbox } from "@headlessui/react";
 import { Button } from "../ui/button";
+import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
+import toast from "react-hot-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -19,13 +22,13 @@ const DEFAULT_FILTERS: Filters = {
 };
 
 const perPageOptions = [
-  { label: "Draft", value: "draft" },
-  { label: "Pending Review", value: "pending_review" },
-  { label: "Published", value: "open" },
-  { label: "Closed", value: "closed" },
-  { label: "Rejected", value: "rejected" },
-  { label: "Expired", value: "expired" },
-  { label: "Saved", value: "saved" },
+    { label: "Draft", value: "draft" },
+    { label: "Pending Review", value: "pending_review" },
+    { label: "Published", value: "open" },
+    { label: "Closed", value: "closed" },
+    { label: "Rejected", value: "rejected" },
+    { label: "Expired", value: "expired" },
+    { label: "Saved", value: "saved" },
 ];
 
 // ---- Utilities ----
@@ -44,11 +47,11 @@ export const fromQuery = (qs: string): Filters => {
 };
 
 const isNew = (created_at: string) => {
-  if (!created_at) return false;
-  const createdAt = new Date(created_at).getTime();
-  const now = Date.now();
-  const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
-  return diffHours <= 72; // less than or equal 72 hours
+    if (!created_at) return false;
+    const createdAt = new Date(created_at).getTime();
+    const now = Date.now();
+    const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
+    return diffHours <= 72; // less than or equal 72 hours
 };
 
 
@@ -114,6 +117,28 @@ export default function MyJobs({
 
 
     const pageSlice = dataSource;
+    const closeJobMutation = useCloseJob();
+
+    const CloseJobButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(
+        ({ onClick }, ref) => (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button ref={ref} onClick={onClick} className="p-1 rounded hover:bg-gray-100">
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                        Close Job
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        )
+    );
+
+
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -139,7 +164,7 @@ export default function MyJobs({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {pageSlice.map((job) => (
                             <article
-                                key={job.id}
+                                key={`${job.id}-${job.slug}`}
                                 className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
                             >
                                 {/* Main content */}
@@ -152,8 +177,8 @@ export default function MyJobs({
                                             {job?.price_type === "range" && job?.price_min && job?.price_max
                                                 ? `${job.currency} ${job.price_min} – ${job.price_max}`
                                                 : job?.price_value
-                                                ? `${job.currency} ${job.price_value}`
-                                                : "Not specified"}
+                                                    ? `${job.currency} ${job.price_value}`
+                                                    : "Not specified"}
                                             {job?.price_type && (
                                                 <span className="inline-flex items-center gap-1">/ {job.price_type}</span>
                                             )}
@@ -161,8 +186,8 @@ export default function MyJobs({
                                         <span>
                                             •{" "}
                                             {[job?.street, job?.city, job?.state, job?.postal_code, job?.country]
-                                              .filter(Boolean)
-                                              .join(", ")}
+                                                .filter(Boolean)
+                                                .join(", ")}
                                         </span>
                                         {job?.distance && <span>• {(job.distance / 1000).toFixed(2)} km away</span>}
                                         {job?.category_name && <span>• {job.category_name}</span>}
@@ -171,34 +196,99 @@ export default function MyJobs({
                                             <span>• {job.job_experience.join(", ")}</span>
                                         )}
                                     </div>
-                                    
+
                                     {/* Job tag badges */}
                                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                         {job.tags?.length > 0 &&
-                                            job.tags.map((tag) => (
-                                                <span key={tag.id} className="px-2 py-1 bg-gray-100 rounded-full">
+                                            job.tags.map((tag, index) => (
+                                                <span key={index} className="px-2 py-1 bg-gray-100 rounded-full">
                                                     {tag.name}
                                                 </span>
                                             )
-                                        )}
+                                            )}
                                     </div>
                                 </div>
-                                    
+
+                                {/* Actions: just below badge */}
+
+
                                 {/* Right-side container: posted date top, button bottom */}
                                 <div className="flex flex-col justify-between items-end min-h-[80px]">
+
                                     <div className="text-xs text-gray-500">
                                         {isNew(job?.created_at) ? (
-                                            <Button variant="outline" className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"><span className="h-3">New </span></Button>
+                                            <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 font-medium px-2 py-1 rounded-full">
+                                                <span className="h-2 w-2 rounded-full bg-green-600 animate-pulse" />
+                                                New
+                                            </span>
                                         ) : (
-                                            "Posted " + new Date(job?.created_at).toLocaleDateString()
+                                            <span className="flex items-center gap-1 text-gray-500">
+                                                <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14A6 6 0 1110 4a6 6 0 010 12zm-.5-6V5h1v5h4v1h-5z" />
+                                                </svg>
+                                                Posted {new Date(job?.created_at).toLocaleDateString()}
+                                            </span>
                                         )}
                                     </div>
-                                    <button
-                                      className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
-                                      onClick={() => router.push(`/jobs/${job.slug}`)}
-                                    >
-                                        View
-                                    </button>
+                                    <div className="flex items-center gap-1 mb-2">
+                                        {/* View */}
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        className="p-1 rounded hover:bg-gray-100"
+                                                        onClick={() => router.push(`/jobs/${job.slug}`)}
+                                                    >
+                                                        <Eye className="w-4 h-4 text-blue-600" />
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top" className="text-xs">
+                                                    View Job
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+
+                                        {/* Edit */}
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        className="p-1 rounded hover:bg-gray-100"
+                                                        onClick={() => router.push(`/post-job/${job.slug}`)}
+                                                    >
+                                                        {job.status === "draft" ? (
+                                                            <ArrowRight className="w-4 h-4 text-amber-600" />
+                                                        ) : (
+                                                            <Pencil className="w-4 h-4 text-amber-600" />
+                                                        )}
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top" className="text-xs">
+                                                    {job.status === "draft" ? "Continue Job" : " Edit Job"}
+
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+
+                                        {/* Delete */}
+                                        <AlertBox
+                                            trigger={<CloseJobButton onClick={() => { }} />}
+                                            title="Close Job?"
+                                            description="Are you sure you want to close this job? This action cannot be undone."
+                                            confirmText="Close"
+                                            cancelText="Cancel"
+                                            onConfirm={() => {
+                                                closeJobMutation.mutate(job.id, {
+                                                    onSuccess: () => toast.success("Job closed successfully!"),
+                                                    onError: (error: any) => toast.error(error.message || "Failed to close the job"),
+                                                });
+                                            }}
+                                        />
+
+
+
+                                    </div>
+
                                 </div>
                             </article>
                         ))}
@@ -218,53 +308,53 @@ export default function MyJobs({
 type Option = { label: string; value: string };
 
 function Select({
-  label,
-  value,
-  onChange,
-  options,
+    label,
+    value,
+    onChange,
+    options,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: Option[];
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    options: Option[];
 }) {
-  // If label is "Status" (or you want to show this option explicitly)
-  const finalOptions =
-    label.toLowerCase().includes("status") ||
-    label.toLowerCase().includes("review")
-      ? [{ label: "Pending review", value: "pending_review" }, ...options]
-      : options;
+    // If label is "Status" (or you want to show this option explicitly)
+    const finalOptions =
+        label.toLowerCase().includes("status") ||
+            label.toLowerCase().includes("review")
+            ? [{ label: "Pending review", value: "pending_review" }, ...options]
+            : options;
 
-  return (
-    <div className="text-sm">
-      <span className="mb-1 block text-gray-700">{label}</span>
+    return (
+        <div className="text-sm">
+            <span className="mb-1 block text-gray-700">{label}</span>
 
-      <Listbox value={value} onChange={onChange}>
-        <div className="relative">
-          {/* Fixed width */}
-          <Listbox.Button className="flex w-56 items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
-            {finalOptions.find((o) => o.value === value)?.label || "Select"}
-            <ChevronDown className="h-4 w-4 text-gray-400" />
-          </Listbox.Button>
+            <Listbox value={value} onChange={onChange}>
+                <div className="relative">
+                    {/* Fixed width */}
+                    <Listbox.Button className="flex w-56 items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+                        {finalOptions.find((o) => o.value === value)?.label || "Select"}
+                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                    </Listbox.Button>
 
-          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-56 overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
-            {finalOptions.map((o) => (
-              <Listbox.Option
-                key={o.value}
-                value={o.value}
-                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
-              >
-                {({ selected }) => (
-                  <div className="flex items-center justify-between">
-                    <span>{o.label}</span>
-                    {selected && <Check className="h-4 w-4 text-gray-600" />}
-                  </div>
-                )}
-              </Listbox.Option>
-            ))}
-          </Listbox.Options>
+                    <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-56 overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+                        {finalOptions.map((o) => (
+                            <Listbox.Option
+                                key={o.value}
+                                value={o.value}
+                                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
+                            >
+                                {({ selected }) => (
+                                    <div className="flex items-center justify-between">
+                                        <span>{o.label}</span>
+                                        {selected && <Check className="h-4 w-4 text-gray-600" />}
+                                    </div>
+                                )}
+                            </Listbox.Option>
+                        ))}
+                    </Listbox.Options>
+                </div>
+            </Listbox>
         </div>
-      </Listbox>
-    </div>
-  );
+    );
 }

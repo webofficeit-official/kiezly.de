@@ -137,6 +137,7 @@ export interface JobCollections {
   jobTags: JobTag[];
   languages: jobLanguage[]
   jobMode: JobMode[];
+  countries: []
 }
 
 export interface JobCollectionsResponse {
@@ -197,6 +198,13 @@ export type JobApiResponse = {
     total_items: number;
     total_pages: number;
   };
+};
+
+
+export type JobSaveApiResponse = {
+  status: boolean;
+  message: string;
+  jobs: JobList[];
 };
 
 
