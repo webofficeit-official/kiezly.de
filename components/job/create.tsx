@@ -10,7 +10,8 @@ import { DateInput } from "../shared-ui/custom-date/custom-date";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Switch from "../shared-ui/switch/switch";
-import { useCollection, useZipcodes } from "@/lib/react-query/queries/collection";
+import { useZipcodes } from "@/lib/react-query/queries/collection";
+import { DynamicAutocomplete } from "../shared-ui/auto-complete/dynamic-auto-complete";
 
 
 /* ----------------------------- Type Definitions ---------------------------- */
@@ -105,7 +106,7 @@ export function useDebounce<T>(value: T, delay: number) {
 /* ----------------------------- Create/Edit Wrapper ---------------------------- */
 export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFormProps) {
     const { data: collections } = useJobCollections();
-    const { data: countries } = useCollection<{ id: number; code?: string; name: string, currency?: string }>("countries");
+    // const { data: countries } = useCollection<{ id: number; code?: string; name: string, currency?: string }>("countries");
 
 
     return (
@@ -123,7 +124,7 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
                         languages: [],
                         jobMode: [],
                     }}
-                    countries={countries || []}
+                    countries={collections?.countries || []}
                 />
             </div>
         </div>
@@ -154,7 +155,6 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
     });
     const [titleValue, setTitleValue] = useState(formData.title || "");
     const [slugEdited, setSlugEdited] = useState(false);
-    const [internalSlug, setInternalSlug] = useState(formData.slug || "");
     const [zipOptions, setZipOptions] = useState<ZipOption[]>([]);
     const [countryCode, setCountryCode] = useState<string | undefined>(undefined);
 
@@ -186,21 +186,24 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
     useEffect(() => {
+
         if (mode === "edit" && initialData && collections) {
             const job = initialData.job;
 
-            let selectedCountry = countries.find(c => c.name === job.country);
+            let selectedCountry =
+                countries.find(c => c.name === job?.country) ||
+                countries.find(c => c.name === "Germany" || c.code === "DE");
+
             if (selectedCountry) {
-                setCountryCode(selectedCountry.id.toString()); // for fetchZipOptions
-                fetchZipOptions(job.postal_code ? job.postal_code : null, selectedCountry.id.toString())
-            } else if (!selectedCountry) {
-                if (!formData.country) {
-                     selectedCountry = countries.find(c => c.name === "Germany" || c.code === "DE");
-                    if (selectedCountry) {                          
-                        setCountryCode(selectedCountry.id.toString());     
-                    }
-                }
+                //  Store the country code for other components
+                setCountryCode(selectedCountry.id.toString());
+
+                // Pre-fetch zip options
+                fetchZipOptions(job?.postal_code || "", selectedCountry.id.toString());
             }
+
+            const selectedLanguages = (job.languages || []).map(l => l.id.toString());
+
             setFormData({
                 title: job.title || "",
                 subtitle: job.subtitle || "",
@@ -223,7 +226,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 price_max: job.price_max || "",
                 currency: job.currency
                     ? { id: job.currency, name: job.currency }  // wrap string as object for Select
-                    : null,
+                    : { id: "EUR", name: "EUR" },
                 first_aid_verified: !!job.first_aid_verified,
                 police_verified: !!job.police_verified,
                 slug: job.slug,
@@ -234,7 +237,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 job_type: job?.job_type || [],
                 job_experience: job?.job_experience || [],
                 tag_ids: (job.tags || []).map(t => t.id.toString()),
-                languages: (job.languages || []).map(l => ({ id: l.id.toString(), name: l.name })),
+                languages: selectedLanguages,
                 work_mode: job.work_mode
                     ? {
                         id: job.work_mode,
@@ -267,25 +270,50 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                             ? "External Link"
                                             : job.contact_method, // fallback
                     }
-                    : null,
+                    : { id: "email_relay", name: "Email Relay" },
 
                 contact_email: job.contact_email || "",
                 contact_phone: job.contact_phone || "",
                 contact_link: job.contact_link || "",
             });
+
+
         }
 
         if (mode === "create") {
+            let selectedCountry =
+                countries.find(c => c.name === "Germany" || c.code === "DE");
+
+            if (selectedCountry) {
+                //  Store the country code for other components
+                setCountryCode(selectedCountry.id.toString());
+
+                setFormData(prev => ({
+                    ...prev,                               // keep everything else the same
+                    country: {
+                        id: selectedCountry.id.toString(),
+                        name: selectedCountry.name
+                    },
+                    currency: { id: "EUR", name: "EUR" },
+                    price_type: { id: "fixed", name: "Fixed" },
+                    contact_method: { id: "email_relay", name: "Email Relay" },
+                }));
+
+                // Pre-fetch zip options
+                fetchZipOptions("", selectedCountry.id.toString());
+            }
             window.history.replaceState(null, "", `/post-job`);
         }
 
     }, [mode, initialData, collections?.jobType, collections?.jobExperience, collections?.jobTags, collections?.languages, collections?.jobMode, countries]);
 
 
-
+    const allCurrencies = Array.from(
+        new Set(countries.map(c => c.currency))
+    ).map(curr => ({ id: curr, name: curr }));
 
     const steps: WizardStep[] = useMemo(
-        () => {             
+        () => {
             return [
                 {
                     id: "basic",
@@ -384,9 +412,6 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                             // fetchOptions: (query: string) => fetchZipOptions(query, countryCode),
                             onChangeValue: val => update(d => (d.postal_code = val)),
                             onSelectOption: (zip: ZipOption) => {
-                                const selectedCountry = countries.find(
-                                    c => String(c.id) === String(zip.country_id)
-                                );
 
                                 update(d => {
                                     // d.country = selectedCountry ? selectedCountry.name : "";
@@ -398,6 +423,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                     d.lng = String(zip.longitude);
                                 });
                             },
+                            required: true,
                         },
 
                         { id: "street", label: "Street", type: "auto-complete", value: formData.street },
@@ -419,9 +445,14 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                             label: "Currency",
                             type: "select",
                             required: true,
-                            options: [
-                                { id: "EUR", name: "EUR" },
-                            ]
+                            options: allCurrencies,
+                            value: (() => {
+                                const country = countries.find(
+                                    c => c.id.toString() === formData.country?.id
+                                );
+                                const currency = country?.currency || "EUR"; // fallback
+                                return { id: currency, name: currency };
+                            })(),
                         },
                         {
                             id: "price_type",
@@ -526,9 +557,24 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                 { id: "external_link", name: "External Link" }
                             ]
                         },
-                        { id: "contact_email", label: "Email", type: "input" },
-                        { id: "contact_phone", label: "Phone", type: "input" },
-                        { id: "contact_link", label: "External Link", type: "input" }
+                        {
+                            id: "contact_email",
+                            label: "Email",
+                            type: "input",
+                            required: (formData) => formData.contact_method?.id === "email_relay" || formData.contact_method?.id === "direct_email",
+                        },
+                        {
+                            id: "contact_phone",
+                            label: "Phone",
+                            type: "input",
+                            required: (formData) => formData.contact_method?.id === "phone",
+                        },
+                        {
+                            id: "contact_link",
+                            label: "External Link",
+                            type: "input",
+                            required: (formData) => formData.contact_method?.id === "external_link",
+                        }
                     ]
                 }
             ]
@@ -573,12 +619,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
     useEffect(() => {
-        if (!debouncedTitle) {
-            // Title is empty → clear slug
-            update(d => { d.slug = ""; });
-            setSlugEdited(false); // allow auto-generation later
-            return;
-        }
+        if (!debouncedTitle) return;
 
         // Auto-generate slug only if user hasn't manually typed anything
         if (!slugEdited && (!formData.slug || formData.slug === "")) {
@@ -624,13 +665,19 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 : [],
 
             languages: Array.isArray(data.languages)
-                ? data.languages.map((l: any) => Number(l.id ?? l))
+                ? data.languages.map(l =>
+                    typeof l === 'object' && l !== null
+                        ? Number(l.id)
+                        : Number(l)
+                )
                 : [],
 
+
+
             price_type: typeof data.price_type === "object" ? data.price_type.id : data.price_type,
-            work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
             currency: typeof data.currency === "object" ? data.currency.id : data.currency,
-            contact_method: typeof data.contact_method === "object" ? data.contact_method.id : data.contact_method,
+            work_mode: typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode,
+            contact_method: data.contact_method?.id ?? data.contact_method,
 
             slug: data.slug,
             status: data.status ?? "draft",
@@ -669,6 +716,10 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                     }
                 }
                 if (t.type === "checkbox") return;
+                if (t.type === "custom" && (!val || val.trim() === "")) {
+                    errors[t.id] = `${t.label} is required`;
+                    return;
+                }
                 if ((t.type === "input" || t.type === "textarea" || t.type === "date") && (!val || val === "")) {
                     errors[t.id] = `${t.label} is required`;
                     return;
@@ -755,7 +806,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
         steps[currentStep].subTopics.forEach(t => (stepData[t.id] = formData[t.id]));
 
         // Create mode, first step
-        if (mode === "create" && currentStep === 0) {
+        if (mode === "create" && currentStep === 0 && !jobId) {
             const normalized = normalizeJobPayload(stepData);
             createJobMutation.mutate(normalized, {
                 onSuccess: (data: any) => {
@@ -785,7 +836,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
             });
         }
 
-        
+
     };
 
 
@@ -833,6 +884,14 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
         const errors = validateStep(stepIdx);
         return Object.keys(errors).length === 0; // No errors = completed
+    }
+
+    const handleDefaultCurrency = (countryId: string) => {
+        const country = countries.find(c => c.id.toString() === countryId);
+        setFormData(prev => ({
+            ...prev,
+            currency: { id: country.currency, name: country.currency },
+        }));
     }
 
     /* ----------------------------- Render ---------------------------- */
@@ -959,42 +1018,49 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                 return (
                                     <div key={topic.id} className={topic.colSpan || ""}>
                                         {topic.type === "input" && (
-                                            <Input
-                                                label={topic.label}
-                                                value={formData?.[topic.id] || ""}
-                                                onChange={v => {
-                                                    update(d => (d[topic.id] = v))
-                                                    if (topic.id === "title") {
-                                                        setTitleValue(v);
+                                            <>
+                                                <Input
+                                                    label={topic.label}
+                                                    value={formData?.[topic.id] || ""}
+                                                    onChange={v => {
+                                                        update(d => (d[topic.id] = v))
+                                                        if (topic.id === "title") {
+                                                            setTitleValue(v);
 
-                                                        if (!slugEdited) {
-                                                            if (mode === "create" || (mode === "edit" && !formData.slug)) {
-                                                                generateSlugMutation.mutate(v, {
-                                                                    onSuccess: res => update(d => (d.slug = res.slug))
-                                                                });
+                                                            if (!slugEdited) {
+                                                                if (mode === "create" || (mode === "edit" && !formData.slug)) {
+                                                                    generateSlugMutation.mutate(v, {
+                                                                        onSuccess: res => update(d => (d.slug = res.slug))
+                                                                    });
+                                                                }
                                                             }
                                                         }
-                                                    }
 
-                                                    if (topic.id === "slug") {
-                                                        if (v.trim() === "") {
-                                                            // User cleared the slug → allow auto-generation
-                                                            setSlugEdited(false);
-                                                            if (titleValue.trim()) {
-                                                                generateSlugMutation.mutate(titleValue, {
-                                                                    onSuccess: res => update(d => (d.slug = res.slug))
-                                                                });
-                                                            }
-                                                        } else {
+                                                        if (topic.id === "slug") {
+
                                                             // User typed something → mark as manually edited
                                                             setSlugEdited(true);
-                                                        }
-                                                    }
 
-                                                }}
-                                                required={!!topic.required}
-                                                error={showErrors && errors[topic.id]}
-                                            />
+                                                        }
+
+                                                    }}
+                                                    required={!!topic.required}
+                                                    error={showErrors && errors[topic.id]}
+                                                />
+                                                {slugEdited && topic.id === "slug" && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSlugEdited(false);
+                                                            generateSlugMutation.mutate(titleValue, {
+                                                                onSuccess: res => update(d => (d.slug = res.slug))
+                                                            });
+                                                        }}
+                                                        className="text-gray-600 text-sm underline"
+                                                    >
+                                                        ↻ Auto-generate
+                                                    </button>)}
+                                            </>
                                         )}
 
                                         {topic.type === "textarea" && (
@@ -1036,7 +1102,8 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                     if (topic.id === "country") {
                                                         const selectedCountry = countries.find(c => String(c.id) === String(opt?.id));
                                                         setCountryCode(selectedCountry.id.toString());
-                                                        // fetchZipOptions(null,String(selectedCountry?.id))
+                                                        // fetchZipOptions(null, String(selectedCountry?.id))
+                                                        handleDefaultCurrency(selectedCountry.id.toString());
                                                         update(d => {
                                                             // d.country = selectedCountry.name;
                                                             d.postal_code = "";
@@ -1045,6 +1112,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                             d.state = "";
                                                             d.lat = "";
                                                             d.lng = "";
+
                                                         });
                                                     }
                                                 }}
@@ -1065,7 +1133,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
                                         {topic.type === "select_country" && !topic.multiple && (
                                             <Select
-                                                label={topic.label}
+                                                label={topic.label + "ff"}
                                                 value={formData?.[topic.id] || null}
                                                 onChange={opt => {
 
@@ -1124,7 +1192,9 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                 placeholder={topic.placeholder || "Type postal code"}
                                                 fetchOptions={(query: string) => fetchZipOptions(query, countryCode)}      // we provided it in subTopic
                                                 onChangeValue={val => update(d => (d.postal_code = val))}
-                                                onSelectOption={topic.onSelectOption}     // also passed from subTopic
+                                                onSelectOption={topic.onSelectOption}
+                                                required={!!topic.required}
+                                                error={showErrors ? errors[topic.id] : undefined}
                                             />
                                         )}
 
@@ -1182,67 +1252,3 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
 
-interface DynamicAutocompleteProps {
-    label: string;
-    value: string;
-    fetchOptions: (query: string) => Promise<ZipOption[]>;
-    onSelectOption: (option: ZipOption) => void;
-    placeholder?: string;
-    onChangeValue: (val: string) => void;
-}
-
-const DynamicAutocomplete: React.FC<DynamicAutocompleteProps> = ({
-    label,
-    value,
-    fetchOptions,
-    onSelectOption,
-    placeholder,
-    onChangeValue
-}) => {
-    const [options, setOptions] = useState<ZipOption[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [isFocused, setIsFocused] = useState(false); // track input focus
-
-    const handleInputChange = async (val: string) => {
-        onChangeValue(val);
-        if (val.length < 2) return; // wait for at least 2 chars
-        setLoading(true);
-        const result = await fetchOptions(val);
-        setOptions(result);
-        setLoading(false);
-    };
-
-    return (
-        <div className="text-sm">
-            <span className="mb-1 block text-gray-700">{label}</span>
-            <div className="relative">
-                <input
-                    value={value}
-                    onChange={e => handleInputChange(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} // delay to allow click on list
-                    placeholder={placeholder}
-                    className="w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black"
-                />
-                {isFocused && options.length > 0 && (
-                    <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
-                        {options.map(opt => (
-                            <li
-                                key={opt.id}
-                                onMouseDown={() => {
-                                    // use onMouseDown instead of onClick to prevent blur
-                                    onSelectOption(opt);
-                                    onChangeValue(opt.zipcode);
-                                    setOptions([]);
-                                }}
-                                className="cursor-pointer px-3 py-2 hover:bg-gray-100"
-                            >
-                                {opt.zipcode} - {opt.street}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-        </div>
-    );
-};

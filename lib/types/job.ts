@@ -137,6 +137,7 @@ export interface JobCollections {
   jobTags: JobTag[];
   languages: jobLanguage[]
   jobMode: JobMode[];
+  countries: []
 }
 
 export interface JobCollectionsResponse {
