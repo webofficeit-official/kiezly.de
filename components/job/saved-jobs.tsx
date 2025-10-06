@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Button } from "../ui/button";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark, BookmarkCheck, Eye } from "lucide-react";
 import { useSavedJobs, useUnsaveJob } from "@/lib/react-query/queries/useJob";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -151,7 +152,7 @@ export default function SavedJobs({
                                     {/* Job tag badges */}
                                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                         {job.tags?.length > 0 &&
-                                            job.tags.map((tag,index) => (
+                                            job.tags.map((tag, index) => (
                                                 <span key={index} className="px-2 py-1 bg-gray-100 rounded-full">
                                                     {tag.name}
                                                 </span>
@@ -164,11 +165,22 @@ export default function SavedJobs({
                                 <div className="flex flex-col justify-between items-end min-h-[80px]">
                                     <div className="text-xs text-gray-500">
                                         {isNew(job?.created_at) ? (
-                                            <Button variant="outline" className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"><span className="h-3">New </span></Button>
+                                            <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 font-medium px-2 py-1 rounded-full">
+                                                <span className="h-2 w-2 rounded-full bg-green-600 animate-pulse" />
+                                                New
+                                            </span>
                                         ) : (
-                                            "Posted " + new Date(job?.created_at).toLocaleDateString()
+                                            <span className="flex items-center gap-1 text-gray-500">
+                                                <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14A6 6 0 1110 4a6 6 0 010 12zm-.5-6V5h1v5h4v1h-5z" />
+                                                </svg>
+                                                Posted {new Date(job?.created_at).toLocaleDateString()}
+                                            </span>
                                         )}
 
+
+                                    </div>
+                                    <div className="flex items-center gap-1 mb-2">
                                         {savedJobs.some((j) => j.id === job.id) && (
                                             <Button
                                                 variant="default"
@@ -178,13 +190,19 @@ export default function SavedJobs({
                                                 <BookmarkCheck className="h-3 w-3" />
                                             </Button>
                                         )}
+                                        {/* View */}
+                                        <button
+                                            className="mt-1 inline-flex items-center justify-center rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
+                                            onClick={() => router.push(`/jobs/${job.slug}`)}
+                                        >
+                                            View
+                                        </button>
+
+
+
+
+
                                     </div>
-                                    <button
-                                        className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
-                                        onClick={() => router.push(`/jobs/${job.slug}`)}
-                                    >
-                                        View
-                                    </button>
                                 </div>
                             </article>
                         ))}
