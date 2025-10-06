@@ -201,3 +201,10 @@ export type JobApiResponse = {
 };
 
 
+export type JobSaveApiResponse = {
+  status: boolean;
+  message: string;
+  jobs: JobList[];
+};
+
+

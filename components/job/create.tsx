@@ -114,7 +114,7 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
             <h1 className="text-3xl font-semibold tracking-tight">
                 {mode === "create" ? "Post a mini-job" : "Post a mini-job"}
             </h1>
-            <div className="mt-2 bg-white">
+            <div className="mt-2 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
                 <OnboardingForm mode={mode} initialData={initialData}
                     collections={collections || {
                         jobCategories: [],
@@ -897,21 +897,22 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
     /* ----------------------------- Render ---------------------------- */
     return (
         <div className="max-w-4xl mx-auto p-5 pb-1">
-            <div className="flex gap-12">
+            <div className="flex flex-col lg:flex-row gap-12"> {/* stack on small screens */}
 
                 {/* Stepper */}
-                <div className="relative w-1/3 pt-2">
-                    <div className="space-y-8"> {/* Reduced from space-y-12 to space-y-8 for less spacing */}
+                <div className="relative w-full md:w-1/3 pt-2">
+                    <div className="flex md:flex-col gap-6 md:gap-8 overflow-x-auto md:overflow-visible scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+
                         {steps.map((step, idx) => {
                             const isCompleted = isStepCompleted(idx);
                             const isActive = !formSubmitted && idx === currentStep;
+
                             return (
                                 <div
                                     key={step.id}
-                                    className={`relative flex items-center gap-3 cursor-pointer ${idx < steps.length - 1 ? 'pb-8' : ''}`} // items-center for better alignment, pb-8 to match space-y-8 and reduce overall space
+                                    className={`relative flex md:flex-row flex-col items-center md:items-start cursor-pointer ${idx < steps.length - 1 ? 'md:pb-8 pb-0' : ''}`}
                                     onClick={() => {
                                         if (!formSubmitted) {
-                                            // Find first invalid step up to clicked step
                                             let firstInvalidStep = -1;
                                             for (let i = 0; i <= idx; i++) {
                                                 const stepErrors = validateStep(i);
@@ -920,12 +921,9 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                     break;
                                                 }
                                             }
-
                                             if (firstInvalidStep === -1 || firstInvalidStep === idx) {
-                                                // No errors before or at clicked step
                                                 setCurrentStep(idx);
                                             } else {
-                                                // Jump to first invalid step
                                                 setCurrentStep(firstInvalidStep);
                                                 setShowErrors(true);
                                                 toast.error("Please fix the errors in the highlighted step.");
@@ -933,6 +931,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                         }
                                     }}
                                 >
+                                    {/* Circle */}
                                     <div
                                         className={`flex-shrink-0 flex items-center justify-center rounded-full border w-8 h-8 ${isCompleted
                                             ? "bg-green-500 text-white border-green-500"
@@ -943,9 +942,11 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                     >
                                         {isCompleted ? "✓" : idx + 1}
                                     </div>
-                                    <div>
+
+                                    {/* Text */}
+                                    <div className="hidden md:block">
                                         <div
-                                            className={`font-medium ${isCompleted
+                                            className={`font-medium p-1 ${isCompleted
                                                 ? "text-green-600"
                                                 : isActive
                                                     ? "text-black"
@@ -954,14 +955,27 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                         >
                                             {step.title}
                                         </div>
-                                        <div className="text-xs text-gray-400">{step.subtitle}</div>
+                                        <div className="p-1 text-xs text-gray-400">{step.subtitle}</div>
                                     </div>
+
+                                    {/* Horizontal text for mobile */}
+                                    <div className="md:hidden flex flex-col items-center text-center text-xs mt-1 mb-1 p-1">
+                                        <span className={`font-medium ${isCompleted ? "text-green-600" : isActive ? "text-black" : "text-gray-500"}`}>
+                                            {step.title}
+                                        </span>
+                                    </div>
+
+
+                                    {/* Horizontal connecting line for mobile */}
+                                  
+
+
                                     {idx < steps.length - 1 && (
                                         <div
-                                            className={`absolute left-4 top-9 -bottom-9 w-px transition-colors duration-300 ${isCompleted ? "bg-green-500" : "bg-gray-300"
-                                                }`} // top-8 starts after circle, -bottom-8 extends exactly to the next circle's top (matches pb-8 + space-y-8)
+                                            className={`hidden md:block absolute left-4 top-8 -bottom-8 w-px transition-colors duration-300 ${isCompleted ? "bg-green-500" : "bg-gray-300"}`}
                                         />
                                     )}
+
                                 </div>
                             );
                         })}
@@ -969,20 +983,8 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                 </div>
 
 
-
                 {/* Step Content */}
-                <div className="w-3/4 pt-2">
-                    {/* {formSubmitted ? (
-                        <div className="p-8 border rounded-lg bg-green-50 shadow text-center">
-                            <h3 className="text-2xl font-bold text-green-600 mb-2">
-                                Job {mode === "create" ? "Created" : "Updated"}!
-                            </h3>
-                            <p className="text-gray-600">
-                                All steps completed successfully. Thank you!
-                            </p>
-                        </div>
-                    ) : 
-                    ( */}
+                <div className="w-full lg:w-3/4 pt-6 lg:pt-2">
                     <>
                         <h3 className="text-xl font-bold mb-2">
                             {steps[currentStep].title}
@@ -991,10 +993,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                             {steps[currentStep].subtitle}
                         </p>
 
-                        <div
-                            className={`p-4 border rounded-lg bg-white shadow ${steps[currentStep].layout || "space-y-4"
-                                }`}
-                        >
+                        <div className={`p-4 border rounded-lg bg-white shadow ${steps[currentStep].layout || "space-y-4"}`}>
                             {steps[currentStep].subTopics.map(topic => {
                                 const errors = showErrors ? validateStep(currentStep) : {};
                                 const shouldShowField = () => {
@@ -1008,13 +1007,8 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                     return true;
                                 };
 
-                                if (["contact_email", "contact_phone", "contact_link"].includes(topic.id)) {
-                                    if (topic.id === "contact_email" && !["email_relay", "direct_email"].includes(formData.contact_method?.id)) return null;
-                                    if (topic.id === "contact_phone" && formData.contact_method?.id !== "phone") return null;
-                                    if (topic.id === "contact_link" && formData.contact_method?.id !== "external_link") return null;
-                                }
-
                                 if (!shouldShowField()) return null;
+
                                 return (
                                     <div key={topic.id} className={topic.colSpan || ""}>
                                         {topic.type === "input" && (
@@ -1026,23 +1020,11 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                         update(d => (d[topic.id] = v))
                                                         if (topic.id === "title") {
                                                             setTitleValue(v);
-
-                                                            if (!slugEdited) {
-                                                                if (mode === "create" || (mode === "edit" && !formData.slug)) {
-                                                                    generateSlugMutation.mutate(v, {
-                                                                        onSuccess: res => update(d => (d.slug = res.slug))
-                                                                    });
-                                                                }
+                                                            if (!slugEdited && (mode === "create" || (mode === "edit" && !formData.slug))) {
+                                                                generateSlugMutation.mutate(v, { onSuccess: res => update(d => (d.slug = res.slug)) });
                                                             }
                                                         }
-
-                                                        if (topic.id === "slug") {
-
-                                                            // User typed something → mark as manually edited
-                                                            setSlugEdited(true);
-
-                                                        }
-
+                                                        if (topic.id === "slug") setSlugEdited(true);
                                                     }}
                                                     required={!!topic.required}
                                                     error={showErrors && errors[topic.id]}
@@ -1059,12 +1041,13 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                         className="text-gray-600 text-sm underline"
                                                     >
                                                         ↻ Auto-generate
-                                                    </button>)}
+                                                    </button>
+                                                )}
                                             </>
                                         )}
 
+                                        {/* Rest of the topic types remain same */}
                                         {topic.type === "textarea" && (
-
                                             <RichTextEditor
                                                 key={topic.id}
                                                 label={topic.label}
@@ -1080,13 +1063,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                 label={topic.label}
                                                 values={formData?.[topic.id] || []}
                                                 onChange={opt => update(d => (d[topic.id] = opt))}
-                                                options={
-                                                    topic.options?.map(o =>
-                                                        typeof o === "string"
-                                                            ? { id: o, name: o }
-                                                            : { id: o.id, name: o.name }
-                                                    ) || []
-                                                }
+                                                options={topic.options?.map(o => typeof o === "string" ? { id: o, name: o } : { id: o.id, name: o.name }) || []}
                                                 required={!!topic.required}
                                                 error={showErrors && errors[topic.id]}
                                             />
@@ -1098,75 +1075,32 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                 value={formData?.[topic.id] || null}
                                                 onChange={opt => {
                                                     update(d => (d[topic.id] = opt))
-
                                                     if (topic.id === "country") {
                                                         const selectedCountry = countries.find(c => String(c.id) === String(opt?.id));
                                                         setCountryCode(selectedCountry.id.toString());
-                                                        // fetchZipOptions(null, String(selectedCountry?.id))
                                                         handleDefaultCurrency(selectedCountry.id.toString());
                                                         update(d => {
-                                                            // d.country = selectedCountry.name;
                                                             d.postal_code = "";
                                                             d.street = "";
                                                             d.city = "";
                                                             d.state = "";
                                                             d.lat = "";
                                                             d.lng = "";
-
                                                         });
                                                     }
                                                 }}
-                                                options={
-                                                    topic.options?.map(o =>
-                                                        typeof o === "string"
-                                                            ? { id: o, name: o }
-                                                            : { id: o.id, name: o.name }
-                                                    ) || []
-                                                }
-                                                required={!!topic.required}
-                                                error={showErrors && errors[topic.id]}
-                                                searchable={
-                                                    topic.id === "country" ? true : false
-                                                }
-                                            />
-                                        )}
-
-                                        {topic.type === "select_country" && !topic.multiple && (
-                                            <Select
-                                                label={topic.label + "ff"}
-                                                value={formData?.[topic.id] || null}
-                                                onChange={opt => {
-
-
-                                                    // Call the subTopic's onChangeValue if it exists
-                                                    if (topic.onChangeValue) {
-                                                        const selectedVal = typeof opt === "object" ? opt.id : opt;
-                                                        topic.onChangeValue(selectedVal);
-                                                    }
-                                                }}
-                                                options={
-                                                    topic.options?.map(o =>
-                                                        typeof o === "string"
-                                                            ? { id: o, name: o }
-                                                            : { id: o.id, name: o.name }
-                                                    ) || []
-                                                }
+                                                options={topic.options?.map(o => typeof o === "string" ? { id: o, name: o } : { id: o.id, name: o.name }) || []}
                                                 required={!!topic.required}
                                                 error={showErrors && errors[topic.id]}
                                                 searchable={topic.id === "country"}
                                             />
                                         )}
 
-
                                         {topic.type === "checkbox" && (
                                             <Switch
                                                 label={topic.label}
                                                 checked={formData?.[topic.id] || false}
-                                                onChange={(value) =>
-                                                    update((d) => {
-                                                        d[topic.id] = value;
-                                                    })
-                                                }
+                                                onChange={(value) => update(d => { d[topic.id] = value })}
                                             />
                                         )}
 
@@ -1177,11 +1111,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                 onChange={v => update(d => (d[topic.id] = v ?? null))}
                                                 required={!!topic.required}
                                                 error={showErrors && errors[topic.id]}
-                                                minDate={
-                                                    topic.id === "starts_at"
-                                                        ? new Date() // starts_at cannot be in the past
-                                                        : formData.starts_at || new Date() // ends_at cannot be before start
-                                                }
+                                                minDate={topic.id === "starts_at" ? new Date() : formData.starts_at || new Date()}
                                             />
                                         )}
 
@@ -1190,7 +1120,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                                 label={topic.label}
                                                 value={formData.postal_code}
                                                 placeholder={topic.placeholder || "Type postal code"}
-                                                fetchOptions={(query: string) => fetchZipOptions(query, countryCode)}      // we provided it in subTopic
+                                                fetchOptions={(query: string) => fetchZipOptions(query, countryCode)}
                                                 onChangeValue={val => update(d => (d.postal_code = val))}
                                                 onSelectOption={topic.onSelectOption}
                                                 required={!!topic.required}
@@ -1202,50 +1132,46 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                             <Input
                                                 label={topic.label}
                                                 value={formData?.[topic.id] || ""}
-                                                onChange={v => {
-                                                    update(d => (d[topic.id] = v))
-                                                }}
+                                                onChange={v => update(d => (d[topic.id] = v))}
                                                 required={!!topic.required}
                                                 error={showErrors && errors[topic.id]}
                                             />
                                         )}
-
                                     </div>
                                 );
                             })}
                         </div>
 
-                        <div className="flex justify-between mt-6">
+                        {/* Buttons */}
+                        <div className="flex flex-col sm:flex-row justify-between mt-6 gap-4 sm:gap-0">
                             {currentStep > 0 ? (
-                                <button onClick={prevStep} className="px-4 py-2 bg-gray-200 rounded">
+                                <button onClick={prevStep} className="px-4 py-2 bg-gray-200 rounded w-full sm:w-auto">
                                     Prev
                                 </button>
-                            ) : (
-                                <div />
-                            )}
+                            ) : <div />}
 
                             {isLastStep ? (
                                 <button
                                     onClick={handleSubmit}
-                                    className="rounded-xl w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
+                                    className="rounded-xl w-full sm:w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
                                 >
                                     {mode === "create" ? "Create Job" : "Update Job"}
                                 </button>
                             ) : (
                                 <button
                                     onClick={nextStep}
-                                    className="rounded-xl w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
+                                    className="rounded-xl w-full sm:w-48 px-6 py-2 text-white font-medium transition bg-black hover:bg-gray-800"
                                 >
                                     Next
                                 </button>
                             )}
                         </div>
                     </>
-                    {/* )} */}
                 </div>
             </div>
         </div>
     );
+
 }
 
 
