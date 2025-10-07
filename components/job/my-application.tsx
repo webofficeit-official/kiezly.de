@@ -7,6 +7,8 @@ import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { useMyApplications } from "@/lib/react-query/queries/apply-job";
 import { MyApplications } from "@/lib/types/apply-job";
+import { Select } from "./list";
+import { getMyApplications } from "@/lib/react-query/api-handler/apply-job";
 
 /**
  * Helper to check if a job was created recently (within 72h)
@@ -16,15 +18,48 @@ const isNew = (createdAt: string) => {
   return hours <= 72;
 };
 
+const perPageOptions = [
+  { label: "1", value: "1" },
+  { label: "5", value: "5" },
+  { label: "10", value: "10" },
+  { label: "25", value: "25" },
+  { label: "50", value: "50" },
+];
+
+const statusOptions = [
+  { label: "All", value: "" },
+  { label: "Applied", value: "applied" },
+  { label: "Shortlisted", value: "shortlisted" },
+  { label: "Accepted", value: "accepted" },
+  { label: "Rejected", value: "rejected" },
+  { label: "Withdrawn", value: "withdrawn" },
+];
+
 export default function AppliedJobList() {
   const router = useRouter();
   const [applications, setApplications] = useState<MyApplications[]>([]);
 
-  const mpApplications = useMyApplications();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(10);
+  const [localPageSize, setLocalPageSize] = useState(pageSize);
+
+  const [status, setStatus] = useState("");
+
+  const mpApplications = useMyApplications(status, page, pageSize);
 
   useEffect(() => {
     setApplications(mpApplications?.data?.applications);
-  }, [mpApplications]);
+    setTotalPages(mpApplications?.data?.total_pages);
+  }, [mpApplications?.data?.applications]);
+
+  const filterApplication = async (s: string, p: number, pz: number) => {
+    const filtered = await getMyApplications(s, p, pz);
+    if(filtered) {
+      setApplications(filtered?.data?.applications)
+      setTotalPages(filtered?.data?.total_pages)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -34,6 +69,36 @@ export default function AppliedJobList() {
           <h2 className="text-lg font-semibold">
             Applied Jobs ({applications?.length})
           </h2>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">{applications?.length} jobs</h2>
+            <p className="text-sm text-gray-600">Page {page} of {applications?.length}</p>
+          </div>
+          <div className="flex items-center gap-10">
+            <Select
+              label="Status"
+              value={status}
+              onChange={(v: string) => {
+                setStatus(v); 
+                filterApplication(v, page, pageSize)
+              }}
+              options={statusOptions}
+              width="w-32"
+            />
+            <Select
+              label="Per page"
+              value={String(localPageSize)}
+              onChange={(v: string) => {
+                const newSize = Number(v);
+                setLocalPageSize(newSize);
+                setPage(1);
+                filterApplication(status, page, Number(v))
+              }}
+              options={perPageOptions}
+              width="w-16"
+            />
+          </div>
         </div>
 
         {/* Application card container - Clean grid for responsiveness */}
@@ -100,6 +165,44 @@ export default function AppliedJobList() {
             </div>
           )}
         </div>
+
+                    {/* Pagination */}
+                    <nav className="flex items-center justify-between gap-2" aria-label="Pagination">
+                        <button
+                            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+                            onClick={() => {
+                              setPage((p) => Math.max(1, p - 1))
+                              filterApplication(status, page, pageSize)
+                            }}
+                            disabled={page <= 1}
+                        >
+                            Prev
+                        </button>
+                        <div className="flex items-center gap-1" data-testid="pager">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5).map((n) => (
+                                <button
+                                    key={n}
+                                    className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""}`}
+                              onClick={() => {
+                                setPage((p) => Math.max(1, p - 1))
+                                filterApplication(status, page, pageSize)
+                              }}
+                                >
+                                    {n}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+                            onClick={() => {
+                              setPage((p) => Math.max(1, p - 1))
+                              filterApplication(status, page, pageSize)
+                            }}
+                            disabled={page >= totalPages}
+                        >
+                            Next
+                        </button>
+                    </nav>
       </main>
     </div>
   );

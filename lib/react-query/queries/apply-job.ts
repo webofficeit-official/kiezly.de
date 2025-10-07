@@ -88,11 +88,11 @@ export function useUpdateApplicantStatus() {
   });
 }
 
-export const useMyApplications = () => {
+export const useMyApplications = (status: string, page: number, pageSize: number) => {
   return useQuery<MyApplicationsData, Error>({
     queryKey: ["my-applications"],
     queryFn: async () => {
-      const res: MyApplicationResponse = await getMyApplications();
+      const res: MyApplicationResponse = await getMyApplications(status, page, pageSize);
       return res.data;
     },
     enabled: true,
