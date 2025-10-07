@@ -1,3 +1,5 @@
+import { Job } from "./job";
+
 export interface ApplyJobData {
   cover_note: string;
   proposed_rate: string;
@@ -40,8 +42,35 @@ export interface Application {
   user: User;
 }
 
+export interface MyApplications {
+  id: string;
+  job_id: string;
+  helper_id: string;
+  cover_note: string;
+  proposed_rate: string;
+  status: string; // 'applied' | 'shortlisted' | 'accepted' | 'rejected' | 'withdrawn'
+  created_at: string;
+  updated_at: string;
+  job: Job;
+}
+
+export interface MyApplicationsData {
+  applications: MyApplications[],
+  page: number;
+  page_size: number;
+  total_items: number;
+  total_pages: number;
+}
+
 export interface JobApplicantsResponse {
   success: boolean;
   message: string;
   applicants: Application[];
+}
+
+
+export interface MyApplicationResponse {
+  success: boolean;
+  message: string;
+  data: MyApplicationsData;
 }
