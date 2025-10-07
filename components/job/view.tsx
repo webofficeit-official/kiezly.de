@@ -258,112 +258,113 @@ export default function JobDetail() {
 
                 {/* Right: sticky apply panel */}
 
+                {user?.id !== jobDetails?.client_id && (
+                    <aside className="lg:sticky lg:top-6">
+                        <Card className="shadow-sm">
+                            <CardHeader>
+                                <CardTitle className="text-base">Ready to apply?</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {user ? (
+                                    // If user is logged in
+                                    <Dialog open={open} onOpenChange={setOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button data-testid="apply-now" className="w-full rounded-2xl">
+                                                Apply Now
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-lg">
+                                            <DialogHeader>
+                                                <DialogTitle>Apply to {jobDetails.title}</DialogTitle>
+                                                <DialogDescription>
+                                                    Please share your note and proposed rate.
+                                                </DialogDescription>
+                                            </DialogHeader>
 
-                <aside className="lg:sticky lg:top-6">
-                    <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base">Ready to apply?</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {user ? (
-                                // If user is logged in
-                                <Dialog open={open} onOpenChange={setOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button data-testid="apply-now" className="w-full rounded-2xl">
-                                            Apply Now
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-lg">
-                                        <DialogHeader>
-                                            <DialogTitle>Apply to {jobDetails.title}</DialogTitle>
-                                            <DialogDescription>
-                                                Please share your note and proposed rate.
-                                            </DialogDescription>
-                                        </DialogHeader>
-
-                                        <form onSubmit={handleApplySubmit} className="space-y-4">
-                                            <div className="grid gap-3">
-                                                {/* Cover Note */}
-                                                <Textarea
-                                                    label="Cover Note"
-                                                    value={coverNote}        // state for cover note
-                                                    onChange={setCoverNote} // function to update state
-                                                    placeholder="A short note…"
-                                                />
-
-                                                {/* Proposed Rate */}
-                                                <div className="grid gap-1">
-                                                    <Input
-                                                        label="Proposed Rate"
-                                                        value={proposedRate}
-                                                        onChange={setProposedRate}
-                                                        type="number"
-                                                        placeholder="e.g., 18"
-                                                        min={0}
-                                                    // error={error} // pass the error state here
+                                            <form onSubmit={handleApplySubmit} className="space-y-4">
+                                                <div className="grid gap-3">
+                                                    {/* Cover Note */}
+                                                    <Textarea
+                                                        label="Cover Note"
+                                                        value={coverNote}        // state for cover note
+                                                        onChange={setCoverNote} // function to update state
+                                                        placeholder="A short note…"
                                                     />
+
+                                                    {/* Proposed Rate */}
+                                                    <div className="grid gap-1">
+                                                        <Input
+                                                            label={`Proposed Rate  (${jobDetails?.currency})`}
+                                                            value={proposedRate} // state for proposed rate
+                                                            onChange={setProposedRate}
+                                                            type="number"
+                                                            placeholder="e.g., 18"
+                                                            min={0}
+                                                        // error={error} // pass the error state here
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="flex items-center justify-end gap-2 pt-2">
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => setOpen(false)}
-                                                    className="rounded-xl"
-                                                >
-                                                    Cancel
-                                                </Button>
-                                                <Button type="submit" className="rounded-xl">
-                                                    Submit Application
-                                                </Button>
-                                            </div>
-                                        </form>
-                                    </DialogContent>
+                                                <div className="flex items-center justify-end gap-2 pt-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => setOpen(false)}
+                                                        className="rounded-xl"
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button type="submit" className="rounded-xl">
+                                                        Submit Application
+                                                    </Button>
+                                                </div>
+                                            </form>
+                                        </DialogContent>
 
-                                </Dialog>
-                            ) : (
-                                // If no user, show signup prompt
-                                <div className="space-y-2">
-                                    <p className="text-sm text-muted-foreground">
-                                        Please{' '}
-                                        <span
-                                            className="text-blue-500 cursor-pointer"
+                                    </Dialog>
+                                ) : (
+                                    // If no user, show signup prompt
+                                    <div className="space-y-2">
+                                        <p className="text-sm text-muted-foreground">
+                                            Please{' '}
+                                            <span
+                                                className="text-blue-500 cursor-pointer"
+                                                onClick={() => router.push('/signup')}
+                                            >
+                                                sign up
+                                            </span>{' '}
+                                            to apply for this job.
+                                        </p>
+                                        <Button
                                             onClick={() => router.push('/signup')}
+                                            className="w-full rounded-2xl"
                                         >
-                                            sign up
-                                        </span>{' '}
-                                        to apply for this job.
-                                    </p>
-                                    <Button
-                                        onClick={() => router.push('/signup')}
-                                        className="w-full rounded-2xl"
-                                    >
-                                        Sign Up
-                                    </Button>
+                                            Sign Up
+                                        </Button>
+                                    </div>
+                                )}
+
+                                <p className="text-xs text-muted-foreground">
+                                    By applying, you agree to our Terms and acknowledge our Privacy Policy.
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        {/* Mini facts */}
+                        <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+                            {jobDetails?.police_verified && (
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="h-4 w-4" /> Police Verified
                                 </div>
                             )}
-
-                            <p className="text-xs text-muted-foreground">
-                                By applying, you agree to our Terms and acknowledge our Privacy Policy.
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    {/* Mini facts */}
-                    <div className="mt-6 space-y-2 text-sm text-muted-foreground">
-                        {jobDetails?.police_verified && (
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="h-4 w-4" /> Police Verified
-                            </div>
-                        )}
-                        {jobDetails?.first_aid_verified && (
-                            <div className="flex items-center gap-2">
-                                <GraduationCap className="h-4 w-4" /> First-aid certified preferred
-                            </div>
-                        )}
-                    </div>
-                </aside>
+                            {jobDetails?.first_aid_verified && (
+                                <div className="flex items-center gap-2">
+                                    <GraduationCap className="h-4 w-4" /> First-aid certified preferred
+                                </div>
+                            )}
+                        </div>
+                    </aside>
+                )}
 
             </section>
         </main>
