@@ -27,12 +27,19 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { JobList } from "@/lib/types/job";
 import { addJobAsFavorite, getSavedJobs, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
 import { useAuth } from "@/lib/context/auth-context";
-import { useApplyJob, useCheckApplied, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
+import { useApplyJob, useCheckApplied, useJobApplicants, useUpdateApplicantStatus, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
 import Input from "../shared-ui/input/input";
 import toast from "react-hot-toast";
 import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
+import { Select } from "../shared-ui/custom-select/custom-select";
 
-// button.tsx
+const statusOptions = [
+    { id: 1, name: "applied" },
+    { id: 2, name: "shortlisted" },
+    { id: 3, name: "hired" },
+    { id: 4, name: "rejected" },
+    { id: 5, name: "withdrawn" },
+];
 
 
 // Extend dayjs with the plugin
@@ -59,8 +66,14 @@ export default function JobDetail() {
     // Now call the previously conditional hooks unconditionally
     const { data: application, isLoading: isChecking } = useCheckApplied(jobId);
     const withdrawMutation = useWithdrawApplication();
+    const updateStatusMutation = useUpdateApplicantStatus();
 
-    console.log("Application data:", application);
+    const { data: applicants, isLoading: isApplicantsLoading } = useJobApplicants(
+        jobId,
+        user?.role === "client"   // only enable if client
+    );
+
+
     // Early useEffect (unchanged)
     useEffect(() => {
         getSavedJobs().then((data) => {
@@ -74,7 +87,7 @@ export default function JobDetail() {
             setProposedRate(application?.data?.application?.proposed_rate || null);
             setSubmitted(true); // optional: mark as already applied
         }
-    }, [application]);
+    }, [application, submitted]);
     // EARLY RETURNS: Now safe, since all hooks are called above
     if (isLoading) return <Loader />;
     if (isError) return (
@@ -128,6 +141,20 @@ export default function JobDetail() {
             console.error("Failed to save job:", error);
             setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
         }
+    };
+
+    const handleStatusChange = (applicationId: string, status: string) => {
+        updateStatusMutation.mutate(
+            { applicationId, status },
+            {
+                onSuccess: () => {
+                    toast.success("Application status updated successfully!");
+                },
+                onError: (error: any) => {
+                    toast.error(error?.message || "Failed to update application status.");
+                },
+            }
+        );
     };
 
     // Your JSX return remains exactly the same (no changes needed here)
@@ -377,6 +404,90 @@ export default function JobDetail() {
                         </div>
                     </aside>
                 )}
+
+                {user?.role === "client" && (
+                    <aside className="lg:sticky lg:top-6">
+                        <Card className="shadow-sm border rounded-xl">
+                            <CardHeader>
+                                <CardTitle className="text-lg font-semibold">Applicants</CardTitle>
+                            </CardHeader>
+
+                            <CardContent>
+                                {isApplicantsLoading ? (
+                                    <p className="text-gray-500 text-sm">Loading applicants...</p>
+                                ) : applicants && applicants.length > 0 ? (
+                                    <ul className="space-y-4">
+                                        {applicants.map((applicant) => (
+                                            <li
+                                                key={applicant.id}
+                                                className="border rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
+                                            >
+                                                {/* Top section: Name and Status */}
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <div className="font-medium text-gray-900">
+                                                            {applicant.user.first_name} {applicant.user.last_name}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {applicant.user.email}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Status Dropdown */}
+                                                    {/* <select
+                                                        value={applicant.status}
+                                                        onChange={(e) =>
+                                                            handleStatusChange(applicant.id, e.target.value)
+                                                        }
+                                                        className="border rounded-lg text-sm px-2 py-1 bg-white focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                        <option value="applied">Applied</option>
+                                                        <option value="shortlisted">Shortlisted</option>
+                                                        <option value="hired">Hired</option>
+                                                        <option value="rejected">Rejected</option>
+                                                        <option value="withdrawn">Withdrawn</option>
+                                                    </select> */}
+
+                                                    <Select
+                                                        label=""
+                                                        value={statusOptions.find((o) => o.name === applicant.status) || null}
+                                                        onChange={(selected) =>
+                                                            handleStatusChange(applicant.id, selected?.name || "")
+                                                        }
+                                                        options={statusOptions}
+                                                        placeholder="Change status"
+                                                        searchable={false}
+                                                    />
+                                                </div>
+
+                                                {/* Body section */}
+                                                <div className="mt-3 text-sm text-gray-700 space-y-1">
+                                                    <div>
+                                                        <span className="font-medium">Proposed Rate:</span> {applicant.proposed_rate} €
+                                                    </div>
+
+                                                    {applicant.cover_note && (
+                                                        <div className="bg-gray-50 rounded-lg p-2 text-gray-700">
+                                                            <span className="font-medium">Cover Note:</span>
+                                                            <p>{applicant.cover_note}</p>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="text-xs text-gray-500">
+                                                        Applied on {new Date(applicant.created_at).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-gray-500 text-sm">No applicants yet.</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </aside>
+                )}
+
             </section>
         </main>
     );

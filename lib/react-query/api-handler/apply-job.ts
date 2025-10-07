@@ -25,3 +25,20 @@ export const checkJobApplied = async (jobId: string) => {
   return data; 
   
 };
+
+export const getApplicantsByJobId = async (jobId: string) => {
+    const { data } = await apiClient.get(`/jobs/${jobId}/applicants`);
+    return data; // returns { success, message, applicants }
+};
+
+
+export const updateApplicationStatus = async (
+  applicationId: string,
+  status: string
+) => {
+  const { data } = await apiClient.patch(
+    `/jobs/application/${applicationId}/status`,
+    { status }
+  );
+  return data;
+};
