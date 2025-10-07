@@ -13,3 +13,15 @@ export const applyJobApi = async ({
   });
   return data;
 };
+
+
+export const withdrawApplication = async (applicationId: string) => {
+  const response = await apiClient.delete(`jobs/application/${applicationId}/withdraw`);
+  return response.data;
+};
+
+export const checkJobApplied = async (jobId: string) => {
+  const { data } = await apiClient.get(`/jobs/${jobId}/applied`);
+  return data; 
+  
+};

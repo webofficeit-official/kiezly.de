@@ -18,16 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 
-import { Label } from "@/components/ui/label";
 import { useParams, useRouter } from "next/navigation";
 import { useJob } from "@/lib/react-query/queries/useJob";
 import { Loader } from "../ui/loader";
@@ -36,71 +27,88 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { JobList } from "@/lib/types/job";
 import { addJobAsFavorite, getSavedJobs, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
 import { useAuth } from "@/lib/context/auth-context";
-import { useApplyJob } from "@/lib/react-query/queries/apply-job";
+import { useApplyJob, useCheckApplied, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
 import Input from "../shared-ui/input/input";
 import toast from "react-hot-toast";
 import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
 
+// button.tsx
+
+
 // Extend dayjs with the plugin
 dayjs.extend(relativeTime);
 
-
-
 export default function JobDetail() {
-
     const [submitted, setSubmitted] = React.useState(false);
     const [open, setOpen] = React.useState(false);
 
     const [savedJobs, setSavedJobs] = React.useState([]);
     const [coverNote, setCoverNote] = useState('');
     const [proposedRate, setProposedRate] = useState('');
-    const { user } = useAuth() // Get user from useUser hook
+    const { user } = useAuth(); // Get user from useUser  hook
     const router = useRouter();
     const applyJobMutation = useApplyJob();
 
+    // MOVE THESE HOOKS TO THE TOP: Call unconditionally before early returns
+    const { slug } = useParams(); // get /jobs/[slug]
+    const { data, isLoading, isError } = useJob(slug as string);
+
+    // Compute jobId early from data (safe: undefined initially)
+    const jobId = data?.job?.id ?? undefined;
+
+    // Now call the previously conditional hooks unconditionally
+    const { data: application, isLoading: isChecking } = useCheckApplied(jobId);
+    const withdrawMutation = useWithdrawApplication();
+
+    console.log("Application data:", application);
+    // Early useEffect (unchanged)
     useEffect(() => {
         getSavedJobs().then((data) => {
             setSavedJobs(data.jobs)
         }).catch((err) => console.log(err))
     }, [])
-
-    const { slug } = useParams(); // get /jobs/[slug]
-    const { data, isLoading, isError } = useJob(slug as string);
-
+    useEffect(() => {
+        if (application?.success && application?.data?.application && application?.data?.application?.status !== "withdrawn") {
+            // Fill local state with existing application data
+            setCoverNote(application?.data?.application?.cover_note || '');
+            setProposedRate(application?.data?.application?.proposed_rate || null);
+            setSubmitted(true); // optional: mark as already applied
+        }
+    }, [application]);
+    // EARLY RETURNS: Now safe, since all hooks are called above
     if (isLoading) return <Loader />;
     if (isError) return (
         <div className="flex items-center justify-center min-h-screen">
             <p className="text-red-600 text-lg">Failed to load job.</p>
         </div>
-    )
+    );
 
     const jobDetails = data?.job;
+    if (!jobDetails) return <Loader />;
 
-
-
-  const handleApplySubmit = () => {
-    if (user && jobDetails) {    
-
-      applyJobMutation.mutate(
-        {
-          jobId: jobDetails.id,
-          cover_note: coverNote,
-          proposed_rate: proposedRate,
-        },
-        {
-          onSuccess: () => {
-            toast.success("Application submitted successfully!");
-            setCoverNote("");
-            setProposedRate("");
-            setSubmitted(true);
-          },
-          onError: (error: any) => {
-            toast.error(error?.message || "Failed to submit application. Please try again.");
-          },
+    // Rest of your component logic (handleApplySubmit, handleSaveJob, etc.) remains unchanged
+    const handleApplySubmit = () => {
+        if (user && jobDetails) {
+            applyJobMutation.mutate(
+                {
+                    jobId: jobDetails.id,
+                    cover_note: coverNote,
+                    proposed_rate: proposedRate,
+                },
+                {
+                    onSuccess: () => {
+                        toast.success("Application submitted successfully!");
+                        setCoverNote("");
+                        setProposedRate("");
+                        setSubmitted(true);
+                    },
+                    onError: (error: any) => {
+                        toast.error(error?.message || "Failed to submit application. Please try again.");
+                    },
+                }
+            );
         }
-      );
-    }
-  };
+    };
 
     const handleSaveJob = async (jobId: string) => {
         try {
@@ -122,8 +130,7 @@ export default function JobDetail() {
         }
     };
 
-
-
+    // Your JSX return remains exactly the same (no changes needed here)
     return (
         <main className="flex-1 min-h-screen mx-auto max-w-6xl px-4 py-8">
             {/* Success banner after submit */}
@@ -131,7 +138,7 @@ export default function JobDetail() {
                 <div className="mb-6 rounded-2xl border bg-green-50 p-4 text-sm text-green-900">
                     <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-5 w-5" />
-                        <span>Your application has been submitted. We'll get back to you soon!</span>
+                        <span>Your application has been submitted.</span>
                     </div>
                 </div>
             )}
@@ -165,7 +172,6 @@ export default function JobDetail() {
                                             </span>
                                         )}
 
-
                                         {jobDetails?.job_type && (<span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {jobDetails?.job_type.join(", ")} {jobDetails?.job_experience ? `. ${jobDetails?.job_experience}` : ""}</span>)}
                                         <span className="inline-flex items-center gap-1"><DollarSign className="h-4 w-4" />
                                             {jobDetails?.price_min && jobDetails?.price_max
@@ -197,10 +203,6 @@ export default function JobDetail() {
                                             </span>
                                         )}
                                     </div>
-
-
-
-
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button variant="outline" className="rounded-xl"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
@@ -238,14 +240,6 @@ export default function JobDetail() {
                                 <CardTitle className="text-base">About {jobDetails?.company}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm text-muted-foreground">
-                                {/* <p>
-                                    We are a friendly household seeking occasional support with our two kids. We value reliability, warmth, and open communication. Our home is non-smoking and located near tram/bus connections.
-                                </p>
-                                <div className="flex flex-wrap gap-3">
-                                    <Badge variant="outline">2 children (3 & 6)</Badge>
-                                    <Badge variant="outline">Non-smoking home</Badge>
-                                    <Badge variant="outline">Pet: friendly Labrador</Badge>
-                                </div> */}
                                 <a href="#" className="inline-flex items-center gap-2 text-sm font-medium hover:underline">
                                     View similar babysitting jobs <ExternalLink className="h-4 w-4" />
                                 </a>
@@ -255,7 +249,6 @@ export default function JobDetail() {
                 </div>
 
                 {/* Right: sticky apply panel */}
-
                 {user?.id !== jobDetails?.client_id && (
                     <aside className="lg:sticky lg:top-6">
                         <Card className="shadow-sm">
@@ -267,45 +260,79 @@ export default function JobDetail() {
                                     // If user is logged in
                                     <div className="space-y-4 mt-4 rounded-xl p-4 shadow-xs bg-white">
                                         <h3 className="text-base font-semibold">
-                                            Apply to {jobDetails.title}
+                                            {application?.applied ? `Your application for ${jobDetails.title}` : `Apply to ${jobDetails.title}`}
                                         </h3>
-                                        <p className="text-sm text-gray-600">
-                                            Please share your note and proposed rate.
-                                        </p>
-                                        <div className="grid gap-1">
-                                            {/* Cover Note */}
-                                            <Textarea
-                                                label="Cover Note"
-                                                value={coverNote}        // state for cover note
-                                                onChange={setCoverNote} // function to update state
-                                                placeholder="A short note…"
-                                            />
 
-                                            {/* Proposed Rate */}
-                                            <div className="grid gap-1">
-                                                <Input
-                                                    label={`Proposed Rate  (${jobDetails?.currency})`}
-                                                    value={proposedRate} // state for proposed rate
-                                                    onChange={setProposedRate}
-                                                    type="number"
-                                                    placeholder="e.g., 18"
-                                                    min={0}
-                                                // error={error} // pass the error state here
-                                                />
-                                            </div>
-                                            <div className="flex pt-2">
-
-
+                                        {isChecking ? (
+                                            <p>Checking application status...</p>
+                                        ) : application?.success && application?.data?.application?.status !== "withdrawn" ? (
+                                            <>
+                                                <div className="grid gap-2">
+                                                    <Textarea label="Cover Note" onChange={application?.success ? () => { } : setCoverNote} value={coverNote} disabled={application?.success} placeholder="" />
+                                                    <Input
+                                                        label={`Proposed Rate (${jobDetails?.currency})`}
+                                                        value={proposedRate}
+                                                        onChange={application?.success ? () => { } : setProposedRate}
+                                                        type="number"
+                                                        disabled={application?.success}
+                                                    />
+                                                </div>
                                                 <AlertBox
-                                                    trigger={<Button className="rounded-xl w-full">Apply</Button>}
-                                                    title="Apply for this Job?"
-                                                    description={`You are about to apply for "${jobDetails?.title}". Do you want to proceed?`}
-                                                    confirmText="Yes, Apply"
+                                                    trigger={
+                                                        <Button variant="destructive" className="w-full rounded-xl mt-2">
+                                                            Withdraw Application
+                                                        </Button>
+                                                    }
+                                                    title="Withdraw Application?"
+                                                    description={`Are you sure you want to withdraw your application for "${jobDetails?.title}"? This action cannot be undone.`}
+                                                    confirmText="Yes, Withdraw"
                                                     cancelText="Cancel"
-                                                    onConfirm={handleApplySubmit}
+                                                    onConfirm={() =>
+                                                        withdrawMutation.mutate(application.data.application.id, {
+                                                            onSuccess: () => toast.success("Application withdrawn successfully!"),
+                                                            onError: (err) => toast.error(err?.message || "Failed to withdraw."),
+                                                        })
+                                                    }
                                                 />
-                                            </div>
-                                        </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="text-sm text-gray-600">
+                                                    Please share your note and proposed rate.
+                                                </p>
+                                                <div className="grid gap-1">
+                                                    {/* Cover Note */}
+                                                    <Textarea
+                                                        label="Cover Note"
+                                                        value={coverNote}
+                                                        onChange={setCoverNote}
+                                                        placeholder="A short note…"
+                                                    />
+
+                                                    {/* Proposed Rate */}
+                                                    <div className="grid gap-1">
+                                                        <Input
+                                                            label={`Proposed Rate  (${jobDetails?.currency})`}
+                                                            value={proposedRate}
+                                                            onChange={setProposedRate}
+                                                            type="number"
+                                                            placeholder="e.g., 18"
+                                                            min={0}
+                                                        />
+                                                    </div>
+                                                    <div className="flex pt-2">
+                                                        <AlertBox
+                                                            trigger={<Button className="rounded-xl w-full">Apply</Button>}
+                                                            title="Apply for this Job?"
+                                                            description={`You are about to apply for "${jobDetails?.title}". Do you want to proceed?`}
+                                                            confirmText="Yes, Apply"
+                                                            cancelText="Cancel"
+                                                            onConfirm={handleApplySubmit}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 ) : (
                                     // If no user, show signup prompt
@@ -349,22 +376,43 @@ export default function JobDetail() {
                             )}
                         </div>
                     </aside>
-                )
-                }
-
-
-
-            </section >
-        </main >
+                )}
+            </section>
+        </main>
     );
 }
 
-
-function Textarea({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+// Your local Textarea component (unchanged)
+function Textarea({
+    label,
+    value,
+    onChange,
+    placeholder,
+    disabled = false,
+    id,
+    name,
+}: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    placeholder?: string;
+    disabled?: boolean;
+    id?: string;
+    name?: string;
+}) {
     return (
-        <label className="block text-sm">
+        <label className="block text-sm" htmlFor={id}>
             <span className="mb-1 block text-gray-700">{label}</span>
-            <textarea className="w-full rounded-xl border px-3 py-2 outline-none focus:border-black" rows={4} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+            <textarea
+                id={id}
+                name={name}
+                className={`w-full rounded-xl border px-3 py-2 outline-none focus:border-black ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                rows={4}
+                value={value}
+                placeholder={placeholder}
+                onChange={(e) => onChange(e.target.value)}
+                disabled={disabled}
+            />
         </label>
     );
 }
