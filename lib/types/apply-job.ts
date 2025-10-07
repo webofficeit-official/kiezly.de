@@ -9,3 +9,39 @@ export interface ApplyJobResponse {
   message: string;
   application: any;
 }
+
+// types/job.ts
+export interface User {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  bio: string;
+  country: string;
+  state: string;
+  city: string;
+  postal_code: string;
+  street: string;
+  lat: number;
+  lng: number;
+  district: string;
+}
+
+export interface Application {
+  id: string;
+  job_id: string;
+  helper_id: string;
+  cover_note: string;
+  proposed_rate: string;
+  status: string; // 'applied' | 'shortlisted' | 'accepted' | 'rejected' | 'withdrawn'
+  created_at: string;
+  updated_at: string;
+  user: User;
+}
+
+export interface JobApplicantsResponse {
+  success: boolean;
+  message: string;
+  applicants: Application[];
+}
