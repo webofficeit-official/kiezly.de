@@ -897,7 +897,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
     /* ----------------------------- Render ---------------------------- */
     return (
         <div className="max-w-4xl mx-auto p-5 pb-1">
-            <div className="flex flex-col lg:flex-row gap-12"> {/* stack on small screens */}
+            <div className="flex flex-col md:flex-row gap-12"> {/* stack on small screens */}
 
                 {/* Stepper */}
                 <div className="relative w-full md:w-1/3 pt-2">
