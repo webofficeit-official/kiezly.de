@@ -15,7 +15,7 @@ export default function Input({ label, value, onChange, type = "text", required,
             <input
                 className={`w-full rounded-xl border px-3 py-2 outline-none ring-0 focus:border-black ${error
                         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-gray-300 focus:border-sky-500 focus:ring-sky-500"
+                        : "border-gray-300 focus:border-black focus:ring-sky-500"
                     }`}
                 type={type}
                 value={value}

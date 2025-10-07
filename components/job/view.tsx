@@ -39,6 +39,7 @@ import { useAuth } from "@/lib/context/auth-context";
 import { useApplyJob } from "@/lib/react-query/queries/apply-job";
 import Input from "../shared-ui/input/input";
 import toast from "react-hot-toast";
+import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
 
 // Extend dayjs with the plugin
 dayjs.extend(relativeTime);
@@ -77,32 +78,29 @@ export default function JobDetail() {
 
 
 
-    const handleApplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        // Simulate a submit and show a success state
-        if (user && jobDetails) {
-            if (!jobDetails?.id) return;
-            applyJobMutation.mutate(
-                {
-                    jobId: jobDetails.id,
-                    cover_note: coverNote,
-                    proposed_rate: proposedRate,
-                },
-                {
-                    onSuccess: (data) => {
-                        toast.success("Application submitted successfully!");
-                        setCoverNote("");
-                        setProposedRate("");
-                        setOpen(false);
-                        setSubmitted(true);
-                    },
-                    onError: (error: any) => {
-                        toast.error(error?.message || "Failed to submit application. Please try again.");
-                    },
-                }
-            );
+  const handleApplySubmit = () => {
+    if (user && jobDetails) {    
+
+      applyJobMutation.mutate(
+        {
+          jobId: jobDetails.id,
+          cover_note: coverNote,
+          proposed_rate: proposedRate,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Application submitted successfully!");
+            setCoverNote("");
+            setProposedRate("");
+            setSubmitted(true);
+          },
+          onError: (error: any) => {
+            toast.error(error?.message || "Failed to submit application. Please try again.");
+          },
         }
-    };
+      );
+    }
+  };
 
     const handleSaveJob = async (jobId: string) => {
         try {
@@ -267,61 +265,48 @@ export default function JobDetail() {
                             <CardContent className="space-y-3">
                                 {user ? (
                                     // If user is logged in
-                                    <Dialog open={open} onOpenChange={setOpen}>
-                                        <DialogTrigger asChild>
-                                            <Button data-testid="apply-now" className="w-full rounded-2xl">
-                                                Apply Now
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-lg">
-                                            <DialogHeader>
-                                                <DialogTitle>Apply to {jobDetails.title}</DialogTitle>
-                                                <DialogDescription>
-                                                    Please share your note and proposed rate.
-                                                </DialogDescription>
-                                            </DialogHeader>
+                                    <div className="space-y-4 mt-4 rounded-xl p-4 shadow-xs bg-white">
+                                        <h3 className="text-base font-semibold">
+                                            Apply to {jobDetails.title}
+                                        </h3>
+                                        <p className="text-sm text-gray-600">
+                                            Please share your note and proposed rate.
+                                        </p>
+                                        <div className="grid gap-1">
+                                            {/* Cover Note */}
+                                            <Textarea
+                                                label="Cover Note"
+                                                value={coverNote}        // state for cover note
+                                                onChange={setCoverNote} // function to update state
+                                                placeholder="A short note…"
+                                            />
 
-                                            <form onSubmit={handleApplySubmit} className="space-y-4">
-                                                <div className="grid gap-3">
-                                                    {/* Cover Note */}
-                                                    <Textarea
-                                                        label="Cover Note"
-                                                        value={coverNote}        // state for cover note
-                                                        onChange={setCoverNote} // function to update state
-                                                        placeholder="A short note…"
-                                                    />
+                                            {/* Proposed Rate */}
+                                            <div className="grid gap-1">
+                                                <Input
+                                                    label={`Proposed Rate  (${jobDetails?.currency})`}
+                                                    value={proposedRate} // state for proposed rate
+                                                    onChange={setProposedRate}
+                                                    type="number"
+                                                    placeholder="e.g., 18"
+                                                    min={0}
+                                                // error={error} // pass the error state here
+                                                />
+                                            </div>
+                                            <div className="flex pt-2">
 
-                                                    {/* Proposed Rate */}
-                                                    <div className="grid gap-1">
-                                                        <Input
-                                                            label={`Proposed Rate  (${jobDetails?.currency})`}
-                                                            value={proposedRate} // state for proposed rate
-                                                            onChange={setProposedRate}
-                                                            type="number"
-                                                            placeholder="e.g., 18"
-                                                            min={0}
-                                                        // error={error} // pass the error state here
-                                                        />
-                                                    </div>
-                                                </div>
 
-                                                <div className="flex items-center justify-end gap-2 pt-2">
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        onClick={() => setOpen(false)}
-                                                        className="rounded-xl"
-                                                    >
-                                                        Cancel
-                                                    </Button>
-                                                    <Button type="submit" className="rounded-xl">
-                                                        Submit Application
-                                                    </Button>
-                                                </div>
-                                            </form>
-                                        </DialogContent>
-
-                                    </Dialog>
+                                                <AlertBox
+                                                    trigger={<Button className="rounded-xl w-full">Apply</Button>}
+                                                    title="Apply for this Job?"
+                                                    description={`You are about to apply for "${jobDetails?.title}". Do you want to proceed?`}
+                                                    confirmText="Yes, Apply"
+                                                    cancelText="Cancel"
+                                                    onConfirm={handleApplySubmit}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 ) : (
                                     // If no user, show signup prompt
                                     <div className="space-y-2">
@@ -331,7 +316,7 @@ export default function JobDetail() {
                                                 className="text-blue-500 cursor-pointer"
                                                 onClick={() => router.push('/signup')}
                                             >
-                                                sign up
+                                                sign up or log in
                                             </span>{' '}
                                             to apply for this job.
                                         </p>
@@ -339,7 +324,7 @@ export default function JobDetail() {
                                             onClick={() => router.push('/signup')}
                                             className="w-full rounded-2xl"
                                         >
-                                            Sign Up
+                                            Apply with Kiezly Profile
                                         </Button>
                                     </div>
                                 )}
@@ -364,10 +349,13 @@ export default function JobDetail() {
                             )}
                         </div>
                     </aside>
-                )}
+                )
+                }
 
-            </section>
-        </main>
+
+
+            </section >
+        </main >
     );
 }
 
