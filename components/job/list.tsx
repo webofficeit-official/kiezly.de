@@ -767,29 +767,35 @@ export default function JobFilterPage({
 
 type Option = { label: string; value: string };
 
-function Select({
+export function Select({
   label,
   value,
   onChange,
   options,
+  width = "w-full", // ✅ default width (Tailwind class)
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: Option[];
+  width?: string; // ✅ optional prop for width
 }) {
   return (
-    <div className="text-sm">
+    <div className={`text-sm ${width}`}>
       <span className="mb-1 block text-gray-700">{label}</span>
 
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
-          <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+          <Listbox.Button
+            className={`flex ${width} items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black`}
+          >
             {options.find((o) => o.value === value)?.label || "Select"}
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </Listbox.Button>
 
-          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+          <Listbox.Options
+            className={`absolute z-10 mt-2 max-h-60 ${width} overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none`}
+          >
             {options.map((o) => (
               <Listbox.Option
                 key={o.value}

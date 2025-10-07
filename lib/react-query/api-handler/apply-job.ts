@@ -42,3 +42,8 @@ export const updateApplicationStatus = async (
   );
   return data;
 };
+
+export const getMyApplications = async (status: string, page: number, pageSize: number) => {
+    const { data } = await apiClient.get(`/jobs/applications?status=${status}&page=${page}&page_size=${pageSize}`);
+    return data; // returns { success, message, applicants }
+};

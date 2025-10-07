@@ -1,7 +1,7 @@
 // hooks/useApplyJob.ts
-import { Application, ApplyJobData, ApplyJobResponse, JobApplicantsResponse } from "@/lib/types/apply-job";
+import { Application, ApplyJobData, ApplyJobResponse, JobApplicantsResponse, MyApplicationResponse, MyApplicationsData } from "@/lib/types/apply-job";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
-import { applyJobApi, checkJobApplied, getApplicantsByJobId, updateApplicationStatus, withdrawApplication } from "../api-handler/apply-job";
+import { applyJobApi, checkJobApplied, getApplicantsByJobId, getMyApplications, updateApplicationStatus, withdrawApplication } from "../api-handler/apply-job";
 
 export function useApplyJob() {
     const queryClient = useQueryClient();
@@ -88,4 +88,13 @@ export function useUpdateApplicantStatus() {
   });
 }
 
-
+export const useMyApplications = (status: string, page: number, pageSize: number) => {
+  return useQuery<MyApplicationsData, Error>({
+    queryKey: ["my-applications"],
+    queryFn: async () => {
+      const res: MyApplicationResponse = await getMyApplications(status, page, pageSize);
+      return res.data;
+    },
+    enabled: true,
+  });
+};

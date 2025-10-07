@@ -65,12 +65,20 @@ export default function Header() {
                       onClick={() => setDropdownOpen(false)}
                     >
                       My Jobs
-                    </a>) : (<a
-                      href="/saved-job"
-                      className="block px-4 py-2 text-sm hover:bg-gray-100"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      Saved Jobs</a>)}
+                    </a>) : (<>
+                      <a
+                        href="/saved-job"
+                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        Saved Jobs</a>
+                      <a
+                        href="/applied-jobs"
+                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        Applied Jobs</a>
+                      </>)}
 
                   <button
                     onClick={() => {
