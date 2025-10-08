@@ -1,17 +1,17 @@
 'use client'
 
 import React from 'react'
-import { Baby, Dog, Leaf, PartyPopper, ShoppingCart, Users, Sparkles, ShieldCheck, MapPin, Search, ArrowRight, CheckCircle2, Clock, FileText, Send } from 'lucide-react'
+import { ShieldCheck, MapPin, Search, ArrowRight, CheckCircle2, Clock, FileText, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
 import { useCollections } from '@/lib/react-query/queries/user/account'
+import { getIconForCategory } from '@/components/ui/icon-category'
 
 export default function Page() {
   const collections = useCollections();
-  const router = useRouter();
   const [what, setWhat] = React.useState('')
   const [where, setWhere] = React.useState('')
   const [categories, setCategories] = React.useState([]);
@@ -78,10 +78,10 @@ export default function Page() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base text-neutral-700">Popular right now near you</CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3">
+              <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3 overflow-auto" style={{ height: '320px'}}>
                 {categories.map(({ id, name }) => (
                   <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`}>
-                    <div className="mb-2 flex items-center gap-2"><Baby className="h-4 w-4" /><span className="text-sm font-medium">{name}</span></div>
+                    <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
                     <div className="text-xs text-neutral-500">from €15/h</div>
                   </div>
                 ))}
@@ -137,7 +137,7 @@ export default function Page() {
             <Card key={id} className="group hover:shadow-sm">
               <CardContent className="p-5">
                 <div className="mb-2 flex items-center gap-2">
-                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white"><Baby className="h-4 w-4" /></div>
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">{getIconForCategory(name)}</div>
                   <h3 className="font-medium">{name}</h3>
                 </div>
                 <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
@@ -188,8 +188,8 @@ export default function Page() {
               <p className="text-neutral-600">Post your mini‑job for free — start getting applications today.</p>
             </div>
             <div className="flex gap-2">
-              <a href="#" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</a>
-              <a href="#" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</a>
+              <a href="/signup?role=helper" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</a>
+              <a href="/signup?role=client" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</a>
             </div>
           </CardContent>
         </Card>
