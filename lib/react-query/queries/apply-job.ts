@@ -90,7 +90,7 @@ export function useUpdateApplicantStatus() {
 
 export const useMyApplications = (status: string, page: number, pageSize: number) => {
   return useQuery<MyApplicationsData, Error>({
-    queryKey: ["my-applications"],
+    queryKey: ["my-applications", status, page, pageSize],
     queryFn: async () => {
       const res: MyApplicationResponse = await getMyApplications(status, page, pageSize);
       return res.data;
