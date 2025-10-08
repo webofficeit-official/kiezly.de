@@ -67,13 +67,18 @@ export default function JobDetail() {
         user?.role === "client"   // only enable if client
     );
 
-
-    // Early useEffect (unchanged)
     useEffect(() => {
-        getSavedJobs().then((data) => {
-            setSavedJobs(data.jobs)
-        }).catch((err) => console.log(err))
-    }, [])
+        if(user) {
+            getSavedJobs().then((data) => {
+                setSavedJobs(data.jobs)
+            }).catch((err) => console.log(err))
+        } else {
+            const localStoredJobs = localStorage.getItem("saved-jobs")
+            if(localStoredJobs) {
+                setSavedJobs(JSON.parse(localStoredJobs))
+            }
+        }
+    }, [user])
   
     // EARLY RETURNS: Now safe, since all hooks are called above
     if (isLoading) return <Loader />;
@@ -124,7 +129,7 @@ export default function JobDetail() {
                 <div>
                     <Card className="shadow-sm">
                         <CardHeader className="pb-4">
-                           <JobHeader job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} />
+                           <JobHeader job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} user={user} />
                         </CardHeader>
 
                         <Separator />

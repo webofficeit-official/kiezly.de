@@ -622,7 +622,7 @@ export default function JobFilterPage({
                             >
                                 {/* Main content */}
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="text-base sm:text-lg font-semibold truncate">{job.title}</h3>
+                                    <h3 className="text-base sm:text-lg font-semibold truncate cursor-pointer" onClick={() => router.push(`/jobs/${job.slug}`)}>{job.title}</h3>
                                     {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
 
                                     <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">

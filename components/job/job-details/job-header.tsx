@@ -19,18 +19,46 @@ import { addJobAsFavorite, unsaveJobAsFavorite } from "@/lib/react-query/api-han
 dayjs.extend(relativeTime);
 
 
-export default function JobHeader({ job, savedJobs, setSavedJobs }) {
+export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
 
     const jobDetails = job || {};
  
     const handleSaveJob = async () => {
-        setSavedJobs(prev => [...prev, { id: job.id }]);
-        await addJobAsFavorite({ jobId: job.id });
+        try {
+            setSavedJobs(prev => [...prev, { id: job.id }]);
+            if(user) {
+                await addJobAsFavorite({ jobId: job.id });
+            } else {
+                const localStoredJobs = localStorage.getItem("saved-jobs")
+                let savedJobsLocal = []
+                if(localStoredJobs) {
+                    savedJobsLocal = JSON.parse(localStoredJobs)
+                }
+                localStorage.setItem('saved-jobs', JSON.stringify([...savedJobsLocal, { id: job.id }]))
+            }
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => prev.filter((j) => j.id !== job.id));
+        }
     };
 
     const handleUnsave = async () => {
-        setSavedJobs(prev => prev.filter(j => j.id !== job.id));
-        await unsaveJobAsFavorite(job.id);
+        try {
+            setSavedJobs(prev => prev.filter(j => j.id !== job.id));
+            if(user) {
+                await unsaveJobAsFavorite(job.id);
+            } else {
+                const localStoredJobs = localStorage.getItem("saved-jobs")
+                let savedJobsLocal = []
+                if(localStoredJobs) {
+                    savedJobsLocal = JSON.parse(localStoredJobs)
+                }
+                localStorage.setItem('saved-jobs', JSON.stringify(savedJobsLocal.filter((j) => j.id !== job.id)))
+            }
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => [...prev, { id: job.id }]);
+        }
     };
 
     return (
@@ -59,16 +87,14 @@ export default function JobHeader({ job, savedJobs, setSavedJobs }) {
                         )}
 
                         {jobDetails?.job_type && (<span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {jobDetails?.job_type.join(", ")} {jobDetails?.job_experience ? `. ${jobDetails?.job_experience}` : ""}</span>)}
-                        <span className="inline-flex items-center gap-1"><DollarSign className="h-4 w-4" />
-                            {jobDetails?.price_min && jobDetails?.price_max
+                        <span className="inline-flex items-center">
+                            {jobDetails?.price_type === "range" && jobDetails?.price_min && jobDetails?.price_max
                                 ? `${jobDetails?.currency} ${jobDetails?.price_min}–${jobDetails?.price_max}`
-                                : jobDetails?.price_min
-                                    ? `${jobDetails?.currency} ${jobDetails?.price_min}`
-                                    : jobDetails?.price_max
-                                        ? `${jobDetails?.currency} ${jobDetails?.price_max}`
+                                : jobDetails?.price_value
+                                        ? `${jobDetails?.currency} ${jobDetails?.price_value}`
                                         : "Not specified"}
                         </span>
-                        {jobDetails?.price_type && <span className="inline-flex items-center gap-1">/ {jobDetails?.price_type}</span>}
+                        {jobDetails?.price_type && <span className="inline-flex items-center">/ {jobDetails?.price_type}</span>}
                         <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" />Posted {dayjs(jobDetails?.created_at).fromNow()}</span>
 
                         {jobDetails?.category?.name && (
