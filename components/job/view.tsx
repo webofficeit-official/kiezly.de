@@ -154,7 +154,7 @@ export default function JobDetail() {
                     <ApplyPanel user={user} jobDetails={jobDetails} />
                 )}
                 {user?.role === "client" && user.id === jobDetails?.client_id && (
-                    <div className="mt-6">
+                    <div className="">
                         <CompanyInfoCard job={jobDetails} />
                     </div>
                 )}
