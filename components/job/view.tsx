@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {   
+import {
     GraduationCap,
     CheckCircle2,
     ExternalLink,
@@ -29,6 +29,7 @@ import CompanyInfoCard from "./job-details/company-info";
 import ApplyPanel from "./job-details/apply-panel";
 import ApplicantsPanel from "./job-details/applicant-panel";
 import SimilarJobCard from "./job-details/similar-jobs";
+import ApplicantListCard from "./job-details/applicants-list";
 
 const statusOptions = [
     { id: 1, name: "applied" },
@@ -51,7 +52,7 @@ export default function JobDetail() {
     const [proposedRate, setProposedRate] = useState('');
     const { user } = useAuth(); // Get user from useUser  hook
     const router = useRouter();
-   
+
 
     // MOVE THESE HOOKS TO THE TOP: Call unconditionally before early returns
     const { slug } = useParams(); // get /jobs/[slug]
@@ -60,7 +61,7 @@ export default function JobDetail() {
     // Compute jobId early from data (safe: undefined initially)
     const jobId = data?.job?.id ?? undefined;
 
-   
+
     const updateStatusMutation = useUpdateApplicantStatus();
 
     const { data: applicants, isLoading: isApplicantsLoading } = useJobApplicants(
@@ -69,18 +70,18 @@ export default function JobDetail() {
     );
 
     useEffect(() => {
-        if(user) {
+        if (user) {
             getSavedJobs().then((data) => {
                 setSavedJobs(data.jobs)
             }).catch((err) => console.log(err))
         } else {
             const localStoredJobs = localStorage.getItem("saved-jobs")
-            if(localStoredJobs) {
+            if (localStoredJobs) {
                 setSavedJobs(JSON.parse(localStoredJobs))
             }
         }
     }, [user])
-  
+
     // EARLY RETURNS: Now safe, since all hooks are called above
     if (isLoading) return <Loader />;
     if (isError) return (
@@ -93,9 +94,9 @@ export default function JobDetail() {
     if (!jobDetails) return <Loader />;
 
     // Rest of your component logic (handleApplySubmit, handleSaveJob, etc.) remains unchanged
- 
 
- 
+
+
 
     const handleStatusChange = (applicationId: string, status: string) => {
         updateStatusMutation.mutate(
@@ -130,36 +131,43 @@ export default function JobDetail() {
                 <div>
                     <Card className="shadow-sm">
                         <CardHeader className="pb-4">
-                           <JobHeader job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} user={user} />
+                            <JobHeader job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} user={user} />
                         </CardHeader>
 
                         <Separator />
 
                         <CardContent className="prose prose-sm max-w-none py-6">
-                           <JobDescription job={jobDetails} />
+                            <JobDescription job={jobDetails} />
                         </CardContent>
                     </Card>
-
                     {/* Family card */}
-                    <div className="mt-6">
-                       <CompanyInfoCard job={jobDetails} />
-                    </div>
+                    {user?.role === "helper" && (
+                        <div className="mt-6">
+                            <CompanyInfoCard job={jobDetails} />
+                        </div>
+                    )}
+
                 </div>
 
                 {/* Right: sticky apply panel */}
-                {user?.role!='client' &&user?.id !== jobDetails?.client_id && (
-                  <ApplyPanel user={user} jobDetails={jobDetails} />
-
+                {user?.role != 'client' && user?.id !== jobDetails?.client_id && (
+                    <ApplyPanel user={user} jobDetails={jobDetails} />
                 )}
-
-                {user?.role === "client" &&user.id===jobDetails?.client_id  && (
-                   <ApplicantsPanel jobId={jobDetails?.id} user={user} />
+                {user?.role === "client" && user.id === jobDetails?.client_id && (
+                    <div className="mt-6">
+                        <CompanyInfoCard job={jobDetails} />
+                    </div>
                 )}
 
             </section>
-            
+
             <div className="mt-6">
-               <SimilarJobCard job={jobDetails} />
+                {user?.role === "helper" && (
+                    <SimilarJobCard job={jobDetails} />
+                )}
+                {user?.role === "client" && user.id === jobDetails?.client_id && (
+                    <ApplicantListCard job={jobDetails} user={user} />
+                )}
             </div>
         </main>
     );
