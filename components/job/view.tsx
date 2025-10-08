@@ -147,7 +147,7 @@ export default function JobDetail() {
                 )}
 
                 {user?.role === "client" &&user.id===jobDetails?.client_id  && (
-                   <ApplicantsPanel jobId={jobDetails.id} userRole={user?.role} />
+                   <ApplicantsPanel jobId={jobDetails?.id} user={user} />
                 )}
 
             </section>

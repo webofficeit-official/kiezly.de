@@ -8,7 +8,7 @@ import { Select } from "@/components/shared-ui/custom-select/custom-select";
 
 interface ApplicantsPanelProps {
   jobId: string | number;
-  userRole: string;
+  user: any;
 }
 
 const statusOptions = [
@@ -19,8 +19,9 @@ const statusOptions = [
   { id: 5, name: "withdrawn" },
 ];
 
-export default function ApplicantsPanel({ jobId, userRole }: ApplicantsPanelProps) {
-  const { data: applicants, isLoading } = useJobApplicants(jobId, userRole === "client");
+export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
+  if (!jobId) return null; 
+  const { data: applicants, isLoading } = useJobApplicants(jobId.toString(), user?.role === "client");
   const updateStatusMutation = useUpdateApplicantStatus();
 
   const handleStatusChange = (applicationId: string, status: string) => {
@@ -33,7 +34,7 @@ export default function ApplicantsPanel({ jobId, userRole }: ApplicantsPanelProp
     );
   };
 
-  if (userRole !== "client") return null;
+  if (user?.role !== "client") return null;
 
   return (
     <aside className="lg:sticky lg:top-6">
