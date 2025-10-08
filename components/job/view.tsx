@@ -28,6 +28,7 @@ import JobDescription from "./job-details/job-decription";
 import CompanyInfoCard from "./job-details/company-info";
 import ApplyPanel from "./job-details/apply-panel";
 import ApplicantsPanel from "./job-details/applicant-panel";
+import SimilarJobCard from "./job-details/similar-jobs";
 
 const statusOptions = [
     { id: 1, name: "applied" },
@@ -156,6 +157,10 @@ export default function JobDetail() {
                 )}
 
             </section>
+            
+            <div className="mt-6">
+               <SimilarJobCard job={jobDetails} />
+            </div>
         </main>
     );
 }
