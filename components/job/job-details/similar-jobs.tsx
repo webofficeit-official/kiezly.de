@@ -4,8 +4,10 @@ import { ExternalLink } from "lucide-react";
 import { Job } from "@/lib/types/job";
 import { useJobs } from "@/lib/react-query/queries/useJob";
 import { Filters, fromQuery } from "../list";
+import { useRouter } from "next/navigation";
 
 export default function SimilarJobCard({ job }) {
+    const router = useRouter();
     const DEFAULT_FILTERS: Filters = {
         q: "",
         city: "",
@@ -63,10 +65,10 @@ export default function SimilarJobCard({ job }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Map over your actual similarJobs array here */}
                     {similarJobs?.map((simJob) => (
-                        <a
+                        <div
                             key={simJob.id}
-                            href={`/jobs/${simJob.slug}`}
-                            className="flex flex-col rounded-xl border border-gray-200 p-4 transition-all duration-200 
+                            onClick={() => router.push(`/jobs/${simJob.slug}`)}
+                            className="flex flex-col rounded-xl cursor-pointer border border-gray-200 p-4 transition-all duration-200 
                                        hover:border-gray-400 hover:shadow-md bg-white min-h-[160px]"
                         >
                             {/* Header: Category & Title */}
@@ -94,7 +96,7 @@ export default function SimilarJobCard({ job }) {
                                     }
                                 </span>
                             </div>
-                        </a>
+                        </div>
                     ))}
                 </div>
 
