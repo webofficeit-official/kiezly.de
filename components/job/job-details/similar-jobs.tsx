@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink } from "lucide-react";
+import { BookmarkCheck, ExternalLink } from "lucide-react";
 import { Job } from "@/lib/types/job";
-import { useJobs } from "@/lib/react-query/queries/useJob";
+import { useJobs, useSavedJobs } from "@/lib/react-query/queries/useJob";
 import { Filters, fromQuery } from "../list";
 import { useRouter } from "next/navigation";
+import { formatDate } from "date-fns";
+import { Button } from "@/components/ui/button";
 
 export default function SimilarJobCard({ job }) {
     const router = useRouter();
@@ -57,61 +59,93 @@ export default function SimilarJobCard({ job }) {
                     Similar Jobs
                 </CardTitle>
             </CardHeader>
+            <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <CardContent className="space-y-6 p-4 sm:p-5">
+                {/* Right: Job list + debug preview */}
+                <section className="lg:col-span-3 space-y-4">
+                    {/* Stats + controls */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {similarJobs?.map((job) => (
+                            <article
+                                key={`${job.id}-${job.slug}`}
+                                className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
+                            >
+                                {/* Header */}
+                                <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${job.slug}`}>
+                                    <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${job.slug}`}>
+                                        <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
+                                            {formatDate(job.starts_at, "dd MMM, yyyy")} – {formatDate(job.ends_at, "dd MMM, yyyy")}
+                                        </span>
+                                    </div>
 
-                {/* Job Cards Grid */}
-                {/* Increased gap and ensured equal size on different screens */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Map over your actual similarJobs array here */}
-                    {similarJobs?.map((simJob) => (
-                        <div
-                            key={simJob.id}
-                            onClick={() => router.push(`/jobs/${simJob.slug}`)}
-                            className="flex flex-col rounded-xl cursor-pointer border border-gray-200 p-4 transition-all duration-200 
-                                       hover:border-gray-400 hover:shadow-md bg-white min-h-[160px]"
-                        >
-                            {/* Header: Category & Title */}
-                            <div className="flex flex-col mb-2 flex-1">
-                                {/* Job Title */}
-                                <h4 className="text-lg font-semibold text-gray-900 line-clamp-2 leading-snug">
-                                    {simJob.title}
-                                </h4>
-                                {/* Category/Pill */}
-                                <span className="text-xs text-gray-600 tracking-wider mb-1">
-                                    {simJob.subtitle}
-                                </span>
+                                    {/* Category */}
+                                    <p className="text-xs text-gray-500 mt-4 uppercase tracking-wide font-medium">
+                                        {job.category_name}
+                                    </p>
+
+                                    {/* Title */}
+                                    <h3 className="text-base font-semibold text-gray-900 mt-1 line-clamp-2 hover:text-black transition">
+                                        {job.title}
+                                    </h3>
+
+                                    {/* Tags */}
+                                    {job.tags?.length > 0 && (
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            {job.tags.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
+                                                >
+                                                    {tag.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Footer */}
+                                <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
+                                    <div className="text-xs text-gray-600 leading-tight">
+                                        <p className="font-semibold text-sm text-gray-900">
+                                            {job?.price_type === "range" && job?.price_min && job?.price_max
+                                                ? `${job.currency} ${job.price_min} – ${job.price_max}`
+                                                : job?.price_value
+                                                    ? `${job.currency} ${job.price_value}`
+                                                    : "Not specified"}
+                                            {job?.price_type && (
+                                                <span className="text-gray-500 text-xs ml-1">
+                                                    / {job.price_type}
+                                                </span>
+                                            )}
+                                        </p>
+                                        {job?.distance && (
+                                            <p className="text-gray-500 text-xs mt-1">
+                                                {(job.distance / 1000).toFixed(2)} km away
+                                            </p>
+                                        )}
+                                        <p className="text-gray-500 text-xs mt-1">
+                                            {job.city}, {job.state}, {job.countries?.name}
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
+                                        onClick={() => window.location.href = `/jobs/${job.slug}`}
+                                    >
+                                        View
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
+                        {similarJobs?.length === 0 && (
+                            <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
+                                No jobs match your filters.
                             </div>
+                        )}
+                    </div>
 
-                            {/* Description/Snippet (Moved below title for better hierarchy) */}
-                            <p
-                                className="text-xs text-gray-500 line-clamp-2 mt-1 mb-3"
-                                dangerouslySetInnerHTML={{ __html: simJob.description }}
-                            />
-
-                            {/* Footer: Rate (Highlighted) */}
-                            <div className="mt-3 pt-2 border-t border-gray-100">
-                                <span className="text-sm font-semibold text-gray-800">
-                                    {
-                                        simJob.price_type == 'fixed' ? `${simJob.currency} ${simJob.price_value}` : `${simJob.currency} ${simJob.price_min} - ${simJob.price_max}`
-                                    }
-                                </span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* View All Link */}
-                <div className="pt-2">
-                    <a
-                        href={`/jobs?category_id=${job?.category?.id}`}
-                        className="inline-flex items-center gap-2 text-base font-semibold text-gray-800 hover:text-black hover:underline"
-                    >
-                        View all similar **{job?.category?.name || 'Category'}** jobs
-                        <ExternalLink className="h-4 w-4" />
-                    </a>
-                </div>
-            </CardContent>
+                </section>
+            </main>
         </Card>
     );
 }

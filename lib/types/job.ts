@@ -61,6 +61,17 @@ export interface Job {
     slug: string;
     name: string;
   }[];
+  category?: {
+    id: number;
+    slug: string;
+    name: string;
+  };
+  countries?: {
+    id?: number;
+    code?: string;
+    currency?: string;
+    name?: string;
+  };
 }
 
 
@@ -185,6 +196,17 @@ export interface JobList {
     slug: string;
     name: string;
   }[];
+  category?: {
+    id: number;
+    slug: string;
+    name: string;
+  };
+  countries?: {
+    id?: number;
+    code?: string;
+    currency?: string;
+    name?: string;
+  };
 }
 
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMyApplications } from "@/lib/react-query/queries/apply-job";
 import { MyApplications } from "@/lib/types/apply-job";
 import { Select } from "./list";
+import { formatDate } from "date-fns";
 
 /**
  * Helper to check if a job was created recently (within 72h)
@@ -79,77 +80,103 @@ export default function AppliedJobList() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
+        <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between gap-10">
+          {/* Header */}
           <h2 className="text-lg font-semibold">
             {status === "" ? "Applied Jobs" : `${capitalize(status)} Jobs`} ({totalApplications})
           </h2>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between gap-10">
-          <Select
-            label="Status"
-            value={status}
-            onChange={handleStatusChange}
-            options={statusOptions}
-            width="w-32"
-          />
-          <Select
-            label="Per page"
-            value={String(pageSize)}
-            onChange={(v: string) => handlePageSizeChange(Number(v))}
-            options={perPageOptions}
-            width="w-16"
-          />
+          {/* Filters */}
+          <div className="flex items-center justify-between gap-6">
+            <Select
+              label="Status"
+              value={status}
+              onChange={handleStatusChange}
+              options={statusOptions}
+              width="w-32"
+            />
+            <Select
+              label="Per page"
+              value={String(pageSize)}
+              onChange={(v: string) => handlePageSizeChange(Number(v))}
+              options={perPageOptions}
+              width="w-16"
+            />
+          </div>
         </div>
 
         {/* Application cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {applications.length > 0 ? (
-            applications.map((app) => (
-              <article
-                key={app.id}
-                className="bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-200 hover:shadow-lg hover:border-gray-300 p-5 flex flex-col"
-              >
-                <div className="flex flex-col flex-1 min-w-0">
-                  <h3 className="text-xl font-bold text-gray-900 truncate mb-1">{app.job.title}</h3>
-                  {app.proposed_rate && (
-                    <p className="text-sm font-semibold text-gray-700 mb-3 border-l-2 pl-3 border-gray-400">
-                      Proposed Rate: <span className="text-lg text-gray-900 ml-1">{app.proposed_rate}</span>
-                    </p>
-                  )}
-                  {app.cover_note && (
-                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                      <span className="font-semibold text-gray-800">Note:</span> {app.cover_note}
-                    </p>
-                  )}
-                </div>
+        <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <hr className="my-4 border-gray-100" />
+          {/* Right: Job list + debug preview */}
+          <section className="lg:col-span-3 space-y-4">
+            {/* Stats + controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {applications.map((app) => (
+                <article
+                  key={`${app.id}`}
+                  className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
+                >
+                  {/* Header */}
+                  <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
+                    <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
+                      <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
+                        {formatDate(app.created_at, "dd MMM, yyyy")}
+                      </span>
+                      <div className="text-xs"> <span className={getStatusClasses(app.status)}>{app.status}</span></div>
+                    </div>
 
-                <div className="flex justify-between items-center pt-1">
-                  <div className="text-xs font-medium">
-                    <span className={getStatusClasses(app.status)}>{app.status}</span>
+                    {/* Title */}
+                    <h3 className="text-base font-semibold text-gray-900 mt-4 line-clamp-2 hover:text-black transition">
+                      {app.job.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1 tracking-wide font-medium">
+                      <span className="font-bold text-black">Note: </span>{app.cover_note}
+                    </p>
+
+                    {/* Tags */}
+                    {app.job.tags?.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {app.job.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <Button
-                    variant="outline"
-                    className="text-sm font-semibold text-gray-800 hover:text-black hover:bg-gray-100 transition-colors duration-200 rounded-lg px-4 py-2"
-                    onClick={() => router.push(`/jobs/${app.job.slug}`)}
-                  >
-                    View Details &rarr;
-                  </Button>
+
+                  {/* Footer */}
+                  <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
+                    <div className="text-xs text-gray-600 leading-tight">
+                      <p className="font-semibold text-sm text-gray-900">
+                        {app.proposed_rate}
+                        <span className="text-gray-500 text-xs ml-1">
+                          / Proposed Rate
+                        </span>
+                      </p>
+                    </div>
+
+                    <button
+                      className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
+                      onClick={() => window.location.href = `/jobs/${app.job.slug}`}
+                    >
+                      View
+                    </button>
+                  </div>
+                </article>
+              ))}
+              {applications.length === 0 && (
+                <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
+                  No jobs match your filters.
                 </div>
-              </article>
-            ))
-          ) : (
-            <div className="md:col-span-2 lg:col-span-3">
-              <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-base text-gray-600 shadow-md">
-                You haven’t applied to any jobs yet.
-              </div>
+              )}
             </div>
-          )}
-        </div>
+
+          </section>
+        </main>
 
         {/* Pagination */}
         <nav className="flex items-center justify-between gap-2" aria-label="Pagination">
