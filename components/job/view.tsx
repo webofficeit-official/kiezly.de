@@ -64,10 +64,10 @@ export default function JobDetail() {
 
     const updateStatusMutation = useUpdateApplicantStatus();
 
-    const { data: applicants, isLoading: isApplicantsLoading } = useJobApplicants(
-        jobId,
-        user?.role === "client"   // only enable if client
-    );
+    // const { data: applicants, isLoading: isApplicantsLoading } = useJobApplicants(
+    //     jobId,
+    //     user?.role === "client"   // only enable if client
+    // );
 
     useEffect(() => {
         if (user) {

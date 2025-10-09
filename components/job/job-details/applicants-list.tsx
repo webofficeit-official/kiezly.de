@@ -33,7 +33,14 @@ const getStatusClasses = (status: string) => {
 
 export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
     if (!job) return null;
-    const { data: applicants, isLoading } = useJobApplicants(job.id.toString(), user?.role === "client");
+    const { data, isLoading } = useJobApplicants({
+        jobId: job.id.toString(),
+        page: 1,
+        pageSize: 3,
+        status: '',
+        sort: 'asc',
+        enabled: user?.role === 'client', // <-- include here if your hook supports it
+    });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
 
@@ -56,7 +63,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
             <Card className="shadow-lg border-gray-100 bg-white">
                 <CardHeader className="border-b border-gray-100 p-4 sm:p-5">
                     <CardTitle className="text-xl font-bold text-gray-900">
-                        Applicants ({applicants?.length})
+                        Applicants ({data&&data?.total_items || 0})
                     </CardTitle>
                 </CardHeader>
 
@@ -66,7 +73,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
                     {/* Increased gap and ensured equal size on different screens */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Map over your actual similarJobs array here */}
-                        {applicants?.map((app) => (
+                        {data && data?.applicants?.map((app) => (
                             <div
                                 key={app.id}
                                 className="flex flex-col rounded-xl cursor-pointer border border-gray-200 p-4 transition-all duration-200 
