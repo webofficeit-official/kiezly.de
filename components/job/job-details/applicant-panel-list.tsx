@@ -14,8 +14,6 @@ interface ApplicantsPageProps {
   params: { slug: string };
 }
 const perPageOptions = [
-  { label: "1", value: "1" },
-  { label: "5", value: "5" },
   { label: "10", value: "10" },
   { label: "25", value: "25" },
   { label: "50", value: "50" },
@@ -41,7 +39,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [sort, setSort] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(12);
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const openUserModal = (userId: string) => {

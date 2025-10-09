@@ -42,7 +42,7 @@ export default function ApplicantDetailModal({ isOpen, onClose, userId }: Applic
                     </div>
                 </div>
             ) : (
-                <p className="text-center text-gray-500 py-8">User not found.</p>
+                ""
             )}
         </>
     );
