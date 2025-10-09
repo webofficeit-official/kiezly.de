@@ -1,5 +1,6 @@
 "use client";
 
+import ApplicantDetailModal from "@/components/ui/ApplicantDetailModal";
 import { Button } from "@/components/ui/button-variant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
@@ -9,7 +10,7 @@ import { useJobApplicants } from "@/lib/react-query/queries/apply-job";
 import { useJob } from "@/lib/react-query/queries/useJob";
 import { ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 interface ApplicantsPageProps {
   params: { slug: string };
 }
@@ -18,6 +19,31 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const { slug } = params;
   const { user } = useAuth();
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  const openUserModal = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsUserModalOpen(true);
+  };
+
+  const closeUserModal = () => {
+    setIsUserModalOpen(false);
+    setSelectedUserId(null);
+  };
+
+  const openUpdateModal = (applicant: any) => {
+    setSelectedApplicant(applicant);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedApplicant(null);
+  };
+
   const { data: job, isLoading, isError } = useJob(slug as string);
 
   const jobDetails = job?.job;
@@ -55,7 +81,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
                 {/* --- Top Section: Name + Status --- */}
                 <div className="flex items-start justify-between">
                   <div
-                    onClick={() => router.push(`/`)}
+                    onClick={() => openUserModal(applicant.user.id)}
                     className="cursor-pointer"
                   >
                     <div className="font-semibold text-lg text-gray-900 line-clamp-1">
@@ -97,6 +123,16 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
                 <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
                   <div className="text-xs text-gray-500">
                     Applied: {new Date(applicant.created_at).toLocaleDateString()}
+
+                  </div>
+                  <div>
+                    <Button
+                      variant="outline"
+                      className="text-sm font-medium text-gray-800 border-gray-300 hover:bg-gray-100 px-4 py-2 h-auto"
+                      onClick={() => openUpdateModal(applicant)}
+                    >
+                      Update Status
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -109,7 +145,17 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             </div>
           )}
         </div>
+        <UpdateStatusModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          applicant={selectedApplicant}
+        />
 
+        <ApplicantDetailModal
+          isOpen={isUserModalOpen}
+          onClose={closeUserModal}
+          userId={selectedUserId}
+        />
 
       </main>
     </div>

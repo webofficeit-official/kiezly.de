@@ -2,6 +2,7 @@
 import { Application, ApplyJobData, ApplyJobResponse, JobApplicantsResponse, MyApplicationResponse, MyApplicationsData } from "@/lib/types/apply-job";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { applyJobApi, checkJobApplied, getApplicantsByJobId, getMyApplications, updateApplicationStatus, withdrawApplication } from "../api-handler/apply-job";
+import apiClient from "@/lib/config/axios-client";
 
 export function useApplyJob() {
     const queryClient = useQueryClient();
@@ -96,5 +97,16 @@ export const useMyApplications = (status: string, page: number, pageSize: number
       return res.data;
     },
     enabled: true,
+  });
+};
+
+export const useApplicantDetails = (userId: string | null) => {
+  return useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const { data } = await apiClient.get(`/user/${userId}`);
+      return data.user; // unwrap user
+    },
+    enabled: !!userId, // only fetch when id is available
   });
 };
