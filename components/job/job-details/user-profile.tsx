@@ -4,119 +4,163 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { Briefcase, BriefcaseMedical, CalendarClock, CalendarMinus2, CircleSlash, Euro, Eye, Facebook, Globe, GraduationCap, Hourglass, IceCream, Instagram, Linkedin, Scale, View, X } from "lucide-react";
 
 interface UserProfileProps {
   user: any;
   application?: any;
+  onClose?: any;
 }
 
-export default function UserProfile({ user }: UserProfileProps) {
+export default function UserProfile({ user, onClose }: UserProfileProps) {
   if (!user) return null;
 
   return (
-    <Card className="space-y-6 p-6">
-      {/* --- Header Section --- */}
-      <div className="flex items-center gap-4 border-b border-gray-100 pb-2">
-        {user.avatar_url ? (
-          <Image
-            src={user.avatar_url}
-            alt={`${user.first_name} ${user.last_name}`}
-            width={80}
-            height={80}
-            className="rounded-full object-cover border border-gray-200"
-          />
-        ) : (
-          <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-full text-gray-600 font-semibold">
-            {user.first_name?.charAt(0)}
-            {user.last_name?.charAt(0)}
+    <>
+      <Card className="space-y-6">
+        <div className="grid grid-cols-12">
+          <div className="col-span-5 bg-gray-100 p-6">
+            {user.avatar_url ? (
+              <>
+                <img src={user?.avatar_url || "https://placehold.co/96x96"} alt={user?.display_name} className="h-100 w-full rounded-lg object-cover" />
+              </>
+            ) : (
+              <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-full text-gray-600 font-semibold">
+                {user.first_name?.charAt(0)}
+                {user.last_name?.charAt(0)}
+              </div>
+            )}
+            <div className="mt-10">
+              {user.rate ? (
+                <LeftType label="Salary expectation" value={`€ ${user.rate}/Hr`} Icon={<Euro />} />
+              ) : ""}
+              {user.experience ? (
+                <LeftType label="Work Experience" value={`${user.experience} Years`} Icon={<Briefcase />} />
+              ) : ""}
+              {user.min_hours ? (
+                <LeftType label="Minimum Hours" value={`${user.min_hours} Hr`} Icon={<Hourglass />} />
+              ) : ""}
+              {user.gender ? (
+                <LeftType label="Gender" value={`${user.gender}`} Icon={<CircleSlash />} />
+              ) : ""}
+              {user.weekdays.length > 0 ? (
+                <LeftType label="Available days" value={`${user.weekdays.join(', ')}`} Icon={<CalendarClock />} />
+              ) : ""}
+              {user.time_windows.length > 0 ? (
+                <LeftType label="Time windows" value={`${user.time_windows.join(', ')}`} Icon={<CalendarMinus2 />} />
+              ) : ""}
+            </div>
+            <div className="mt-10">
+              <p className="font-medium text-lg">Contacts</p>
+              <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`mailto:${user.email}`}>{user.email}</a></p>
+              <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`tel:${user.phone}`}>{user.phone}</a></p>
+            </div>
+            {user.social_links.length > 0 ? (
+              <div className="mt-10">
+                <p className="font-medium text-lg mb-3">Socials</p>
+                <div className="flex items-center gap-1">
+                  {user.social_links.find(s => s.platform === 'website') ? (
+                    <SocialIcons Icon={<Globe className="h-4 w-4 text-gray-600 hover:text-black" />} link={user.social_links.find(s => s.platform === 'website')?.url} />
+                  ) : ""}
+                  {user.social_links.find(s => s.platform === 'linkedin') ? (
+                    <SocialIcons Icon={<Linkedin className="h-4 w-4 text-blue-600 hover:text-blue-700" />} link={user.social_links.find(s => s.platform === 'linkedin')?.url} />
+                  ) : ""}
+                  {user.social_links.find(s => s.platform === 'instagram') ? (
+                    <SocialIcons Icon={<Instagram className="h-4 w-4 text-pink-500 hover:text-pink-600" />} link={user.social_links.find(s => s.platform === 'instagram')?.url} />
+                  ) : ""}
+                  {user.social_links.find(s => s.platform === 'x') ? (
+                    <SocialIcons Icon={<X className="h-4 w-4 text-gray-800 hover:text-black" />} link={user.social_links.find(s => s.platform === 'x')?.url} />
+                  ) : ""}
+                  {user.social_links.find(s => s.platform === 'facebook') ? (
+                    <SocialIcons Icon={<Facebook className="h-4 w-4 text-blue-500 hover:text-blue-600" />} link={user.social_links.find(s => s.platform === 'facebook')?.url} />
+                  ) : ""}
+                </div>
+              </div>
+            ) : ""}
           </div>
-        )}
+          <div className="col-span-7 p-6">
+            {/* --- Header --- */}
+            <div className="flex justify-between">
+              <h2 className="text-xl font-bold text-gray-900">
+                {user.first_name} {user.last_name}
+              </h2>
+              <X className="h-6 w-6 text-black-300 border border-gray-200 cursor-pointer rounded-lg" onClick={onClose} />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {user.street} . {user.postal_code}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              {user.city} . {user.state} . {user.country}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Member since {new Date(user.created_at).toLocaleDateString()}
+            </p>
 
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            {user.first_name} {user.last_name}
-          </h2>
-          <p className="text-sm text-gray-600">{user.email}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            Member since {new Date(user.created_at).toLocaleDateString()}
-          </p>
-        </div>
-      </div>
+            {/* --- Bio --- */}
+            {user.bio && user.bio.trim() && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-500 leading-relaxed">{user.bio}</p>
+              </div>
+            )}
+            <hr className="mt-4" />
 
-      {/* --- Basic Info --- */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-        <InfoItem label="Gender" value={user.gender || "N/A"} />
-        <InfoItem label="Hourly Rate (€)" value={user.rate || "N/A"} />
-        <InfoItem label="Experience" value={`${user.experience || 0} years`} />
-        <InfoItem label="City" value={user.city || "N/A"} />
-        <InfoItem label="Postal Code" value={user.postal_code || "N/A"} />
-        <InfoItem label="District" value={user.district || "N/A"} />
-      </div>
+            {/* --- Education --- */}
+            {user.education?.length > 0 && (
+              <>
+                <div className="mt-5">
+                  <p className="font-medium text-gray-500 text-sm mb-3">Education</p>
+                  <div className="mt-4">
+                    {user.education.map((e: any) => (
+                      <EducationType label={e.institution} value={e.field} year={e.year} Icon={<GraduationCap />} />
+                    ))}
+                  </div>
+                </div>
+                <hr className="mt-4" />
+              </>
+            )}
 
-      {/* --- Skills Section --- */}
-      {user.skills?.length > 0 && (
-        <div>
-          <h3 className="font-medium mb-1 text-gray-800">Skills</h3>
-          <div className="flex flex-wrap gap-2">
-            {user.skills.map((skill: any) => (
-              <Badge
-                key={skill.id}
-                className="bg-blue-100 text-blue-800 border border-blue-200"
-              >
-                {skill.name}
-              </Badge>
-            ))}
+            {/* --- Skills Section --- */}
+            {user.skills?.length > 0 && (
+              <>
+                <div className="mt-5">
+                  <p className="font-medium text-gray-500 text-sm mb-3">Skills</p>
+                  <div className="flex flex-wrap gap-2">
+                    {user.skills.map((skill: any) => (
+                      <span
+                        key={skill.name}
+                        className="border rounded-2xl py-1 px-2 text-xs text-gray-800 border-gray-400"
+                      >
+                        {skill.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <hr className="mt-4" />
+              </>
+            )}
+
+            {/* --- Documents --- */}
+            <div className="mt-5">
+              <div className="mt-3">
+                {user.has_first_aid ? (
+                  <>
+                    <p className="font-medium text-gray-500 text-sm mb-2">First Aid</p>
+                    <CertificateType value={`${user.first_aid.provider} - ${user.first_aid.certificateId}`} label={`${user.first_aid.completionDate} - ${user.first_aid.expiryDate}`} Icon={<BriefcaseMedical />} fileUrl={user.first_aid.fileUrl} />
+                  </>
+                ) : ''}
+                {user.police_verified ? (
+                  <>
+                    <p className="font-medium text-gray-500 text-sm mb-2 mt-3">Police certificate</p>
+                    <CertificateType value={`${user.police_certificate.level}`} label={`${user.police_certificate.issueDate} - ${user.police_certificate.expiryDate}`} Icon={<Scale />} fileUrl={user.first_aid.fileUrl} />
+                  </>
+                ) : ''}
+              </div>
+            </div>
+
           </div>
         </div>
-      )}
-
-      {/* --- Certificates --- */}
-      <div className="space-y-4">
-        <h3 className="font-medium text-gray-800">Certificates</h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-          <CertificateItem
-            title="First Aid Certificate"
-            certificate={user.first_aid}
-          />
-          <CertificateItem
-            title="Police Certificate"
-            certificate={user.police_certificate}
-          />
-        </div>
-      </div>
-
-      {/* --- Verification Status --- */}
-      <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-gray-100">
-        <Badge
-          className={`${
-            user.is_email_verified
-              ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-              : "bg-gray-100 text-gray-600 border border-gray-200"
-          }`}
-        >
-          {user.is_email_verified ? "Email Verified" : "Email Not Verified"}
-        </Badge>
-
-        <Badge
-          className={`${
-            user.police_verified
-              ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-              : "bg-gray-100 text-gray-600 border border-gray-200"
-          }`}
-        >
-          {user.police_verified ? "Police Verified" : "Police Not Verified"}
-        </Badge>
-      </div>
-
-      {/* --- Bio --- */}
-      {user.bio && user.bio.trim() && (
-        <div>
-          <h3 className="font-medium mb-1 text-gray-800">Bio</h3>
-          <p className="text-sm text-gray-700 leading-relaxed">{user.bio}</p>
-        </div>
-      )}
-    </Card>
+      </Card>
+    </>
   );
 }
 
@@ -127,6 +171,87 @@ function InfoItem({ label, value }: { label: string; value: string }) {
       <p className="font-medium text-gray-700">{label}</p>
       <p className="text-gray-600">{value}</p>
     </div>
+  );
+}
+
+function LeftType({ label, value, Icon }: { label: string; value: string; Icon: any }) {
+  return (
+    <div className="flex items-center gap-3 mt-4">
+      <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-gray-100">
+        {Icon}
+      </div>
+      <div className="flex flex-col leading-tight">
+        <span className="font-bold text-gray-900 text-sm">{value}</span>
+        <span className="text-xs text-gray-600">{label}</span>
+      </div>
+    </div>
+  );
+}
+
+function EducationType({
+  label,
+  value,
+  year,
+  Icon,
+}: {
+  label: string;
+  value: string;
+  year: number;
+  Icon: any;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-6 mt-4">
+      {/* Left side: icon + text */}
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-gray-100">
+          {Icon}
+        </div>
+        <div className="flex flex-col leading-tight">
+          <span className="font-bold text-gray-900 text-sm">{value}</span>
+          <span className="text-xs text-gray-600">{label}</span>
+        </div>
+      </div>
+
+      {/* Right side: year at top */}
+      <div className="text-sm text-black-500 font-semibold">{year}</div>
+    </div>
+  );
+}
+
+function CertificateType({
+  label,
+  value,
+  Icon,
+  fileUrl
+}: {
+  label: string;
+  value: string;
+  Icon: any;
+  fileUrl: string
+}) {
+  return (
+    <div className="flex items-start justify-between gap-6 mt-4">
+      {/* Left side: icon + text */}
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-gray-100">
+          {Icon}
+        </div>
+        <a href={fileUrl} target="__blank">
+          <div className="flex flex-col leading-tight">
+            <span className="font-bold text-gray-900 text-sm">{value}</span>
+            <span className="text-xs text-gray-600">{label}</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function SocialIcons({ link, Icon }: { link: string; Icon: any }) {
+  return (
+    <a href={link} target="__blank" className="p-2 bg-background rounded-full border border-gray-200 hover:bg-gray-100 transition-all duration-200">
+      {Icon}
+    </a>
   );
 }
 

@@ -44,7 +44,7 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
   return (
     <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md transition-all duration-150 flex flex-col">
       {/* Top Section */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between cursor-pointer" onClick={() => openUserModal(applicant.user.id)}>
         <div
           onClick={() => openUserModal(applicant.user.id)}
           className="cursor-pointer"
@@ -63,7 +63,7 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
       <hr className="my-3 border-gray-100" />
 
       {/* Body Section */}
-      <div className="text-sm text-gray-700 space-y-3 flex-1">
+      <div className="text-sm text-gray-700 space-y-3 flex-1 cursor-pointer" onClick={() => openUserModal(applicant.user.id)}>
         {applicant.proposed_rate && (
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium text-gray-800">
