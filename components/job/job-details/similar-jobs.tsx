@@ -84,9 +84,10 @@ export default function SimilarJobCard({ job }) {
                             </div>
 
                             {/* Description/Snippet (Moved below title for better hierarchy) */}
-                            <p className="text-xs text-gray-500 line-clamp-2 mt-1 mb-3">
-                                {simJob.description}
-                            </p>
+                            <p
+                                className="text-xs text-gray-500 line-clamp-2 mt-1 mb-3"
+                                dangerouslySetInnerHTML={{ __html: simJob.description }}
+                            />
 
                             {/* Footer: Rate (Highlighted) */}
                             <div className="mt-3 pt-2 border-t border-gray-100">

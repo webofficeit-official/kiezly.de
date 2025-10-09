@@ -31,7 +31,14 @@ const getStatusClasses = (status: string) => {
 
 export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
   if (!jobId) return null;
-  const { data: applicants, isLoading } = useJobApplicants(jobId.toString(), user?.role === "client");
+  const { data, isLoading } = useJobApplicants({
+         jobId:jobId.toString(),
+         page: 1,
+         pageSize: 3,
+         status: '',
+         sort: 'asc',
+         enabled: user?.role === 'client', // <-- include here if your hook supports it
+     });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
 
@@ -54,16 +61,16 @@ export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
       <Card className="shadow-lg border-b border-gray-200 rounded-xl bg-white">
         <CardHeader className="border-b border-gray-100 p-4 sm:p-5">
           <CardTitle className="text-xl font-bold text-gray-900">
-            Applicants <span className="text-gray-500 font-medium ml-1">({applicants?.length || 0})</span>
+            Applicants <span className="text-gray-500 font-medium ml-1">({data?.applicants?.length || 0})</span>
           </CardTitle>
         </CardHeader>
 
         <CardContent className="p-4 sm:p-5">
           {isLoading ? (
             <p className="text-gray-500 text-sm italic">Loading applicants...</p>
-          ) : applicants && applicants.length > 0 ? (
+          ) : data&&data?.applicants && data?.applicants.length > 0 ? (
             <ul className="space-y-4">
-              {applicants.map((applicant: any) => (
+              {data?.applicants.map((applicant: any) => (
                 <li
                   key={applicant.id}
                   className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md transition-all duration-150"

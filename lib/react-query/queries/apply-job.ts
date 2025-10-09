@@ -5,66 +5,100 @@ import { applyJobApi, checkJobApplied, getApplicantsByJobId, getMyApplications, 
 import apiClient from "@/lib/config/axios-client";
 
 export function useApplyJob() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation<ApplyJobResponse, Error, ApplyJobData>({
-        mutationFn: applyJobApi,
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["jobs", "applications"] });
-            queryClient.invalidateQueries({ queryKey: ["my-application"] });
-            queryClient.invalidateQueries({ queryKey: ["applied-job"] });
-        },
-        onError: (err) => {
-            console.error("Apply job failed:", err);
-        },
-    });
+  return useMutation<ApplyJobResponse, Error, ApplyJobData>({
+    mutationFn: applyJobApi,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["jobs", "applications"] });
+      queryClient.invalidateQueries({ queryKey: ["my-application"] });
+      queryClient.invalidateQueries({ queryKey: ["applied-job"] });
+    },
+    onError: (err) => {
+      console.error("Apply job failed:", err);
+    },
+  });
 }
 
 
 export const useWithdrawApplication = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (applicationId: string) => withdrawApplication(applicationId),
-        onSuccess: () => {
-            // Optional: invalidate related queries
-            queryClient.invalidateQueries({ queryKey: ["applied-job"] });
-            queryClient.invalidateQueries({ queryKey: ["my-application"] });
-            queryClient.invalidateQueries({ queryKey: ["jobs", "applications"] });
-        },
-        onError: (error: any) => {
-            console.error("Apply job failed:", error);
-        },
-    });
+  return useMutation({
+    mutationFn: (applicationId: string) => withdrawApplication(applicationId),
+    onSuccess: () => {
+      // Optional: invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ["applied-job"] });
+      queryClient.invalidateQueries({ queryKey: ["my-application"] });
+      queryClient.invalidateQueries({ queryKey: ["jobs", "applications"] });
+    },
+    onError: (error: any) => {
+      console.error("Apply job failed:", error);
+    },
+  });
 };
 
 
 
 
 export const useCheckApplied = (jobId?: string) => {
-    return useQuery({
-        queryKey: ["applied-job", jobId],
-        queryFn: async () => {
-            if (!jobId) return null; // safe: resolves to null
-            // Example fetch logic
-            const res = checkJobApplied(jobId);
-            return res;
-        },
-        enabled: !!jobId, // query runs only if jobId exists
-    });
-};
-
-
-export const useJobApplicants = (jobId?: string, enabled: boolean = true) => {
-  return useQuery<Application[], Error>({
-    queryKey: ["job-applicants", jobId],
+  return useQuery({
+    queryKey: ["applied-job", jobId],
     queryFn: async () => {
-      const res: JobApplicantsResponse = await getApplicantsByJobId(jobId!);
-      return res.applicants;
+      if (!jobId) return null; // safe: resolves to null
+      // Example fetch logic
+      const res = checkJobApplied(jobId);
+      return res;
     },
-    enabled: !!jobId && enabled,  // fetch only if jobId exists AND enabled is true
+    enabled: !!jobId, // query runs only if jobId exists
   });
 };
+
+
+interface JobApplicantsParams {
+  jobId?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+  sort?: "asc" | "desc";
+  enabled?: boolean;
+}
+
+
+interface JobApplicantsParams {
+  jobId?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+  sort?: "asc" | "desc";
+  enabled?: boolean;
+}
+
+export const useJobApplicants = ({
+  jobId,
+  status = "",
+  page = 1,
+  pageSize = 20,
+  sort = "asc",
+  enabled = true,
+}: JobApplicantsParams) => {
+  return useQuery({
+    queryKey: ["job-applicants", jobId, status, page, pageSize, sort],
+    queryFn: async () => {
+      const res = await getApplicantsByJobId(jobId!, {
+        status,
+        page,
+        page_size: pageSize,
+        sort,
+      });
+      return res; // returns { applicants, page, total_pages, total_items }
+    },
+    enabled: !!jobId && enabled,
+    placeholderData: (prev) => prev, // 👈 keeps previous data during pagination
+  });
+};
+
+
 
 export function useUpdateApplicantStatus() {
   const queryClient = useQueryClient();

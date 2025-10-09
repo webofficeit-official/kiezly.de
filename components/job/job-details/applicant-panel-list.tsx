@@ -1,19 +1,34 @@
 "use client";
 
 import ApplicantDetailModal from "@/components/ui/ApplicantDetailModal";
-import { Button } from "@/components/ui/button-variant";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
 import UpdateStatusModal from "@/components/ui/UpdateStatusModal";
 import { useAuth } from "@/lib/context/auth-context";
 import { useJobApplicants } from "@/lib/react-query/queries/apply-job";
 import { useJob } from "@/lib/react-query/queries/useJob";
-import { ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import ApplicantCard from "./applicant-card/applicant-card";
+import { Select } from "../list";
 interface ApplicantsPageProps {
   params: { slug: string };
 }
+const perPageOptions = [
+  { label: "1", value: "1" },
+  { label: "5", value: "5" },
+  { label: "10", value: "10" },
+  { label: "25", value: "25" },
+  { label: "50", value: "50" },
+];
+
+const statusOptions = [
+  { label: "All", value: "" },
+  { label: "Applied", value: "applied" },
+  { label: "Shortlisted", value: "shortlisted" },
+  { label: "Accepted", value: "accepted" },
+  { label: "Rejected", value: "rejected" },
+  { label: "Withdrawn", value: "withdrawn" },
+];
 
 export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const { slug } = params;
@@ -23,6 +38,11 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [sort, setSort] = useState<"asc" | "desc">("asc");
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const openUserModal = (userId: string) => {
     setSelectedUserId(userId);
@@ -57,11 +77,41 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
     }
   }, [user, job]);
 
-  const { data: applicants, isLoading: isLoaingApplicant } = useJobApplicants(jobId, user?.role === "client");
 
+
+
+  const { data, isLoading: isLoadingApplicants } = useJobApplicants({
+    jobId,
+    status: statusFilter,
+    sort,
+    page,
+    pageSize,
+    enabled: jobId && user?.role === "client",
+  });
+
+  useEffect(() => {
+    if (data) {
+      setTotalPages(data.total_pages || 1);
+    }
+  }, [data]);
   if (isLoading) {
     return <Loader />;
   }
+
+  const handleStatusChange = (newStatus: string) => {
+    setStatusFilter(newStatus);
+    setPage(1); // reset to first page
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1); // reset to first page
+  };
+
+  const handleSortChange = (newSort: "asc" | "desc") => {
+    setSort(newSort);
+    setPage(1); // reset to first page when sort changes
+  };
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -71,71 +121,53 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             Applicants for {jobDetails.title}
           </h2>
         </div>
+
+
+        <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex justify-between items-center flex-wrap gap-4">
+          {/* Left group */}
+          <div className="flex items-center gap-6">
+            <Select
+              label="Status"
+              value={statusFilter}
+              onChange={handleStatusChange}
+              options={statusOptions}
+              width="w-32"
+            />
+            {/* Add more filters here if needed */}
+          </div>
+
+          {/* Right group */}
+          <div className="flex items-center gap-6">
+            <Select
+              label="Proposed Rate"
+              value={sort}
+              onChange={(v: string) => handleSortChange(v as 'asc' | 'desc')}
+              options={[
+                { label: 'Ascending', value: 'asc' },
+                { label: 'Descending', value: 'desc' },
+              ]}
+              width="w-32"
+            />
+            <Select
+              label="Per page"
+              value={String(pageSize)}
+              onChange={(v: string) => handlePageSizeChange(Number(v))}
+              options={perPageOptions}
+              width="w-16"
+            />
+          </div>
+        </div>
+
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {applicants && applicants.length > 0 ? (
-            applicants.map((applicant) => (
-              <div
+          {data && data?.applicants.length > 0 ? (
+            data?.applicants?.map((applicant) => (
+              <ApplicantCard
                 key={applicant.id}
-                className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md transition-all duration-150 flex flex-col"
-              >
-                {/* --- Top Section: Name + Status --- */}
-                <div className="flex items-start justify-between">
-                  <div
-                    onClick={() => openUserModal(applicant.user.id)}
-                    className="cursor-pointer"
-                  >
-                    <div className="font-semibold text-lg text-gray-900 line-clamp-1">
-                      {applicant.user.first_name} {applicant.user.last_name}
-                    </div>
-                    <div className="text-xs text-gray-500">{applicant.user.email}</div>
-                  </div>
-
-                  {/* Status Badge */}
-                  <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusClasses(applicant.status)}`}
-                  >
-                    {applicant.status}
-                  </span>
-                </div>
-
-                {/* --- Separator --- */}
-                <hr className="my-3 border-gray-100" />
-
-                {/* --- Body Section --- */}
-                <div className="text-sm text-gray-700 space-y-3 flex-1">
-                  {/* Rate Row */}
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-gray-800">
-                      Rate: <span className="font-bold text-gray-900">{applicant.proposed_rate} €</span>
-                    </div>
-                  </div>
-
-                  {/* Cover Note Section */}
-                  {applicant.cover_note && (
-                    <div className="rounded-lg text-gray-700">
-                      <span className="font-semibold text-gray-800 block mb-1">Cover Note:</span>
-                      <p className="text-sm line-clamp-3">{applicant.cover_note}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* --- Footer / Action Row --- */}
-                <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
-                  <div className="text-xs text-gray-500">
-                    Applied: {new Date(applicant.created_at).toLocaleDateString()}
-
-                  </div>
-                  <div>
-                    <Button
-                      variant="outline"
-                      className="text-sm font-medium text-gray-800 border-gray-300 hover:bg-gray-100 px-4 py-2 h-auto"
-                      onClick={() => openUpdateModal(applicant)}
-                    >
-                      Update Status
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                applicant={applicant}
+                openUserModal={openUserModal}
+                openUpdateModal={openUpdateModal}
+              />
             ))
           ) : (
             <div className="md:col-span-2 lg:col-span-3">
@@ -145,6 +177,40 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             </div>
           )}
         </div>
+
+        <nav className="flex items-center justify-between gap-2 mt-6" aria-label="Pagination">
+          <button
+            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+            onClick={() => setPage(page - 1)}
+            disabled={page <= 1}
+          >
+            Prev
+          </button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5) // show max 5 pages
+              .map((n) => (
+                <button
+                  key={n}
+                  className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""}`}
+                  onClick={() => setPage(n)}
+                >
+                  {n}
+                </button>
+              ))}
+          </div>
+
+          <button
+            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+            onClick={() => setPage(page + 1)}
+            disabled={page >= totalPages}
+          >
+            Next
+          </button>
+        </nav>
+
+
         <UpdateStatusModal
           isOpen={isModalOpen}
           onClose={closeModal}
@@ -163,19 +229,3 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
 }
 
 
-function getStatusClasses(status: string) {
-  switch (status.toLowerCase()) {
-    case "accepted":
-      return "px-3 py-1 rounded-xl bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300";
-    case "shortlisted":
-      return "px-3 py-1 rounded-xl bg-amber-100 text-amber-700 ring-1 ring-amber-300";
-    case "applied":
-      return "px-3 py-1 rounded-xl bg-blue-100 text-blue-700 ring-1 ring-blue-300";
-    case "rejected":
-      return "px-3 py-1 rounded-xl bg-red-100 text-red-700 ring-1 ring-red-300";
-    case "withdrawn":
-      return "px-3 py-1 rounded-xl bg-gray-100 text-gray-600 ring-1 ring-gray-300";
-    default:
-      return "px-3 py-1 rounded-xl bg-gray-100 text-gray-600";
-  }
-}
