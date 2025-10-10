@@ -1,5 +1,6 @@
 "use client";
 import { Card } from "@/components/ui/card";
+import { WizardDateInput } from "@/components/wizard/WizardDateInput";
 import { WizardDirection } from "@/components/wizard/WizardDirection";
 import { WizardHeader } from "@/components/wizard/WizardHeader";
 import { WizardInput } from "@/components/wizard/WizardInput";
@@ -7,6 +8,7 @@ import { WizardMultiSelect } from "@/components/wizard/WizardMultiSelect";
 import { WizardNavigation } from "@/components/wizard/WizardNavigation";
 import { WizardRichText } from "@/components/wizard/WizardRichText";
 import { WizardSelect } from "@/components/wizard/WizardSelect";
+import { WizardSwitch } from "@/components/wizard/WizardSwitch";
 import React from "react";
 
 export default function Page() {
@@ -32,62 +34,48 @@ export default function Page() {
                                     <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={false} finished={true} />
                                     <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={true} />
                                     <WizardNavigation title="Location Details" description="Provide location details" count={3} current={false} finished={true} />
-                                    <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={true} finished={false} />
-                                    <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
+                                    <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={false} finished={true} />
+                                    <WizardNavigation title="Work Details" description="Provide work details" count={5} current={true} finished={false} />
                                     <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
                                 </div>
                             </div>
 
                             <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
                                 {/* --- Header --- */}
-                                <WizardHeader title="Pricing Details" description="Set the pricing for this job" />
+                                <WizardHeader title="Work Details" description="Provide work details" />
 
                                 {/* Form */}
                                 <div className="mt-5">
                                     <div className="flex flex-col md:flex-row">
                                         <WizardSelect
-                                            label="Currency"
-                                            value='1'
+                                            label="Work Mode"
+                                            value='On site'
                                             onChange={() => { }}
                                             options={[
                                                 {
-                                                    label: "EUR",
-                                                    value: '1'
+                                                    label: "On site",
+                                                    value: 'On site'
                                                 },
                                                 {
-                                                    label: "Rs",
-                                                    value: '3'
+                                                    label: "Remote",
+                                                    value: 'Remote'
                                                 },
                                                 {
-                                                    label: "Dlr",
-                                                    value: '2'
-                                                }
-                                            ]}
-                                        />
-                                        <WizardSelect
-                                            label="Price Type"
-                                            value='fixed'
-                                            onChange={() => { }}
-                                            options={[
-                                                {
-                                                    label: "Fixed",
-                                                    value: 'fixed'
-                                                },
-                                                {
-                                                    label: "Range",
-                                                    value: 'range'
+                                                    label: "Hybrid",
+                                                    value: 'Hybrid'
                                                 }
                                             ]}
                                         />
                                     </div>
                                     <div className="flex flex-col md:flex-row">
-                                        <WizardInput label="Fixed Price" placeholder="50" value='' onChange={() => { }} />
+                                        <WizardDateInput label="Start Date" required value='' onChange={() => { }} />
+                                        <WizardDateInput label="End Date" required value='' onChange={() => { }} />
                                     </div>
                                     <div className="flex flex-col md:flex-row">
-                                        <WizardInput label="Minimum Price" placeholder="10" value='' onChange={() => { }} />
-                                        <WizardInput label="Maximum Price" placeholder="100" value='' onChange={() => { }} />
+                                        <WizardSwitch label="First Aid Verified" checked={true} onChange={() => { }} />
+                                        <WizardSwitch label="Police Verified" checked={false} onChange={() => { }} />
                                     </div>
-                                    <WizardDirection next prev prevLink="/wizard/location-details" nextLink="/wizard/work-details" />
+                                    <WizardDirection next prev prevLink="/wizard/pricing-details" nextLink="/wizard/contact-details" />
                                 </div>
                             </div>
                         </div>
