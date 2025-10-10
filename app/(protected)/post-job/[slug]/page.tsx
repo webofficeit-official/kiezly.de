@@ -10,11 +10,11 @@ export default function Page() {
     const params = useParams();
     const slugParam  = params.slug;
     const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
-    const { data, isLoading, isError } = useJob(slug || ""); // use your React Query fetch
+    const { data, isLoading, isError,refetch  } = useJob(slug || ""); // use your React Query fetch
 
     if (isLoading || !data) return <Loader />;
     if (isLoading) return <Loader />;
-    return <CreateEditJobForm mode="edit" initialData={data}  />
+    return <CreateEditJobForm mode="edit" initialData={data}  refetchJob={refetch}/>
 
 
 }
