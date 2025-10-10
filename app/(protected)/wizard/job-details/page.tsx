@@ -125,7 +125,7 @@ export default function Page() {
                                             ]}
                                         />
                                     </div>
-                                    <WizardDirection next nextLink="/wizard/job-details" />
+                                    <WizardDirection next prev />
                                 </div>
                             </div>
                         </div>
