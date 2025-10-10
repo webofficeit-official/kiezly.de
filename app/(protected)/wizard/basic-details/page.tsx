@@ -6,7 +6,6 @@ import { WizardInput } from "@/components/wizard/WizardInput";
 import { WizardMultiSelect } from "@/components/wizard/WizardMultiSelect";
 import { WizardNavigation } from "@/components/wizard/WizardNavigation";
 import { WizardSelect } from "@/components/wizard/WizardSelect";
-import { Euro } from "lucide-react";
 import React from "react";
 
 export default function Page() {
@@ -28,13 +27,14 @@ export default function Page() {
                     <Card className="lg:col-span-3 space-y-4">
                         <div className="grid grid-cols-12 gap-4">
                             <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
-                                {/* Wizard Navigation */}
-                                <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={true} finished={false} />
-                                <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={false} />
-                                <WizardNavigation title="Location Details" description="Provide location details" count={3} current={false} finished={false} />
-                                <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={false} finished={false} />
-                                <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
-                                <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
+                                <div className="flex flex-wrap justify-center lg:flex-col gap-2  justify-between lg:space-x-0 lg:space-y-4">
+                                    <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={true} finished={false} />
+                                    <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={false} />
+                                    <WizardNavigation title="Location Details" description="Provide location details" count={3} current={false} finished={false} />
+                                    <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={false} finished={false} />
+                                    <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
+                                    <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
+                                </div>
                             </div>
                             <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
                                 {/* --- Header --- */}
