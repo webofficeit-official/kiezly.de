@@ -1,8 +1,10 @@
 "use client";
 import { Card } from "@/components/ui/card";
 import { WizardDirection } from "@/components/wizard/WizardDirection";
+import { WizardHeader } from "@/components/wizard/WizardHeader";
 import { WizardInput } from "@/components/wizard/WizardInput";
 import { WizardMultiSelect } from "@/components/wizard/WizardMultiSelect";
+import { WizardNavigation } from "@/components/wizard/WizardNavigation";
 import { WizardSelect } from "@/components/wizard/WizardSelect";
 import { Euro } from "lucide-react";
 import React from "react";
@@ -27,12 +29,12 @@ export default function Page() {
                         <div className="grid grid-cols-12">
                             <div className="col-span-5 bg-gray-100 p-6">
                                 {/* Wizard Navigation */}
-                                <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={true} />
-                                <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} />
-                                <WizardNavigation title="Location Details" description="Provide location details" count={3} current={false} />
-                                <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={false} />
-                                <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} />
-                                <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} />
+                                <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={true} finished={false} />
+                                <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={false} />
+                                <WizardNavigation title="Location Details" description="Provide location details" count={3} current={false} finished={false} />
+                                <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={false} finished={false} />
+                                <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
+                                <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
                             </div>
                             <div className="col-span-7 p-6">
                                 {/* --- Header --- */}
@@ -131,35 +133,6 @@ export default function Page() {
                         </div>
                     </Card>
                 </main>
-            </div>
-        </>
-    );
-}
-
-function WizardNavigation({ title, description, count, current }: { title: string, description: string, count: number, current: boolean | false }) {
-    return (
-        <div className="mt-10">
-            <div className="flex items-center gap-3 mt-4">
-                <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-gray-100">
-                    <span className={`flex-shrink-0 flex items-center justify-center rounded-full border w-8 h-8 border-black ${current ? 'bg-black text-white' : ''}`}>{count}</span>
-                </div>
-                <div className="flex flex-col leading-tight">
-                    <span className="font-bold text-gray-900 text-sm">{title}</span>
-                    <span className="text-xs text-gray-600">{description}</span>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function WizardHeader({ title, description }: { title: string, description: string }) {
-    return (
-        <>
-            <div className="flex flex-wrap -mx-3 text-center">
-                <div className="w-10/12 max-w-full px-3 mx-auto [flex:0_0_auto]">
-                    <h5 className="font-semibold text-gray-900 dark:text-white">{title}</h5>
-                    <p className="text-gray-500 font-medium">{description}</p>
-                </div>
             </div>
         </>
     );
