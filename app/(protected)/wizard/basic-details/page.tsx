@@ -26,8 +26,8 @@ export default function Page() {
                         </div>
                     </section>
                     <Card className="lg:col-span-3 space-y-4">
-                        <div className="grid grid-cols-12">
-                            <div className="col-span-5 bg-gray-100 p-6">
+                        <div className="grid grid-cols-12 gap-4">
+                            <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
                                 {/* Wizard Navigation */}
                                 <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={true} finished={false} />
                                 <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={false} />
@@ -36,18 +36,18 @@ export default function Page() {
                                 <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
                                 <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
                             </div>
-                            <div className="col-span-7 p-6">
+                            <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
                                 {/* --- Header --- */}
                                 <WizardHeader title="Basic Details" description="Provide the main information" />
 
                                 {/* Form */}
                                 <div className="mt-5">
-                                    <div className="flex justify-between">
+                                    <div className="flex flex-col md:flex-row">
                                         <WizardInput label="Title" placeholder="Babysitting job in Berlin" value='' onChange={() => { }} />
                                         <WizardInput label="Subtitle" placeholder="" value='' onChange={() => { }} />
                                     </div>
                                     <WizardInput label="Slug" placeholder="babisitting-job-in-berlin" value='' onChange={() => { }} />
-                                    <div className="flex justify-between">
+                                    <div className="flex flex-col md:flex-row">
                                         <WizardSelect
                                             label="Job Category"
                                             value='1'
@@ -87,7 +87,7 @@ export default function Page() {
                                             ]}
                                         />
                                     </div>
-                                    <div className="flex justify-between mt-3">
+                                    <div className="flex flex-col md:flex-row mt-3">
                                         <WizardMultiSelect
                                             label="Job Type"
                                             values={['Part time', 'On Demand']}
