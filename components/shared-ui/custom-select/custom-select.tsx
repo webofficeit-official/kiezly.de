@@ -11,7 +11,7 @@ export function Select<
   options,
   error,
   required,
-  searchable = false,         // ✅ define it here
+  searchable = false,      
   placeholder = "Select",
 }: {
   label: string;

@@ -76,6 +76,7 @@ interface Country {
 interface CreateEditJobFormProps {
     mode: "create" | "edit";
     initialData?: JobResponse;
+    refetchJob?: () => Promise<any>;
 }
 
 interface OnboardingFormProps {
@@ -89,7 +90,8 @@ interface OnboardingFormProps {
         languages: { id: number; name: string }[];
         jobMode: JobMode[]
     };
-    countries?: Country[]
+    countries?: Country[],
+    refetchJob?: () => Promise<any>;
 }
 
 export function useDebounce<T>(value: T, delay: number) {
@@ -104,7 +106,7 @@ export function useDebounce<T>(value: T, delay: number) {
 }
 
 /* ----------------------------- Create/Edit Wrapper ---------------------------- */
-export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFormProps) {
+export default function CreateEditJobForm({ mode, initialData, refetchJob }: CreateEditJobFormProps) {
     const { data: collections } = useJobCollections();
     // const { data: countries } = useCollection<{ id: number; code?: string; name: string, currency?: string }>("countries");
 
@@ -125,6 +127,7 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
                         jobMode: [],
                     }}
                     countries={collections?.countries || []}
+                    refetchJob={refetchJob}
                 />
             </div>
         </div>
@@ -132,7 +135,7 @@ export default function CreateEditJobForm({ mode, initialData }: CreateEditJobFo
 }
 
 /* ----------------------------- OnboardingForm ---------------------------- */
-function OnboardingForm({ mode, initialData, collections, countries }: OnboardingFormProps) {
+function OnboardingForm({ mode, initialData, collections, countries, refetchJob }: OnboardingFormProps) {
     const [jobId, setJobId] = useState<string | null>(initialData?.job?.id || null);
 
     const [currentStep, setCurrentStep] = useState(() => {
@@ -191,7 +194,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
             const job = initialData.job;
 
             let selectedCountry =
-                countries.find(c => c.name === job?.country) ||
+                countries.find(c => c.id === Number(job?.country)) ||
                 countries.find(c => c.name === "Germany" || c.code === "DE");
 
             if (selectedCountry) {
@@ -684,9 +687,129 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
             starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
             ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
 
-            country: data.country ? (typeof data.country === "object" ? data.country.name : data.country) : null,
+            country: data.country ? (typeof data.country === "object" ? data.country.id : data.country) : null,
         };
     }
+
+    function normalizeJobPayloadPartial(data: Record<string, any>) {
+        const normalized: Record<string, any> = {};
+
+        const addIfExists = (key: string, value: any) => {
+            if (value !== undefined) normalized[key] = value;
+        };
+
+        // category_id
+        if (data.category_id !== undefined) {
+            addIfExists(
+                "category_id",
+                data.category_id
+                    ? Number(typeof data.category_id === "object" ? data.category_id.id : data.category_id)
+                    : null
+            );
+        }
+
+        // tag_ids
+        if (data.tag_ids !== undefined) {
+            addIfExists(
+                "tag_ids",
+                Array.isArray(data.tag_ids)
+                    ? data.tag_ids.map((t: any) => (typeof t === "object" ? Number(t.id) : Number(t))).filter(Boolean)
+                    : []
+            );
+        }
+
+        // job_type
+        if (data.job_type !== undefined) {
+            addIfExists(
+                "job_type",
+                Array.isArray(data.job_type)
+                    ? data.job_type.map((t: any) => (typeof t === "object" ? t.id : t))
+                    : []
+            );
+        }
+
+        // job_experience
+        if (data.job_experience !== undefined) {
+            addIfExists(
+                "job_experience",
+                Array.isArray(data.job_experience)
+                    ? data.job_experience.map((t: any) => (typeof t === "object" ? t.id : t))
+                    : []
+            );
+        }
+
+        // languages
+        if (data.languages !== undefined) {
+            addIfExists(
+                "languages",
+                Array.isArray(data.languages)
+                    ? data.languages.map((l) =>
+                        typeof l === "object" && l !== null ? Number(l.id) : Number(l)
+                    )
+                    : []
+            );
+        }
+
+        // price_type
+        if (data.price_type !== undefined)
+            addIfExists(
+                "price_type",
+                typeof data.price_type === "object" ? data.price_type.id : data.price_type
+            );
+
+        // currency
+        if (data.currency !== undefined)
+            addIfExists(
+                "currency",
+                typeof data.currency === "object" ? data.currency.id : data.currency
+            );
+
+        // work_mode
+        if (data.work_mode !== undefined)
+            addIfExists(
+                "work_mode",
+                typeof data.work_mode === "object" ? data.work_mode.id : data.work_mode
+            );
+
+        // contact_method
+        if (data.contact_method !== undefined)
+            addIfExists("contact_method", data.contact_method?.id ?? data.contact_method);
+
+        // slug
+        if (data.slug !== undefined) addIfExists("slug", data.slug);
+
+        // status
+        if (data.status !== undefined)
+            addIfExists("status", data.status ?? "draft");
+
+        // starts_at / ends_at
+        if (data.starts_at !== undefined)
+            addIfExists("starts_at", data.starts_at ? new Date(data.starts_at).toISOString() : null);
+
+        if (data.ends_at !== undefined)
+            addIfExists("ends_at", data.ends_at ? new Date(data.ends_at).toISOString() : null);
+
+        // country
+        if (data.country !== undefined)
+            addIfExists(
+                "country",
+                data.country
+                    ? typeof data.country === "object"
+                        ? data.country.id
+                        : data.country
+                    : null
+            );
+
+        // any other dynamic fields (title, description, etc.)
+        for (const [key, value] of Object.entries(data)) {
+            if (!(key in normalized) && value !== undefined) {
+                normalized[key] = value;
+            }
+        }
+
+        return normalized;
+    }
+
 
 
 
@@ -807,8 +930,11 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
         // Create mode, first step
         if (mode === "create" && currentStep === 0 && !jobId) {
-            const normalized = normalizeJobPayload(stepData);
-            createJobMutation.mutate(normalized, {
+            const normalized = normalizeJobPayloadPartial(stepData);
+            createJobMutation.mutate({
+                ...normalized,
+                status: "draft", // or "pending", "published", etc.
+            }, {
                 onSuccess: (data: any) => {
                     const newJob = data?.data;
                     window.history.replaceState(null, "", `/post-job/${newJob.slug}`);
@@ -822,13 +948,18 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
         // Update mode or subsequent steps (only if jobId exists)
         if (jobId) {
-            const normalized = normalizeJobPayload({
-                ...formData,
+
+            const normalized = normalizeJobPayloadPartial({
+                ...stepData,
                 status: formData.status !== "draft" ? formData.status : "draft",
             });
 
             updateJobMutation.mutate(normalized, {
-                onSuccess: () => {
+                onSuccess: async () => {
+                    if (refetchJob) {
+                        const refreshed = await refetchJob();
+                        if (refreshed?.data) setFormData(prev => ({ ...prev, ...refreshed.data }));
+                    }
 
                     setCurrentStep(s => Math.min(s + 1, steps.length - 1));
                 },
@@ -840,7 +971,13 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
     };
 
 
-    const prevStep = () => setCurrentStep(s => Math.max(s - 1, 0));
+    const prevStep = async () => {
+        if (mode === "edit" && refetchJob) {
+            const refreshed = await refetchJob();
+            if (refreshed?.data) setFormData(prev => ({ ...prev, ...refreshed.data }));
+        }
+        setCurrentStep(s => Math.max(s - 1, 0));
+    };
 
     const handleSubmit = async () => {
         const errors = validateStep(currentStep);
@@ -848,10 +985,11 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
             setShowErrors(true);
             return;
         }
-
+        const stepData: Record<string, any> = {};
+        steps[currentStep].subTopics.forEach(t => (stepData[t.id] = formData[t.id]));
         if (jobId) {
-            const normalized = normalizeJobPayload({
-                ...formData,
+            const normalized = normalizeJobPayloadPartial({
+                ...stepData,
                 status: formData.status || 'pending_review'
             });
             updateJobMutation.mutate(normalized, {
@@ -897,7 +1035,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
     /* ----------------------------- Render ---------------------------- */
     return (
         <div className="max-w-4xl mx-auto p-5 pb-1">
-            <div className="flex flex-col lg:flex-row gap-12"> {/* stack on small screens */}
+            <div className="flex flex-col md:flex-row gap-12"> {/* stack on small screens */}
 
                 {/* Stepper */}
                 <div className="relative w-full md:w-1/3 pt-2">
@@ -913,6 +1051,13 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
                                     className={`relative flex md:flex-row flex-col items-center md:items-start cursor-pointer ${idx < steps.length - 1 ? 'md:pb-8 pb-0' : ''}`}
                                     onClick={() => {
                                         if (!formSubmitted) {
+                                            if (mode === "edit" && jobId) {
+                                                refetchJob().then(({ data }) => {
+                                                    if (data) {
+                                                        setFormData(data); // update form with latest server data
+                                                    }
+                                                });
+                                            }
                                             let firstInvalidStep = -1;
                                             for (let i = 0; i <= idx; i++) {
                                                 const stepErrors = validateStep(i);
@@ -967,7 +1112,7 @@ function OnboardingForm({ mode, initialData, collections, countries }: Onboardin
 
 
                                     {/* Horizontal connecting line for mobile */}
-                                  
+
 
 
                                     {idx < steps.length - 1 && (

@@ -61,6 +61,13 @@ export interface Job {
     slug: string;
     name: string;
   }[];
+
+  countries?: {
+    id?: number;
+    code?: string;
+    currency?: string;
+    name?: string;
+  };
 }
 
 
@@ -88,7 +95,7 @@ export type CreateJobData = {
   first_aid_verified: boolean;
   police_verified: boolean;
   verified: boolean;
-  status: "open" | "closed";
+  status?: string;
   tag_ids: number[];
   tasks?: string;
   requirements?: string;
@@ -185,6 +192,17 @@ export interface JobList {
     slug: string;
     name: string;
   }[];
+  category?: {
+    id: number;
+    slug: string;
+    name: string;
+  };
+  countries?: {
+    id?: number;
+    code?: string;
+    currency?: string;
+    name?: string;
+  };
 }
 
 

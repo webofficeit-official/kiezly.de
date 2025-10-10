@@ -622,7 +622,7 @@ export default function JobFilterPage({
                             >
                                 {/* Main content */}
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="text-base sm:text-lg font-semibold truncate">{job.title}</h3>
+                                    <h3 className="text-base sm:text-lg font-semibold truncate cursor-pointer" onClick={() => router.push(`/jobs/${job.slug}`)}>{job.title}</h3>
                                     {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
 
                                     <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
@@ -767,29 +767,35 @@ export default function JobFilterPage({
 
 type Option = { label: string; value: string };
 
-function Select({
+export function Select({
   label,
   value,
   onChange,
   options,
+  width = "w-full", // ✅ default width (Tailwind class)
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: Option[];
+  width?: string; // ✅ optional prop for width
 }) {
   return (
-    <div className="text-sm">
+    <div className={`text-sm ${width}`}>
       <span className="mb-1 block text-gray-700">{label}</span>
 
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
-          <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
+          <Listbox.Button
+            className={`flex ${width} items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black`}
+          >
             {options.find((o) => o.value === value)?.label || "Select"}
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </Listbox.Button>
 
-          <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+          <Listbox.Options
+            className={`absolute z-10 mt-2 max-h-60 ${width} overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none`}
+          >
             {options.map((o) => (
               <Listbox.Option
                 key={o.value}
