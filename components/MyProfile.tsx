@@ -584,7 +584,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           { file },
           {
             onSuccess: (data) => {
-              update((d) => (form.photoUrl = data.data.filePath))
+              update((d) => (d.photoUrl = data.data.filePath))
             },
             onError: (err) => {
               console.error("Upload failed:", err);
