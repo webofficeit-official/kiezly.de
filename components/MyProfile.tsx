@@ -584,7 +584,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
           { file },
           {
             onSuccess: (data) => {
-              update((d) => (form.photoUrl = data.data.filePath))
+              update((d) => (d.photoUrl = data.data.filePath))
             },
             onError: (err) => {
               console.error("Upload failed:", err);
@@ -956,6 +956,21 @@ function DateInput({
     end: endOfMonth(month),
   });
 
+  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i); // Last 100 years
+  const months = Array.from({ length: 12 }, (_, i) => format(new Date(2024, i, 1), "MMMM"));
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMonth = new Date(month);
+    newMonth.setMonth(parseInt(e.target.value));
+    setMonth(newMonth);
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMonth = new Date(month);
+    newMonth.setFullYear(parseInt(e.target.value));
+    setMonth(newMonth);
+  };
+
   return (
     <div className="block text-sm">
       <span className="mb-1 block text-gray-700">
@@ -969,9 +984,9 @@ function DateInput({
           <CalendarIcon className="h-4 w-4 text-gray-400" />
         </Popover.Button>
 
-        <Popover.Panel className="absolute z-10 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
-          {/* Month navigation */}
-          <div className="mb-2 flex items-center justify-between">
+        <Popover.Panel className="absolute z-10 mt-2 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+          {/* Month navigation with dropdowns */}
+          <div className="mb-3 flex items-center justify-between">
             <button
               type="button"
               onClick={() => setMonth(subMonths(month, 1))}
@@ -979,7 +994,30 @@ function DateInput({
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="font-medium">{format(month, "MMMM yyyy")}</span>
+            <div className="flex space-x-2">
+              <select
+                value={month.getMonth()}
+                onChange={handleMonthChange}
+                className="rounded-md bg-background text-sm px-1 py-0.5"
+              >
+                {months.map((m, i) => (
+                  <option key={m} value={i}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={month.getFullYear()}
+                onChange={handleYearChange}
+                className="rounded-md bg-background text-sm px-1 py-0.5"
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
               type="button"
               onClick={() => setMonth(addMonths(month, 1))}
