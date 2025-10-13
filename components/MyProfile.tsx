@@ -159,6 +159,7 @@ export type User = {
   firstName: string;
   lastName: string;
   displayName?: string; // nickname on profile
+  orgName?: string; // nickname on profile
   phone?: string;
   dateOfBirth?: string; // YYYY-MM-DD
   gender?: string;
@@ -279,6 +280,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
       firstName: myProfile?.user?.first_name ?? '',
       lastName: myProfile?.user?.last_name ?? '',
       displayName: myProfile?.user?.display_name ?? '',
+      orgName: myProfile?.user?.org_name ?? '',
       email: myProfile?.user?.email ?? '',
       phone: myProfile?.user?.phone ?? '',
       dateOfBirth: formatted,
@@ -348,6 +350,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     firstName: myProfile?.user?.first_name ?? '',
     lastName: myProfile?.user?.last_name ?? '',
     displayName: myProfile?.user?.display_name ?? '',
+    orgName: myProfile?.user?.org_name ?? '',
     email: myProfile?.user?.email ?? '',
     phone: myProfile?.user?.phone ?? '',
     dateOfBirth: formatted ?? '',
@@ -520,10 +523,10 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
         fileId: form.verification.policeCertificate.fileId
       },
       avatar_url: form.photoUrl,
-      org_name: '',
       website: '',
       rate: form.rate.hourlyEUR,
       display_name: form.displayName,
+      org_name: form.orgName,
       gender: form.gender,
       district: form.address.districtOrKiez,
       fixed_price: form.rate.fixedPriceAvailable,
@@ -623,8 +626,12 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="First name" value={form.firstName} onChange={(v) => update((d) => (d.firstName = v))} required />
           <Input label="Last name" value={form.lastName} onChange={(v) => update((d) => (d.lastName = v))} required />
-          <Input label="Display name (optional)" value={form.displayName || ""} onChange={(v) => update((d) => (d.displayName = v))} />
+          {myProfile?.user?.role == "helper" ?
+            <Input label="Display name (optional)" value={form.displayName || ""} onChange={(v) => update((d) => (d.displayName = v))} /> :
+            <Input label="Household/Company name" value={form.orgName || ""} onChange={(v) => update((d) => (d.orgName = v))} />
+          }
           <Input label="Phone" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
+          <Input label="Website (optional)" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
           <DateInput label="Date of birth" value={form.dateOfBirth || ""} onChange={(v) => update((d) => (d.dateOfBirth = v))} />
           <Select label="Gender" value={form.gender || ""} onChange={(v) => update((d) => (d.gender = v))} options={["", "Female", "Male", "Non-binary", "Prefer not to say"]} />
         </div>
@@ -753,8 +760,8 @@ function PublicProfile({ user, jobCategories, languages }: {
     name: string;
   }[]
 }) {
-  const hasName = (user.displayName && user.displayName.trim()) || (user.firstName || user.lastName);
-  const name = hasName ? (user.displayName || `${user.firstName} ${user.lastName}`.trim()) : "New helper";
+  const hasName = (user?.role == "helper" ? (user.displayName && user.displayName.trim()) : (user.orgName && user.orgName.trim())) || (user.firstName || user.lastName);
+  const name = hasName ? ((user?.role == "helper" ? user.displayName : user.orgName) || `${user.firstName} ${user.lastName}`.trim()) : "New helper";
   const cityLine = [user.address?.city, user.address?.districtOrKiez, user.address?.state, user.address?.country].filter(Boolean).join(" • ");
   const myProfile = useAuth();
 
@@ -852,7 +859,7 @@ function DocRow({ label, value, href }: { label: string; value: string; href?: s
 
 function Badges({ verification }: { verification: Verification }) {
   const myProfile = useAuth()
-  
+
   const items: { label: string; active: boolean, hide: boolean }[] = [
     { label: "ID", active: verification.idVerified, hide: false },
     { label: "First Aid", active: verification.firstAid.completed, hide: myProfile?.user?.role == "client" },

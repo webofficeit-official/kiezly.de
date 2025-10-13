@@ -9,14 +9,15 @@ import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
 import { useCollections } from '@/lib/react-query/queries/user/account'
 import { getIconForCategory } from '@/components/ui/icon-category'
+import { useAuth } from '@/lib/context/auth-context'
 
 export default function Page() {
   const collections = useCollections();
   const [what, setWhat] = React.useState('')
   const [where, setWhere] = React.useState('')
   const [categories, setCategories] = React.useState([]);
-  
-  const doSearch = () => { 
+
+  const doSearch = () => {
     window.location.href = `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`;
   }
 
@@ -31,6 +32,8 @@ export default function Page() {
   }, [])
 
   const router = useRouter();
+
+  const { user } = useAuth()
 
   return (
     <main>
@@ -50,14 +53,14 @@ export default function Page() {
                   <div>
                     <Label className="mb-1">What</Label>
                     <div className="relative">
-                      <Input placeholder="e.g., Babysitting" value={what} onChange={(e)=>setWhat(e.target.value)} onKeyDown={(e)=> e.key==='Enter' && doSearch()} />
+                      <Input placeholder="e.g., Babysitting" value={what} onChange={(e) => setWhat(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && doSearch()} />
                     </div>
                   </div>
                   <div>
                     <Label className="mb-1">Where</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                      <Input className="pl-9" placeholder="City or postcode" value={where} onChange={(e)=>setWhere(e.target.value)} onKeyDown={(e)=> e.key==='Enter' && doSearch()} />
+                      <Input className="pl-9" placeholder="City or postcode" value={where} onChange={(e) => setWhere(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && doSearch()} />
                     </div>
                   </div>
                   <div className="flex items-end">
@@ -80,7 +83,7 @@ export default function Page() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base text-neutral-700">Popular right now near you</CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3 overflow-auto" style={{ height: '320px'}}>
+              <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3 overflow-auto" style={{ height: '320px' }}>
                 {categories.map(({ id, name }) => (
                   <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`}>
                     <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
@@ -102,21 +105,21 @@ export default function Page() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><FileText className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><FileText className="h-4 w-4" /></div>
               <h3 className="font-medium">1) Post your job</h3>
               <p className="mt-1 text-sm text-neutral-600">Describe tasks, time, and pay. Auto‑invite nearby helpers.</p>
             </CardContent>
           </Card>
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Send className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Send className="h-4 w-4" /></div>
               <h3 className="font-medium">2) Compare applicants</h3>
               <p className="mt-1 text-sm text-neutral-600">See distance, ratings, badges, and response rate. Chat to align.</p>
             </CardContent>
           </Card>
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4" /></div>
               <h3 className="font-medium">3) Hire with confidence</h3>
               <p className="mt-1 text-sm text-neutral-600">After hiring, follow the household mini‑job checklist & stay within the monthly cap.</p>
             </CardContent>
@@ -160,21 +163,21 @@ export default function Page() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><CheckCircle2 className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><CheckCircle2 className="h-4 w-4" /></div>
               <h3 className="font-medium">Verified badges</h3>
               <p className="mt-1 text-sm text-neutral-600">ID check, First Aid, and optional enhanced police certificate (for childcare) highlighted on profiles.</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Clock className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Clock className="h-4 w-4" /></div>
               <h3 className="font-medium">Clear rates & availability</h3>
               <p className="mt-1 text-sm text-neutral-600">Filter by distance, time window, price, languages, and badges. Keep everything local.</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4" /></div>
               <h3 className="font-medium">Mini‑job guidance</h3>
               <p className="mt-1 text-sm text-neutral-600">In‑app checklist for Haushaltsscheck registration, minimum wage, and monthly cap reminders.</p>
             </CardContent>
@@ -182,20 +185,22 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-6">
-        <Card className="border-neutral-200 bg-gradient-to-br from-neutral-50 to-white">
-          <CardContent className="flex flex-col items-start gap-3 p-6 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h3 className="text-xl font-semibold">Ready to find help?</h3>
-              <p className="text-neutral-600">Post your mini‑job for free — start getting applications today.</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => router.push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
-              <button onClick={() => router.push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</button>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+      {!user &&
+        <section className="mx-auto max-w-6xl px-4 pb-16 pt-6">
+          <Card className="border-neutral-200 bg-gradient-to-br from-neutral-50 to-white">
+            <CardContent className="flex flex-col items-start gap-3 p-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 className="text-xl font-semibold">Ready to find help?</h3>
+                <p className="text-neutral-600">Post your mini‑job for free — start getting applications today.</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => router.push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
+                <button onClick={() => router.push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      }
     </main>
   )
 }
