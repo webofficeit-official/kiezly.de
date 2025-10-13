@@ -1,126 +1,71 @@
-'use client'
-import { JobList } from "@/lib/types/job";
-import { useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
-import { useAuth } from "@/lib/context/auth-context";
-import { Button } from "../ui/button";
-import { Bookmark, BookmarkCheck, Eye } from "lucide-react";
-import { useSavedJobs, useUnsaveJob } from "@/lib/react-query/queries/useJob";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookmarkCheck, ExternalLink } from "lucide-react";
+import { Job } from "@/lib/types/job";
+import { useJobs, useSavedJobs } from "@/lib/react-query/queries/useJob";
+import { Filters, fromQuery } from "../list";
+import { useRouter } from "next/navigation";
 import { formatDate } from "date-fns";
+import { Button } from "@/components/ui/button";
 
-export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
-
-export type Filters = {
-    status?: Status
-};
-
-const DEFAULT_FILTERS: Filters = {
-    status: 'open'
-};
-
-const perPageOptions = [
-    { label: "Draft", value: "draft" },
-    { label: "Pending Review", value: "pending_review" },
-    { label: "Published", value: "open" },
-    { label: "Closed", value: "closed" },
-    { label: "Rejected", value: "rejected" },
-    { label: "Expired", value: "expired" },
-    { label: "Saved", value: "saved" },
-];
-
-// ---- Utilities ----
-export const toQuery = (f: Filters) => {
-    const p = new URLSearchParams();
-    if (f.status) p.set("status", f.status);
-    return p.toString();
-};
-
-export const fromQuery = (qs: string): Filters => {
-    const p = new URLSearchParams(qs);
-    return {
-        ...DEFAULT_FILTERS,
-        status: (p.get("status") as Status) || "open",
-    };
-};
-
-const isNew = (created_at: string) => {
-    if (!created_at) return false;
-    const createdAt = new Date(created_at).getTime();
-    const now = Date.now();
-    const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
-    return diffHours <= 72; // less than or equal 72 hours
-};
-
-
-
-
-export default function SavedJobs({
-    onChange,
-    jobs,
-}: {
-    onChange?: (f: Filters) => void;
-    jobs?: JobList[];
-}) {
-    const [savedJobs, setSavedJobs] = useState([]);
-    const { user } = useAuth();
-
-
-
+export default function SimilarJobCard({ job }) {
     const router = useRouter();
-
-
-
-    const { data, isLoading, error } = useSavedJobs();
-    const unsaveMutation = useUnsaveJob();
-
-    // Debounce high-churn fields (search query)
-
-    const dataSource: JobList[] = useMemo(() => {
-        setSavedJobs(data?.jobs || [])
-        if (data?.jobs) return data.jobs as JobList[];
-        if (jobs && jobs.length) return jobs;
-        return []
-    }, [data, jobs]);
-
-    const pageSlice = dataSource;
-
-
-    const handleUnSaveJob = async (jobId: string) => {
-        try {
-            setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
-            if (user) {
-                unsaveMutation.mutate(jobId);
-            } else {
-                const localStoredJobs = localStorage.getItem("saved-jobs")
-                let savedJobsLocal = []
-                if (localStoredJobs) {
-                    savedJobsLocal = JSON.parse(localStoredJobs)
-                }
-                localStorage.setItem('saved-jobs', JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId)))
-            }
-        } catch (error) {
-            console.error("Failed to save job:", error);
-            setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
-        }
+    const DEFAULT_FILTERS: Filters = {
+        q: "",
+        city: "",
+        category_id: [job.category_id],
+        job_type: [],
+        job_experience: [],
+        job_tags: [],
+        min_price: "",
+        max_price: "",
+        posted: "any",
+        radius_km: 10,
+        sort: "new",
+        starts_at: undefined,
+        ends_at: undefined,
     };
+
+    const [filters, setFilters] = useState<Filters>(() => {
+        if (typeof window === "undefined") return DEFAULT_FILTERS;
+        const initial = fromQuery(window.location.search);
+
+        return {
+            ...initial,
+            category_id: [job.category_id]
+        };
+    });
+    const [page, setPage] = useState(1);
+    const [localPageSize, setLocalPageSize] = useState(4);
+
+    const buildApiFilters = (filters: Filters, page: number, pageSize: number) => {
+        const payload: Record<string, any> = { page, page_size: pageSize };
+        if (filters.category_id.length) payload.category_id = filters.category_id.join(",");
+
+        return payload;
+    };
+
+    const apiFilters = useMemo(() => buildApiFilters(filters, page, localPageSize), [filters, page, localPageSize]);
+    const { data, isLoading, error } = useJobs(apiFilters);
+
+    let similarJobs = data?.data?.items
+    similarJobs = similarJobs?.filter((j) => j.id !== job.id)
+    similarJobs = similarJobs?.slice(0, 3)
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
-            <main className="max-w-6xl mx-auto px-4 py-6 gap-6">
-                <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">
-                        Saved Jobs ({pageSlice.length})
-                    </h2>
-                </div>
-            </main>
-            <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="shadow-lg border-gray-100 bg-white">
+            <CardHeader className="border-b border-gray-100 p-4 sm:p-5">
+                <CardTitle className="text-xl font-bold text-gray-900">
+                    Similar Jobs
+                </CardTitle>
+            </CardHeader>
+            <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white/80">
 
                 {/* Right: Job list + debug preview */}
                 <section className="lg:col-span-3 space-y-4">
                     {/* Stats + controls */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {pageSlice.map((job) => (
+                        {similarJobs?.map((job) => (
                             <article
                                 key={`${job.id}-${job.slug}`}
                                 className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
@@ -131,21 +76,11 @@ export default function SavedJobs({
                                         <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
                                             {formatDate(job.starts_at, "dd MMM, yyyy")} – {formatDate(job.ends_at, "dd MMM, yyyy")}
                                         </span>
-
-                                        {savedJobs.some((j) => j.id === job.id) && (
-                                            <Button
-                                                variant="outline"
-                                                className="text-green-600 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition"
-                                                onClick={() => handleUnSaveJob(job.id)}
-                                            >
-                                                <BookmarkCheck className="h-4 w-4" />
-                                            </Button>
-                                        )}
                                     </div>
 
                                     {/* Category */}
                                     <p className="text-xs text-gray-500 mt-4 uppercase tracking-wide font-medium">
-                                        {job.category?.name}
+                                        {job.category_name}
                                     </p>
 
                                     {/* Title */}
@@ -202,7 +137,7 @@ export default function SavedJobs({
                                 </div>
                             </article>
                         ))}
-                        {pageSlice.length === 0 && (
+                        {similarJobs?.length === 0 && (
                             <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
                                 No jobs match your filters.
                             </div>
@@ -211,6 +146,6 @@ export default function SavedJobs({
 
                 </section>
             </main>
-        </div>
+        </Card>
     );
 }

@@ -1,96 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import dayjs from "dayjs";
-import { Clock } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-
-/**
- * Narrow type for applied jobs.
- * Only includes fields we need for display.
- */
-type AppliedJob = {
-  id: string;
-  title: string;
-  subtitle?: string;
-  slug: string;
-  currency: string;
-  price_type: string;
-  price_value: number;
-  city: string;
-  country: string;
-  category_name: string;
-  created_at: string;
-  starts_at?: string;
-  ends_at?: string;
-  tags?: { id: number; name: string }[];
-  description: string;
-};
-
-/** 
- * Dummy applied jobs data
- * (replace with API call in production)
- */
-const dummyAppliedJobs: AppliedJob[] = [
-  {
-    id: "1",
-    title: "Frontend Developer",
-    subtitle: "React + Next.js",
-    slug: "frontend-developer",
-    currency: "€",
-    price_type: "hour",
-    price_value: 30,
-    city: "Berlin",
-    country: "Germany",
-    category_name: "IT & Software",
-    created_at: dayjs().subtract(2, "day").toISOString(),
-    starts_at: dayjs().add(3, "day").toISOString(),
-    ends_at: dayjs().add(30, "day").toISOString(),
-    tags: [
-      { id: 1, name: "Remote" },
-      { id: 2, name: "Contract" },
-    ],
-    description: "We are seeking a skilled React/Next.js frontend developer for a long-term contract.",
-  },
-  {
-    id: "2",
-    title: "UX Designer",
-    subtitle: "Mobile & Web Apps",
-    slug: "ux-designer",
-    currency: "$",
-    price_type: "month",
-    price_value: 4000,
-    city: "New York",
-    country: "USA",
-    category_name: "Design",
-    created_at: dayjs().subtract(5, "hour").toISOString(),
-    starts_at: dayjs().add(7, "day").toISOString(),
-    ends_at: dayjs().add(60, "day").toISOString(),
-    tags: [
-      { id: 3, name: "Full-time" },
-      { id: 4, name: "Hybrid" },
-    ],
-    description: "Looking for a UX designer with experience in mobile and responsive web platforms.",
-  },
-  {
-    id: "3",
-    title: "Backend Engineer",
-    subtitle: "Node.js + AWS",
-    slug: "backend-engineer",
-    currency: "€",
-    price_type: "hour",
-    price_value: 35,
-    city: "Amsterdam",
-    country: "Netherlands",
-    category_name: "Software Engineering",
-    created_at: dayjs().subtract(4, "day").toISOString(),
-    starts_at: dayjs().add(14, "day").toISOString(),
-    ends_at: dayjs().add(90, "day").toISOString(),
-    tags: [{ id: 5, name: "Remote-Friendly" }],
-    description: "Join our backend team to build APIs and integrate AWS services.",
-  },
-];
+import { useMyApplications } from "@/lib/react-query/queries/apply-job";
+import { MyApplications } from "@/lib/types/apply-job";
+import { Select } from "./list";
+import { formatDate } from "date-fns";
 
 /**
  * Helper to check if a job was created recently (within 72h)
@@ -100,113 +16,218 @@ const isNew = (createdAt: string) => {
   return hours <= 72;
 };
 
+const perPageOptions = [
+  { label: "1", value: "1" },
+  { label: "5", value: "5" },
+  { label: "10", value: "10" },
+  { label: "25", value: "25" },
+  { label: "50", value: "50" },
+];
+
+const statusOptions = [
+  { label: "All", value: "" },
+  { label: "Applied", value: "applied" },
+  { label: "Shortlisted", value: "shortlisted" },
+  { label: "Accepted", value: "accepted" },
+  { label: "Rejected", value: "rejected" },
+  { label: "Withdrawn", value: "withdrawn" },
+];
+
 export default function AppliedJobList() {
   const router = useRouter();
-  const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
+  const [applications, setApplications] = useState<MyApplications[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalApplications, setTotalApplications] = useState(0);
+  const [status, setStatus] = useState("");
 
-  // Load dummy data (or localStorage if needed)
+  // Fetch data using custom hook
+  const { data: mpApplications, isLoading } = useMyApplications(status, page, pageSize);
+
   useEffect(() => {
-    // Example: try to load from localStorage first
-    const stored = localStorage.getItem("applied-jobs");
-    if (stored) {
-      setAppliedJobs(JSON.parse(stored));
-    } else {
-      // Use dummy data for demo
-      setAppliedJobs(dummyAppliedJobs);
+    if (mpApplications) {
+      setApplications(mpApplications.applications);
+      setTotalPages(mpApplications.total_pages);
+      setTotalApplications(mpApplications.total_items || 0);
     }
-  }, []);
+  }, [mpApplications]);
+
+  // Page change
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setPage(newPage);
+  };
+
+  // Page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1); // reset to first page
+  };
+
+  // Status change
+  const handleStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
+    setPage(1); // reset to first page
+  };
+
+  // Capitalize status
+  const capitalize = (str: string) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
+        <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between gap-10">
+          {/* Header */}
           <h2 className="text-lg font-semibold">
-            Applied Jobs ({appliedJobs.length})
+            {status === "" ? "Applied Jobs" : `${capitalize(status)} Jobs`} ({totalApplications})
           </h2>
+          {/* Filters */}
+          <div className="flex items-center justify-between gap-6">
+            <Select
+              label="Status"
+              value={status}
+              onChange={handleStatusChange}
+              options={statusOptions}
+              width="w-32"
+            />
+            <Select
+              label="Per page"
+              value={String(pageSize)}
+              onChange={(v: string) => handlePageSizeChange(Number(v))}
+              options={perPageOptions}
+              width="w-16"
+            />
+          </div>
         </div>
 
-        {/* Job cards */}
-        <div className="grid grid-cols-1 gap-4">
-          {appliedJobs.length > 0 ? (
-            appliedJobs.map((job) => (
-              <article
-                key={job.id}
-                className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
-              >
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base sm:text-lg font-semibold truncate">
-                    {job.title}
-                  </h3>
-                  {job.subtitle && (
-                    <p className="text-sm text-gray-500">{job.subtitle}</p>
-                  )}
+        {/* Application cards */}
+        <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                  <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
-                    <span>
-                      {job.price_value
-                        ? `${job.currency}${job.price_value}/${job.price_type}`
-                        : "Not specified"}
-                    </span>
-                    {job.city && (
-                      <span>• {job.city}, {job.country}</span>
-                    )}
-                    {job.category_name && <span>• {job.category_name}</span>}
-                    {job.starts_at && (
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        Start: {dayjs(job.starts_at).format("MMM D, YYYY")}
+          {/* Right: Job list + debug preview */}
+          <section className="lg:col-span-3 space-y-4">
+            {/* Stats + controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {applications.map((app) => (
+                <article
+                  key={`${app.id}`}
+                  className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
+                >
+                  {/* Header */}
+                  <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
+                    <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
+                      <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
+                        {formatDate(app.created_at, "dd MMM, yyyy")}
                       </span>
+                      <div className="text-xs"> <span className={getStatusClasses(app.status)}>{app.status}</span></div>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-base font-semibold text-gray-900 mt-4 line-clamp-2 hover:text-black transition">
+                      {app.job.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1 tracking-wide font-medium">
+                      <span className="font-bold text-black">Note: </span>{app.cover_note}
+                    </p>
+
+                    {/* Tags */}
+                    {app.job.tags?.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {app.job.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
 
-                  {/* Tags */}
-                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                    {job.tags?.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="px-2 py-1 bg-gray-100 rounded-full"
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div
-                    className="mt-2 text-sm text-gray-600 line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: job.description }}
-                  />
-                </div>
-
-                {/* Right side */}
-                <div className="flex flex-col justify-between items-end min-h-[80px]">
-                  <div className="text-xs text-gray-500">
-                    {isNew(job.created_at)
-                      ? (
-                        <span className="px-2 py-1 rounded-xl bg-green-100 text-green-700">
-                          New
+                  {/* Footer */}
+                  <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
+                    <div className="text-xs text-gray-600 leading-tight">
+                      <p className="font-semibold text-sm text-gray-900">
+                        {app.proposed_rate}
+                        <span className="text-gray-500 text-xs ml-1">
+                          / Proposed Rate
                         </span>
-                      )
-                      : "Applied on " +
-                        dayjs(job.created_at).format("MMM D, YYYY")}
+                      </p>
+                    </div>
+
+                    <button
+                      className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
+                      onClick={() => window.location.href = `/jobs/${app.job.slug}`}
+                    >
+                      View
+                    </button>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="mt-2 rounded-xl px-3 py-2 text-sm"
-                    onClick={() => router.push(`/jobs/${job.slug}`)}
-                  >
-                    View Details
-                  </Button>
+                </article>
+              ))}
+              {applications.length === 0 && (
+                <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
+                  No jobs match your filters.
                 </div>
-              </article>
-            ))
-          ) : (
-            <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-              You haven’t applied to any jobs yet.
+              )}
             </div>
-          )}
-        </div>
+
+          </section>
+        </main>
+
+        {/* Pagination */}
+        <nav className="flex items-center justify-between gap-2" aria-label="Pagination">
+          <button
+            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page <= 1}
+          >
+            Prev
+          </button>
+
+          <div className="flex items-center gap-1" data-testid="pager">
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
+              .map((n) => (
+                <button
+                  key={n}
+                  className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""}`}
+                  onClick={() => handlePageChange(n)}
+                >
+                  {n}
+                </button>
+              ))}
+          </div>
+
+          <button
+            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page >= totalPages}
+          >
+            Next
+          </button>
+        </nav>
       </main>
     </div>
   );
+}
+
+function getStatusClasses(status: string) {
+  switch (status.toLowerCase()) {
+    case "accepted":
+      return "px-3 py-1 rounded-xl bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300";
+    case "shortlisted":
+      return "px-3 py-1 rounded-xl bg-amber-100 text-amber-700 ring-1 ring-amber-300";
+    case "applied":
+      return "px-3 py-1 rounded-xl bg-blue-100 text-blue-700 ring-1 ring-blue-300";
+    case "rejected":
+      return "px-3 py-1 rounded-xl bg-red-100 text-red-700 ring-1 ring-red-300";
+    case "withdrawn":
+      return "px-3 py-1 rounded-xl bg-gray-100 text-gray-600 ring-1 ring-gray-300";
+    default:
+      return "px-3 py-1 rounded-xl bg-gray-100 text-gray-600";
+  }
 }

@@ -11,7 +11,9 @@ export function useCreateJob() {
     mutationFn: createJobApi,
     onSuccess: (data) => {
       console.log(" Job created:", data);
+      const newJob = data?.data;
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      if (newJob?.slug) queryClient.invalidateQueries({ queryKey: ["job", newJob.slug] });
     },
     onError: (err) => {
       console.error("Create job failed:", err);
@@ -26,7 +28,10 @@ export function useUpdateJob(jobId: string) {
   return useMutation<JobResponse, Error, Partial<CreateJobData>>({
     mutationFn: (updatedData) => updateJobApi(jobId, updatedData),
     onSuccess: (data) => {
+      const updatedJob = data?.job;
+
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      if (updatedJob?.slug) queryClient.invalidateQueries({ queryKey: ["job", updatedJob.slug] });
     },
     onError: (err) => console.error("Update job failed:", err),
   });
@@ -104,7 +109,7 @@ export const useCloseJob = () => {
 };
 
 export const useUnsaveJob = () => {
-  const queryClient = useQueryClient(); 
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (jobId: string) => unsaveJobAsFavorite(jobId),

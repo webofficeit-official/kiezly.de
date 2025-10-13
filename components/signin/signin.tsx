@@ -9,10 +9,11 @@ import { FaCheckCircle } from "react-icons/fa";
 
 // NOTE: Simple Link shim so this file runs in any React runtime (no Next.js dependency)
 function Link({ href = "#", className = "", children, ...props }) {
+    const router = useRouter();
     return (
-        <a href={href} className={className} {...props}>
+        <button type="button" onClick={() => router.push(href)} className={className} {...props}>
             {children}
-        </a>
+        </button>
     );
 }
 
