@@ -143,7 +143,7 @@ export default function JobDetail() {
                     {/* Family card */}
                     {user?.role === "helper" && (
                         <div className="mt-6">
-                            <CompanyInfoCard job={jobDetails} />
+                            <CompanyInfoCard job={jobDetails} role="helper" />
                         </div>
                     )}
 
@@ -155,7 +155,7 @@ export default function JobDetail() {
                 )}
                 {user?.role === "client" && user.id === jobDetails?.client_id && (
                     <div className="">
-                        <CompanyInfoCard job={jobDetails} />
+                        <CompanyInfoCard job={jobDetails} role="client" />
                     </div>
                 )}
 

@@ -2,12 +2,12 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Facebook, Globe, Instagram, Linkedin, X } from "lucide-react";
 
-export default function CompanyInfoCard({ job }: { job: any }) {
+export default function CompanyInfoCard({ job, role = "helper" }: { job: any, role: string }) {
     return (
         <>
             <Card className="shadow-sm">
                 <div className="grid grid-cols-12">
-                    <div className="col-span-5 bg-gray-100 p-6">
+                    <div className={`col-span-${role == "client" ? "12" : "5"} bg-gray-100 p-6`}>
                         <h2 className="text-lg font-semibold mb-4">
                             About the client
                         </h2>
@@ -21,14 +21,14 @@ export default function CompanyInfoCard({ job }: { job: any }) {
                                 {job.client.last_name?.charAt(0)}
                             </div>
                         )}
-                        <div className="mt-10">
+                        <div className="mt-4">
                             <p className="font-medium text-lg">Contact Method</p>
                             { (job.contact_method == "email_relay" || job.contact_method == "direct_email") &&  <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`mailto:${job.contact_email}`}>{job.contact_email}</a></p>}
                             { (job.contact_method == "phone") &&  <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`tel:${job.contact_phone}`}>{job.contact_phone}</a></p>}
                             { (job.contact_method == "external_link") &&  <p className="mt-3 font-semibold text-sm text-blue-700"><a href={job.contact_link} target="__blank">{job.contact_link}</a></p>}
                         </div>
                     </div>
-                    <div className="col-span-7 p-6">
+                    <div className={`col-span-${role == "client" ? "12" : "7"} p-6`}>
                         {/* --- Header --- */}
                         <div className="flex justify-between">
                             <h2 className="text-xl font-bold text-gray-900">
