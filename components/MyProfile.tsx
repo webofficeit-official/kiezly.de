@@ -631,7 +631,6 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             <Input label="Household/Company name" value={form.orgName || ""} onChange={(v) => update((d) => (d.orgName = v))} />
           }
           <Input label="Phone" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
-          <Input label="Website (optional)" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
           <DateInput label="Date of birth" value={form.dateOfBirth || ""} onChange={(v) => update((d) => (d.dateOfBirth = v))} />
           <Select label="Gender" value={form.gender || ""} onChange={(v) => update((d) => (d.gender = v))} options={["", "Female", "Male", "Non-binary", "Prefer not to say"]} />
         </div>

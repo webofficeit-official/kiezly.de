@@ -55,7 +55,7 @@ export default function Header() {
               {dropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-40 rounded-lg border bg-white shadow-md z-50">
                   <button
-                    className="block px-4 py-2 text-sm hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                     onClick={() => {
                       setDropdownOpen(false)
                       router.push("/my-profile")
@@ -65,7 +65,7 @@ export default function Header() {
                   </button>
                   {user.role === 'client' ? (
                     <button
-                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                       onClick={() => {
                         setDropdownOpen(false)
                         router.push("/my-jobs")
@@ -74,7 +74,7 @@ export default function Header() {
                       My Jobs
                     </button>) : (<>
                       <button
-                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                         onClick={() => {
                           setDropdownOpen(false)
                           router.push("/saved-job")
@@ -82,7 +82,7 @@ export default function Header() {
                       >
                         Saved Jobs</button>
                       <button
-                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                         onClick={() => {
                           setDropdownOpen(false)
                           router.push("/applied-jobs")
