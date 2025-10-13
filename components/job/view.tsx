@@ -30,6 +30,7 @@ import ApplyPanel from "./job-details/apply-panel";
 import ApplicantsPanel from "./job-details/applicant-panel";
 import SimilarJobCard from "./job-details/similar-jobs";
 import ApplicantListCard from "./job-details/applicants-list";
+import JobCountCard from "./job-details/job-counts";
 
 const statusOptions = [
     { id: 1, name: "applied" },
@@ -153,9 +154,14 @@ export default function JobDetail() {
                 {user?.role != 'client' && user?.id !== jobDetails?.client_id && (
                     <ApplyPanel user={user} jobDetails={jobDetails} />
                 )}
-                {user?.role === "client" && user.id === jobDetails?.client_id && (
+                {user?.role === "client" && user.id !== jobDetails?.client_id && (
                     <div className="">
                         <CompanyInfoCard job={jobDetails} role="client" />
+                    </div>
+                )}
+                {user?.role === "client" && user.id === jobDetails?.client_id && (
+                    <div className="">
+                        <JobCountCard job={jobDetails} />
                     </div>
                 )}
 
