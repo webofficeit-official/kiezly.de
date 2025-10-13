@@ -9,7 +9,7 @@ export default function CompanyInfoCard({ job, role = "helper" }: { job: any, ro
                 <div className="grid grid-cols-12">
                     <div className={`col-span-${role == "client" ? "12" : "5"} bg-gray-100 p-6`}>
                         <h2 className="text-lg font-semibold mb-4">
-                            About the client
+                            About the company
                         </h2>
                         {job.client.avatar_url ? (
                             <>
@@ -17,22 +17,29 @@ export default function CompanyInfoCard({ job, role = "helper" }: { job: any, ro
                             </>
                         ) : (
                             <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-full text-gray-600 font-semibold">
-                                {job.client.first_name?.charAt(0)}
-                                {job.client.last_name?.charAt(0)}
+                                {
+                                    job.client.company_name ? job.client.company_name?.charAt(0) : (
+                                        `${job.client.first_name?.charAt(0)}${job.client.last_name?.charAt(0)}`
+                                    )
+                                }
                             </div>
                         )}
                         <div className="mt-4">
                             <p className="font-medium text-lg">Contact Method</p>
-                            { (job.contact_method == "email_relay" || job.contact_method == "direct_email") &&  <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`mailto:${job.contact_email}`}>{job.contact_email}</a></p>}
-                            { (job.contact_method == "phone") &&  <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`tel:${job.contact_phone}`}>{job.contact_phone}</a></p>}
-                            { (job.contact_method == "external_link") &&  <p className="mt-3 font-semibold text-sm text-blue-700"><a href={job.contact_link} target="__blank">{job.contact_link}</a></p>}
+                            {(job.contact_method == "email_relay" || job.contact_method == "direct_email") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`mailto:${job.contact_email}`}>{job.contact_email}</a></p>}
+                            {(job.contact_method == "phone") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`tel:${job.contact_phone}`}>{job.contact_phone}</a></p>}
+                            {(job.contact_method == "external_link") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={job.contact_link} target="__blank">{job.contact_link}</a></p>}
                         </div>
                     </div>
                     <div className={`col-span-${role == "client" ? "12" : "7"} p-6`}>
                         {/* --- Header --- */}
                         <div className="flex justify-between">
                             <h2 className="text-xl font-bold text-gray-900">
-                                {job.client.first_name} {job.client.last_name}
+                                {
+                                    job.client.company_name ? job.client.company_name : (
+                                        `${job.client.first_name} ${job.client.last_name}`
+                                    )
+                                }
                             </h2>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
