@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
 import toast from "react-hot-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
+import { formatDate } from "date-fns";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -21,7 +22,7 @@ const DEFAULT_FILTERS: Filters = {
     status: 'open'
 };
 
-const perPageOptions = [
+const statusOptions = [
     { label: "Draft", value: "draft" },
     { label: "Pending Review", value: "pending_review" },
     { label: "Published", value: "open" },
@@ -29,6 +30,14 @@ const perPageOptions = [
     { label: "Rejected", value: "rejected" },
     { label: "Expired", value: "expired" },
     { label: "Saved", value: "saved" },
+];
+
+const perPageOptions = [
+    { label: "1", value: "1" },
+    { label: "5", value: "5" },
+    { label: "10", value: "10" },
+    { label: "25", value: "25" },
+    { label: "50", value: "50" },
 ];
 
 // ---- Utilities ----
@@ -80,15 +89,16 @@ export default function MyJobs({
     });
 
     const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(12);
     const router = useRouter();
-    const buildApiFilters = (filters: Filters, page: number) => {
-        const payload: Record<string, any> = { page };
+    const buildApiFilters = (filters: Filters, page: number, pageSize: number) => {
+        const payload: Record<string, any> = { page, page_size: pageSize };
         if (filters.status) payload.status = filters.status;
 
         return payload;
     };
 
-    const apiFilters = useMemo(() => buildApiFilters(filters, page), [filters, page]);
+    const apiFilters = useMemo(() => buildApiFilters(filters, page, pageSize), [filters, page, pageSize]);
     const { data, isLoading, error } = myJobs(apiFilters);
 
     // Debounce high-churn fields (search query)
@@ -136,172 +146,207 @@ export default function MyJobs({
         )
     );
 
+    // Page size change
+    const handlePageSizeChange = (newSize: number) => {
+        setPageSize(newSize);
+        setPage(1); // reset to first page
+    };
 
-
-
+    const handlePageChange = (newPage: number) => {
+        if (newPage < 1 || newPage > data?.data?.total_items) return;
+        setPage(newPage);
+    };
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
-            <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Right: Job list + debug preview */}
-                <section className="lg:col-span-3 space-y-4">
-                    {/* Stats + controls */}
-                    <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold">{perPageOptions.find((o) => o.value === filters.status)?.label || "Select"} jobs</h2>
-                        </div>
-                        <div className="flex items-center gap-4 w-45">
+        <>
+            <div className="min-h-screen bg-gray-50 text-gray-900">
+                <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+                    <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between gap-10">
+                        {/* Header */}
+                        <h2 className="text-lg font-semibold">
+                            My Jobs - {statusOptions.find((o) => o.value === filters.status)?.label || "Select"} Jobs ({pageSlice.length})
+                        </h2>
+                        {/* Filters */}
+                        <div className="flex items-center justify-between gap-6">
+
+                            <Select
+                                label="Per page"
+                                value={String(pageSize)}
+                                onChange={(v: string) => handlePageSizeChange(Number(v))}
+                                options={perPageOptions}
+                            />
                             <Select
                                 label="Select Type"
                                 value={filters.status}
                                 onChange={(v: string) => update({ status: v as Status })}
-                                options={perPageOptions}
+                                options={statusOptions}
                             />
                         </div>
                     </div>
 
-                    {/* Job cards */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {pageSlice.map((job) => (
-                            <article
-                                key={`${job.id}-${job.slug}`}
-                                className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
-                            >
-                                {/* Main content */}
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-base sm:text-lg font-semibold truncate">{job.title}</h3>
-                                    {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
+                    {/* Application cards */}
+                    <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                                    <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
-                                        <span className="inline-flex items-center">
-                                            {job?.price_type === "range" && job?.price_min && job?.price_max
-                                                ? `${job.currency} ${job.price_min} – ${job.price_max}`
-                                                : job?.price_value
-                                                    ? `${job.currency} ${job.price_value}`
-                                                    : "Not specified"}
-                                            {job?.price_type && (
-                                                <span className="inline-flex items-center gap-1">/ {job.price_type}</span>
-                                            )}
-                                        </span>
-                                        <span>
-                                            •{" "}
-                                            {[job?.street, job?.city, job?.state, job?.postal_code, job?.country]
-                                                .filter(Boolean)
-                                                .join(", ")}
-                                        </span>
-                                        {job?.distance && <span>• {(job.distance / 1000).toFixed(2)} km away</span>}
-                                        {job?.category_name && <span>• {job.category_name}</span>}
-                                        {job?.job_type && <span>• {job.job_type.join(", ")}</span>}
-                                        {job?.job_experience.length > 0 && (
-                                            <span>• {job.job_experience.join(", ")}</span>
-                                        )}
-                                    </div>
-
-                                    {/* Job tag badges */}
-                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                        {job.tags?.length > 0 &&
-                                            job.tags.map((tag, index) => (
-                                                <span key={index} className="px-2 py-1 bg-gray-100 rounded-full">
-                                                    {tag.name}
+                        {/* Right: Job list + debug preview */}
+                        <section className="lg:col-span-3 space-y-4">
+                            {/* Stats + controls */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {pageSlice?.map((job) => (
+                                    <article
+                                        key={`${job.id}-${job.slug}`}
+                                        className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
+                                    >
+                                        {/* Header */}
+                                        <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${job.slug}`}>
+                                            <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${job.slug}`}>
+                                                <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
+                                                    {formatDate(job.starts_at, "dd MMM, yyyy")} – {formatDate(job.ends_at, "dd MMM, yyyy")}
                                                 </span>
-                                            )
+                                                <span className="space-x-2 ">
+
+                                                    {/* Edit */}
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <button
+                                                                    className="p-1 rounded hover:bg-gray-100"
+                                                                    onClick={() => router.push(`/post-job/${job.slug}`)}
+                                                                >
+                                                                    {job.status === "draft" ? (
+                                                                        <ArrowRight className="w-4 h-4 text-amber-500" />
+                                                                    ) : (
+                                                                        <Pencil className="w-4 h-4 text-amber-500" />
+                                                                    )}
+                                                                </button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="text-xs">
+                                                                {job.status === "draft" ? "Continue Job" : " Edit Job"}
+
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+
+                                                    {/* Delete */}
+                                                    <AlertBox
+                                                        trigger={<CloseJobButton onClick={() => { }} />}
+                                                        title="Close Job?"
+                                                        description="Are you sure you want to close this job? This action cannot be undone."
+                                                        confirmText="Close"
+                                                        cancelText="Cancel"
+                                                        onConfirm={() => {
+                                                            closeJobMutation.mutate(job.id, {
+                                                                onSuccess: () => toast.success("Job closed successfully!"),
+                                                                onError: (error: any) => toast.error(error.message || "Failed to close the job"),
+                                                            });
+                                                        }}
+                                                    />
+                                                </span>
+                                            </div>
+
+                                            {/* Category */}
+                                            <p className="text-xs text-gray-500 mt-4 uppercase tracking-wide font-medium">
+                                                {job.category_name}
+                                            </p>
+
+                                            {/* Title */}
+                                            <h3 className="text-base font-semibold text-gray-900 mt-1 line-clamp-2 hover:text-black transition">
+                                                {job.title}
+                                            </h3>
+
+                                            {/* Tags */}
+                                            {job.tags?.length > 0 && (
+                                                <div className="mt-3 flex flex-wrap gap-2">
+                                                    {job.tags.map((tag, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
+                                                        >
+                                                            {tag.name}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             )}
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
+                                            <div className="text-xs text-gray-600 leading-tight">
+                                                <p className="font-semibold text-sm text-gray-900">
+                                                    {job?.price_type === "range" && job?.price_min && job?.price_max
+                                                        ? `${job.currency} ${job.price_min} – ${job.price_max}`
+                                                        : job?.price_value
+                                                            ? `${job.currency} ${job.price_value}`
+                                                            : "Not specified"}
+                                                    {job?.price_type && (
+                                                        <span className="text-gray-500 text-xs ml-1">
+                                                            / {job.price_type}
+                                                        </span>
+                                                    )}
+                                                </p>
+                                                {job?.distance && (
+                                                    <p className="text-gray-500 text-xs mt-1">
+                                                        {(job.distance / 1000).toFixed(2)} km away
+                                                    </p>
+                                                )}
+                                                <p className="text-gray-500 text-xs mt-1">
+                                                    {job.city}, {job.state}, {job.countries?.name}
+                                                </p>
+                                            </div>
+
+                                            <button
+                                                className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
+                                                onClick={() => window.location.href = `/jobs/${job.slug}`}
+                                            >
+                                                View
+                                            </button>
+                                        </div>
+                                    </article>
+                                ))}
+                                {pageSlice?.length === 0 && (
+                                    <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
+                                        No jobs match your filters.
                                     </div>
-                                </div>
-
-                                {/* Actions: just below badge */}
-
-
-                                {/* Right-side container: posted date top, button bottom */}
-                                <div className="flex flex-col justify-between items-end min-h-[80px]">
-
-                                    <div className="text-xs text-gray-500">
-                                        {isNew(job?.created_at) ? (
-                                            <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 font-medium px-2 py-1 rounded-full">
-                                                <span className="h-2 w-2 rounded-full bg-green-600 animate-pulse" />
-                                                New
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-1 text-gray-500">
-                                                <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14A6 6 0 1110 4a6 6 0 010 12zm-.5-6V5h1v5h4v1h-5z" />
-                                                </svg>
-                                                Posted {new Date(job?.created_at).toLocaleDateString()}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-1 mb-2">
-                                        {/* View */}
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <button
-                                                        className="p-1 rounded hover:bg-gray-100"
-                                                        onClick={() => router.push(`/jobs/${job.slug}`)}
-                                                    >
-                                                        <Eye className="w-4 h-4 text-blue-600" />
-                                                    </button>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top" className="text-xs">
-                                                    View Job
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-
-                                        {/* Edit */}
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <button
-                                                        className="p-1 rounded hover:bg-gray-100"
-                                                        onClick={() => router.push(`/post-job/${job.slug}`)}
-                                                    >
-                                                        {job.status === "draft" ? (
-                                                            <ArrowRight className="w-4 h-4 text-amber-600" />
-                                                        ) : (
-                                                            <Pencil className="w-4 h-4 text-amber-600" />
-                                                        )}
-                                                    </button>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top" className="text-xs">
-                                                    {job.status === "draft" ? "Continue Job" : " Edit Job"}
-
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-
-                                        {/* Delete */}
-                                        <AlertBox
-                                            trigger={<CloseJobButton onClick={() => { }} />}
-                                            title="Close Job?"
-                                            description="Are you sure you want to close this job? This action cannot be undone."
-                                            confirmText="Close"
-                                            cancelText="Cancel"
-                                            onConfirm={() => {
-                                                closeJobMutation.mutate(job.id, {
-                                                    onSuccess: () => toast.success("Job closed successfully!"),
-                                                    onError: (error: any) => toast.error(error.message || "Failed to close the job"),
-                                                });
-                                            }}
-                                        />
-
-
-
-                                    </div>
-
-                                </div>
-                            </article>
-                        ))}
-                        {pageSlice.length === 0 && (
-                            <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-                                No jobs match your filters.
+                                )}
                             </div>
-                        )}
-                    </div>
 
-                </section>
-            </main>
-        </div>
+                        </section>
+                    </main>
+
+                    {/* Pagination */}
+                    <nav className="flex items-center justify-between gap-2" aria-label="Pagination">
+                        <button
+                            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={page <= 1}
+                        >
+                            Prev
+                        </button>
+
+                        <div className="flex items-center gap-1" data-testid="pager">
+                            {Array.from({ length: data?.data?.total_pages }, (_, i) => i + 1)
+                                .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
+                                .map((n) => (
+                                    <button
+                                        key={n}
+                                        className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""}`}
+                                        onClick={() => handlePageChange(n)}
+                                    >
+                                        {n}
+                                    </button>
+                                ))}
+                        </div>
+
+                        <button
+                            className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
+                            onClick={() => handlePageChange(page + 1)}
+                            disabled={page >= data?.data?.total_pages}
+                        >
+                            Next
+                        </button>
+                    </nav>
+                </main>
+            </div>
+        </>
     );
 }
 
@@ -357,4 +402,21 @@ function Select({
             </Listbox>
         </div>
     );
+}
+
+function getStatusClasses(status: string) {
+    switch (status.toLowerCase()) {
+        case "accepted":
+            return "px-3 py-1 rounded-xl bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300";
+        case "shortlisted":
+            return "px-3 py-1 rounded-xl bg-amber-100 text-amber-700 ring-1 ring-amber-300";
+        case "applied":
+            return "px-3 py-1 rounded-xl bg-blue-100 text-blue-700 ring-1 ring-blue-300";
+        case "rejected":
+            return "px-3 py-1 rounded-xl bg-red-100 text-red-700 ring-1 ring-red-300";
+        case "withdrawn":
+            return "px-3 py-1 rounded-xl bg-gray-100 text-gray-600 ring-1 ring-gray-300";
+        default:
+            return "px-3 py-1 rounded-xl bg-gray-100 text-gray-600";
+    }
 }
