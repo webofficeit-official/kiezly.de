@@ -30,6 +30,8 @@ export default function Page() {
     });
   }, [])
 
+  const router = useRouter();
+
   return (
     <main>
       <section className="mx-auto max-w-6xl px-4 pb-10 pt-12">
@@ -121,9 +123,9 @@ export default function Page() {
           </Card>
         </div>
         <div className="mt-6">
-          <a href="/how-it-works" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
+          <button onClick={() => router.push("/how-it-works")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
             Learn more <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
+          </button>
         </div>
       </section>
 
@@ -188,8 +190,8 @@ export default function Page() {
               <p className="text-neutral-600">Post your mini‑job for free — start getting applications today.</p>
             </div>
             <div className="flex gap-2">
-              <a href="/signup?role=helper" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</a>
-              <a href="/signup?role=client" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</a>
+              <button onClick={() => router.push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
+              <button onClick={() => router.push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</button>
             </div>
           </CardContent>
         </Card>

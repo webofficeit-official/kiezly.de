@@ -3,27 +3,13 @@
 import React from 'react'
 import { ShieldCheck, FileText, Send, CheckCircle2, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useRouter } from 'next/navigation';
 
 export default function HowItWorksPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
-      {/* <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5" />
-            <a href="/" className="font-semibold">Mini-Helfer</a>
-          </div>
-          <nav className="hidden items-center gap-6 text-sm md:flex">
-            <a href="/how-it-works" className="hover:opacity-80">How it works</a>
-            <a href="/#categories" className="hover:opacity-80">Categories</a>
-            <a href="/#trust" className="hover:opacity-80">Trust & Safety</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <a href="/" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Back to home</a>
-          </div>
-        </div>
-      </header> */}
-
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-4">
           <h1 className="text-2xl font-semibold">How it works</h1>
@@ -87,9 +73,9 @@ export default function HowItWorksPage() {
         </div>
 
         <div className="mt-8">
-          <a href="/" className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
+          <button onClick={() => router.push("/")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
             Back to home <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
+          </button>
         </div>
       </main>
     </div>
