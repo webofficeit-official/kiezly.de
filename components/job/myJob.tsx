@@ -165,7 +165,7 @@ export default function MyJobs({
                     <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between gap-10">
                         {/* Header */}
                         <h2 className="text-lg font-semibold">
-                            My Jobs - {statusOptions.find((o) => o.value === filters.status)?.label || "Select"} Jobs ({pageSlice.length})
+                            My Jobs - {statusOptions.find((o) => o.value === filters.status)?.label || "Select"} Jobs ({data?.data?.total_items})
                         </h2>
                         {/* Filters */}
                         <div className="flex items-center justify-between gap-6">
@@ -204,53 +204,56 @@ export default function MyJobs({
                                                     {formatDate(job.starts_at, "dd MMM, yyyy")} – {formatDate(job.ends_at, "dd MMM, yyyy")}
                                                 </span>
                                                 <span className="space-x-2 ">
+                                                    {filters.status != 'closed' && (<>
 
-                                                    {/* Edit */}
-                                                    <TooltipProvider>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <button
-                                                                    className="p-1 rounded hover:bg-gray-100"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        router.push(`/post-job/basic-details?slug=${job.slug}`)
-                                                                    }
-                                                                    }
-                                                                >
-                                                                    {job.status === "draft" ? (
-                                                                        <ArrowRight className="w-4 h-4 text-amber-500" />
-                                                                    ) : (
-                                                                        <Pencil className="w-4 h-4 text-amber-500" />
-                                                                    )}
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent side="top" className="text-xs">
-                                                                {job.status === "draft" ? "Continue Job" : " Edit Job"}
+                                                        {/* Edit */}
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <button
+                                                                        className="p-1 rounded hover:bg-gray-100"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            router.push(`/post-job/basic-details?slug=${job.slug}`)
+                                                                        }
+                                                                        }
+                                                                    >
+                                                                        {job.status === "draft" ? (
+                                                                            <ArrowRight className="w-4 h-4 text-amber-500" />
+                                                                        ) : (
+                                                                            <Pencil className="w-4 h-4 text-amber-500" />
+                                                                        )}
+                                                                    </button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent side="top" className="text-xs">
+                                                                    {job.status === "draft" ? "Continue Job" : " Edit Job"}
 
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </TooltipProvider>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
 
-                                                    {/* Delete */}
-                                                    <AlertBox
-                                                        trigger={<CloseJobButton onClick={(e) => {
-                                                            e.stopPropagation(); 
-                                                        }} />}
-                                                        title="Close Job?"
-                                                        description="Are you sure you want to close this job? This action cannot be undone."
-                                                        confirmText="Close"
-                                                        cancelText="Cancel"
-                                                        onConfirm={(e) => {
-                                                            e?.stopPropagation?.();
-                                                            closeJobMutation.mutate(job.id, {
-                                                                onSuccess: () => {
-                                                                    toast.success("Job closed successfully!")
-                                                                    update({ status: "closed" });
-                                                                },
-                                                                onError: (error: any) => toast.error(error.message || "Failed to close the job"),
-                                                            });
-                                                        }}
-                                                    />
+                                                        {/* Delete */}
+                                                        <AlertBox
+                                                            trigger={<CloseJobButton onClick={(e) => {
+                                                                e.stopPropagation();
+                                                            }} />}
+                                                            title="Close Job?"
+                                                            description="Are you sure you want to close this job? This action cannot be undone."
+                                                            confirmText="Close"
+                                                            cancelText="Cancel"
+                                                            onConfirm={(e) => {
+                                                                e?.stopPropagation?.();
+                                                                closeJobMutation.mutate(job.id, {
+                                                                    onSuccess: () => {
+                                                                        toast.success("Job closed successfully!")
+                                                                        update({ status: "closed" });
+                                                                    },
+                                                                    onError: (error: any) => toast.error(error.message || "Failed to close the job"),
+                                                                });
+                                                            }}
+                                                        />
+                                                    </>)}
+
                                                 </span>
                                             </div>
 

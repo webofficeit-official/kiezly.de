@@ -638,7 +638,7 @@ export default function JobFilterPage({
                                         </span>
                                         <span>
                                             •{" "}
-                                            {[job?.street, job?.city, job?.state, job?.postal_code, job?.country]
+                                            {[job?.street, job?.city, job?.state, job?.postal_code, job?.countries?.name]
                                               .filter(Boolean)
                                               .join(", ")}
                                         </span>

@@ -54,7 +54,7 @@ export default function Page() {
         description: job.description || "",
         tasks: job.tasks || "",
         requirements: job.requirements || "",
-        languages: job.tags?.map((t: any) => String(t.id)) || [],
+        languages: job.languages?.map((t: any) => String(t.id)) || [],
     });
     /* ----------------------------- Options ----------------------------- */
     const languageOptions =
