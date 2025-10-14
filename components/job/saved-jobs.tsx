@@ -136,7 +136,10 @@ export default function SavedJobs({
                                             <Button
                                                 variant="outline"
                                                 className="text-green-600 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition"
-                                                onClick={() => handleUnSaveJob(job.id)}
+                                                onClick={(e) =>{
+                                                      e.stopPropagation();
+                                                    handleUnSaveJob(job.id)
+                                                }}
                                             >
                                                 <BookmarkCheck className="h-4 w-4" />
                                             </Button>
