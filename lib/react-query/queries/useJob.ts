@@ -96,6 +96,29 @@ export const useSavedJobs = () => {
   >);
 };
 
+type UseSavedJobsOptions = {
+  enabled?: boolean; // allows controlling when to fetch
+};
+export const useSavedJobsWhileLogin = (options?: UseSavedJobsOptions) => {
+  return useQuery<JobSaveApiResponse>({
+    queryKey: ["savedJobs"],
+    queryFn: () => getSavedJobsListApi(),
+    keepPreviousData: true,
+    enabled: options?.enabled ?? true, // ✅ only runs if true
+    // optional: prevent infinite retries on unauthorized errors
+    retry: (failureCount, error: any) => {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) return false; // stop retrying unauthorized
+      return failureCount < 2;
+    },
+  } as UseQueryOptions<
+    JobSaveApiResponse,
+    unknown,
+    JobSaveApiResponse,
+    readonly unknown[]
+  >);
+};
+
 
 export const useCloseJob = () => {
   const queryClient = useQueryClient();
