@@ -208,7 +208,7 @@ export default function MyJobs({
                                                             <TooltipTrigger asChild>
                                                                 <button
                                                                     className="p-1 rounded hover:bg-gray-100"
-                                                                    onClick={() => router.push(`/post-job/${job.slug}`)}
+                                                                    onClick={() => router.push(`/post-job/basic-details?slug=${job.slug}`)}
                                                                 >
                                                                     {job.status === "draft" ? (
                                                                         <ArrowRight className="w-4 h-4 text-amber-500" />
