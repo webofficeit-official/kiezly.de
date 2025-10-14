@@ -127,12 +127,15 @@ export default function MyJobs({
     const pageSlice = dataSource;
     const closeJobMutation = useCloseJob();
 
-    const CloseJobButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(
+    const CloseJobButton = React.forwardRef<HTMLButtonElement, { onClick: (e: React.MouseEvent) => void }>(
         ({ onClick }, ref) => (
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <button ref={ref} onClick={onClick} className="p-1 rounded hover:bg-gray-100">
+                        <button ref={ref} onClick={(e) => {
+                            e.stopPropagation();
+                            onClick(e);
+                        }} className="p-1 rounded hover:bg-gray-100">
                             <Trash2 className="w-4 h-4 text-red-600" />
                         </button>
                     </TooltipTrigger>
@@ -208,7 +211,11 @@ export default function MyJobs({
                                                             <TooltipTrigger asChild>
                                                                 <button
                                                                     className="p-1 rounded hover:bg-gray-100"
-                                                                    onClick={() => router.push(`/post-job/basic-details?slug=${job.slug}`)}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        router.push(`/post-job/basic-details?slug=${job.slug}`)
+                                                                    }
+                                                                    }
                                                                 >
                                                                     {job.status === "draft" ? (
                                                                         <ArrowRight className="w-4 h-4 text-amber-500" />
@@ -226,14 +233,20 @@ export default function MyJobs({
 
                                                     {/* Delete */}
                                                     <AlertBox
-                                                        trigger={<CloseJobButton onClick={() => { }} />}
+                                                        trigger={<CloseJobButton onClick={(e) => {
+                                                            e.stopPropagation(); 
+                                                        }} />}
                                                         title="Close Job?"
                                                         description="Are you sure you want to close this job? This action cannot be undone."
                                                         confirmText="Close"
                                                         cancelText="Cancel"
-                                                        onConfirm={() => {
+                                                        onConfirm={(e) => {
+                                                            e?.stopPropagation?.();
                                                             closeJobMutation.mutate(job.id, {
-                                                                onSuccess: () => toast.success("Job closed successfully!"),
+                                                                onSuccess: () => {
+                                                                    toast.success("Job closed successfully!")
+                                                                    update({ status: "closed" });
+                                                                },
                                                                 onError: (error: any) => toast.error(error.message || "Failed to close the job"),
                                                             });
                                                         }}
