@@ -19,7 +19,7 @@ interface AlertBoxProps {
   description: string;            // Alert message
   confirmText?: string;           // Text on confirm button
   cancelText?: string;            // Text on cancel button
-  onConfirm: () => void;          // What to do if user clicks confirm
+  onConfirm: (e?: React.MouseEvent) => void;          // What to do if user clicks confirm
   isLoading?: boolean;            // For disabling buttons during API calls
 }
 

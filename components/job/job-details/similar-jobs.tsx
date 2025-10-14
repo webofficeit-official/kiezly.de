@@ -59,7 +59,7 @@ export default function SimilarJobCard({ job }) {
                     Similar Jobs
                 </CardTitle>
             </CardHeader>
-            <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white/80">
 
                 {/* Right: Job list + debug preview */}
                 <section className="lg:col-span-3 space-y-4">
