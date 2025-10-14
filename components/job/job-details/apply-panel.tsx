@@ -27,7 +27,7 @@ export default function ApplyPanel({ user, jobDetails }: ApplyPanelProps) {
 
   // Pre-fill if already applied
   useEffect(() => {
-    if (application?.success && application?.data?.application?.status !== "withdrawn") {
+    if (application?.success) {
       setCoverNote(application.data.application.cover_note || "");
       setProposedRate(application.data.application.proposed_rate || "");
     }
@@ -47,50 +47,64 @@ export default function ApplyPanel({ user, jobDetails }: ApplyPanelProps) {
     );
   };
 
-  
+
 
   return (
     <aside className="lg:sticky lg:top-6">
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">Ready to apply?</CardTitle>
+          <CardTitle className="text-base">{application?.success ? (
+            application?.data?.application?.status == "withdrawn" ?
+              "Application withdrawed" :
+              "Already applied"
+          ) : "Ready to apply?"}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-1">
           {user ? (
-            <div className="space-y-4 mt-4 rounded-xl p-4 shadow-xs bg-white">
+            <div className="space-y-4 rounded-xl p-1 shadow-xs bg-white">
               <h3 className="text-base font-semibold">
-                {application?.applied ? `Your application for ${jobDetails.title}` : `Apply to ${jobDetails.title}`}
+                {application?.success ? (
+                  application?.data?.application?.status == "withdrawn" ?
+                    `Withdrawed application for ${jobDetails.title}` :
+                    `Your application for ${jobDetails.title}`
+                ) : `Apply to ${jobDetails.title}`}
               </h3>
 
-              {application?.success && application?.data?.application?.status !== "withdrawn" ? (
+              {application?.success ? (
                 <>
                   <div className="grid gap-2">
                     <Textarea label="Cover Note" value={coverNote} onChange={setCoverNote} disabled />
                     <Input
                       label={`Proposed Rate (${jobDetails?.currency})`}
                       value={proposedRate}
-                      onChange={() => {}}
+                      onChange={() => { }}
                       type="number"
                       disabled
                     />
                   </div>
-                  <AlertBox
-                    trigger={<Button variant="destructive" className="w-full rounded-xl mt-2">Withdraw Application</Button>}
-                    title="Withdraw Application?"
-                    description={`Are you sure you want to withdraw your application for "${jobDetails?.title}"?`}
-                    confirmText="Yes, Withdraw"
-                    cancelText="Cancel"
-                    onConfirm={() =>
-                      withdrawMutation.mutate(application.data.application.id, {
-                        onSuccess: () => toast.success("Application withdrawn successfully!"),
-                        onError: (err: any) => toast.error(err?.message || "Failed to withdraw."),
-                      })
-                    }
-                  />
+                  {
+                    application?.data?.application?.status !== "withdrawn" ? (
+                      <AlertBox
+                        trigger={<Button variant="destructive" className="w-full rounded-xl mt-2">Withdraw Application</Button>}
+                        title="Withdraw Application?"
+                        description={`Are you sure you want to withdraw your application for "${jobDetails?.title}"?`}
+                        confirmText="Yes, Withdraw"
+                        cancelText="Cancel"
+                        onConfirm={() =>
+                          withdrawMutation.mutate(application.data.application.id, {
+                            onSuccess: () => toast.success("Application withdrawn successfully!"),
+                            onError: (err: any) => toast.error(err?.message || "Failed to withdraw."),
+                          })
+                        }
+                      />
+                    ) : (
+                      ""
+                    )
+                  }
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-gray-600">Please share your note and proposed rate.</p>
+                  <p className="text-sm text-gray-600">{!application?.success && "Please share your note and proposed rate."}</p>
                   <div className="grid gap-1">
                     <Textarea label="Cover Note" value={coverNote} onChange={setCoverNote} placeholder="A short note…" />
                     <Input
