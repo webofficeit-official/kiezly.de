@@ -7,51 +7,95 @@ import { WizardNavigation } from "@/components/wizard/WizardNavigation";
 import { WizardSelectSearch } from "@/components/wizard/WizardSelectSearch";
 import { WizardInputSearch } from "@/components/wizard/WizardInputSearch";
 import { useJobWizard } from "@/lib/context/job-wizard-context";
-import { useJobCollections, useUpdateJob } from "@/lib/react-query/queries/useJob";
+import {
+    useJob,
+    useJobCollections,
+    useUpdateJob,
+} from "@/lib/react-query/queries/useJob";
 import { useZipcodes } from "@/lib/react-query/queries/collection";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { count } from "console";
 
 export default function Page() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const slug = searchParams.get("slug");
 
-    const { formData, updateForm, jobId } = useJobWizard();
+    const { formData, updateForm, jobId, setJobId, mode, setMode } = useJobWizard();
     const updateJobMutation = useUpdateJob(jobId ?? undefined);
     const { data: basicCollections } = useJobCollections();
     const { mutateAsync: fetchZipcodes } = useZipcodes();
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [showErrors, setShowErrors] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    /* -------------------------- Options and Validation -------------------------- */
+    /* ----------------------------- Fetch Existing Job ----------------------------- */
+    const { data: existingJob, isLoading } = useJob(slug || "");
+
+    useEffect(() => {
+        if (slug && existingJob?.job) {
+            setMode("edit");
+            setJobId(existingJob.job.id);
+            updateForm(normalizeJobForForm(existingJob.job));
+        } else if (!slug) {
+            setMode("create");
+        }
+    }, [slug, existingJob]);
+
+    const normalizeJobForForm = (job: any) => ({
+        title: job.title || "",
+        slug: job.slug || "",
+        subtitle: job.subtitle || "",
+        category_id: job.category_id ? String(job.category_id) : "",
+        tag_ids: job.tags?.map((t: any) => String(t.id)) || [],
+        job_type: job.job_type || [],
+        job_experience: job.job_experience || [],
+        status: job.status || "draft",
+        description: job.description || "",
+        tasks: job.tasks || "",
+        requirements: job.requirements || "",
+        languages: job.tags?.map((t: any) => String(t.id)) || [],
+        country: job.country || "",
+        postal_code: job.postal_code || "",
+        street: job.street || "",
+        city: job.city || "",
+        state: job.state || "",
+        lat: job.lat || "",
+        lng: job.lng || "",
+    });
+
+    /* -------------------------- Country Options -------------------------- */
     const countryOptions =
         basicCollections?.countries?.map((c: any) => ({
             label: c.name,
             value: String(c.id),
-        })) || [
-        ];
+            code: c.code,
+        })) || [];
 
+    /* -------------------------- Default Country Logic -------------------------- */
+    useEffect(() => {
+        if (!formData.country && countryOptions.length > 0) {
+            const germany = countryOptions.find(
+                (c) =>
+                    c.label.toLowerCase() === "germany" || c.code?.toLowerCase() === "de"
+            );
+            if (germany) {
+                updateForm({ country: germany.value });
+            }
+        }
+    }, [countryOptions, formData.country]);
+
+    /* -------------------------- Validation -------------------------- */
     const validateFields = () => {
         const newErrors: Record<string, string> = {};
-
-        if (!formData.country_id || formData.country_id === "")
-            newErrors.country_id = "Country is required";
-
-        if (!formData.postal_code || formData.postal_code.trim() === "")
-            newErrors.postal_code = "Postal Code is required";
-
-        if (!formData.street || formData.street.trim() === "")
-            newErrors.street = "Street is required";
-
-        if (!formData.city || formData.city.trim() === "")
-            newErrors.city = "City is required";
-
-        if (!formData.state || formData.state.trim() === "")
-            newErrors.state = "State is required";
-
+        if (!formData.country) newErrors.country = "Country is required";
+        if (!formData.postal_code?.trim()) newErrors.postal_code = "Postal Code is required";
+        if (!formData.street?.trim()) newErrors.street = "Street is required";
+        if (!formData.city?.trim()) newErrors.city = "City is required";
+        if (!formData.state?.trim()) newErrors.state = "State is required";
         setErrors(newErrors);
         return newErrors;
     };
@@ -73,12 +117,14 @@ export default function Page() {
         try {
             const res = await fetchZipcodes({
                 zip: query,
-                country: formData.country_id,
+                country: formData.country,
             });
 
             const zips =
                 res?.data?.zipcode?.map((z: any) => ({
-                    label: `${z.zipcode} - ${z.street}`,
+                    label: z.street
+                        ? `${z.zipcode} - ${z.street}`
+                        : `${z.zipcode} - ${z.city}`,
                     value: z.zipcode,
                     meta: {
                         id: String(z.id),
@@ -97,6 +143,7 @@ export default function Page() {
         }
     };
 
+    /* -------------------------- When ZIP is Selected -------------------------- */
     const handleZipSelect = (meta: any) => {
         if (!meta) return;
         updateForm({
@@ -107,56 +154,8 @@ export default function Page() {
             lat: String(meta.latitude || ""),
             lng: String(meta.longitude || ""),
         });
-    };
 
-    /* -------------------------- Navigation -------------------------- */
-    const handleNext = async () => {
-        const newErrors = validateFields();
-        if (Object.keys(newErrors).length > 0) {
-            setShowErrors(true);
-            return;
-        }
-
-        const payload = {
-            country_id: formData.country_id,
-            postal_code: formData.postal_code,
-            street: formData.street,
-            city: formData.city,
-            state: formData.state,
-            lat: formData.lat || "",
-            lng: formData.lng || "",
-        };
-
-        if (jobId) {
-            await updateJobMutation.mutateAsync(payload, {
-                onSuccess: () => {
-                    toast.success("Location updated successfully!");
-                    router.push(`/wizard/pricing-details?slug=${slug}`);
-                },
-                onError: () => toast.error("Failed to update location."),
-            });
-        }
-    };
-
-    const handlePrev = () => router.push(`/wizard/job-details?slug=${slug}`);
-
-    const isNextLoading = updateJobMutation.isPending;
-
-    const handleCountryChange = (v: string) => {
-        // Update the selected country
-        handleFieldChange("country_id", v);
-
-        // Reset all dependent fields (ZIP, Street, City, etc.)
-        updateForm({
-            postal_code: "",
-            street: "",
-            city: "",
-            state: "",
-            lat: "",
-            lng: "",
-        });
-
-        // Optionally, clear any previous errors on those fields
+        // Remove validation errors after auto-fill
         setErrors((prev) => {
             const updated = { ...prev };
             delete updated.postal_code;
@@ -167,6 +166,71 @@ export default function Page() {
         });
     };
 
+    /* -------------------------- Country Change -------------------------- */
+    const handleCountryChange = (v: string) => {
+        handleFieldChange("country", v);
+        updateForm({
+            postal_code: "",
+            street: "",
+            city: "",
+            state: "",
+            lat: "",
+            lng: "",
+        });
+        setErrors((prev) => {
+            const updated = { ...prev };
+            delete updated.postal_code;
+            delete updated.street;
+            delete updated.city;
+            delete updated.state;
+            return updated;
+        });
+    };
+
+    /* -------------------------- Navigation -------------------------- */
+    const handleNext = async () => {
+        const newErrors = validateFields();
+        if (Object.keys(newErrors).length > 0) {
+            setShowErrors(true);
+            toast.error("Please fill all required fields.");
+            return;
+        }
+
+        const payload = {
+            country: formData.country,
+            postal_code: formData.postal_code,
+            street: formData.street,
+            city: formData.city,
+            state: formData.state,
+            lat: formData.lat || "",
+            lng: formData.lng || "",
+            status: formData.status ? formData.status : "draft",
+        };
+
+        try {
+            if (jobId) {
+                await updateJobMutation.mutateAsync(payload, {
+                    onSuccess: () => {
+                        // toast.success("Location details updated successfully!");
+                        router.push(`/wizard/pricing-details?slug=${slug}`);
+                    },
+                    onError: () => toast.error("Failed to update location details."),
+                });
+            }
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
+    };
+
+    const handlePrev = () => router.push(`/wizard/job-details?slug=${slug}`);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen text-gray-600">
+                Loading location details...
+            </div>
+        );
+    }
 
     /* -------------------------- Render -------------------------- */
     return (
@@ -183,49 +247,13 @@ export default function Page() {
                     <div className="grid grid-cols-12 gap-4">
                         {/* Sidebar */}
                         <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
-                            <div className="flex flex-wrap justify-center lg:flex-col gap-2 lg:space-y-4">
-                                <WizardNavigation
-                                    title="Basic Details"
-                                    description="Provide the main information"
-                                    count={1}
-                                    current={false}
-                                    finished
-                                />
-                                <WizardNavigation
-                                    title="Job Details"
-                                    description="Provide detailed information"
-                                    count={2}
-                                    current={false}
-                                    finished
-                                />
-                                <WizardNavigation
-                                    title="Location Details"
-                                    description="Provide location details"
-                                    count={3}
-                                    current
-                                    finished={false}
-                                />
-                                <WizardNavigation
-                                    title="Pricing Details"
-                                    description="Set the pricing for this job"
-                                    count={4}
-                                    current={false}
-                                    finished={false}
-                                />
-                                <WizardNavigation
-                                    title="Work Details"
-                                    description="Provide work details"
-                                    count={5}
-                                    current={false}
-                                    finished={false}
-                                />
-                                <WizardNavigation
-                                    title="Contact Details"
-                                    description="Provide how applicants can reach you"
-                                    count={6}
-                                    current={false}
-                                    finished={false}
-                                />
+                            <div className="flex flex-wrap justify-center lg:flex-col gap-2  justify-between lg:space-x-0 lg:space-y-4">
+                                <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={false} finished={true} />
+                                <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={true} />
+                                <WizardNavigation title="Location Details" description="Provide location details" count={3} current={true} finished={false} />
+                                <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={false} finished={false} />
+                                <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
+                                <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
                             </div>
                         </div>
 
@@ -233,7 +261,7 @@ export default function Page() {
                         <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
                             <WizardHeader
                                 title="Location Details"
-                                description="Provide location details"
+                                description="Provide the location details for your job"
                             />
 
                             <div className="mt-5 space-y-4">
@@ -241,13 +269,12 @@ export default function Page() {
                                 <div className="flex flex-col md:flex-row gap-3">
                                     <WizardSelectSearch
                                         label="Country"
-                                        value={formData.country_id || ""}
+                                        value={formData.country || ""}
                                         onChange={handleCountryChange}
                                         options={countryOptions}
                                         required
-                                        error={showErrors ? errors.country_id : ""}
+                                        error={showErrors ? errors.country : ""}
                                     />
-
 
                                     <WizardInputSearch
                                         label="Postal Code"
@@ -257,6 +284,7 @@ export default function Page() {
                                         fetchOptions={fetchZipOptions}
                                         onSelectOption={handleZipSelect}
                                         required
+                                        disabled={!formData.country}
                                         error={showErrors ? errors.postal_code : ""}
                                     />
                                 </div>
@@ -289,7 +317,7 @@ export default function Page() {
                                     />
                                 </div>
 
-                                {/* Latitude & Longitude (Optional) */}
+                                {/* Latitude & Longitude */}
                                 <div className="flex flex-col md:flex-row gap-3">
                                     <WizardInput
                                         label="Latitude"
@@ -308,10 +336,10 @@ export default function Page() {
                                 {/* Navigation */}
                                 <WizardDirection
                                     prev
-                                    next
                                     onPrev={handlePrev}
+                                    next
                                     onNext={handleNext}
-                                    isNextLoading={isNextLoading}
+                                    isNextLoading={updateJobMutation.isPending}
                                 />
                             </div>
                         </div>

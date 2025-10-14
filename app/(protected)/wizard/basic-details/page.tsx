@@ -139,6 +139,7 @@ export default function Page() {
     const handleNext = async () => {
         const newErrors = validateStep();
         if (Object.keys(newErrors).length > 0) {
+            toast.error("Please fix the errors before continuing.");
             setShowErrors(true);
             return;
         }
@@ -171,7 +172,7 @@ export default function Page() {
                 await updateJobMutation.mutateAsync(payload, {
                     onSuccess: (res: any) => {
                         const updatedSlug = res?.job?.slug || formData.slug;
-                         setJobId(res?.job?.id);
+                        setJobId(res?.job?.id);
                         updateForm({ slug: updatedSlug });
                         // toast.success("Job updated successfully!");
                         router.push(`/wizard/job-details?slug=${updatedSlug}`);
@@ -220,7 +221,7 @@ export default function Page() {
                 <section className="lg:col-span-3 space-y-4">
                     <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
                         <h2 className="text-lg font-semibold">
-                            {mode === "edit" ? "Edit Mini-Job" : "Post a Mini-Job"}
+                            Post a Mini-Job
                         </h2>
                     </div>
                 </section>
@@ -316,7 +317,7 @@ export default function Page() {
                                             handleFieldChange("slug", v);
                                         }}
                                         error={showErrors ? errors.slug : ""}
-                                        disabled={mode==='edit'?true:false}
+                                        disabled={mode === 'edit' ? true : false}
                                         required
                                     />
                                     {slugEdited && (

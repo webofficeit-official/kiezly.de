@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 
 interface WizardInputSearchProps {
@@ -32,8 +32,10 @@ export function WizardInputSearch({
   >([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [displayText, setDisplayText] = useState(value);
+  const isSelecting = useRef(false); // 👈 prevent blur from closing prematurely
 
-  // --- Fetch ZIP options as user types ---
+  // --- Fetch options ---
   const handleSearch = async (query: string) => {
     if (!query || query.trim().length < 2) {
       setOptions([]);
@@ -51,12 +53,32 @@ export function WizardInputSearch({
     }
   };
 
-  // --- Refetch only when typing while dropdown open ---
+  // --- Update display text when value changes externally ---
   useEffect(() => {
-    if (showDropdown && value.trim().length > 1) {
-      handleSearch(value);
-    }
+    setDisplayText(value);
   }, [value]);
+
+  // --- Close dropdown safely ---
+  const handleBlur = () => {
+    if (!isSelecting.current) {
+      setTimeout(() => setShowDropdown(false), 100);
+    }
+  };
+
+  // --- Handle selection ---
+  const handleSelect = (opt: { label: string; value: string; meta?: any }) => {
+    isSelecting.current = true;
+    setDisplayText(opt.label); // show label (ZIP + street)
+    onChangeValue(opt.value); // store ZIP code
+    setOptions([]);
+    setShowDropdown(false);
+
+    if (onSelectOption) onSelectOption(opt.meta);
+
+    setTimeout(() => {
+      isSelecting.current = false;
+    }, 150); // reset after click completes
+  };
 
   return (
     <div className="mt-2 px-1.5 w-full relative">
@@ -70,22 +92,24 @@ export function WizardInputSearch({
       <div className="relative">
         <input
           type="text"
-          value={value}
+          value={displayText}
           placeholder={placeholder}
           disabled={disabled}
           onChange={(e) => {
-            onChangeValue(e.target.value);
-            handleSearch(e.target.value);
+            const val = e.target.value;
+            setDisplayText(val);
+            onChangeValue(val);
+            handleSearch(val);
           }}
           onFocus={() => setShowDropdown(true)}
-          onBlur={() => setTimeout(() => setShowDropdown(false), 150)} // close on blur
+          onBlur={handleBlur}
           className={`mb-1 focus:border-gray-500 focus:outline-none dark:bg-gray-950 
           text-[0.875rem] leading-5.6 block w-full rounded-lg border px-3 py-2 font-normal 
           text-gray-700 placeholder:text-gray-500 transition-all 
           ${
             error
-              ? "border-red-500 bg-red-50 focus:border-red-500"
-              : "border-gray-300 bg-white focus:border-[#e293d3]"
+              ? "border-red-500 bg-white focus:border-red-500"
+              : "border-gray-300 bg-white focus:border-black"
           }`}
         />
         <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -99,14 +123,10 @@ export function WizardInputSearch({
           ) : (
             options.map((opt) => (
               <li
-                key={opt.value}
+                key={opt.value + opt.label}
                 className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  onChangeValue(opt.value);
-                  setOptions([]); // clear results
-                  setShowDropdown(false); // close dropdown
-                  if (onSelectOption) onSelectOption(opt.meta);
-                }}
+                onMouseDown={(e) => e.preventDefault()} // prevent blur before click
+                onClick={() => handleSelect(opt)}
               >
                 {opt.label}
               </li>

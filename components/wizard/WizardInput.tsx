@@ -29,8 +29,8 @@ export function WizardInput({ label, placeholder, value, onChange, error,require
            bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 
            focus:border-[#e293d3] focus:outline-none
              ${error
-            ? "border-red-500 bg-red-50 focus:border-red-500"
-            : "border-gray-300 bg-white focus:border-[#e293d3]"
+            ? "border-red-500 bg-white focus:border-red-500"
+            : "border-gray-300 bg-white focus:border-black"
           }
            `}
       />
