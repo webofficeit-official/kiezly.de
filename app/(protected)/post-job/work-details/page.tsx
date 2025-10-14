@@ -108,7 +108,7 @@ export default function Page() {
                 await updateJobMutation.mutateAsync(payload, {
                     onSuccess: () => {
                         // toast.success("Work details updated successfully!");
-                        router.push(`/wizard/contact-details?slug=${slug}`);
+                        router.push(`/post-job/contact-details?slug=${slug}`);
                     },
                     onError: () => toast.error("Failed to update work details."),
                 });
@@ -118,7 +118,7 @@ export default function Page() {
         }
     };
 
-    const handlePrev = () => router.push(`/wizard/pricing-details?slug=${slug}`);
+    const handlePrev = () => router.push(`/post-job/pricing-details?slug=${slug}`);
 
     /* ----------------------------- Derived ----------------------------- */
     const workModeOptions =

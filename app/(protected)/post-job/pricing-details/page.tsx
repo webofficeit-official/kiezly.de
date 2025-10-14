@@ -158,7 +158,7 @@ export default function Page() {
   const handlePriceTypeChange = (value: string) => {
     handleFieldChange("price_type", value);
     if (value === "fixed") updateForm({ price_min: "", price_max: "" });
-    if (value === "range") updateForm({ price_value: "" });
+    if (value === "range") updateForm({ price_value: 1 });
   };
 
   /* ----------------------------- Navigation ----------------------------- */
@@ -173,7 +173,7 @@ export default function Page() {
     const payload = {
       currency: formData.currency,
       price_type: formData.price_type,
-      price_value: formData.price_value || null,
+      price_value: formData.price_value || 1,
       price_min: formData.price_min || null,
       price_max: formData.price_max || null,
       status: formData.status ? formData.status : "draft",
@@ -184,7 +184,7 @@ export default function Page() {
         await updateJobMutation.mutateAsync(payload, {
           onSuccess: () => {
             // toast.success("Pricing details updated successfully!");
-            router.push(`/wizard/work-details?slug=${slug}`);
+            router.push(`/post-job/work-details?slug=${slug}`);
           },
           onError: () => toast.error("Failed to update pricing details."),
         });
@@ -194,7 +194,7 @@ export default function Page() {
     }
   };
 
-  const handlePrev = () => router.push(`/wizard/location-details?slug=${slug}`);
+  const handlePrev = () => router.push(`/post-job/location-details?slug=${slug}`);
 
   /* ----------------------------- Derived ----------------------------- */
   const isFixed = formData.price_type === "fixed";

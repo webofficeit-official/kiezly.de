@@ -75,8 +75,20 @@ export default function Page() {
             newErrors.contact_phone = "Phone number is required.";
         }
 
-        if (contactMethod === "external_link" && !formData.contact_link?.trim()) {
-            newErrors.contact_link = "External link is required.";
+        if (contactMethod === "external_link") {
+            if (!formData.contact_link?.trim()) {
+                newErrors.contact_link = "External link is required.";
+            } else {
+                try {
+                    const url = new URL(formData.contact_link.trim());
+                    // allow only http and https
+                    if (!["http:", "https:"].includes(url.protocol)) {
+                        newErrors.contact_link = "Only HTTP or HTTPS links are allowed.";
+                    }
+                } catch {
+                    newErrors.contact_link = "Please enter a valid URL (e.g. https://example.com)";
+                }
+            }
         }
 
         setErrors(newErrors);
@@ -125,7 +137,7 @@ export default function Page() {
         }
     };
 
-    const handlePrev = () => router.push(`/wizard/work-details?slug=${slug}`);
+    const handlePrev = () => router.push(`/post-job/work-details?slug=${slug}`);
 
     /* ----------------------------- Render ----------------------------- */
     return (
@@ -260,7 +272,7 @@ export default function Page() {
                                         save
                                         onSave={handleSave}
                                         isNextLoading={updateJobMutation.isPending}
-                                         mode={jobId ? "edit" : mode}
+                                        mode={jobId ? "edit" : mode}
                                     />
                                 </div>
                             </div>

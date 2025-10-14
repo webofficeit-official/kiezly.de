@@ -111,12 +111,12 @@ export default function Page() {
                 await updateJobMutation.mutateAsync(payload, {
                     onSuccess: () => {
                         // toast.success("Job details updated!");
-                        router.push(`/wizard/location-details?slug=${formData.slug || slug}`);
+                        router.push(`/post-job/location-details?slug=${formData.slug || slug}`);
                     },
                     onError: () => toast.error("Failed to update job details."),
                 });
             } else {
-                router.push(`/wizard/location-details?slug=${formData.slug || slug}`);
+                router.push(`/post-job/location-details?slug=${formData.slug || slug}`);
             }
         } catch (err) {
             console.error("Error updating job details:", err);
@@ -237,7 +237,7 @@ export default function Page() {
                                 {/* Navigation */}
                                 <WizardDirection
                                     prev
-                                    prevLink={`/wizard/basic-details?slug=${formData?.slug || slug}`}
+                                    prevLink={`/post-job/basic-details?slug=${formData?.slug || slug}`}
                                     next
                                     onNext={handleNext}
                                     isNextLoading={updateJobMutation.isPending}

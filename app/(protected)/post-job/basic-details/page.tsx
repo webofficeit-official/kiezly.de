@@ -164,7 +164,7 @@ export default function Page() {
                     setMode("edit");
                     updateForm({ slug: res.data.slug });
                     //   toast.success("Job created successfully!");
-                    router.push(`/wizard/job-details?slug=${res.data.slug}`);
+                    router.push(`/post-job/job-details?slug=${res.data.slug}`);
                 }
             }
             // --- UPDATE JOB ---
@@ -175,7 +175,7 @@ export default function Page() {
                         setJobId(res?.job?.id);
                         updateForm({ slug: updatedSlug });
                         // toast.success("Job updated successfully!");
-                        router.push(`/wizard/job-details?slug=${updatedSlug}`);
+                        router.push(`/post-job/job-details?slug=${updatedSlug}`);
                     },
                 });
             }
