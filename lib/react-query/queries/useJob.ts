@@ -67,19 +67,23 @@ export function useJobCollections() {
   });
 }
 
-export const useJobs = (filters: Record<string, any>) => {
+export const useJobs = (filters: Record<string, any>, options?: any) => {
   return useQuery<JobApiResponse>({
     queryKey: ["jobs", filters],
     queryFn: () => getJobsApi(filters),
     keepPreviousData: true, // works here
+    staleTime: 5000, // optional — prevents refetch on tab switch
+    ...options,
   } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
 };
 
-export const myJobs = (filters: Record<string, any>) => {
+export const myJobs = (filters: Record<string, any>, options?: Partial<UseQueryOptions<JobApiResponse>>) => {
   return useQuery<JobApiResponse>({
     queryKey: ["jobs", filters],
     queryFn: () => getMyJobsApi(filters),
     keepPreviousData: true, // works here
+    enabled: options?.enabled ?? true, // ✅ defaults to same behavior
+    ...options,
   } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
 };
 

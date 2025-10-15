@@ -158,36 +158,17 @@ export default function JobFilterPage({
     pageSize?: number;
 }) {
     const { user } = useAuth();
-    const [filters, setFilters] = useState<Filters>(() => {
-        if (typeof window === "undefined") return DEFAULT_FILTERS;
-        const initial = fromQuery(window.location.search);
-        // If user has lat/lng in context, override them with defaults
-        if (user && user?.lat && user?.lng) {
-            return {
-                ...initial,
-                lat: user.lat,
-                lng: user.lng,
-                radius_km: user?.lat && user?.lng ? (initial.radius_km || DEFAULT_FILTERS.radius_km) : undefined,
-            };
-        }
-
-        return initial;
-    });
-
-    useEffect(() => {
-        if (user?.lat && user?.lng) {
-            setFilters((f) => ({
-                ...f,
-                lat: user.lat,
-                lng: user.lng,
-                radius_km: f.radius_km || DEFAULT_FILTERS.radius_km,
-            }));
-        }
-    }, [user]);
-
+    const router = useRouter();
+    const [filters, setFilters] = useState<Filters>(() =>
+        typeof window === "undefined" ? DEFAULT_FILTERS : { ...DEFAULT_FILTERS }
+    );
     const [page, setPage] = useState(1);
     const [localPageSize, setLocalPageSize] = useState(pageSize);
-    const router = useRouter();
+    const [savedJobs, setSavedJobs] = useState([]);
+
+    const canModifyHistory = useCanModifyHistory();
+    // Debounce high-churn fields (search query)
+    const debouncedFilters = useDebounced(filters, 300);
     const buildApiFilters = (filters: Filters, page: number, pageSize: number) => {
         const payload: Record<string, any> = { page, page_size: pageSize };
 
@@ -210,18 +191,29 @@ export default function JobFilterPage({
         return payload;
     };
 
-    const apiFilters = useMemo(() => buildApiFilters(filters, page, localPageSize), [filters, page, localPageSize]);
-    const { data: collections, isLoading: isCollectionsLoading, isError: isCollectionsError } = useJobCollections();
-    const { data, isLoading, error } = useJobs(apiFilters);
+    const apiFilters = useMemo(() => buildApiFilters(debouncedFilters, page, localPageSize), [debouncedFilters, page, localPageSize]);
+
+    const { data: collections, isLoading: isCollectionsLoading } = useJobCollections();
+    const { data, isLoading, error, isFetching } = useJobs(apiFilters, { keepPreviousData: true });
+    const dataSource = data?.data?.items ?? jobs ?? [];
     const total = data?.data?.total_items ?? 0;
     const totalPages = data?.data?.total_pages ?? 1;
 
-    const [savedJobs, setSavedJobs] = useState([]);
+    const isInitialLoad = !data && (isLoading || isCollectionsLoading);
+    useEffect(() => {
+        if (user?.lat && user?.lng) {
+            setFilters((f) => ({
+                ...f,
+                lat: user.lat,
+                lng: user.lng,
+                radius_km: f.radius_km || DEFAULT_FILTERS.radius_km,
+            }));
+        }
+    }, [user?.lat, user?.lng]);
 
-    const canModifyHistory = useCanModifyHistory();
 
-    // Debounce high-churn fields (search query)
-    const debouncedFilters = useDebounced(filters, 300);
+
+
 
     useEffect(() => {
         onChange?.(debouncedFilters);
@@ -287,11 +279,7 @@ export default function JobFilterPage({
     const resetAll = () => setFilters(DEFAULT_FILTERS);
 
 
-    const dataSource: JobList[] = useMemo(() => {
-        if (data?.data?.items) return data.data.items as JobList[];
-        if (jobs && jobs.length) return jobs;
-        return []
-    }, [data, jobs]);
+
 
 
     const pageSlice = dataSource;
@@ -349,26 +337,11 @@ export default function JobFilterPage({
         }
     };
 
-    const loading = isLoading || isCollectionsLoading;
-    if (loading) {
-        return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                <div className="col-span-1 space-y-4">
-                    <div className="h-10 bg-gray-200 rounded-lg animate-pulse" />
-                    <div className="h-10 bg-gray-200 rounded-lg animate-pulse" />
-                    <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
-                </div>
-                <div className="col-span-2 space-y-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="h-32 bg-gray-200 rounded-2xl animate-pulse"
-                        />
-                    ))}
-                </div>
-            </div>
-        );
-    }
+
+    const isFirstLoad = !data && (isLoading || isCollectionsLoading);
+
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -633,107 +606,120 @@ export default function JobFilterPage({
                             />
                         </div>
                     </div>
-
-                    {/* Job cards */}
-                    <div className="grid grid-cols-1 gap-4">
-                        {pageSlice.map((job) => (
-                            <article
-                                key={job.id}
-                                className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
-                            >
-                                {/* Main content */}
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-base sm:text-lg font-semibold truncate cursor-pointer" onClick={() => router.push(`/jobs/${job.slug}`)}>{job.title}</h3>
-                                    {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
-
-                                    <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
-                                        <span className="inline-flex items-center">
-                                            {job?.price_type === "range" && job?.price_min && job?.price_max
-                                                ? `${job.currency} ${job.price_min} – ${job.price_max}`
-                                                : job?.price_value
-                                                    ? `${job.currency} ${job.price_value}`
-                                                    : "Not specified"}
-                                            {job?.price_type && (
-                                                <span className="inline-flex items-center gap-1">/ {job.price_type}</span>
-                                            )}
-                                        </span>
-                                        <span>
-                                            •{" "}
-                                            {[job?.street, job?.city, job?.state, job?.postal_code, job?.countries?.name]
-                                                .filter(Boolean)
-                                                .join(", ")}
-                                        </span>
-                                        {job?.distance && <span>• {(job.distance / 1000).toFixed(2)} km away</span>}
-                                        {job?.category_name && <span>• {job.category_name}</span>}
-                                        {job?.job_type && <span>• {job.job_type.join(", ")}</span>}
-                                        {job?.job_experience.length > 0 && (
-                                            <span>• {job.job_experience.join(", ")}</span>
-                                        )}
-                                        {job?.starts_at && (
-                                            <span className="inline-flex items-center gap-1">
-                                                <Clock className="h-3 w-3" /> Start: {dayjs(job.starts_at).format("MMM D, YYYY")}
-                                            </span>
-                                        )}
-                                        {job?.ends_at && (
-                                            <span className="inline-flex items-center gap-1">
-                                                <Clock className="h-3 w-3" /> End: {dayjs(job.ends_at).format("MMM D, YYYY")}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Job tag badges */}
-                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                        {job.tags?.length > 0 &&
-                                            job.tags.map((tag) => (
-                                                <span key={tag.id} className="px-2 py-1 bg-gray-100 rounded-full">
-                                                    {tag.name}
-                                                </span>
-                                            )
-                                            )}
-                                    </div>
-
-                                    <div
-                                        className="mt-2 text-sm text-gray-600 line-clamp-2"
-                                        dangerouslySetInnerHTML={{ __html: job.description }}
-                                    />
-                                </div>
-
-                                {/* Right-side container: posted date top, button bottom */}
-                                <div className="flex flex-col justify-between items-end min-h-[80px]">
-                                    <div className="text-xs text-gray-500">
-                                        {isNew(job?.created_at) ? (
-                                            <Button variant="outline" className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"><span className="h-3">New </span></Button>
-                                        ) : (
-                                            "Posted " + new Date(job?.created_at).toLocaleDateString()
-                                        )}
-                                        {savedJobs.some((j) => j.id === job.id) ? (
-                                            <Button
-                                                variant="default"
-                                                className="rounded-xl px-2 py-1 text-xs flex items-center gap-1 bg-green-50 text-green-700 border border-green-200"
-                                                onClick={() => handleUnSaveJob(job.id)}
-                                            >
-                                                <BookmarkCheck className="h-3 w-3" />
-                                            </Button>
-                                        ) : (
-                                            <Button variant="outline" className="rounded-xl px-2 py-1 text-xs flex items-center gap-1" onClick={() => handleSaveJob(job.id)}><Bookmark className="h-3 w-3" /></Button>
-                                        )}
-                                    </div>
-                                    <button
-                                        className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
-                                        onClick={() => router.push(`/jobs/${job.slug}`)}
+                    <div className="relative">
+                        {isFetching && data && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[1px] z-20 rounded-2xl">
+                                <div className="h-6 w-6 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+                            </div>
+                        )}
+                        {/* Job cards */}
+                        {isInitialLoad ? (
+                            <div className="flex flex-col gap-4">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="h-32 bg-gray-200 rounded-2xl animate-pulse" />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4">
+                                {pageSlice.map((job) => (
+                                    <article
+                                        key={job.id}
+                                        className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
                                     >
-                                        View
-                                    </button>
-                                </div>
-                            </article>
-                        ))}
-                        {pageSlice.length === 0 && (
-                            <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-                                No jobs match your filters.
+                                        {/* Main content */}
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-base sm:text-lg font-semibold truncate cursor-pointer" onClick={() => router.push(`/jobs/${job.slug}`)}>{job.title}</h3>
+                                            {job.subtitle && <p className="text-sm text-gray-500">{job.subtitle}</p>}
+
+                                            <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
+                                                <span className="inline-flex items-center">
+                                                    {job?.price_type === "range" && job?.price_min && job?.price_max
+                                                        ? `${job.currency} ${job.price_min} – ${job.price_max}`
+                                                        : job?.price_value
+                                                            ? `${job.currency} ${job.price_value}`
+                                                            : "Not specified"}
+                                                    {job?.price_type && (
+                                                        <span className="inline-flex items-center gap-1">/ {job.price_type}</span>
+                                                    )}
+                                                </span>
+                                                <span>
+                                                    •{" "}
+                                                    {[job?.street, job?.city, job?.state, job?.postal_code, job?.countries?.name]
+                                                        .filter(Boolean)
+                                                        .join(", ")}
+                                                </span>
+                                                {job?.distance && <span>• {(job.distance / 1000).toFixed(2)} km away</span>}
+                                                {job?.category_name && <span>• {job.category_name}</span>}
+                                                {job?.job_type && <span>• {job.job_type.join(", ")}</span>}
+                                                {job?.job_experience.length > 0 && (
+                                                    <span>• {job.job_experience.join(", ")}</span>
+                                                )}
+                                                {job?.starts_at && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <Clock className="h-3 w-3" /> Start: {dayjs(job.starts_at).format("MMM D, YYYY")}
+                                                    </span>
+                                                )}
+                                                {job?.ends_at && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <Clock className="h-3 w-3" /> End: {dayjs(job.ends_at).format("MMM D, YYYY")}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Job tag badges */}
+                                            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                                {job.tags?.length > 0 &&
+                                                    job.tags.map((tag) => (
+                                                        <span key={tag.id} className="px-2 py-1 bg-gray-100 rounded-full">
+                                                            {tag.name}
+                                                        </span>
+                                                    )
+                                                    )}
+                                            </div>
+
+                                            <div
+                                                className="mt-2 text-sm text-gray-600 line-clamp-2"
+                                                dangerouslySetInnerHTML={{ __html: job.description }}
+                                            />
+                                        </div>
+
+                                        {/* Right-side container: posted date top, button bottom */}
+                                        <div className="flex flex-col justify-between items-end min-h-[80px]">
+                                            <div className="text-xs text-gray-500">
+                                                {isNew(job?.created_at) ? (
+                                                    <Button variant="outline" className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"><span className="h-3">New </span></Button>
+                                                ) : (
+                                                    "Posted " + new Date(job?.created_at).toLocaleDateString()
+                                                )}
+                                                {savedJobs.some((j) => j.id === job.id) ? (
+                                                    <Button
+                                                        variant="default"
+                                                        className="rounded-xl px-2 py-1 text-xs flex items-center gap-1 bg-green-50 text-green-700 border border-green-200"
+                                                        onClick={() => handleUnSaveJob(job.id)}
+                                                    >
+                                                        <BookmarkCheck className="h-3 w-3" />
+                                                    </Button>
+                                                ) : (
+                                                    <Button variant="outline" className="rounded-xl px-2 py-1 text-xs flex items-center gap-1" onClick={() => handleSaveJob(job.id)}><Bookmark className="h-3 w-3" /></Button>
+                                                )}
+                                            </div>
+                                            <button
+                                                className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+                                                onClick={() => router.push(`/jobs/${job.slug}`)}
+                                            >
+                                                View
+                                            </button>
+                                        </div>
+                                    </article>
+                                ))}
+                                {pageSlice.length === 0 && (
+                                    <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
+                                        No jobs match your filters.
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
-
                     {/* Pagination */}
                     <nav className="flex items-center justify-between gap-2" aria-label="Pagination">
                         <button
