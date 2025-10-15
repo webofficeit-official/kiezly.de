@@ -25,6 +25,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             "/client": ["client"],
             "/my-profile": ["client", "helper"],
             "/helper": ["helper"],
+            "/post-job": ['client'],
+            "/applied-job": ['helper'],
+            "/saved-job": ['helper']
         };
 
         const rule = Object.entries(roleRules).find(([route]) =>

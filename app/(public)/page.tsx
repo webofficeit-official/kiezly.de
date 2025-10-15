@@ -164,22 +164,22 @@ export default function Page() {
 
           {isLoading ? (
             Array.from({ length: 9 }).map((_, i) => (
-               <Card key={i} className="group hover:shadow-sm">
+              <Card key={i} className="group hover:shadow-sm">
                 <CardContent className="p-5">
-                {/* Icon + name row */}
-                <div className="mb-2 flex items-center gap-2 h-4">
+                  {/* Icon + name row */}
+                  <div className="mb-2 flex items-center gap-2 h-4">
+                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                  </div>
                   <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
-                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
-                </div>
-                <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
-              </CardContent>
+                </CardContent>
               </Card>
             ))
           ) :
-            (categories.map(({ id, name }) => (
+            (categories.map(({ id, name,slug}) => (
               <Card key={id} className="group hover:shadow-sm">
                 <CardContent className="p-5">
                   <div className="mb-2 flex items-center gap-2">
@@ -188,7 +188,12 @@ export default function Page() {
                   </div>
                   <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
                   <div className="mt-3">
-                    <button className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Post a {name} job</button>
+                    <button
+                      onClick={() => router.push(`/post-job/basic-details?category=${slug}`)}
+                      className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
+                      transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">
+                      Post a {name} job
+                    </button>
                   </div>
                 </CardContent>
               </Card>
