@@ -22,6 +22,8 @@ export default function Page() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const slug = searchParams.get("slug");
+    const categorySlug = searchParams.get("category");
+
 
     const { data: basicCollections } = useJobCollections();
     const generateSlugMutation = useGenerateSlug();
@@ -55,6 +57,22 @@ export default function Page() {
             setMode("create");
         }
     }, [slug, existingJob]);
+
+    //  When collections load and in create mode, set default category from URL
+useEffect(() => {
+  if (!slug && categorySlug && basicCollections?.jobCategories && mode==='create') {
+    const matchedCategory = basicCollections?.jobCategories?.find(
+      (cat) =>
+        cat.slug?.toLowerCase() === categorySlug.toLowerCase() ||
+        cat.name?.toLowerCase() === categorySlug.toLowerCase()
+    );
+
+    if (matchedCategory) {
+      updateForm({ category_id: String(matchedCategory.id) });
+    }
+  }
+}, [categorySlug, slug, basicCollections]);
+
 
     const normalizeJobForForm = (job: any) => ({
         title: job.title || "",
