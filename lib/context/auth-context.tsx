@@ -116,13 +116,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    if (loading && getCookie("refreshToken")) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
+                <Loader />
+            </div>
+        );
+    }
+
     return (
         <AuthContext.Provider value={{ user, login, logout, loading, loadUser }}>
-            {loading || (user && ["/signin", "/signup"].includes(pathname)) ? (
-                <Loader />
-            ) : (
-                children
-            )}
+            {children}
         </AuthContext.Provider>
     );
 }

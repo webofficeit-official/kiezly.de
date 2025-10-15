@@ -51,23 +51,23 @@ const DEFAULT_FILTERS: Filters = {
 };
 
 const postedOptions = [
-  { label: "Any time", value: "any" },
-  { label: "Last 24 hours", value: "1" },
-  { label: "Last 7 days", value: "7" },
-  { label: "Last 30 days", value: "30" },
+    { label: "Any time", value: "any" },
+    { label: "Last 24 hours", value: "1" },
+    { label: "Last 7 days", value: "7" },
+    { label: "Last 30 days", value: "30" },
 ];
 
 const sortByOptions = [
-  { label: "Newest", value: "new" },
-  { label: "Pay: High → Low", value: "price_desc" },
-  { label: "Pay: Low → High", value: "price_asc" },
+    { label: "Newest", value: "new" },
+    { label: "Pay: High → Low", value: "price_desc" },
+    { label: "Pay: Low → High", value: "price_asc" },
 ];
 
 const perPageOptions = [
-  { label: "5", value: "5" },
-  { label: "10", value: "10" },
-  { label: "25", value: "25" },
-  { label: "50", value: "50" },
+    { label: "5", value: "5" },
+    { label: "10", value: "10" },
+    { label: "25", value: "25" },
+    { label: "50", value: "50" },
 ];
 
 // ---- Utilities ----
@@ -114,11 +114,11 @@ export const fromQuery = (qs: string): Filters => {
 };
 
 const isNew = (created_at: string) => {
-  if (!created_at) return false;
-  const createdAt = new Date(created_at).getTime();
-  const now = Date.now();
-  const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
-  return diffHours <= 72; // less than or equal 72 hours
+    if (!created_at) return false;
+    const createdAt = new Date(created_at).getTime();
+    const now = Date.now();
+    const diffHours = (now - createdAt) / (1000 * 60 * 60); // convert ms to hours
+    return diffHours <= 72; // less than or equal 72 hours
 };
 
 
@@ -215,7 +215,7 @@ export default function JobFilterPage({
     const { data, isLoading, error } = useJobs(apiFilters);
     const total = data?.data?.total_items ?? 0;
     const totalPages = data?.data?.total_pages ?? 1;
-    
+
     const [savedJobs, setSavedJobs] = useState([]);
 
     const canModifyHistory = useCanModifyHistory();
@@ -232,13 +232,13 @@ export default function JobFilterPage({
     }, [debouncedFilters]);
 
     useEffect(() => {
-        if(user) {
+        if (user) {
             getSavedJobs().then((data) => {
                 setSavedJobs(data.jobs)
             }).catch((err) => console.log(err))
         } else {
             const localStoredJobs = localStorage.getItem("saved-jobs")
-            if(localStoredJobs) {
+            if (localStoredJobs) {
                 setSavedJobs(JSON.parse(localStoredJobs))
             }
         }
@@ -314,12 +314,12 @@ export default function JobFilterPage({
     const handleSaveJob = async (jobId: string) => {
         try {
             setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
-            if(user) {
+            if (user) {
                 await addJobAsFavorite({ jobId });
             } else {
                 const localStoredJobs = localStorage.getItem("saved-jobs")
                 let savedJobsLocal = []
-                if(localStoredJobs) {
+                if (localStoredJobs) {
                     savedJobsLocal = JSON.parse(localStoredJobs)
                 }
                 localStorage.setItem('saved-jobs', JSON.stringify([...savedJobsLocal, { id: jobId }]))
@@ -333,12 +333,12 @@ export default function JobFilterPage({
     const handleUnSaveJob = async (jobId: string) => {
         try {
             setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
-            if(user) {
+            if (user) {
                 await unsaveJobAsFavorite(jobId);
             } else {
                 const localStoredJobs = localStorage.getItem("saved-jobs")
                 let savedJobsLocal = []
-                if(localStoredJobs) {
+                if (localStoredJobs) {
                     savedJobsLocal = JSON.parse(localStoredJobs)
                 }
                 localStorage.setItem('saved-jobs', JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId)))
@@ -348,6 +348,25 @@ export default function JobFilterPage({
             setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
         }
     };
+
+    const loading = isLoading || isCollectionsLoading;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 text-gray-900 p-6 animate-pulse">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="space-y-4">
+                        {/* <div className="h-10 bg-gray-200 rounded-xl" /> */}
+                        <div className="h-96 bg-gray-200 rounded-xl" />
+                    </div>
+                    <div className="lg:col-span-2 space-y-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="h-32 bg-gray-200 rounded-2xl" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900"> {/* Content */}
@@ -601,14 +620,14 @@ export default function JobFilterPage({
                         </div>
                         <div className="flex items-center gap-2">
                             <Select
-                              label="Per page"
-                              value={String(localPageSize)}
-                              onChange={(v: string) => {
-                                const newSize = Number(v);
-                                setLocalPageSize(newSize); // update local state
-                                setPage(1);                 // reset page to 1
-                              }}
-                              options={perPageOptions}
+                                label="Per page"
+                                value={String(localPageSize)}
+                                onChange={(v: string) => {
+                                    const newSize = Number(v);
+                                    setLocalPageSize(newSize); // update local state
+                                    setPage(1);                 // reset page to 1
+                                }}
+                                options={perPageOptions}
                             />
                         </div>
                     </div>
@@ -630,8 +649,8 @@ export default function JobFilterPage({
                                             {job?.price_type === "range" && job?.price_min && job?.price_max
                                                 ? `${job.currency} ${job.price_min} – ${job.price_max}`
                                                 : job?.price_value
-                                                ? `${job.currency} ${job.price_value}`
-                                                : "Not specified"}
+                                                    ? `${job.currency} ${job.price_value}`
+                                                    : "Not specified"}
                                             {job?.price_type && (
                                                 <span className="inline-flex items-center gap-1">/ {job.price_type}</span>
                                             )}
@@ -639,8 +658,8 @@ export default function JobFilterPage({
                                         <span>
                                             •{" "}
                                             {[job?.street, job?.city, job?.state, job?.postal_code, job?.countries?.name]
-                                              .filter(Boolean)
-                                              .join(", ")}
+                                                .filter(Boolean)
+                                                .join(", ")}
                                         </span>
                                         {job?.distance && <span>• {(job.distance / 1000).toFixed(2)} km away</span>}
                                         {job?.category_name && <span>• {job.category_name}</span>}
@@ -659,7 +678,7 @@ export default function JobFilterPage({
                                             </span>
                                         )}
                                     </div>
-                                    
+
                                     {/* Job tag badges */}
                                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                         {job.tags?.length > 0 &&
@@ -668,15 +687,15 @@ export default function JobFilterPage({
                                                     {tag.name}
                                                 </span>
                                             )
-                                        )}
+                                            )}
                                     </div>
-                                      
+
                                     <div
                                         className="mt-2 text-sm text-gray-600 line-clamp-2"
                                         dangerouslySetInnerHTML={{ __html: job.description }}
                                     />
                                 </div>
-                                    
+
                                 {/* Right-side container: posted date top, button bottom */}
                                 <div className="flex flex-col justify-between items-end min-h-[80px]">
                                     <div className="text-xs text-gray-500">
@@ -698,8 +717,8 @@ export default function JobFilterPage({
                                         )}
                                     </div>
                                     <button
-                                      className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
-                                      onClick={() => router.push(`/jobs/${job.slug}`)}
+                                        className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+                                        onClick={() => router.push(`/jobs/${job.slug}`)}
                                     >
                                         View
                                     </button>
@@ -768,51 +787,51 @@ export default function JobFilterPage({
 type Option = { label: string; value: string };
 
 export function Select({
-  label,
-  value,
-  onChange,
-  options,
-  width = "w-full", // ✅ default width (Tailwind class)
+    label,
+    value,
+    onChange,
+    options,
+    width = "w-full", // ✅ default width (Tailwind class)
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: Option[];
-  width?: string; // ✅ optional prop for width
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    options: Option[];
+    width?: string; // ✅ optional prop for width
 }) {
-  return (
-    <div className={`text-sm ${width}`}>
-      <span className="mb-1 block text-gray-700">{label}</span>
+    return (
+        <div className={`text-sm ${width}`}>
+            <span className="mb-1 block text-gray-700">{label}</span>
 
-      <Listbox value={value} onChange={onChange}>
-        <div className="relative">
-          <Listbox.Button
-            className={`flex ${width} items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black`}
-          >
-            {options.find((o) => o.value === value)?.label || "Select"}
-            <ChevronDown className="h-4 w-4 text-gray-400" />
-          </Listbox.Button>
+            <Listbox value={value} onChange={onChange}>
+                <div className="relative">
+                    <Listbox.Button
+                        className={`flex ${width} items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black`}
+                    >
+                        {options.find((o) => o.value === value)?.label || "Select"}
+                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                    </Listbox.Button>
 
-          <Listbox.Options
-            className={`absolute z-10 mt-2 max-h-60 ${width} overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none`}
-          >
-            {options.map((o) => (
-              <Listbox.Option
-                key={o.value}
-                value={o.value}
-                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
-              >
-                {({ selected }) => (
-                  <div className="flex items-center justify-between">
-                    <span>{o.label}</span>
-                    {selected && <Check className="h-4 w-4 text-gray-600" />}
-                  </div>
-                )}
-              </Listbox.Option>
-            ))}
-          </Listbox.Options>
+                    <Listbox.Options
+                        className={`absolute z-10 mt-2 max-h-60 ${width} overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none`}
+                    >
+                        {options.map((o) => (
+                            <Listbox.Option
+                                key={o.value}
+                                value={o.value}
+                                className="cursor-pointer select-none px-3 py-2 text-sm text-gray-700 ui-active:bg-gray-100"
+                            >
+                                {({ selected }) => (
+                                    <div className="flex items-center justify-between">
+                                        <span>{o.label}</span>
+                                        {selected && <Check className="h-4 w-4 text-gray-600" />}
+                                    </div>
+                                )}
+                            </Listbox.Option>
+                        ))}
+                    </Listbox.Options>
+                </div>
+            </Listbox>
         </div>
-      </Listbox>
-    </div>
-  );
+    );
 }
