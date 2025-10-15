@@ -99,10 +99,10 @@ export default function Page() {
                       <div className="mb-1 flex items-center gap-2">
                         <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
-                       <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                        <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
                       </div>
-                     <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                      <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
                     </div>
                   ))
@@ -161,20 +161,38 @@ export default function Page() {
           <p className="text-neutral-600">From quick chores to recurring help.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {categories.map(({ id, name }) => (
-            <Card key={id} className="group hover:shadow-sm">
-              <CardContent className="p-5">
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">{getIconForCategory(name)}</div>
-                  <h3 className="font-medium">{name}</h3>
+
+          {isLoading ? (
+            Array.from({ length: 9 }).map((_, i) => (
+               <Card key={i} className="group hover:shadow-sm">
+                <CardContent className="p-5">
+                {/* Icon + name row */}
+                <div className="mb-2 flex items-center gap-2 h-4">
+                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
                 </div>
-                <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
-                <div className="mt-3">
-                  <button className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Post a {name} job</button>
-                </div>
+                <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
               </CardContent>
-            </Card>
-          ))}
+              </Card>
+            ))
+          ) :
+            (categories.map(({ id, name }) => (
+              <Card key={id} className="group hover:shadow-sm">
+                <CardContent className="p-5">
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">{getIconForCategory(name)}</div>
+                    <h3 className="font-medium">{name}</h3>
+                  </div>
+                  <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
+                  <div className="mt-3">
+                    <button className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Post a {name} job</button>
+                  </div>
+                </CardContent>
+              </Card>
+            )))}
         </div>
       </section>
 
