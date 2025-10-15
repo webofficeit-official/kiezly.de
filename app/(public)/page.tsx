@@ -16,17 +16,22 @@ export default function Page() {
   const [what, setWhat] = React.useState('')
   const [where, setWhere] = React.useState('')
   const [categories, setCategories] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
 
   const doSearch = () => {
     window.location.href = `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`;
   }
 
   React.useEffect(() => {
+    setIsLoading(true);
     collections.mutate({}, {
       onSuccess: (data) => {
         setCategories(data.data.jobCategories)
+        setIsLoading(false);
       },
       onError: (err: any) => {
+        setIsLoading(false);
       }
     });
   }, [])
@@ -84,12 +89,30 @@ export default function Page() {
                 <CardTitle className="text-base text-neutral-700">Popular right now near you</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3 overflow-auto" style={{ height: '320px' }}>
-                {categories.map(({ id, name }) => (
-                  <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`}>
-                    <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
-                    <div className="text-xs text-neutral-500">from €15/h</div>
-                  </div>
-                ))}
+                {isLoading ? (
+                  Array.from({ length: 9 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-2xl border p-3 hover:shadow-sm"
+                    >
+                      {/* Icon + name row */}
+                      <div className="mb-1 flex items-center gap-2">
+                        <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                       <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                      </div>
+                     <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                    </div>
+                  ))
+                ) :
+                  (categories.map(({ id, name }) => (
+                    <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`}>
+                      <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
+                      <div className="text-xs text-neutral-500">from €15/h</div>
+                    </div>
+                  )))}
               </CardContent>
             </Card>
           </div>
