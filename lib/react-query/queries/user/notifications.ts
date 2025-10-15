@@ -11,3 +11,13 @@ export const getNotifications = (): UseMutationResult<
       apiClient.get("/profile/notifications").then(res => res.data),
   });
 };
+
+export const updateNotification = (): UseMutationResult<
+  NotificationsResponse,   
+  Error       
+> => {
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiClient.get(`/profile/notification/${id}`).then(res => res.data),
+  });
+};
