@@ -110,6 +110,27 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
     setSort(newSort);
     setPage(1); // reset to first page when sort changes
   };
+
+
+  if (isLoading || isLoadingApplicants) {
+  return (
+    <div className="min-h-screen bg-gray-50 p-6 animate-pulse">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* header skeleton */}
+        <div className="h-12 bg-gray-200 rounded-xl" />
+        {/* filters */}
+        <div className="h-20 bg-gray-200 rounded-xl" />
+        {/* applicant cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-64 bg-gray-200 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">

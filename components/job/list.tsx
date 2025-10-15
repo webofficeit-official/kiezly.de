@@ -352,17 +352,19 @@ export default function JobFilterPage({
     const loading = isLoading || isCollectionsLoading;
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 text-gray-900 p-6 animate-pulse">
-                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="space-y-4">
-                        {/* <div className="h-10 bg-gray-200 rounded-xl" /> */}
-                        <div className="h-96 bg-gray-200 rounded-xl" />
-                    </div>
-                    <div className="lg:col-span-2 space-y-4">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="h-32 bg-gray-200 rounded-2xl" />
-                        ))}
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                <div className="col-span-1 space-y-4">
+                    <div className="h-10 bg-gray-200 rounded-lg animate-pulse" />
+                    <div className="h-10 bg-gray-200 rounded-lg animate-pulse" />
+                    <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
+                </div>
+                <div className="col-span-2 space-y-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="h-32 bg-gray-200 rounded-2xl animate-pulse"
+                        />
+                    ))}
                 </div>
             </div>
         );
