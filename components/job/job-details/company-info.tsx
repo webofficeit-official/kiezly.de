@@ -13,7 +13,7 @@ export default function CompanyInfoCard({ job, role = "helper" }: { job: any, ro
                         </h2>
                         {job.client.avatar_url ? (
                             <>
-                                <img src={job.client?.avatar_url || "https://placehold.co/96x96"} alt={job.client?.display_name} className="h-100 w-full rounded-lg object-cover" />
+                                <img src={job.client?.avatar_url || "https://placehold.co/96x96"} alt={job.client?.display_name} className="rounded-lg object-cover" />
                             </>
                         ) : (
                             <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-full text-gray-600 font-semibold">
@@ -28,7 +28,7 @@ export default function CompanyInfoCard({ job, role = "helper" }: { job: any, ro
                             <p className="font-medium text-lg">Contact Method</p>
                             {(job.contact_method == "email_relay" || job.contact_method == "direct_email") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`mailto:${job.contact_email}`}>{job.contact_email}</a></p>}
                             {(job.contact_method == "phone") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`tel:${job.contact_phone}`}>{job.contact_phone}</a></p>}
-                            {(job.contact_method == "external_link") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={job.contact_link} target="__blank">{job.contact_link}</a></p>}
+                            {(job.contact_method == "external_link") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={job.contact_link} target="__blank">Click here</a></p>}
                         </div>
                     </div>
                     <div className={`col-span-${role == "client" ? "12" : "7"} p-6`}>
