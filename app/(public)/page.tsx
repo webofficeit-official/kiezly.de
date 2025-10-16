@@ -28,14 +28,14 @@ export default function Page() {
   const [isLoading, setIsLoading] = React.useState(true);
 
   const doSearch = () => {
-    window.location.href = `/jobs?q=${encodeURIComponent(
-      what
-    )}&city=${encodeURIComponent(where)}`;
+    router.push(
+      `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`
+    );
   };
 
-const doCategory = (slug) => {
-  window.location.href = `/jobs?category=${encodeURIComponent(slug)}`;
-};
+  const doCategory = (slug) => {
+    window.location.href = `/jobs?category=${encodeURIComponent(slug)}`;
+  };
 
   React.useEffect(() => {
     setIsLoading(true);
@@ -57,6 +57,13 @@ const doCategory = (slug) => {
 
   const { user } = useAuth();
 
+  const doBrowserCategoryRedirect = (slug) => {
+    if (user?.role === "client") {
+      router.push(`/post-job/basic-details?category=${slug}`);
+    } else {
+      router.push(`/jobs?category=${encodeURIComponent(slug)}`);
+    }
+  };
   return (
     <main>
       <section className="mx-auto max-w-6xl px-4 pb-10 pt-12">
@@ -264,15 +271,13 @@ const doCategory = (slug) => {
                     </p>
                     <div className="mt-3">
                       <button
-                        onClick={() =>
-                          router.push(
-                            `/post-job/basic-details?category=${slug}`
-                          )
-                        }
+                        onClick={() => doBrowserCategoryRedirect(slug)}
                         className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
                       transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
                       >
-                        Post a {name} job
+                        {user?.role === "client"
+                          ? `Post a ${name} job`
+                          : `Find ${name} jobs`}
                       </button>
                     </div>
                   </CardContent>
