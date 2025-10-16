@@ -1,12 +1,9 @@
 "use client";
 import { useJobCollections, useJobs } from "@/lib/react-query/queries/useJob";
 import { Filters, JobList } from "@/lib/types/job";
-import dayjs from "dayjs";
-import { Bookmark, BookmarkCheck, Clock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
-import { Button } from "../ui/button";
 import {
   addJobAsFavorite,
   getSavedJobs,
