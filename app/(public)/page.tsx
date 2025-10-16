@@ -156,7 +156,7 @@ const doCategory = (slug) => {
                   : categories.map(({ id, name, slug }) => (
                       <div
                         key={id}
-                        className="rounded-2xl border p-3 hover:shadow-sm"
+                        className="rounded-2xl border p-3 hover:shadow-sm cursor-pointer"
                         onClick={() => doCategory(slug)}
                       >
                         <div className="mb-2 flex items-center gap-2">
