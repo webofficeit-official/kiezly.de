@@ -23,6 +23,10 @@ export default function Page() {
     window.location.href = `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`;
   }
 
+  const doCategory = (id) => {
+    window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`;
+  }
+
   React.useEffect(() => {
     setIsLoading(true);
     collections.mutate({}, {
@@ -108,7 +112,7 @@ export default function Page() {
                   ))
                 ) :
                   (categories.map(({ id, name }) => (
-                    <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`}>
+                    <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => doCategory(id)}>
                       <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
                       <div className="text-xs text-neutral-500">from €15/h</div>
                     </div>
