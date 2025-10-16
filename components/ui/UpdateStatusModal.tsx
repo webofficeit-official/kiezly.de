@@ -1,9 +1,9 @@
 // components/modals/UpdateStatusModal.jsx (Example structure)
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Select } from '../job/list';
 import { useUpdateApplicantStatus } from '@/lib/react-query/queries/apply-job';
 import toast from 'react-hot-toast';
+import { Select } from '../job/job-filter-select/select-option';
 // Assuming you have a Select component for the status change
 
 const statusOptions = [

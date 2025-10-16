@@ -1,48 +1,61 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { ShieldCheck, MapPin, Search, ArrowRight, CheckCircle2, Clock, FileText, Send } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useRouter } from 'next/navigation'
-import { useCollections } from '@/lib/react-query/queries/user/account'
-import { getIconForCategory } from '@/components/ui/icon-category'
-import { useAuth } from '@/lib/context/auth-context'
+import React from "react";
+import {
+  ShieldCheck,
+  MapPin,
+  Search,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Send,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { useCollections } from "@/lib/react-query/queries/user/account";
+import { getIconForCategory } from "@/components/ui/icon-category";
+import { useAuth } from "@/lib/context/auth-context";
 
 export default function Page() {
   const collections = useCollections();
-  const [what, setWhat] = React.useState('')
-  const [where, setWhere] = React.useState('')
+  const [what, setWhat] = React.useState("");
+  const [where, setWhere] = React.useState("");
   const [categories, setCategories] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
-
   const doSearch = () => {
-    window.location.href = `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`;
-  }
+    window.location.href = `/jobs?q=${encodeURIComponent(
+      what
+    )}&city=${encodeURIComponent(where)}`;
+  };
 
-  const doCategory = (id) => {
-    window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`;
-  }
+const doCategory = (slug) => {
+  window.location.href = `/jobs?category=${encodeURIComponent(slug)}`;
+};
 
   React.useEffect(() => {
     setIsLoading(true);
-    collections.mutate({}, {
-      onSuccess: (data) => {
-        setCategories(data.data.jobCategories)
-        setIsLoading(false);
-      },
-      onError: (err: any) => {
-        setIsLoading(false);
+    collections.mutate(
+      {},
+      {
+        onSuccess: (data) => {
+          setCategories(data.data.jobCategories);
+          setIsLoading(false);
+        },
+        onError: (err: any) => {
+          setIsLoading(false);
+        },
       }
-    });
-  }, [])
+    );
+  }, []);
 
   const router = useRouter();
 
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   return (
     <main>
@@ -50,10 +63,14 @@ export default function Page() {
         <div className="grid items-center gap-10 md:grid-cols-2">
           <div>
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
-              Find trusted help for <span className="underline decoration-neutral-300">everyday mini‑jobs</span>
+              Find trusted help for{" "}
+              <span className="underline decoration-neutral-300">
+                everyday mini‑jobs
+              </span>
             </h1>
             <p className="mt-3 text-neutral-600 md:text-lg">
-              Babysitting, cleaning, pet sitting, senior support and more — book local, verified helpers in minutes.
+              Babysitting, cleaning, pet sitting, senior support and more — book
+              local, verified helpers in minutes.
             </p>
 
             <Card className="mt-6 shadow-sm">
@@ -62,61 +79,95 @@ export default function Page() {
                   <div>
                     <Label className="mb-1">What</Label>
                     <div className="relative">
-                      <Input placeholder="e.g., Babysitting" value={what} onChange={(e) => setWhat(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && doSearch()} />
+                      <Input
+                        placeholder="e.g., Babysitting"
+                        value={what}
+                        onChange={(e) => setWhat(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && doSearch()}
+                      />
                     </div>
                   </div>
                   <div>
                     <Label className="mb-1">Where</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                      <Input className="pl-9" placeholder="City or postcode" value={where} onChange={(e) => setWhere(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && doSearch()} />
+                      <Input
+                        className="pl-9"
+                        placeholder="City or postcode"
+                        value={where}
+                        onChange={(e) => setWhere(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && doSearch()}
+                      />
                     </div>
                   </div>
                   <div className="flex items-end">
-                    <Button className="w-full" onClick={doSearch}><Search className="mr-2 h-4 w-4" /> Search</Button>
+                    <Button className="w-full" onClick={doSearch}>
+                      <Search className="mr-2 h-4 w-4" /> Search
+                    </Button>
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-neutral-500">Tip: use your neighborhood (e.g., "Braunschweig, Weststadt") to see nearby helpers.</p>
+                <p className="mt-2 text-xs text-neutral-500">
+                  Tip: use your neighborhood (e.g., "Braunschweig, Weststadt")
+                  to see nearby helpers.
+                </p>
               </CardContent>
             </Card>
 
             <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-neutral-600">
-              <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> ID verified</span>
-              <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> First Aid badge</span>
-              <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> Police certificate (optional)</span>
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 className="h-4 w-4" /> ID verified
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 className="h-4 w-4" /> First Aid badge
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 className="h-4 w-4" /> Police certificate
+                (optional)
+              </span>
             </div>
           </div>
 
           <div className="">
             <Card className="rounded-3xl border-neutral-200 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base text-neutral-700">Popular right now near you</CardTitle>
+                <CardTitle className="text-base text-neutral-700">
+                  Popular right now near you
+                </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3 overflow-auto" style={{ height: '320px' }}>
-                {isLoading ? (
-                  Array.from({ length: 9 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="rounded-2xl border p-3 hover:shadow-sm"
-                    >
-                      {/* Icon + name row */}
-                      <div className="mb-1 flex items-center gap-2">
-                        <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+              <CardContent
+                className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3 overflow-auto"
+                style={{ height: "320px" }}
+              >
+                {isLoading
+                  ? Array.from({ length: 9 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="rounded-2xl border p-3 hover:shadow-sm"
+                      >
+                        {/* Icon + name row */}
+                        <div className="mb-1 flex items-center gap-2">
+                          <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
+                          <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                        </div>
                         <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
                       </div>
-                      <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
-                    </div>
-                  ))
-                ) :
-                  (categories.map(({ id, name }) => (
-                    <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => doCategory(id)}>
-                      <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
-                      <div className="text-xs text-neutral-500">from €15/h</div>
-                    </div>
-                  )))}
+                    ))
+                  : categories.map(({ id, name, slug }) => (
+                      <div
+                        key={id}
+                        className="rounded-2xl border p-3 hover:shadow-sm"
+                        onClick={() => doCategory(slug)}
+                      >
+                        <div className="mb-2 flex items-center gap-2">
+                          {getIconForCategory(name)}
+                          <span className="text-sm font-medium">{name}</span>
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          from €15/h
+                        </div>
+                      </div>
+                    ))}
               </CardContent>
             </Card>
           </div>
@@ -127,33 +178,51 @@ export default function Page() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold">How it works</h2>
-          <p className="text-neutral-600">Simple, fast, and built for mini‑jobs in Germany.</p>
+          <p className="text-neutral-600">
+            Simple, fast, and built for mini‑jobs in Germany.
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><FileText className="h-4 w-4" /></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                <FileText className="h-4 w-4" />
+              </div>
               <h3 className="font-medium">1) Post your job</h3>
-              <p className="mt-1 text-sm text-neutral-600">Describe tasks, time, and pay. Auto‑invite nearby helpers.</p>
+              <p className="mt-1 text-sm text-neutral-600">
+                Describe tasks, time, and pay. Auto‑invite nearby helpers.
+              </p>
             </CardContent>
           </Card>
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Send className="h-4 w-4" /></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                <Send className="h-4 w-4" />
+              </div>
               <h3 className="font-medium">2) Compare applicants</h3>
-              <p className="mt-1 text-sm text-neutral-600">See distance, ratings, badges, and response rate. Chat to align.</p>
+              <p className="mt-1 text-sm text-neutral-600">
+                See distance, ratings, badges, and response rate. Chat to align.
+              </p>
             </CardContent>
           </Card>
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4" /></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
               <h3 className="font-medium">3) Hire with confidence</h3>
-              <p className="mt-1 text-sm text-neutral-600">After hiring, follow the household mini‑job checklist & stay within the monthly cap.</p>
+              <p className="mt-1 text-sm text-neutral-600">
+                After hiring, follow the household mini‑job checklist & stay
+                within the monthly cap.
+              </p>
             </CardContent>
           </Card>
         </div>
         <div className="mt-6">
-          <button onClick={() => router.push("/how-it-works")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
+          <button
+            onClick={() => router.push("/how-it-works")}
+            className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
+          >
             Learn more <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </div>
@@ -162,95 +231,132 @@ export default function Page() {
       <section id="categories" className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold">Browse categories</h2>
-          <p className="text-neutral-600">From quick chores to recurring help.</p>
+          <p className="text-neutral-600">
+            From quick chores to recurring help.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {isLoading
+            ? Array.from({ length: 9 }).map((_, i) => (
+                <Card key={i} className="group hover:shadow-sm">
+                  <CardContent className="p-5">
+                    {/* Icon + name row */}
+                    <div className="mb-2 flex items-center gap-2 h-4">
+                      <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
-          {isLoading ? (
-            Array.from({ length: 9 }).map((_, i) => (
-              <Card key={i} className="group hover:shadow-sm">
-                <CardContent className="p-5">
-                  {/* Icon + name row */}
-                  <div className="mb-2 flex items-center gap-2 h-4">
+                      <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                    </div>
                     <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
-                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
-                  </div>
-                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
-                </CardContent>
-              </Card>
-            ))
-          ) :
-            (categories.map(({ id, name,slug}) => (
-              <Card key={id} className="group hover:shadow-sm">
-                <CardContent className="p-5">
-                  <div className="mb-2 flex items-center gap-2">
-                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">{getIconForCategory(name)}</div>
-                    <h3 className="font-medium">{name}</h3>
-                  </div>
-                  <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
-                  <div className="mt-3">
-                    <button
-                      onClick={() => router.push(`/post-job/basic-details?category=${slug}`)}
-                      className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
-                      transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">
-                      Post a {name} job
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            )))}
+                  </CardContent>
+                </Card>
+              ))
+            : categories.map(({ id, name, slug }) => (
+                <Card key={id} className="group hover:shadow-sm">
+                  <CardContent className="p-5">
+                    <div className="mb-2 flex items-center gap-2">
+                      <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">
+                        {getIconForCategory(name)}
+                      </div>
+                      <h3 className="font-medium">{name}</h3>
+                    </div>
+                    <p className="text-sm text-neutral-600">
+                      Typical tasks · from €15/h
+                    </p>
+                    <div className="mt-3">
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/post-job/basic-details?category=${slug}`
+                          )
+                        }
+                        className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
+                      transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
+                      >
+                        Post a {name} job
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
         </div>
       </section>
 
       <section id="trust" className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold">Trust & Safety</h2>
-          <p className="text-neutral-600">Verification and guidance tailored to German mini‑jobs.</p>
+          <p className="text-neutral-600">
+            Verification and guidance tailored to German mini‑jobs.
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><CheckCircle2 className="h-4 w-4" /></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
               <h3 className="font-medium">Verified badges</h3>
-              <p className="mt-1 text-sm text-neutral-600">ID check, First Aid, and optional enhanced police certificate (for childcare) highlighted on profiles.</p>
+              <p className="mt-1 text-sm text-neutral-600">
+                ID check, First Aid, and optional enhanced police certificate
+                (for childcare) highlighted on profiles.
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Clock className="h-4 w-4" /></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                <Clock className="h-4 w-4" />
+              </div>
               <h3 className="font-medium">Clear rates & availability</h3>
-              <p className="mt-1 text-sm text-neutral-600">Filter by distance, time window, price, languages, and badges. Keep everything local.</p>
+              <p className="mt-1 text-sm text-neutral-600">
+                Filter by distance, time window, price, languages, and badges.
+                Keep everything local.
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4" /></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
               <h3 className="font-medium">Mini‑job guidance</h3>
-              <p className="mt-1 text-sm text-neutral-600">In‑app checklist for Haushaltsscheck registration, minimum wage, and monthly cap reminders.</p>
+              <p className="mt-1 text-sm text-neutral-600">
+                In‑app checklist for Haushaltsscheck registration, minimum wage,
+                and monthly cap reminders.
+              </p>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      {!user &&
+      {!user && (
         <section className="mx-auto max-w-6xl px-4 pb-16 pt-6">
           <Card className="border-neutral-200 bg-gradient-to-br from-neutral-50 to-white">
             <CardContent className="flex flex-col items-start gap-3 p-6 md:flex-row md:items-center md:justify-between">
               <div>
                 <h3 className="text-xl font-semibold">Ready to find help?</h3>
-                <p className="text-neutral-600">Post your mini‑job for free — start getting applications today.</p>
+                <p className="text-neutral-600">
+                  Post your mini‑job for free — start getting applications
+                  today.
+                </p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => router.push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
-                <button onClick={() => router.push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</button>
+                <button
+                  onClick={() => router.push("/signup?role=client")}
+                  className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
+                >
+                  Post a mini‑job
+                </button>
+                <button
+                  onClick={() => router.push("/signup?role=helper")}
+                  className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
+                >
+                  Become a helper
+                </button>
               </div>
             </CardContent>
           </Card>
         </section>
-      }
+      )}
     </main>
-  )
+  );
 }
