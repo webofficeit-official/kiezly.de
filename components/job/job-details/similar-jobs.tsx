@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookmarkCheck, ExternalLink } from "lucide-react";
-import { Job } from "@/lib/types/job";
+import { Filters, Job } from "@/lib/types/job";
 import { useJobs, useSavedJobs } from "@/lib/react-query/queries/useJob";
-import { Filters, fromQuery } from "../list";
+
 import { useRouter } from "next/navigation";
 import { formatDate } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { fromQuery } from "@/lib/utils/job-query-filters";
 
 export default function SimilarJobCard({ job }) {
     const router = useRouter();

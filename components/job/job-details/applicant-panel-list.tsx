@@ -9,7 +9,7 @@ import { useJob } from "@/lib/react-query/queries/useJob";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import ApplicantCard from "./applicant-card/applicant-card";
-import { Select } from "../list";
+import { Select } from "../job-filter-select/select-option";
 interface ApplicantsPageProps {
   params: { slug: string };
 }

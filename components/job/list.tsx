@@ -21,7 +21,6 @@ import {
 import { JobFilterSidebar } from "./job-filter/job-filter";
 import FilterSidebarSkeleton from "../shared-ui/skeleton/filter-side-bar-skeleton";
 import { JobResults } from "./job-list-card/job-list-card";
-import OverlayLoader from "../shared-ui/skeleton/overlay-loader";
 import { useDelayedLoading } from "@/lib/custom-hook/delayed-loading";
 // ---- Types ----
 
@@ -83,6 +82,19 @@ export default function JobFilterPage({
   const [page, setPage] = useState(1);
   const [localPageSize, setLocalPageSize] = useState(pageSize);
   const [savedJobs, setSavedJobs] = useState([]);
+  const [pendingCategorySlug, setPendingCategorySlug] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get("category");
+      if (slug) {
+        setPendingCategorySlug(slug);
+      }
+    }
+  }, []);
 
   const canModifyHistory = useCanModifyHistory();
   // Debounce high-churn fields (search query)
@@ -124,24 +136,22 @@ export default function JobFilterPage({
   const { data: collections, isLoading: isCollectionsLoading } =
     useJobCollections();
 
-  // Convert ?category=slug → category_id when categories load
+  //  apply pending category slug when collections load
   useEffect(() => {
-    if (!collections?.jobCategories?.length) return;
+    if (!collections?.jobCategories?.length || !pendingCategorySlug) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get("category");
+    const matched = collections.jobCategories.find(
+      (c) => c.slug === pendingCategorySlug
+    );
 
-    if (slug) {
-      const matched = collections.jobCategories.find((c) => c.slug === slug);
-      if (matched) {
-        // Update filters to use numeric ID for API calls
-        setFilters((prev) => ({
-          ...prev,
-          category_id: [matched.id],
-        }));
-      }
+    if (matched) {
+      setFilters((prev) => ({
+        ...prev,
+        category_id: [matched.id],
+      }));
+      setPendingCategorySlug(null); // clear it once applied
     }
-  }, [collections]);
+  }, [collections, pendingCategorySlug]);
 
   const { data, isLoading, error, isFetching } = useJobs(apiFilters, {
     keepPreviousData: true,
@@ -316,6 +326,10 @@ export default function JobFilterPage({
       setSavedJobs((prev) => [...prev, { id: jobId } as JobList]);
     }
   };
+
+  if (pendingCategorySlug && collections?.jobCategories?.length) {
+    return <JobSkeleton count={4} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">

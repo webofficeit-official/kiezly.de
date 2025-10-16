@@ -5,8 +5,8 @@ import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { useMyApplications } from "@/lib/react-query/queries/apply-job";
 import { MyApplications } from "@/lib/types/apply-job";
-import { Select } from "./list";
 import { formatDate } from "date-fns";
+import { Select } from "./job-filter-select/select-option";
 
 /**
  * Helper to check if a job was created recently (within 72h)
