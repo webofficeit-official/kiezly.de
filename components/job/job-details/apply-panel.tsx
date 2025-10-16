@@ -74,7 +74,8 @@ export default function ApplyPanel({ user, jobDetails }: ApplyPanelProps) {
           description="By applying, you agree to our Terms and acknowledge our Privacy Policy."
           application={application}
           jobDetails={jobDetails}
-          buttonLabel={`Apply as ${user.first_name} ${user.last_name}`}
+          buttonLabel={user ? `Apply as ${user.first_name} ${user.last_name}` : `Apply with Kiezly.de Profile`}
+          logged={user ? true : false}
         />
       }
       
