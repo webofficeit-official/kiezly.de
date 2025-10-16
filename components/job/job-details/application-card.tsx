@@ -58,10 +58,11 @@ export default function ApplicationCard({ title, description, buttonLabel, appli
                     <ApplicationModel
                         isModalOpen={isModalOpen}
                         setIsModalOpen={setIsModalOpen}
-                        header={withdraw ? "Update application" : title}
+                        header={applied ? "Update application" : title}
                         application={application}
                         jobDetails={jobDetails}
-                        buttonLabel={withdraw ? "Update" : "Apply"}
+                        buttonLabel={applied ? "Update" : "Apply"}
+                        update={applied ? true : false}
                     />
                 </div>
             </CardContent>

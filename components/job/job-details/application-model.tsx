@@ -2,30 +2,52 @@ import { Textarea } from "@/components/shared-ui/custom-text-area/custom-text-ar
 import AlertBox from "@/components/shared-ui/delete-alert-box/delet-alert-box";
 import Input from "@/components/shared-ui/input/input";
 import { Button } from "@/components/ui/button"
-import { useApplyJob, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
+import { useApplyJob, useUpdateApplicantStatus, useUpdateApplication, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
 import { X } from "lucide-react"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { RichTextEditor } from "../add";
 
-export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, application, jobDetails, buttonLabel }) {
+export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, application, jobDetails, buttonLabel, update = false }) {   
     const [coverNote, setCoverNote] = useState(application?.data?.application?.cover_note);
     const [proposedRate, setProposedRate] = useState(application?.data?.application?.proposed_rate);
     const applyJobMutation = useApplyJob();
+    const updateJobMutation = useUpdateApplication();
     const withdrawMutation = useWithdrawApplication();
 
+    useEffect(() => {
+        setCoverNote(application?.data?.application?.cover_note)
+        setProposedRate(application?.data?.application?.proposed_rate)
+    }, [application]);
+
     const handleApplySubmit = () => {
-        applyJobMutation.mutate(
-            { jobId: jobDetails.id, cover_note: coverNote, proposed_rate: proposedRate },
-            {
-                onSuccess: () => {
-                    toast.success("Application submitted successfully!");
-                },
-                onError: (error: any) => {
-                    toast.error(error?.message || "Failed to submit application.");
-                },
-            }
-        );
+        if (update) {            
+            updateJobMutation.mutate(
+                { applicationId: application?.data?.application?.id, cover_note: coverNote, proposed_rate: proposedRate, status: application?.data?.application?.status },
+                {
+                    onSuccess: () => {
+                        toast.success("Application updated successfully!");
+                        setIsModalOpen(false)
+                    },
+                    onError: (error: any) => {
+                        toast.error(error?.message || "Failed to update application.");
+                    },
+                }
+            );
+        } else {
+            applyJobMutation.mutate(
+                { jobId: jobDetails.id, cover_note: coverNote, proposed_rate: proposedRate },
+                {
+                    onSuccess: () => {
+                        toast.success("Application submitted successfully!");
+                        setIsModalOpen(false)
+                    },
+                    onError: (error: any) => {
+                        toast.error(error?.message || "Failed to submit application.");
+                    },
+                }
+            );
+        }
     };
 
     return (
