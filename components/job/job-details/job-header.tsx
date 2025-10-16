@@ -22,16 +22,16 @@ dayjs.extend(relativeTime);
 export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
 
     const jobDetails = job || {};
- 
+
     const handleSaveJob = async () => {
         try {
             setSavedJobs(prev => [...prev, { id: job.id }]);
-            if(user) {
+            if (user) {
                 await addJobAsFavorite({ jobId: job.id });
             } else {
                 const localStoredJobs = localStorage.getItem("saved-jobs")
                 let savedJobsLocal = []
-                if(localStoredJobs) {
+                if (localStoredJobs) {
                     savedJobsLocal = JSON.parse(localStoredJobs)
                 }
                 localStorage.setItem('saved-jobs', JSON.stringify([...savedJobsLocal, { id: job.id }]))
@@ -45,12 +45,12 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
     const handleUnsave = async () => {
         try {
             setSavedJobs(prev => prev.filter(j => j.id !== job.id));
-            if(user) {
+            if (user) {
                 await unsaveJobAsFavorite(job.id);
             } else {
                 const localStoredJobs = localStorage.getItem("saved-jobs")
                 let savedJobsLocal = []
-                if(localStoredJobs) {
+                if (localStoredJobs) {
                     savedJobsLocal = JSON.parse(localStoredJobs)
                 }
                 localStorage.setItem('saved-jobs', JSON.stringify(savedJobsLocal.filter((j) => j.id !== job.id)))
@@ -91,8 +91,8 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
                             {jobDetails?.price_type === "range" && jobDetails?.price_min && jobDetails?.price_max
                                 ? `${jobDetails?.currency} ${jobDetails?.price_min}–${jobDetails?.price_max}`
                                 : jobDetails?.price_value
-                                        ? `${jobDetails?.currency} ${jobDetails?.price_value}`
-                                        : "Not specified"}
+                                    ? `${jobDetails?.currency} ${jobDetails?.price_value}`
+                                    : "Not specified"}
                         </span>
                         {jobDetails?.price_type && <span className="inline-flex items-center">/ {jobDetails?.price_type}</span>}
                         <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" />Posted {dayjs(jobDetails?.created_at).fromNow()}</span>
@@ -127,12 +127,12 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-                {jobDetails.tags.length > 0 && jobDetails.tags.map((t) => (
-                    <>
-                        <Badge key={t} variant="secondary" className="rounded-full px-3 py-1">
-                            {t?.name}
-                        </Badge>
-                    </>
+                {jobDetails.tags.length > 0 && jobDetails.tags.map((t,index) => (
+
+                    <Badge key={index} variant="secondary" className="rounded-full px-3 py-1">
+                        {t?.name}
+                    </Badge>
+
                 ))}
             </div>
         </>

@@ -16,17 +16,26 @@ export default function Page() {
   const [what, setWhat] = React.useState('')
   const [where, setWhere] = React.useState('')
   const [categories, setCategories] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
 
   const doSearch = () => {
     window.location.href = `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`;
   }
 
+  const doCategory = (id) => {
+    window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`;
+  }
+
   React.useEffect(() => {
+    setIsLoading(true);
     collections.mutate({}, {
       onSuccess: (data) => {
         setCategories(data.data.jobCategories)
+        setIsLoading(false);
       },
       onError: (err: any) => {
+        setIsLoading(false);
       }
     });
   }, [])
@@ -84,12 +93,30 @@ export default function Page() {
                 <CardTitle className="text-base text-neutral-700">Popular right now near you</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3 overflow-auto" style={{ height: '320px' }}>
-                {categories.map(({ id, name }) => (
-                  <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => window.location.href = `/jobs?category_id=${encodeURIComponent(id)}`}>
-                    <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
-                    <div className="text-xs text-neutral-500">from €15/h</div>
-                  </div>
-                ))}
+                {isLoading ? (
+                  Array.from({ length: 9 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-2xl border p-3 hover:shadow-sm"
+                    >
+                      {/* Icon + name row */}
+                      <div className="mb-1 flex items-center gap-2">
+                        <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                        <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                      </div>
+                      <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                    </div>
+                  ))
+                ) :
+                  (categories.map(({ id, name }) => (
+                    <div key={id} className="rounded-2xl border p-3 hover:shadow-sm" onClick={() => doCategory(id)}>
+                      <div className="mb-2 flex items-center gap-2">{getIconForCategory(name)}<span className="text-sm font-medium">{name}</span></div>
+                      <div className="text-xs text-neutral-500">from €15/h</div>
+                    </div>
+                  )))}
               </CardContent>
             </Card>
           </div>
@@ -138,20 +165,43 @@ export default function Page() {
           <p className="text-neutral-600">From quick chores to recurring help.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {categories.map(({ id, name }) => (
-            <Card key={id} className="group hover:shadow-sm">
-              <CardContent className="p-5">
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">{getIconForCategory(name)}</div>
-                  <h3 className="font-medium">{name}</h3>
-                </div>
-                <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
-                <div className="mt-3">
-                  <button className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Post a {name} job</button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+          {isLoading ? (
+            Array.from({ length: 9 }).map((_, i) => (
+              <Card key={i} className="group hover:shadow-sm">
+                <CardContent className="p-5">
+                  {/* Icon + name row */}
+                  <div className="mb-2 flex items-center gap-2 h-4">
+                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                  </div>
+                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+
+                </CardContent>
+              </Card>
+            ))
+          ) :
+            (categories.map(({ id, name,slug}) => (
+              <Card key={id} className="group hover:shadow-sm">
+                <CardContent className="p-5">
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">{getIconForCategory(name)}</div>
+                    <h3 className="font-medium">{name}</h3>
+                  </div>
+                  <p className="text-sm text-neutral-600">Typical tasks · from €15/h</p>
+                  <div className="mt-3">
+                    <button
+                      onClick={() => router.push(`/post-job/basic-details?category=${slug}`)}
+                      className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
+                      transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">
+                      Post a {name} job
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            )))}
         </div>
       </section>
 

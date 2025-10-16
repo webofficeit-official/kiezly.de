@@ -119,6 +119,7 @@ export interface JobResponse {
 
 export interface JobCategory {
   id: number;
+  slug?:string;
   name: string;
 }
 
