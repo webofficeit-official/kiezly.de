@@ -80,7 +80,7 @@ export const metadata = {
 } as const;
 
 export const viewport = {
-  themeColor: "#0ea5e9",
+  themeColor: "#dadcdcff",
 };
 
 function CategoriesSeoJsonLd() {

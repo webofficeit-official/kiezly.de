@@ -89,6 +89,9 @@ export default function MyJobs({
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
     const router = useRouter();
+    // Debounce high-churn fields (search query)
+    const debouncedFilters = useDebounced(filters, 300);
+
     const buildApiFilters = (filters: Filters, page: number, pageSize: number) => {
         const payload: Record<string, any> = { page, page_size: pageSize };
         if (filters.status) payload.status = filters.status;
@@ -96,11 +99,10 @@ export default function MyJobs({
         return payload;
     };
 
-    const apiFilters = useMemo(() => buildApiFilters(filters, page, pageSize), [filters, page, pageSize]);
-    const { data, isLoading, error } = myJobs(apiFilters);
+    const apiFilters = useMemo(() => buildApiFilters(debouncedFilters, page, pageSize), [debouncedFilters, page, pageSize]);
+    const { data, isLoading, error, isFetching } = myJobs(apiFilters);
+    const dataSource = data?.data?.items ?? jobs ?? [];
 
-    // Debounce high-churn fields (search query)
-    const debouncedFilters = useDebounced(filters, 300);
 
     useEffect(() => {
         onChange?.(debouncedFilters);
@@ -117,11 +119,7 @@ export default function MyJobs({
     const update = (patch: Partial<Filters>) => setFilters((f) => ({ ...f, ...patch }));
 
 
-    const dataSource: JobList[] = useMemo(() => {
-        if (data?.data?.items) return data.data.items as JobList[];
-        if (jobs && jobs.length) return jobs;
-        return []
-    }, [data, jobs]);
+
 
 
     const pageSlice = dataSource;
@@ -158,6 +156,9 @@ export default function MyJobs({
         setPage(newPage);
     };
 
+    const isInitialLoad = !data && (isLoading);
+
+
     return (
         <>
             <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -188,142 +189,153 @@ export default function MyJobs({
                     {/* Application cards */}
                     <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+
                         {/* Right: Job list + debug preview */}
                         <section className="lg:col-span-3 space-y-4">
                             {/* Stats + controls */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {pageSlice?.map((job) => (
-                                    <article
-                                        key={`${job.id}-${job.slug}`}
-                                        className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
-                                    >
-                                        {/* Header */}
-                                        <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${job.slug}`}>
-                                            <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${job.slug}`}>
-                                                <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
-                                                    {formatDate(job.starts_at, "dd MMM, yyyy")} – {formatDate(job.ends_at, "dd MMM, yyyy")}
-                                                </span>
-                                                <span className="space-x-2 ">
-                                                    {filters.status != 'closed' && (<>
-
-                                                        {/* Edit */}
-                                                        <TooltipProvider>
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <button
-                                                                        className="p-1 rounded hover:bg-gray-100"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            router.push(`/post-job/basic-details?slug=${job.slug}`)
-                                                                        }
-                                                                        }
-                                                                    >
-                                                                        {job.status === "draft" ? (
-                                                                            <ArrowRight className="w-4 h-4 text-amber-500" />
-                                                                        ) : (
-                                                                            <Pencil className="w-4 h-4 text-amber-500" />
-                                                                        )}
-                                                                    </button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent side="top" className="text-xs">
-                                                                    {job.status === "draft" ? "Continue Job" : " Edit Job"}
-
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        </TooltipProvider>
-
-                                                        {/* Delete */}
-                                                        <AlertBox
-                                                            trigger={<CloseJobButton onClick={(e) => {
-                                                                e.stopPropagation();
-                                                            }} />}
-                                                            title="Close Job?"
-                                                            description="Are you sure you want to close this job? This action cannot be undone."
-                                                            confirmText="Close"
-                                                            cancelText="Cancel"
-                                                            onConfirm={(e) => {
-                                                                e?.stopPropagation?.();
-                                                                closeJobMutation.mutate(job.id, {
-                                                                    onSuccess: () => {
-                                                                        toast.success("Job closed successfully!")
-                                                                        update({ status: "closed" });
-                                                                    },
-                                                                    onError: (error: any) => toast.error(error.message || "Failed to close the job"),
-                                                                });
-                                                            }}
-                                                        />
-                                                    </>)}
-
-                                                </span>
-                                            </div>
-
-                                            {/* Category */}
-                                            <p className="text-xs text-gray-500 mt-4 uppercase tracking-wide font-medium">
-                                                {job.category_name}
-                                            </p>
-
-                                            {/* Title */}
-                                            <h3 className="text-base font-semibold text-gray-900 mt-1 line-clamp-2 hover:text-black transition">
-                                                {job.title}
-                                            </h3>
-
-                                            {/* Tags */}
-                                            {job.tags?.length > 0 && (
-                                                <div className="mt-3 flex flex-wrap gap-2">
-                                                    {job.tags.map((tag, index) => (
-                                                        <span
-                                                            key={index}
-                                                            className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
-                                                        >
-                                                            {tag.name}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
-                                            <div className="text-xs text-gray-600 leading-tight">
-                                                <p className="font-semibold text-sm text-gray-900">
-                                                    {job?.price_type === "range" && job?.price_min && job?.price_max
-                                                        ? `${job.currency} ${job.price_min} – ${job.price_max}`
-                                                        : job?.price_value
-                                                            ? `${job.currency} ${job.price_value}`
-                                                            : "Not specified"}
-                                                    {job?.price_type && (
-                                                        <span className="text-gray-500 text-xs ml-1">
-                                                            / {job.price_type}
-                                                        </span>
-                                                    )}
-                                                </p>
-                                                {job?.distance && (
-                                                    <p className="text-gray-500 text-xs mt-1">
-                                                        {(job.distance / 1000).toFixed(2)} km away
-                                                    </p>
-                                                )}
-                                                <p className="text-gray-500 text-xs mt-1">
-                                                    {job.city}, {job.state}, {job.countries?.name}
-                                                </p>
-                                            </div>
-
-                                            <button
-                                                className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
-                                                onClick={() => window.location.href = `/jobs/${job.slug}`}
-                                            >
-                                                View
-                                            </button>
-                                        </div>
-                                    </article>
-                                ))}
-                                {pageSlice?.length === 0 && (
-                                    <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-                                        No jobs match your filters.
+                            <div className="relative">
+                                {isFetching && data && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[1px] z-20 rounded-2xl">
+                                        <div className="h-6 w-6 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
                                     </div>
                                 )}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {pageSlice?.map((job) => (
+                                        <article
+                                            key={`${job.id}-${job.slug}`}
+                                            className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
+                                        >
+                                            {/* Header */}
+                                            <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${job.slug}`}>
+                                                <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${job.slug}`}>
+                                                    <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
+                                                        {formatDate(job.starts_at, "dd MMM, yyyy")} – {formatDate(job.ends_at, "dd MMM, yyyy")}
+                                                    </span>
+                                                    <span className="space-x-2 ">
+                                                        {filters.status != 'closed' && (<>
+
+                                                            {/* Edit */}
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <button
+                                                                            className="p-1 rounded hover:bg-gray-100"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                router.push(`/post-job/basic-details?slug=${job.slug}`)
+                                                                            }
+                                                                            }
+                                                                        >
+                                                                            {job.status === "draft" ? (
+                                                                                <ArrowRight className="w-4 h-4 text-amber-500" />
+                                                                            ) : (
+                                                                                <Pencil className="w-4 h-4 text-amber-500" />
+                                                                            )}
+                                                                        </button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent side="top" className="text-xs">
+                                                                        {job.status === "draft" ? "Continue Job" : " Edit Job"}
+
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+
+                                                            {/* Delete */}
+                                                            <AlertBox
+                                                                trigger={<CloseJobButton onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                }} />}
+                                                                title="Close Job?"
+                                                                description="Are you sure you want to close this job? This action cannot be undone."
+                                                                confirmText="Close"
+                                                                cancelText="Cancel"
+                                                                onConfirm={(e) => {
+                                                                    e?.stopPropagation?.();
+                                                                    closeJobMutation.mutate(job.id, {
+                                                                        onSuccess: () => {
+                                                                            toast.success("Job closed successfully!")
+                                                                            update({ status: "closed" });
+                                                                        },
+                                                                        onError: (error: any) => toast.error(error.message || "Failed to close the job"),
+                                                                    });
+                                                                }}
+                                                            />
+                                                        </>)}
+
+                                                    </span>
+                                                </div>
+
+                                                {/* Category */}
+                                                <p className="text-xs text-gray-500 mt-4 uppercase tracking-wide font-medium">
+                                                    {job.category_name}
+                                                </p>
+
+                                                {/* Title */}
+                                                <h3 className="text-base font-semibold text-gray-900 mt-1 line-clamp-2 hover:text-black transition">
+                                                    {job.title}
+                                                </h3>
+
+                                                {/* Tags */}
+                                                {job.tags?.length > 0 && (
+                                                    <div className="mt-3 flex flex-wrap gap-2">
+                                                        {job.tags.map((tag, index) => (
+                                                            <span
+                                                                key={index}
+                                                                className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
+                                                            >
+                                                                {tag.name}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Footer */}
+                                            <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
+                                                <div className="text-xs text-gray-600 leading-tight">
+                                                    <p className="font-semibold text-sm text-gray-900">
+                                                        {job?.price_type === "range" && job?.price_min && job?.price_max
+                                                            ? `${job.currency} ${job.price_min} – ${job.price_max}`
+                                                            : job?.price_value
+                                                                ? `${job.currency} ${job.price_value}`
+                                                                : "Not specified"}
+                                                        {job?.price_type && (
+                                                            <span className="text-gray-500 text-xs ml-1">
+                                                                / {job.price_type}
+                                                            </span>
+                                                        )}
+                                                    </p>
+                                                    {job?.distance && (
+                                                        <p className="text-gray-500 text-xs mt-1">
+                                                            {(job.distance / 1000).toFixed(2)} km away
+                                                        </p>
+                                                    )}
+                                                    <p className="text-gray-500 text-xs mt-1">
+                                                        {job.city}, {job.state}, {job.countries?.name}
+                                                    </p>
+                                                </div>
+
+                                                <button
+                                                    className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
+                                                    onClick={() => window.location.href = `/jobs/${job.slug}`}
+                                                >
+                                                    View
+                                                </button>
+                                            </div>
+                                        </article>
+                                    ))}
+                                    {pageSlice?.length === 0 && (
+                                        <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
+                                            No jobs match your filters.
+                                        </div>
+                                    )}
+                                </div>
+
                             </div>
 
                         </section>
+
+
                     </main>
 
                     {/* Pagination */}

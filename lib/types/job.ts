@@ -70,7 +70,6 @@ export interface Job {
   };
 }
 
-
 export type CreateJobData = {
   title: string;
   subtitle: string;
@@ -103,7 +102,6 @@ export type CreateJobData = {
   slug?: string;
 };
 
-
 export interface CreateJobResponse {
   status: boolean;
   message: string;
@@ -116,9 +114,9 @@ export interface JobResponse {
   job: Job;
 }
 
-
 export interface JobCategory {
   id: number;
+  slug?: string;
   name: string;
 }
 
@@ -142,9 +140,9 @@ export interface JobCollections {
   jobExperience: string[];
   jobCategories: JobCategory[];
   jobTags: JobTag[];
-  languages: jobLanguage[]
+  languages: jobLanguage[];
   jobMode: JobMode[];
-  countries: []
+  countries: [];
 }
 
 export interface JobCollectionsResponse {
@@ -152,7 +150,6 @@ export interface JobCollectionsResponse {
   message: string;
   data: JobCollections;
 }
-
 
 export interface JobList {
   id: string;
@@ -176,13 +173,13 @@ export interface JobList {
   street: string;
   lat: number;
   lng: number;
-  starts_at: string;   // ISO datetime
-  ends_at: string;     // ISO datetime
-  created_at: string;  // ISO datetime
-  updated_at: string;  // ISO datetime
+  starts_at: string; // ISO datetime
+  ends_at: string; // ISO datetime
+  created_at: string; // ISO datetime
+  updated_at: string; // ISO datetime
   geom: string;
-  job_type: string[];        // array in response
-  job_experience: string[];  // array in response
+  job_type: string[]; // array in response
+  job_experience: string[]; // array in response
   first_aid_verified: boolean;
   police_verified: boolean;
   verified: boolean;
@@ -205,7 +202,6 @@ export interface JobList {
   };
 }
 
-
 export type JobApiResponse = {
   status: boolean;
   message: string;
@@ -218,11 +214,29 @@ export type JobApiResponse = {
   };
 };
 
-
 export type JobSaveApiResponse = {
   status: boolean;
   message: string;
   jobs: JobList[];
 };
 
+export type SortBy = "new" | "price_desc" | "price_asc";
+export type DatePosted = "any" | "1" | "7" | "30";
 
+export type Filters = {
+  q: string;
+  city: string;
+  category_id: number[];
+  job_type: string[];
+  job_experience: string[];
+  job_tags: number[];
+  min_price: string;
+  max_price: string;
+  posted: DatePosted;
+  radius_km: number; // 0..50
+  sort: SortBy;
+  starts_at?: string;
+  ends_at?: string;
+  lat?: number;
+  lng?: number;
+};
