@@ -141,29 +141,21 @@ export default function JobDetail() {
                             <JobDescription job={jobDetails} />
                         </CardContent>
                     </Card>
-                    {/* Family card */}
-                    {user?.role === "helper" && (
-                        <div className="mt-6">
-                            <CompanyInfoCard job={jobDetails} role="helper" />
-                        </div>
-                    )}
 
                 </div>
+                <div>
 
-                {/* Right: sticky apply panel */}
-                {user?.role != 'client' && user?.id !== jobDetails?.client_id && (
-                    <ApplyPanel user={user} jobDetails={jobDetails} />
-                )}
-                {user?.role === "client" && user.id !== jobDetails?.client_id && (
-                    <div className="">
-                        <CompanyInfoCard job={jobDetails} role="client" />
-                    </div>
-                )}
-                {user?.role === "client" && user.id === jobDetails?.client_id && (
-                    <div className="">
+                    
+                    {/* Right: sticky apply panel */}
+                    {user?.role != 'client' && user?.id !== jobDetails?.client_id && (
+                        <ApplyPanel user={user} jobDetails={jobDetails} />
+                    )}
+                    {user?.role === "client" && user.id === jobDetails?.client_id ? (
                         <JobCountCard job={jobDetails} />
-                    </div>
-                )}
+                    ) : (
+                        <CompanyInfoCard job={jobDetails} role="client" />
+                    )}
+                </div>
 
             </section>
 
