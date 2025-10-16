@@ -1,16 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { CheckCircle2, GraduationCap, X } from "lucide-react";
 import toast from "react-hot-toast";
-import AlertBox from "@/components/shared-ui/delete-alert-box/delet-alert-box";
-import Input from "@/components/shared-ui/input/input";
 import { useApplyJob, useCheckApplied, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
 import { useRouter } from "next/navigation";
-import ApplicationModel from "./application-model";
-import ApplicantCard from "./applicant-card/applicant-card";
 import ApplicationCard from "./application-card";
 
 interface ApplyPanelProps {
@@ -80,7 +74,8 @@ export default function ApplyPanel({ user, jobDetails }: ApplyPanelProps) {
           description="By applying, you agree to our Terms and acknowledge our Privacy Policy."
           application={application}
           jobDetails={jobDetails}
-          buttonLabel={`Apply as ${user.first_name} ${user.last_name}`}
+          buttonLabel={user ? `Apply as ${user.first_name} ${user.last_name}` : `Apply with Kiezly.de Profile`}
+          logged={user ? true : false}
         />
       }
       

@@ -22,8 +22,8 @@ export const withdrawApplication = async (applicationId: string) => {
 
 export const checkJobApplied = async (jobId: string) => {
   const { data } = await apiClient.get(`/jobs/${jobId}/applied`);
-  return data; 
-  
+  return data;
+
 };
 
 export const getApplicantsByJobId = async (
@@ -40,7 +40,7 @@ export const getApplicantsByJobId = async (
 
   try {
     const { data } = await apiClient.get(`/jobs/${jobId}/applicants?${queryString}`);
-    
+
     // Axios automatically parses JSON and puts it in data
     return data.data; // returns { applicants, page, total_pages, total_items }
   } catch (error: any) {
@@ -53,16 +53,18 @@ export const getApplicantsByJobId = async (
 
 export const updateApplicationStatus = async (
   applicationId: string,
-  status: string
+  status: string,
+  cover_note: string,
+  proposed_rate: string
 ) => {
   const { data } = await apiClient.patch(
     `/jobs/application/${applicationId}/status`,
-    { status }
+    { status, cover_note, proposed_rate }
   );
   return data;
 };
 
 export const getMyApplications = async (status: string, page: number, pageSize: number) => {
-    const { data } = await apiClient.get(`/jobs/applications?status=${status}&page=${page}&page_size=${pageSize}`);
-    return data; // returns { success, message, applicants }
+  const { data } = await apiClient.get(`/jobs/applications?status=${status}&page=${page}&page_size=${pageSize}`);
+  return data; // returns { success, message, applicants }
 };

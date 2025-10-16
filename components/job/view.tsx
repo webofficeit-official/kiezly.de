@@ -132,13 +132,13 @@ export default function JobDetail() {
                 <div>
                     <Card className="shadow-sm">
                         <CardHeader className="pb-4">
-                            <JobHeader job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} user={user} />
+                            <JobHeader key={jobDetails.id} job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} user={user} />
                         </CardHeader>
 
                         <Separator />
 
                         <CardContent className="prose prose-sm max-w-none py-6">
-                            <JobDescription job={jobDetails} />
+                            <JobDescription key={jobDetails.id} job={jobDetails} />
                         </CardContent>
                     </Card>
 
