@@ -7,12 +7,14 @@ import { FaCheckCircle } from "react-icons/fa";
 import { SelectWithFilter } from "../input/select";
 import ZipAutocomplete from "../input/autocomplete";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 // Simple Link shim so this runs outside Next.js too
 function Link({ href = "#", className = "", children, ...props }) {
     const router = useRouter();
+    const { push } = useLocalizedRouter();
     return (
-        <button type="button" onClick={() => router.push(href)} className={className} {...props}>
+        <button type="button" onClick={() => push(href)} className={className} {...props}>
             {children}
         </button>
     );

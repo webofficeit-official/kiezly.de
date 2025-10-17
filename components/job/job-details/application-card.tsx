@@ -6,11 +6,13 @@ import AlertBox from "@/components/shared-ui/delete-alert-box/delet-alert-box";
 import { useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 export default function ApplicationCard({ title, description, buttonLabel, application, jobDetails, applied = false, withdraw = false, coverNote = "", proposedRate = "", logged = true }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
-      const withdrawMutation = useWithdrawApplication();
-      const router = useRouter()
+    const withdrawMutation = useWithdrawApplication();
+    const router = useRouter()
+    const { push } = useLocalizedRouter();
 
     return (
         <Card className="shadow-sm">
@@ -36,7 +38,7 @@ export default function ApplicationCard({ title, description, buttonLabel, appli
                     <div className="flex gap-3">
                         {
                             !withdraw &&
-                            <Button onClick={() => logged ? setIsModalOpen(true) : router.push("/signup")} className="w-full rounded-xl">
+                            <Button onClick={() => logged ? setIsModalOpen(true) : push("/signup")} className="w-full rounded-xl">
                                 {buttonLabel}
                             </Button>
                         }

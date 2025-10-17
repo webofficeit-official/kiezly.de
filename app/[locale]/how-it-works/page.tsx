@@ -4,9 +4,11 @@ import React from 'react'
 import { ShieldCheck, FileText, Send, CheckCircle2, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation';
+import { useLocalizedRouter } from '@/lib/useLocalizedRouter';
 
 export default function HowItWorksPage() {
   const router = useRouter();
+  const { push } = useLocalizedRouter();
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
@@ -19,21 +21,21 @@ export default function HowItWorksPage() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><FileText className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><FileText className="h-4 w-4" /></div>
               <h3 className="font-medium">1) Post your job</h3>
               <p className="mt-1 text-sm text-neutral-600">Describe the tasks, time and pay. We surface your job to relevant local helpers.</p>
             </CardContent>
           </Card>
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Send className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Send className="h-4 w-4" /></div>
               <h3 className="font-medium">2) Compare applicants</h3>
               <p className="mt-1 text-sm text-neutral-600">Review ratings, badges, distance and response rate. Chat to align on details.</p>
             </CardContent>
           </Card>
           <Card className="h-full">
             <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4"/></div>
+              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4" /></div>
               <h3 className="font-medium">3) Hire with confidence</h3>
               <p className="mt-1 text-sm text-neutral-600">Confirm the booking and follow our mini‑job checklist (rates, registration, monthly cap).</p>
             </CardContent>
@@ -52,9 +54,9 @@ export default function HowItWorksPage() {
           <Card>
             <CardHeader><CardTitle className="text-base">Trust & safety</CardTitle></CardHeader>
             <CardContent className="p-5 text-sm text-neutral-700 space-y-2">
-              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4"/> Check profiles for badges like ID and First Aid.</p>
-              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4"/> Use in‑app chat to clarify tasks, tools and expectations.</p>
-              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4"/> Share only what’s necessary and arrange a brief intro meeting if helpful.</p>
+              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4" /> Check profiles for badges like ID and First Aid.</p>
+              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4" /> Use in‑app chat to clarify tasks, tools and expectations.</p>
+              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4" /> Share only what’s necessary and arrange a brief intro meeting if helpful.</p>
             </CardContent>
           </Card>
         </div>
@@ -73,7 +75,7 @@ export default function HowItWorksPage() {
         </div>
 
         <div className="mt-8">
-          <button onClick={() => router.push("/")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
+          <button onClick={() => push("/")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
             Back to home <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </div>

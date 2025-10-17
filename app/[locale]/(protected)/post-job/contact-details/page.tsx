@@ -14,11 +14,13 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 export default function Page() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const slug = searchParams.get("slug");
+    const { push } = useLocalizedRouter();
 
     const { formData, updateForm, jobId, setJobId, mode, setMode } = useJobWizard();
     const { data: existingJob } = useJob(slug || "");
@@ -127,7 +129,7 @@ export default function Page() {
                 await updateJobMutation.mutateAsync(payload, {
                     onSuccess: () => {
                         toast.success("Contact details saved successfully!");
-                        router.push(`/jobs/${slug}`); // redirect to job page or summary
+                        push(`/jobs/${slug}`); // redirect to job page or summary
                     },
                     onError: () => toast.error("Failed to save contact details."),
                 });
@@ -137,7 +139,7 @@ export default function Page() {
         }
     };
 
-    const handlePrev = () => router.push(`/post-job/work-details?slug=${slug}`);
+    const handlePrev = () => push(`/post-job/work-details?slug=${slug}`);
 
     /* ----------------------------- Render ----------------------------- */
     return (

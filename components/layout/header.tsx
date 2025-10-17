@@ -3,21 +3,27 @@ import { getNotifications, updateNotification } from '@/lib/react-query/queries/
 import { Notification } from '@/lib/types/notifications';
 import dayjs from 'dayjs';
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Bell, ShieldCheck, User, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Bell, Languages, LanguagesIcon, ShieldCheck, User, X } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLocalizedRouter } from '@/lib/useLocalizedRouter';
 
 export default function Header() {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
-  const [detailNotificationOpen, setdetailNotificationOpen] = useState(false)
   const [latestThree, setLatestThree] = useState([])
   const [notificationsCount, setNotificationsCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false)
+  const [activeLanguag, setActiveLanguage] = useState("")
+  const pathname = usePathname();
+
+  const { push } = useLocalizedRouter();
 
   dayjs.extend(relativeTime);
 
@@ -50,21 +56,65 @@ export default function Header() {
     })
   }
 
+  const locales = ['en', 'de'];
+
+  const handleChange = (locale: string) => {
+    // Replace current locale in URL
+    const segments = pathname.split('/').filter(Boolean);
+    if (locales.includes(segments[0])) {
+      segments[0] = locale;
+    } else {
+      segments.unshift(locale);
+    }
+    setActiveLanguage(locale)
+    const newPath = '/' + segments.join('/');
+    router.push(newPath);
+  };
+
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5" />
-            <button onClick={() => router.push("/")} className="font-semibold">Kiezly.de</button>
+            <button onClick={() => push("/")} className="font-semibold">Kiezly.de</button>
           </div>
           <nav className="hidden items-center gap-6 text-sm md:flex">
-            <button onClick={() => router.push("/how-it-works")} className="hover:opacity-80">How it works</button>
-            <button onClick={() => router.push("/#categories")} className="hover:opacity-80">Categories</button>
-            <button onClick={() => router.push("/#trust")} className="hover:opacity-80">Trust & Safety</button>
-            <button onClick={() => router.push("/jobs")} className="hover:opacity-80">Jobs</button>
+            <button onClick={() => push("/how-it-works")} className="hover:opacity-80">How it works</button>
+            <button onClick={() => push("/#categories")} className="hover:opacity-80">Categories</button>
+            <button onClick={() => push("/#trust")} className="hover:opacity-80">Trust & Safety</button>
+            <button onClick={() => push("/jobs")} className="hover:opacity-80">Jobs</button>
           </nav>
           <div className="flex items-center gap-2 relative">
+            <div className="relative mr-2">
+              <button
+                onClick={() => setLanguageOpen(!languageOpen)}
+                className={`relative inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition`}
+                aria-label="Notifications"
+              >
+                <LanguagesIcon className="h-6 w-6 text-gray-700" />
+                <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                  {activeLanguag}
+                </span>
+              </button>
+              {/* Dropdown */}
+              {languageOpen && (
+                <div className="absolute right-0 top-full mt-2 w-12 rounded-lg border bg-white shadow-md z-50">
+                  {locales.map((locale) => (
+                    <button
+                      key={locale}
+                      onClick={() => {
+                        setLanguageOpen(false)
+                        handleChange(locale)
+                      }}
+                      className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100 ${activeLanguag == locale && 'bg-gray-200'}`}
+                    >
+                      {locale.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {user ? (
               <>
                 <div className="relative mr-2">
@@ -92,7 +142,7 @@ export default function Header() {
                             onClick={() => {
                               setNotificationOpen(false)
                               updateNot(n.id)
-                              router.push(n.link)
+                              push(n.link)
                             }}
                           >
                             <p className='font-bold text-gray-900 text-sm flex justify-between'>
@@ -118,7 +168,7 @@ export default function Header() {
                 </div>
                 {/* Avatar button */}
                 {user?.role === 'client' && (<>
-                  <button onClick={() => router.push("/post-job/basic-details")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
+                  <button onClick={() => push("/post-job/basic-details")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
                 </>)
                 }
                 <button
@@ -151,7 +201,7 @@ export default function Header() {
                       className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                       onClick={() => {
                         setDropdownOpen(false)
-                        router.push("/my-profile")
+                        push("/my-profile")
                       }}
                     >
                       My Profile
@@ -161,7 +211,7 @@ export default function Header() {
                         className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                         onClick={() => {
                           setDropdownOpen(false)
-                          router.push("/my-jobs")
+                          push("/my-jobs")
                         }}
                       >
                         My Jobs
@@ -170,7 +220,7 @@ export default function Header() {
                           className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                           onClick={() => {
                             setDropdownOpen(false)
-                            router.push("/saved-job")
+                            push("/saved-job")
                           }}
                         >
                           Saved Jobs</button>
@@ -178,7 +228,7 @@ export default function Header() {
                           className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                           onClick={() => {
                             setDropdownOpen(false)
-                            router.push("/applied-jobs")
+                            push("/applied-jobs")
                           }}
                         >
                           Applied Jobs</button>
@@ -198,8 +248,8 @@ export default function Header() {
               </>
             ) : (
               <>
-                <button onClick={() => router.push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</button>
-                <button onClick={() => router.push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
+                <button onClick={() => push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</button>
+                <button onClick={() => push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
 
               </>
             )}
@@ -243,7 +293,7 @@ export default function Header() {
                           setNotificationOpen(false)
                           setIsModalOpen(false)
                           updateNot(n.id)
-                          router.push(n.link)
+                          push(n.link)
                         }}
                       >
                         <p className='font-bold text-gray-900 text-sm flex justify-between'>

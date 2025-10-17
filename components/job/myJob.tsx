@@ -11,6 +11,7 @@ import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
 import toast from "react-hot-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { formatDate } from "date-fns";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -79,6 +80,7 @@ export default function MyJobs({
     jobs?: JobList[];
 }) {
     const { user } = useAuth();
+    const { push } = useLocalizedRouter();
     const [filters, setFilters] = useState<Filters>(() => {
         if (typeof window === "undefined") return DEFAULT_FILTERS;
         const initial = fromQuery(window.location.search);
@@ -222,7 +224,7 @@ export default function MyJobs({
                                                                             className="p-1 rounded hover:bg-gray-100"
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
-                                                                                router.push(`/post-job/basic-details?slug=${job.slug}`)
+                                                                                push(`/post-job/basic-details?slug=${job.slug}`)
                                                                             }
                                                                             }
                                                                         >

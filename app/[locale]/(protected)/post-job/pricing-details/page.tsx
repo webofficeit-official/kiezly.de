@@ -12,6 +12,7 @@ import {
 
   useUpdateJob,
 } from "@/lib/react-query/queries/useJob";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -29,6 +30,7 @@ export default function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
+  const { push } = useLocalizedRouter();
 
   const { formData, updateForm, jobId, setJobId, mode, setMode } = useJobWizard();
   const { data: basicCollections } = useJobCollections();
@@ -184,7 +186,7 @@ export default function Page() {
         await updateJobMutation.mutateAsync(payload, {
           onSuccess: () => {
             // toast.success("Pricing details updated successfully!");
-            router.push(`/post-job/work-details?slug=${slug}`);
+            push(`/post-job/work-details?slug=${slug}`);
           },
           onError: () => toast.error("Failed to update pricing details."),
         });
@@ -194,7 +196,7 @@ export default function Page() {
     }
   };
 
-  const handlePrev = () => router.push(`/post-job/location-details?slug=${slug}`);
+  const handlePrev = () => push(`/post-job/location-details?slug=${slug}`);
 
   /* ----------------------------- Derived ----------------------------- */
   const isFixed = formData.price_type === "fixed";

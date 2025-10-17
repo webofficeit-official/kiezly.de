@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 export default function Page() {
     const router = useRouter();
@@ -30,6 +31,7 @@ export default function Page() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [showErrors, setShowErrors] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { push } = useLocalizedRouter();
 
     /* ----------------------------- Fetch Existing Job ----------------------------- */
     useEffect(() => {
@@ -108,7 +110,7 @@ export default function Page() {
                 await updateJobMutation.mutateAsync(payload, {
                     onSuccess: () => {
                         // toast.success("Work details updated successfully!");
-                        router.push(`/post-job/contact-details?slug=${slug}`);
+                        push(`/post-job/contact-details?slug=${slug}`);
                     },
                     onError: () => toast.error("Failed to update work details."),
                 });
@@ -118,7 +120,7 @@ export default function Page() {
         }
     };
 
-    const handlePrev = () => router.push(`/post-job/pricing-details?slug=${slug}`);
+    const handlePrev = () => push(`/post-job/pricing-details?slug=${slug}`);
 
     /* ----------------------------- Derived ----------------------------- */
     const workModeOptions =

@@ -16,6 +16,7 @@ import { useZipcodes } from "@/lib/react-query/queries/collection";
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 export default function Page() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function Page() {
   const updateJobMutation = useUpdateJob(jobId ?? undefined);
   const { data: basicCollections } = useJobCollections();
   const { mutateAsync: fetchZipcodes } = useZipcodes();
+  const { push } = useLocalizedRouter();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showErrors, setShowErrors] = useState(false);
@@ -214,7 +216,7 @@ export default function Page() {
       if (jobId) {
         await updateJobMutation.mutateAsync(payload, {
           onSuccess: () => {
-            router.push(`/post-job/pricing-details?slug=${slug}`);
+            push(`/post-job/pricing-details?slug=${slug}`);
           },
           onError: () => toast.error("Failed to update location details."),
         });
@@ -224,7 +226,7 @@ export default function Page() {
     }
   };
 
-  const handlePrev = () => router.push(`/post-job/job-details?slug=${slug}`);
+  const handlePrev = () => push(`/post-job/job-details?slug=${slug}`);
 
   if (loading) {
     return (

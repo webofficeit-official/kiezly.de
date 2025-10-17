@@ -1,3 +1,4 @@
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -33,11 +34,12 @@ export function WizardDirection({
     mode = "create",
 }: WizardDirectionProps) {
     const router = useRouter();
+    const { push } = useLocalizedRouter();
     const handlePrev = async () => {
         if (onPrev) {
             await onPrev();
         }
-        if (prevLink) router.push(prevLink);
+        if (prevLink) push(prevLink);
     };
 
     const handleNext = async () => {
@@ -45,7 +47,7 @@ export function WizardDirection({
             await onNext();
             return; // assume navigation handled inside callback
         }
-        if (nextLink) router.push(nextLink);
+        if (nextLink) push(nextLink);
     };
 
     const handleSave = async () => {

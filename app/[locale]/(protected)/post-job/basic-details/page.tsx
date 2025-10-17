@@ -14,6 +14,7 @@ import {
     useJobCollections,
     useUpdateJob,
 } from "@/lib/react-query/queries/useJob";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -23,6 +24,7 @@ export default function Page() {
     const searchParams = useSearchParams();
     const slug = searchParams.get("slug");
     const categorySlug = searchParams.get("category");
+    const { push } = useLocalizedRouter();
 
 
     const { data: basicCollections } = useJobCollections();
@@ -182,7 +184,7 @@ useEffect(() => {
                     setMode("edit");
                     updateForm({ slug: res.data.slug });
                     //   toast.success("Job created successfully!");
-                    router.push(`/post-job/job-details?slug=${res.data.slug}`);
+                    push(`/post-job/job-details?slug=${res.data.slug}`);
                 }
             }
             // --- UPDATE JOB ---
@@ -193,7 +195,7 @@ useEffect(() => {
                         setJobId(res?.job?.id);
                         updateForm({ slug: updatedSlug });
                         // toast.success("Job updated successfully!");
-                        router.push(`/post-job/job-details?slug=${updatedSlug}`);
+                        push(`/post-job/job-details?slug=${updatedSlug}`);
                     },
                 });
             }

@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useCollections } from "@/lib/react-query/queries/user/account";
 import { getIconForCategory } from "@/components/ui/icon-category";
 import { useAuth } from "@/lib/context/auth-context";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 export default function Page() {
   const collections = useCollections();
@@ -33,9 +34,9 @@ export default function Page() {
     )}&city=${encodeURIComponent(where)}`;
   };
 
-const doCategory = (slug) => {
-  window.location.href = `/jobs?category=${encodeURIComponent(slug)}`;
-};
+  const doCategory = (slug) => {
+    window.location.href = `/jobs?category=${encodeURIComponent(slug)}`;
+  };
 
   React.useEffect(() => {
     setIsLoading(true);
@@ -56,6 +57,7 @@ const doCategory = (slug) => {
   const router = useRouter();
 
   const { user } = useAuth();
+  const { push } = useLocalizedRouter();
 
   return (
     <main>
@@ -140,34 +142,34 @@ const doCategory = (slug) => {
               >
                 {isLoading
                   ? Array.from({ length: 9 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="rounded-2xl border p-3 hover:shadow-sm"
-                      >
-                        {/* Icon + name row */}
-                        <div className="mb-1 flex items-center gap-2">
-                          <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                    <div
+                      key={i}
+                      className="rounded-2xl border p-3 hover:shadow-sm"
+                    >
+                      {/* Icon + name row */}
+                      <div className="mb-1 flex items-center gap-2">
+                        <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
-                          <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                        </div>
                         <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
                       </div>
-                    ))
+                      <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                    </div>
+                  ))
                   : categories.map(({ id, name, slug }) => (
-                      <div
-                        key={id}
-                        className="rounded-2xl border p-3 hover:shadow-sm"
-                        onClick={() => doCategory(slug)}
-                      >
-                        <div className="mb-2 flex items-center gap-2">
-                          {getIconForCategory(name)}
-                          <span className="text-sm font-medium">{name}</span>
-                        </div>
-                        <div className="text-xs text-neutral-500">
-                          from €15/h
-                        </div>
+                    <div
+                      key={id}
+                      className="rounded-2xl border p-3 hover:shadow-sm"
+                      onClick={() => doCategory(slug)}
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        {getIconForCategory(name)}
+                        <span className="text-sm font-medium">{name}</span>
                       </div>
-                    ))}
+                      <div className="text-xs text-neutral-500">
+                        from €15/h
+                      </div>
+                    </div>
+                  ))}
               </CardContent>
             </Card>
           </div>
@@ -220,7 +222,7 @@ const doCategory = (slug) => {
         </div>
         <div className="mt-6">
           <button
-            onClick={() => router.push("/how-it-works")}
+            onClick={() => push("/how-it-works")}
             className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
           >
             Learn more <ArrowRight className="ml-2 h-4 w-4" />
@@ -238,46 +240,46 @@ const doCategory = (slug) => {
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {isLoading
             ? Array.from({ length: 9 }).map((_, i) => (
-                <Card key={i} className="group hover:shadow-sm">
-                  <CardContent className="p-5">
-                    {/* Icon + name row */}
-                    <div className="mb-2 flex items-center gap-2 h-4">
-                      <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
-                      <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                    </div>
+              <Card key={i} className="group hover:shadow-sm">
+                <CardContent className="p-5">
+                  {/* Icon + name row */}
+                  <div className="mb-2 flex items-center gap-2 h-4">
                     <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                  </CardContent>
-                </Card>
-              ))
+
+                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                  </div>
+                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                </CardContent>
+              </Card>
+            ))
             : categories.map(({ id, name, slug }) => (
-                <Card key={id} className="group hover:shadow-sm">
-                  <CardContent className="p-5">
-                    <div className="mb-2 flex items-center gap-2">
-                      <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">
-                        {getIconForCategory(name)}
-                      </div>
-                      <h3 className="font-medium">{name}</h3>
+              <Card key={id} className="group hover:shadow-sm">
+                <CardContent className="p-5">
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">
+                      {getIconForCategory(name)}
                     </div>
-                    <p className="text-sm text-neutral-600">
-                      Typical tasks · from €15/h
-                    </p>
-                    <div className="mt-3">
-                      <button
-                        onClick={() =>
-                          router.push(
-                            `/post-job/basic-details?category=${slug}`
-                          )
-                        }
-                        className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
+                    <h3 className="font-medium">{name}</h3>
+                  </div>
+                  <p className="text-sm text-neutral-600">
+                    Typical tasks · from €15/h
+                  </p>
+                  <div className="mt-3">
+                    <button
+                      onClick={() =>
+                        push(
+                          `/post-job/basic-details?category=${slug}`
+                        )
+                      }
+                      className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
                       transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
-                      >
-                        Post a {name} job
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    >
+                      Post a {name} job
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </section>
 
@@ -341,13 +343,13 @@ const doCategory = (slug) => {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => router.push("/signup?role=client")}
+                  onClick={() => push("/signup?role=client")}
                   className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                 >
                   Post a mini‑job
                 </button>
                 <button
-                  onClick={() => router.push("/signup?role=helper")}
+                  onClick={() => push("/signup?role=helper")}
                   className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
                 >
                   Become a helper

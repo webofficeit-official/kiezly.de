@@ -1,17 +1,19 @@
 "use client";
 
 import { useAuth } from "@/lib/context/auth-context";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { getErrorMessage } from "@/lib/utils/error";
 import { useSearchParams, useRouter } from "next/navigation";
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
+const { push } = useLocalizedRouter();
 
 // NOTE: Simple Link shim so this file runs in any React runtime (no Next.js dependency)
 function Link({ href = "#", className = "", children, ...props }) {
     const router = useRouter();
     return (
-        <button type="button" onClick={() => router.push(href)} className={className} {...props}>
+        <button type="button" onClick={() => push(href)} className={className} {...props}>
             {children}
         </button>
     );
@@ -146,7 +148,7 @@ function LoginPage() {
                     ));
 
 
-                    router.push("/jobs");
+                    push("/jobs");
                 },
                 onError: (err) => {
                     toast.error(getErrorMessage(err) || "Could not sign in.");

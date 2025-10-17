@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import ApplicantCard from "./applicant-card/applicant-card";
 import { Select } from "../job-filter-select/select-option";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 interface ApplicantsPageProps {
   params: { slug: string };
 }
@@ -41,6 +42,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(12);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const { push } = useLocalizedRouter();
 
   const openUserModal = (userId: string) => {
     setSelectedUserId(userId);
@@ -70,7 +72,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   useEffect(() => {
     if (user && job) {
       if (user.role !== "client" || jobDetails?.client_id !== user.id) {
-        router.push(`/jobs/${slug}`); // redirect to public job page
+        push(`/jobs/${slug}`); // redirect to public job page
       }
     }
   }, [user, job]);
@@ -113,23 +115,23 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
 
 
   if (isLoading || isLoadingApplicants) {
-  return (
-    <div className="min-h-screen bg-gray-50 p-6 animate-pulse">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* header skeleton */}
-        <div className="h-12 bg-gray-200 rounded-xl" />
-        {/* filters */}
-        <div className="h-20 bg-gray-200 rounded-xl" />
-        {/* applicant cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-64 bg-gray-200 rounded-xl" />
-          ))}
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 animate-pulse">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* header skeleton */}
+          <div className="h-12 bg-gray-200 rounded-xl" />
+          {/* filters */}
+          <div className="h-20 bg-gray-200 rounded-xl" />
+          {/* applicant cards */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded-xl" />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">

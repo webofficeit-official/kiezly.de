@@ -12,6 +12,7 @@ import {
     useJobCollections,
     useUpdateJob,
 } from "@/lib/react-query/queries/useJob";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -28,6 +29,7 @@ export default function Page() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [showErrors, setShowErrors] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { push } = useLocalizedRouter();
 
     /* ----------------------------- Fetch Existing Job ----------------------------- */
     const { data: existingJob, isLoading } = useJob(slug || "");
@@ -111,12 +113,12 @@ export default function Page() {
                 await updateJobMutation.mutateAsync(payload, {
                     onSuccess: () => {
                         // toast.success("Job details updated!");
-                        router.push(`/post-job/location-details?slug=${formData.slug || slug}`);
+                        push(`/post-job/location-details?slug=${formData.slug || slug}`);
                     },
                     onError: () => toast.error("Failed to update job details."),
                 });
             } else {
-                router.push(`/post-job/location-details?slug=${formData.slug || slug}`);
+                push(`/post-job/location-details?slug=${formData.slug || slug}`);
             }
         } catch (err) {
             console.error("Error updating job details:", err);
