@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/app/[locale]/layout";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { getErrorMessage } from "@/lib/utils/error";
@@ -11,7 +12,7 @@ import { FaCheckCircle } from "react-icons/fa";
 // NOTE: Simple Link shim so this file runs in any React runtime (no Next.js dependency)
 function Link({ href = "#", className = "", children, ...props }) {
   const router = useRouter();
-    const { push } = useLocalizedRouter();
+  const { push } = useLocalizedRouter();
   return (
     <button
       type="button"
@@ -48,6 +49,7 @@ const __DEV__ =
 // Login Page (single declaration)
 // =========================
 function LoginPage() {
+  const t = useT("signin");
   const searchParams = useSearchParams();
   const roleParam = searchParams.get("role") as "client" | "helper" | null;
   const [submitting, setSubmitting] = React.useState(false);
@@ -74,11 +76,11 @@ function LoginPage() {
     const v = typeof value === "string" ? value.trim() : "";
     switch (name) {
       case "email":
-        if (!v) return "Email is required.";
-        if (!isEmailValid(v)) return "Enter a valid email address.";
+        if (!v) return t("form.email.error_required");
+        if (!isEmailValid(v)) return t("form.email.error_invalid");
         return "";
       case "password":
-        if (!v) return "Password is required.";
+        if (!v) return t("form.password.error_required");
         return "";
       default:
         return "";
@@ -113,7 +115,7 @@ function LoginPage() {
     };
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean)) {
-      setMessage({ type: "error", text: "Please fix the highlighted fields." });
+      setMessage({ type: "error", text: `${t("messages.fix_fields")}` });
       const firstInvalid = ["email", "password"].find((n) => nextErrors[n]);
       if (firstInvalid) {
         const el = e.currentTarget.querySelector(`[name="${firstInvalid}"]`);
@@ -128,10 +130,10 @@ function LoginPage() {
 
       login(email, password, {
         onSuccess: () => {
-          toast.custom((t) => (
+          toast.custom((to) => (
             <div
               className={`${
-                t.visible ? "animate-enter" : "animate-leave"
+                to.visible ? "animate-enter" : "animate-leave"
               } inline-flex items-center bg-white shadow-lg rounded-xl pointer-events-auto ring-1 ring-black ring-opacity-5`}
             >
               {/* Icon */}
@@ -142,14 +144,14 @@ function LoginPage() {
               {/* Message */}
               <div className="flex-1 p-3">
                 <p className="text-sm font-semibold text-green-600">
-                  Login successful!
+                  {t('toasts.success')}
                 </p>
               </div>
 
               {/* Close Button */}
               <div className="flex-shrink-0 p-1">
                 <button
-                  onClick={() => toast.dismiss(t.id)}
+                  onClick={() => toast.dismiss(to.id)}
                   className="text-gray-400 hover:text-gray-600 font-bold text-lg"
                 >
                   ✕
@@ -161,7 +163,7 @@ function LoginPage() {
           push("/jobs");
         },
         onError: (err) => {
-          toast.error(getErrorMessage(err) || "Could not sign in.");
+          toast.error(getErrorMessage(err) || `${t('toasts.error')}`);
         },
       });
       setSubmitting(false);
@@ -178,10 +180,10 @@ function LoginPage() {
     <main className="flex-1 flex-col  h-[calc(100vh-8rem)]">
       <section className="mx-auto max-w-md px-4 py-10">
         <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
-          <h1 className="text-2xl font-bold tracking-tight">Log in</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
 
           <p className="mt-1 text-sm text-gray-600">
-            Welcome back! Please enter your details.
+           {t("subtitle")}
           </p>
 
           <form
@@ -191,7 +193,7 @@ function LoginPage() {
           >
             <div>
               <label htmlFor="email" className="mb-1 block text-sm font-medium">
-                Email *
+                 {t("form.email.label")}
               </label>
               <input
                 id="email"
@@ -222,7 +224,7 @@ function LoginPage() {
                 htmlFor="password"
                 className="mb-1 block text-sm font-medium"
               >
-                Password *
+                 {t("form.password.label")}
               </label>
               <div className="relative">
                 <input
@@ -247,7 +249,7 @@ function LoginPage() {
                   onClick={() => setShowPassword((s) => !s)}
                   className="absolute inset-y-0 right-2 my-auto rounded-lg px-2 text-xs text-gray-600 hover:bg-gray-100"
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword ? t("form.password.hide") : t("form.password.show")}
                 </button>
               </div>
               {getFieldError("password") && (
@@ -260,7 +262,7 @@ function LoginPage() {
                   href="/forgot-password"
                   className="text-gray-600 underline hover:text-black"
                 >
-                  Forgot password?
+                 {t("form.forgot")}
                 </Link>
               </div>
             </div>
@@ -275,9 +277,9 @@ function LoginPage() {
             </button>
 
             <p className="text-sm text-gray-600">
-              Don’t have an account?{" "}
+                 {t("cta.signup_prompt")}{" "}
               <Link href="/signup" className="font-medium underline">
-                Create one
+                  {t("cta.signup")}
               </Link>
             </p>
 

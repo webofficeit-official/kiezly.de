@@ -1,0 +1,36 @@
+{
+  "title": "Log in",
+  "subtitle": "Welcome back! Please enter your details.",
+  "roles": {
+    "helper": "Helper",
+    "client": "Client"
+  },
+  "form": {
+    "email": {
+      "label": "Email *",
+      "placeholder": "Enter your email",
+      "error_required": "Email is required.",
+      "error_invalid": "Enter a valid email address."
+    },
+    "password": {
+      "label": "Password *",
+      "show": "Show",
+      "hide": "Hide",
+      "error_required": "Password is required."
+    },
+    "forgot": "Forgot password?"
+  },
+  "cta": {
+    "signin": "Sign in",
+    "signing_in": "Signing in…",
+    "signup_prompt": "Don’t have an account?",
+    "signup": "Create one"
+  },
+  "toasts": {
+    "success": "Login successful!",
+    "error": "Could not sign in."
+  },
+  "messages": {
+    "fix_fields": "Please fix the highlighted fields."
+  }
+}
