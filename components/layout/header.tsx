@@ -1,3 +1,5 @@
+'use client';
+
 import { useAuth } from '@/lib/context/auth-context';
 import { getNotifications, updateNotification } from '@/lib/react-query/queries/user/notifications';
 import { Notification } from '@/lib/types/notifications';
@@ -9,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useLocalizedRouter } from '@/lib/useLocalizedRouter';
+import { useT } from '@/app/[locale]/layout';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -23,6 +26,7 @@ export default function Header() {
   const [activeLanguag, setActiveLanguage] = useState('')
   const pathname = usePathname();
 
+  const t = useT();
   const { push } = useLocalizedRouter();
 
   dayjs.extend(relativeTime);
@@ -85,10 +89,10 @@ export default function Header() {
             <button onClick={() => push("/")} className="font-semibold">Kiezly.de</button>
           </div>
           <nav className="hidden items-center gap-6 text-sm md:flex">
-            <button onClick={() => push("/how-it-works")} className="hover:opacity-80">How it works</button>
-            <button onClick={() => push("/#categories")} className="hover:opacity-80">Categories</button>
-            <button onClick={() => push("/#trust")} className="hover:opacity-80">Trust & Safety</button>
-            <button onClick={() => push("/jobs")} className="hover:opacity-80">Jobs</button>
+            <button onClick={() => push("/how-it-works")} className="hover:opacity-80">{t("headers.how-it-works")}</button>
+            <button onClick={() => push("/#categories")} className="hover:opacity-80">{t("headers.categories")}</button>
+            <button onClick={() => push("/#trust")} className="hover:opacity-80">{t("headers.trust-safety")}</button>
+            <button onClick={() => push("/jobs")} className="hover:opacity-80">{t("terms.title")}</button>
           </nav>
           <div className="flex items-center gap-2 relative">
             <div className="relative mr-2">

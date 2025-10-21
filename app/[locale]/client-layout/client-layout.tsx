@@ -15,7 +15,8 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function ClientLayout({ children }: { children: ReactNode }) {
+export default function ClientLayout({ children }: { children: ReactNode }) {  
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
