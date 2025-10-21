@@ -9,25 +9,34 @@ export const TranslationContext = createContext({
   messages: {} as Record<string, any>,
 });
 
+
+
 export function useT(fileName?: string) {
   const context = useContext(TranslationContext);
   if (!context) throw new Error("useT must be used within TranslationProvider");
 
-  return (key: string, vars: Record<string, string | number> = {}) => {
-    let value: any = context.messages;
-
-    // Scope to specific file
-    if (fileName) {
-      value = value?.[fileName];
-    }
+  return (key: string, vars: Record<string, any> = {}) => {
+    // Access correct part of JSON based on filename (like 'headers' or 'how-it-works')
+    const base = fileName ? context.messages[fileName] : context.messages;
 
     const keys = key.split(".");
+    let value: any = base;
     for (const k of keys) value = value?.[k];
 
-    if (!value) return key;
+    if (value === undefined) return key;
 
-    // Replace placeholders like {name}
-    return value.replace(/\{(\w+)\}/g, (_, v) => vars[v] ?? `{${v}}`);
+    // ✅ Handle arrays — just return them as is
+    if (Array.isArray(value)) return value;
+
+    // ✅ Handle objects (e.g. nested translation groups)
+    if (typeof value === "object" && value !== null) return value;
+
+    // ✅ Replace placeholders in strings (like "Post a {name} job")
+    if (typeof value === "string") {
+      return value.replace(/\{(\w+)\}/g, (_, v) => vars[v] ?? `{${v}}`);
+    }
+
+    return value;
   };
 }
 
@@ -65,7 +74,7 @@ export default function LocaleLayout({ children, params }: any) {
   const [messages, setMessages] = useState<any>({});
 
   // List of JSON files to load for each locale
-  const files = ["header", "footer", "home","signup","signin"]; // add more as needed
+  const files = ["header", "footer", "home", "signup", "signin"]; // add more as needed
 
   useEffect(() => {
     async function loadMessages() {
@@ -95,28 +104,28 @@ export default function LocaleLayout({ children, params }: any) {
 
   return (
     <TranslationContext.Provider value={{ locale, messages }}>
-        <ClientLayout>
-          <CategoriesSeoJsonLd />
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              className: "rounded-xl shadow-md",
-              success: {
-                style: {
-                  background: "#10B981",
-                  color: "white",
-                },
+      <ClientLayout>
+        <CategoriesSeoJsonLd />
+        {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: "rounded-xl shadow-md",
+            success: {
+              style: {
+                background: "#10B981",
+                color: "white",
               },
-              error: {
-                style: {
-                  background: "#EF4444",
-                  color: "white",
-                },
+            },
+            error: {
+              style: {
+                background: "#EF4444",
+                color: "white",
               },
-            }}
-          />
-        </ClientLayout>
+            },
+          }}
+        />
+      </ClientLayout>
     </TranslationContext.Provider>
   );
 }
