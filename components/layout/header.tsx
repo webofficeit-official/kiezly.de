@@ -26,7 +26,7 @@ export default function Header() {
   const [activeLanguag, setActiveLanguage] = useState('')
   const pathname = usePathname();
 
-  const t = useT();
+  const t = useT('headers');
   const { push } = useLocalizedRouter();
 
   dayjs.extend(relativeTime);
@@ -89,10 +89,10 @@ export default function Header() {
             <button onClick={() => push("/")} className="font-semibold">Kiezly.de</button>
           </div>
           <nav className="hidden items-center gap-6 text-sm md:flex">
-            <button onClick={() => push("/how-it-works")} className="hover:opacity-80">{t("headers.how-it-works")}</button>
-            <button onClick={() => push("/#categories")} className="hover:opacity-80">{t("headers.categories")}</button>
-            <button onClick={() => push("/#trust")} className="hover:opacity-80">{t("headers.trust-safety")}</button>
-            <button onClick={() => push("/jobs")} className="hover:opacity-80">{t("terms.title")}</button>
+            <button onClick={() => push("/how-it-works")} className="hover:opacity-80">{t("how-it-works")}</button>
+            <button onClick={() => push("/#categories")} className="hover:opacity-80">{t("categories")}</button>
+            <button onClick={() => push("/#trust")} className="hover:opacity-80">{t("trust-safety")}</button>
+            <button onClick={() => push("/jobs")} className="hover:opacity-80">{t("title")}</button>
           </nav>
           <div className="flex items-center gap-2 relative">
             <div className="relative mr-2">
@@ -170,7 +170,7 @@ export default function Header() {
                           setIsModalOpen(true)
                         }}
                       >
-                        <p className='text-sm font-semibold text-gray-800'>View all notifications</p>
+                        <p className='text-sm font-semibold text-gray-800'>{t("view-all-notifications")}</p>
                       </button>
                     </div>
                   )}
@@ -213,7 +213,7 @@ export default function Header() {
                         push("/my-profile")
                       }}
                     >
-                      My Profile
+                      {t("my-profile")}
                     </button>
                     {user.role === 'client' ? (
                       <button
@@ -223,7 +223,7 @@ export default function Header() {
                           push("/my-jobs")
                         }}
                       >
-                        My Jobs
+                        {t("my-jobs")}
                       </button>) : (<>
                         <button
                           className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
@@ -232,7 +232,8 @@ export default function Header() {
                             push("/saved-job")
                           }}
                         >
-                          Saved Jobs</button>
+                          {t("saved-jobs")}
+                        </button>
                         <button
                           className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                           onClick={() => {
@@ -240,7 +241,8 @@ export default function Header() {
                             push("/applied-jobs")
                           }}
                         >
-                          Applied Jobs</button>
+                          {t("applied-jobs")}
+                        </button>
                       </>)}
 
                     <button
@@ -250,15 +252,15 @@ export default function Header() {
                       }}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                     >
-                      Logout
+                      {t("logout")}
                     </button>
                   </div>
                 )}
               </>
             ) : (
               <>
-                <button onClick={() => push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">Become a helper</button>
-                <button onClick={() => push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">Post a mini‑job</button>
+                <button onClick={() => push("/signup?role=helper")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50">{t("become-helper")}</button>
+                <button onClick={() => push("/signup?role=client")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">{t("post-mini-job")}</button>
 
               </>
             )}
@@ -286,7 +288,7 @@ export default function Header() {
                 {/* Header */}
                 <div className="bg-white px-6 py-4 border-b border-gray-100 flex justify-between">
                   <h3 className="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                    Notifications
+                    {t("notifications")}
                   </h3>
                   <X className="h-6 w-6 text-black-300 border border-gray-200 cursor-pointer rounded-lg" onClick={() => setIsModalOpen(false)} />
                 </div>
@@ -325,7 +327,7 @@ export default function Header() {
                     className="border-gray-300 text-gray-700 hover:bg-gray-100"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    Close
+                    {t("close")}
                   </Button>
                 </div>
 

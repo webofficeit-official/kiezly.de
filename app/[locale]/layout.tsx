@@ -9,14 +9,22 @@ export const TranslationContext = createContext({
   messages: {},
 });
 
-export function useT() {
+export function useT(namespace?: string) {
   const context = useContext(TranslationContext);
   if (!context) throw new Error("useT must be used within TranslationProvider");
 
   return (key: string) => {
-    const keys = key.split(".");
     let value: any = context.messages;
+
+    // If namespace is provided, go into that first
+    if (namespace) {
+      value = value?.[namespace];
+    }
+
+    // Split key and access nested value
+    const keys = key.split(".");
     for (const k of keys) value = value?.[k];
+
     return value ?? key;
   };
 }
