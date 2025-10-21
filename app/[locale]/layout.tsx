@@ -9,8 +9,6 @@ export const TranslationContext = createContext({
   messages: {} as Record<string, any>,
 });
 
-
-
 export function useT(fileName?: string) {
   const context = useContext(TranslationContext);
   if (!context) throw new Error("useT must be used within TranslationProvider");
@@ -74,7 +72,7 @@ export default function LocaleLayout({ children, params }: any) {
   const [messages, setMessages] = useState<any>({});
 
   // List of JSON files to load for each locale
-  const files = ["header", "footer", "home", "signup", "signin"]; // add more as needed
+  const files = ["header", "footer", "home", "signup", "signin", "howItWorks"]; // add more as needed
 
   useEffect(() => {
     async function loadMessages() {
