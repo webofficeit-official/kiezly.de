@@ -29,15 +29,22 @@ export default function Page() {
   const [where, setWhere] = React.useState("");
   const [categories, setCategories] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const router = useRouter();
+
+  const { user } = useAuth();
+  const { push } = useLocalizedRouter();
+  const t = useT("home");
+  const howItWorks = t("how-it-works.steps") || [];
+  const trustSafety = t("trust-safety") || [];
 
   const doSearch = () => {
-    window.location.href = `/jobs?q=${encodeURIComponent(
-      what
-    )}&city=${encodeURIComponent(where)}`;
+    push(
+      `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`
+    );
   };
 
   const doCategory = (slug) => {
-    window.location.href = `/jobs?category=${encodeURIComponent(slug)}`;
+    push(`/jobs?category=${encodeURIComponent(slug)}`);
   };
 
   React.useEffect(() => {
@@ -56,37 +63,27 @@ export default function Page() {
     );
   }, []);
 
-  const router = useRouter();
-
-  const { user } = useAuth();
-  const { push } = useLocalizedRouter();
-  const t = useT("home");
-  const howItWorks = t('how-it-works.steps') || []
-  const trustSafety = t('trust-safety') || []
-
   return (
     <main>
       <section className="mx-auto max-w-6xl px-4 pb-10 pt-12">
         <div className="grid items-center gap-10 md:grid-cols-2">
           <div>
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
-              {t('heading')}{" "}
+              {t("heading")}{" "}
               <span className="underline decoration-neutral-300">
-                {t('heading-underline')}
+                {t("heading-underline")}
               </span>
             </h1>
-            <p className="mt-3 text-neutral-600 md:text-lg">
-              {t('subheader')}
-            </p>
+            <p className="mt-3 text-neutral-600 md:text-lg">{t("subheader")}</p>
 
             <Card className="mt-6 shadow-sm">
               <CardContent className="p-4">
                 <div className="grid gap-3 md:grid-cols-3">
                   <div>
-                    <Label className="mb-1">{t('form.keyword.label')}</Label>
+                    <Label className="mb-1">{t("form.keyword.label")}</Label>
                     <div className="relative">
                       <Input
-                        placeholder={t('form.keyword.placeholder')}
+                        placeholder={t("form.keyword.placeholder")}
                         value={what}
                         onChange={(e) => setWhat(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && doSearch()}
@@ -94,12 +91,12 @@ export default function Page() {
                     </div>
                   </div>
                   <div>
-                    <Label className="mb-1">{t('form.location.label')}</Label>
+                    <Label className="mb-1">{t("form.location.label")}</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                       <Input
                         className="pl-9"
-                        placeholder={t('form.location.placeholder')}
+                        placeholder={t("form.location.placeholder")}
                         value={where}
                         onChange={(e) => setWhere(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && doSearch()}
@@ -108,25 +105,27 @@ export default function Page() {
                   </div>
                   <div className="flex items-end">
                     <Button className="w-full" onClick={doSearch}>
-                      <Search className="mr-2 h-4 w-4" /> {t('form.button')}
+                      <Search className="mr-2 h-4 w-4" /> {t("form.button")}
                     </Button>
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-neutral-500">
-                  {t('form.description')}
+                  {t("form.description")}
                 </p>
               </CardContent>
             </Card>
 
             <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-neutral-600">
               <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" /> {t('form.badge.id-verified')}
+                <CheckCircle2 className="h-4 w-4" />{" "}
+                {t("form.badge.id-verified")}
               </span>
               <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" /> {t('form.badge.first-aid')}
+                <CheckCircle2 className="h-4 w-4" /> {t("form.badge.first-aid")}
               </span>
               <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" /> {t('form.badge.police-certificate')}
+                <CheckCircle2 className="h-4 w-4" />{" "}
+                {t("form.badge.police-certificate")}
               </span>
             </div>
           </div>
@@ -135,7 +134,7 @@ export default function Page() {
             <Card className="rounded-3xl border-neutral-200 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base text-neutral-700">
-                  {t('popular')}
+                  {t("popular")}
                 </CardTitle>
               </CardHeader>
               <CardContent
@@ -144,34 +143,34 @@ export default function Page() {
               >
                 {isLoading
                   ? Array.from({ length: 9 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="rounded-2xl border p-3 hover:shadow-sm"
-                    >
-                      {/* Icon + name row */}
-                      <div className="mb-1 flex items-center gap-2">
-                        <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                      <div
+                        key={i}
+                        className="rounded-2xl border p-3 hover:shadow-sm"
+                      >
+                        {/* Icon + name row */}
+                        <div className="mb-1 flex items-center gap-2">
+                          <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
+                          <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                        </div>
                         <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
                       </div>
-                      <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                    </div>
-                  ))
+                    ))
                   : categories.map(({ id, name, slug }) => (
-                    <div
-                      key={id}
-                      className="rounded-2xl border p-3 hover:shadow-sm"
-                      onClick={() => doCategory(slug)}
-                    >
-                      <div className="mb-2 flex items-center gap-2">
-                        {getIconForCategory(name)}
-                        <span className="text-sm font-medium">{name}</span>
+                      <div
+                        key={id}
+                        className="rounded-2xl border p-3 hover:shadow-sm"
+                        onClick={() => doCategory(slug)}
+                      >
+                        <div className="mb-2 flex items-center gap-2">
+                          {getIconForCategory(name)}
+                          <span className="text-sm font-medium">{name}</span>
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          {t("popular-rate")}
+                        </div>
                       </div>
-                      <div className="text-xs text-neutral-500">
-                        {t('popular-rate')}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
               </CardContent>
             </Card>
           </div>
@@ -181,10 +180,8 @@ export default function Page() {
       {/* Teaser that links to the dedicated page */}
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold">{t('how-it-works.title')}</h2>
-          <p className="text-neutral-600">
-            {t('how-it-works.description')}
-          </p>
+          <h2 className="text-2xl font-semibold">{t("how-it-works.title")}</h2>
+          <p className="text-neutral-600">{t("how-it-works.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {howItWorks.map((step: any, i: number) => {
@@ -194,10 +191,15 @@ export default function Page() {
               <Card key={i} className="h-full">
                 <CardContent className="p-5">
                   <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                    <IconComponent className="h-4 w-4" /> {/* ✅ dynamic icon */}
+                    <IconComponent className="h-4 w-4" />{" "}
+                    {/* ✅ dynamic icon */}
                   </div>
-                  <h3 className="font-medium">{i + 1}) {step.title}</h3>
-                  <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
+                  <h3 className="font-medium">
+                    {i + 1}) {step.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    {step.description}
+                  </p>
                 </CardContent>
               </Card>
             );
@@ -208,70 +210,64 @@ export default function Page() {
             onClick={() => push("/how-it-works")}
             className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
           >
-            {t('how-it-works.button')} <ArrowRight className="ml-2 h-4 w-4" />
+            {t("how-it-works.button")} <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </div>
       </section>
 
       <section id="categories" className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold">{t('categories.title')}</h2>
-          <p className="text-neutral-600">
-            {t('categories.description')}
-          </p>
+          <h2 className="text-2xl font-semibold">{t("categories.title")}</h2>
+          <p className="text-neutral-600">{t("categories.description")}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {isLoading
             ? Array.from({ length: 9 }).map((_, i) => (
-              <Card key={i} className="group hover:shadow-sm">
-                <CardContent className="p-5">
-                  {/* Icon + name row */}
-                  <div className="mb-2 flex items-center gap-2 h-4">
-                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                <Card key={i} className="group hover:shadow-sm">
+                  <CardContent className="p-5">
+                    {/* Icon + name row */}
+                    <div className="mb-2 flex items-center gap-2 h-4">
+                      <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
 
-                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                  </div>
-                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                </CardContent>
-              </Card>
-            ))
-            : categories.map(({ id, name, slug }) => (
-              <Card key={id} className="group hover:shadow-sm">
-                <CardContent className="p-5">
-                  <div className="mb-2 flex items-center gap-2">
-                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">
-                      {getIconForCategory(name)}
+                      <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
                     </div>
-                    <h3 className="font-medium">{name}</h3>
-                  </div>
-                  <p className="text-sm text-neutral-600">
-                    {t('categories.subtitle')}
-                  </p>
-                  <div className="mt-3">
-                    <button
-                      onClick={() =>
-                        push(
-                          `/post-job/basic-details?category=${slug}`
-                        )
-                      }
-                      className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
+                    <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                  </CardContent>
+                </Card>
+              ))
+            : categories.map(({ id, name, slug }) => (
+                <Card key={id} className="group hover:shadow-sm">
+                  <CardContent className="p-5">
+                    <div className="mb-2 flex items-center gap-2">
+                      <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">
+                        {getIconForCategory(name)}
+                      </div>
+                      <h3 className="font-medium">{name}</h3>
+                    </div>
+                    <p className="text-sm text-neutral-600">
+                      {t("categories.subtitle")}
+                    </p>
+                    <div className="mt-3">
+                      <button
+                        onClick={() =>
+                          push(`/post-job/basic-details?category=${slug}`)
+                        }
+                        className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
                       transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
-                    >
-                      {t('categories.post-job', { name: name })}
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      >
+                        {t("categories.post-job", { name: name })}
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
         </div>
       </section>
 
       <section id="trust" className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold">{t('trust-safety.title')}</h2>
-          <p className="text-neutral-600">
-            {t('trust-safety.description')}
-          </p>
+          <h2 className="text-2xl font-semibold">{t("trust-safety.title")}</h2>
+          <p className="text-neutral-600">{t("trust-safety.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {howItWorks.map((step: any, i: number) => {
@@ -299,23 +295,21 @@ export default function Page() {
           <Card className="border-neutral-200 bg-gradient-to-br from-neutral-50 to-white">
             <CardContent className="flex flex-col items-start gap-3 p-6 md:flex-row md:items-center md:justify-between">
               <div>
-                <h3 className="text-xl font-semibold">{t('help.title')}</h3>
-                <p className="text-neutral-600">
-                  {t('help.description')}
-                </p>
+                <h3 className="text-xl font-semibold">{t("help.title")}</h3>
+                <p className="text-neutral-600">{t("help.description")}</p>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => push("/signup?role=client")}
                   className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                 >
-                  {t('help.mini‑job')}
+                  {t("help.mini‑job")}
                 </button>
                 <button
                   onClick={() => push("/signup?role=helper")}
                   className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
                 >
-                  {t('help.helper')}
+                  {t("help.helper")}
                 </button>
               </div>
             </CardContent>
