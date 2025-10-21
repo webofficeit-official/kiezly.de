@@ -20,7 +20,7 @@ export default function Header() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false)
-  const [activeLanguag, setActiveLanguage] = useState("")
+  const [activeLanguag, setActiveLanguage] = useState('')
   const pathname = usePathname();
 
   const { push } = useLocalizedRouter();
@@ -57,6 +57,11 @@ export default function Header() {
   }
 
   const locales = ['en', 'de'];
+
+  useEffect(() => {
+    const segments = pathname.split('/').filter(Boolean);
+    setActiveLanguage(segments[0])
+  }, []);
 
   const handleChange = (locale: string) => {
     // Replace current locale in URL

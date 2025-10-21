@@ -34,7 +34,7 @@ export default function LocaleLayout({ children, params }: any) {
   }, [locale]);
 
   if (Object.keys(messages).length === 0) {
-    return <div className="p-6">Loading translations...</div>;
+    return <></>;
   }
 
   return (
