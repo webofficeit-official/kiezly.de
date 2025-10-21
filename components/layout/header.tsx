@@ -26,7 +26,7 @@ export default function Header() {
   const [activeLanguag, setActiveLanguage] = useState('')
   const pathname = usePathname();
 
-  const t = useT('headers');
+  const t = useT('header');
   const { push } = useLocalizedRouter();
 
   dayjs.extend(relativeTime);
@@ -92,7 +92,7 @@ export default function Header() {
             <button onClick={() => push("/how-it-works")} className="hover:opacity-80">{t("how-it-works")}</button>
             <button onClick={() => push("/#categories")} className="hover:opacity-80">{t("categories")}</button>
             <button onClick={() => push("/#trust")} className="hover:opacity-80">{t("trust-safety")}</button>
-            <button onClick={() => push("/jobs")} className="hover:opacity-80">{t("title")}</button>
+            <button onClick={() => push("/jobs")} className="hover:opacity-80">{t("jobs")}</button>
           </nav>
           <div className="flex items-center gap-2 relative">
             <div className="relative mr-2">

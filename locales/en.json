@@ -1,22 +1,2 @@
 {
-  "terms": {
-    "title": "Terms & Conditions",
-    "content": "This is the English terms page."
-  },
-  "headers": {
-    "how-it-works": "How it works",
-    "categories": "Categories",
-    "trust-safety": "Trust & Safety",
-    "jobs": "Jobs",
-    "become-helper": "Become a helper",
-    "post-mini-job": "Post a mini‑job",
-    "view-all-notifications": "View all notifications",
-    "my-profile": "My Profile",
-    "my-jobs": "My Jobs",
-    "saved-jobs": "Saved Jobs",
-    "applied-jobs": "Applied Jobs",
-    "logout": "Logout",
-    "notifications": "Notifications",
-    "close": "Close"
-  }
 }

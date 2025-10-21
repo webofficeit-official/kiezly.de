@@ -6,28 +6,28 @@ import { Toaster } from "react-hot-toast";
 
 export const TranslationContext = createContext({
   locale: "en",
-  messages: {},
+  messages: {} as Record<string, any>,
 });
 
-export function useT(namespace?: string) {
+export function useT(fileName?: string) {
   const context = useContext(TranslationContext);
   if (!context) throw new Error("useT must be used within TranslationProvider");
 
   return (key: string) => {
     let value: any = context.messages;
 
-    // If namespace is provided, go into that first
-    if (namespace) {
-      value = value?.[namespace];
+    // Use namespace if provided
+    if (fileName) {
+      value = value?.[fileName];
     }
 
-    // Split key and access nested value
     const keys = key.split(".");
     for (const k of keys) value = value?.[k];
 
     return value ?? key;
   };
 }
+
 
 function CategoriesSeoJsonLd() {
   const jsonLd = {
@@ -62,19 +62,34 @@ export default function LocaleLayout({ children, params }: any) {
   const { locale } = params;
   const [messages, setMessages] = useState<any>({});
 
-  // Load JSON dynamically from /messages folder
+  // List of JSON files to load for each locale
+  const files = ["header", "footer"]; // add more as needed
+
   useEffect(() => {
-    import(`../../locales/${locale}.json`)
-      .then((mod) => setMessages(mod.default))
-      .catch(() => {
-        console.warn(`No translation found for locale: ${locale}, using English fallback.`);
-        import(`../../locales/en.json`).then((mod) => setMessages(mod.default));
-      });
+    async function loadMessages() {
+      const merged: Record<string, any> = {};
+
+      for (const file of files) {
+        try {
+          const mod = await import(`../../locales/${locale}/${file}.json`);
+          merged[file] = mod.default;
+        } catch {
+          console.warn(
+            `Translation file not found: ${locale}/${file}.json. Falling back to English.`
+          );
+          const fallback = await import(`../../locales/en/${file}.json`);
+          merged[file] = fallback.default;
+        }
+      }
+
+      setMessages(merged);
+    }
+
+    loadMessages();
   }, [locale]);
 
-  if (Object.keys(messages).length === 0) {
-    return <></>;
-  }
+  if (Object.keys(messages).length === 0) return <></>;
+
 
   return (
     <TranslationContext.Provider value={{ locale, messages }}>
