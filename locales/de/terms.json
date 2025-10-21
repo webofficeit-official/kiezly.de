@@ -1,0 +1,31 @@
+{
+    "header": "Nutzungsbedingungen",
+    "description": "Stand: 16. Oktober 2025",
+    "lists": [
+        {
+            "title": "Geltungsbereich & Status",
+            "description": "Diese Website ist ein <strong>privates, nicht-kommerzielles</strong> Projekt und befindet sich in der Entwicklung. Die Inhalte dienen ausschließlich Informationszwecken."
+        },
+        {
+            "title": "Haftung",
+            "description": "Es wird keine Gewähr für Richtigkeit, Vollständigkeit oder Aktualität der Inhalte übernommen. Eine Haftung für Schäden aus der Nutzung der Inhalte ist ausgeschlossen, soweit gesetzlich zulässig."
+        },
+        {
+            "title": "Verfügbarkeit",
+            "description": "Es besteht kein Anspruch auf ununterbrochene Verfügbarkeit. Wartungen, Aktualisierungen oder Störungen können zu Ausfällen führen."
+        },
+        {
+            "title": "Externe Links",
+            "description": "Für Inhalte verlinkter externer Seiten sind ausschließlich deren Betreiber verantwortlich."
+        },
+        {
+            "title": "Urheberrecht",
+            "description": "Alle Inhalte (Texte, Layout, ggf. Grafiken) sind urheberrechtlich geschützt. Eine Nutzung, Vervielfältigung oder Bearbeitung ist ohne vorherige Zustimmung nicht gestattet."
+        },
+        {
+            "title": "Änderungen",
+            "description": "Diese Bedingungen können jederzeit angepasst werden. Maßgeblich ist die jeweils aktuelle Fassung."
+        }
+    ],
+    "go-back": "Zurück nach Hause"
+}

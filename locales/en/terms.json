@@ -1,0 +1,31 @@
+{
+    "header": "Terms of Use (English)",
+    "description": "English translation for convenience. German version above is legally authoritative.",
+    "lists": [
+        {
+            "title": "Scope & Status",
+            "description": "This site is a <strong>private, non-commercial project</strong> under development. Content is for informational purposes only."
+        },
+        {
+            "title": "Liability",
+            "description": "No warranty is given for accuracy, completeness, or timeliness. Liability for damages arising from use is excluded to the extent permitted by law."
+        },
+        {
+            "title": "Availability",
+            "description": "No guarantee of uninterrupted availability. Maintenance, updates, or outages may occur."
+        },
+        {
+            "title": "External Links",
+            "description": "Third-party sites are the sole responsibility of their operators."
+        },
+        {
+            "title": "Copyright",
+            "description": "All content (text, layout, graphics) is protected by copyright and may not be used without prior permission."
+        },
+        {
+            "title": "Changes",
+            "description": "These terms may be updated at any time. The current version applies."
+        }
+    ],
+    "go-back": "Back to home"
+}
