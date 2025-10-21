@@ -5,81 +5,87 @@ import { ShieldCheck, FileText, Send, CheckCircle2, ArrowRight } from 'lucide-re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation';
 import { useLocalizedRouter } from '@/lib/useLocalizedRouter';
+import { useT } from '../layout';
+import * as Icons from "lucide-react";
 
 export default function HowItWorksPage() {
-  const router = useRouter();
   const { push } = useLocalizedRouter();
+  const t = useT("howItWorks");
+  const steps = t('steps') || []
+  const feesPayment = t('fees-payment.points') || []
+  const trustSafety = t('trust-safety.points') || []
+  const checklist = t('checklist.list') || []
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-4">
-          <h1 className="text-2xl font-semibold">How it works</h1>
-          <p className="text-neutral-600">Simple, fast, and built for mini‑jobs in Germany.</p>
+          <h1 className="text-2xl font-semibold">{t('header')}</h1>
+          <p className="text-neutral-600">{t('subheader')}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="h-full">
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><FileText className="h-4 w-4" /></div>
-              <h3 className="font-medium">1) Post your job</h3>
-              <p className="mt-1 text-sm text-neutral-600">Describe the tasks, time and pay. We surface your job to relevant local helpers.</p>
-            </CardContent>
-          </Card>
-          <Card className="h-full">
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><Send className="h-4 w-4" /></div>
-              <h3 className="font-medium">2) Compare applicants</h3>
-              <p className="mt-1 text-sm text-neutral-600">Review ratings, badges, distance and response rate. Chat to align on details.</p>
-            </CardContent>
-          </Card>
-          <Card className="h-full">
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white"><ShieldCheck className="h-4 w-4" /></div>
-              <h3 className="font-medium">3) Hire with confidence</h3>
-              <p className="mt-1 text-sm text-neutral-600">Confirm the booking and follow our mini‑job checklist (rates, registration, monthly cap).</p>
-            </CardContent>
-          </Card>
+          {steps.map((step: any, i: number) => {
+            const IconComponent = getIcon(step.icon);
+
+            return (
+              <Card key={i} className="h-full">
+                <CardContent className="p-5">
+                  <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                    <IconComponent className="h-4 w-4" /> {/* ✅ dynamic icon */}
+                  </div>
+                  <h3 className="font-medium">{i + 1}) {step.title}</h3>
+                  <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <Card>
-            <CardHeader><CardTitle className="text-base">Fees & payment</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{t('fees-payment.title')}</CardTitle></CardHeader>
             <CardContent className="p-5 text-sm text-neutral-700 space-y-2">
-              <p>• Posting a job is free. You only pay your helper directly according to the agreed rate.</p>
-              <p>• Agree on hourly vs fixed price before the work starts. Keep a simple log of hours.</p>
-              <p>• Cash or bank transfer are common for household mini‑jobs; keep receipts for your records.</p>
+              {Array.isArray(feesPayment) &&
+                feesPayment.map((line, idx) => (
+                  <p key={idx}>• {line}</p>
+                ))}
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle className="text-base">Trust & safety</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{t('trust-safety.title')}</CardTitle></CardHeader>
             <CardContent className="p-5 text-sm text-neutral-700 space-y-2">
-              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4" /> Check profiles for badges like ID and First Aid.</p>
-              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4" /> Use in‑app chat to clarify tasks, tools and expectations.</p>
-              <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4" /> Share only what’s necessary and arrange a brief intro meeting if helpful.</p>
+              {Array.isArray(trustSafety) &&
+                trustSafety.map((line, idx) => (
+                  <p key={idx} className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4" />  {line}</p>
+                ))}
             </CardContent>
           </Card>
         </div>
 
         <div className="mt-6">
           <Card>
-            <CardHeader><CardTitle className="text-base">Mini‑job checklist (Germany)</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{t('checklist.title')}</CardTitle></CardHeader>
             <CardContent className="p-5 text-sm text-neutral-700 space-y-2">
-              <p className="text-xs text-neutral-500">This is for information only and not legal advice.</p>
-              <p>• Ensure the hourly rate meets or exceeds the legal minimum wage.</p>
-              <p>• If it’s a recurring household mini‑job, register via Haushaltsscheck when required.</p>
-              <p>• Keep monthly earnings within the mini‑job threshold to maintain status.</p>
-              <p>• Clarify liability/accident coverage as applicable for household work.</p>
+              <p className="text-xs text-neutral-500">{t('checklist.description')}</p>
+              {Array.isArray(checklist) &&
+                checklist.map((line, idx) => (
+                  <p key={idx}>• {line}</p>
+                ))}
             </CardContent>
           </Card>
         </div>
 
         <div className="mt-8">
           <button onClick={() => push("/")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
-            Back to home <ArrowRight className="ml-2 h-4 w-4" />
+            {t('go-back')} <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </div>
       </main>
     </div>
   )
+}
+
+export function getIcon(name: string): React.ElementType {
+  return (Icons[name] as React.ElementType) || Icons.FileText;
 }
