@@ -14,9 +14,9 @@
         "button": "Suchen",
         "description": "Tipp: Nutzen Sie Ihre Nachbarschaft (z. B. „Braunschweig, Weststadt“), um Helfer in der Nähe zu sehen.",
         "badge": {
-           "id-verified": "Ausweis verifiziert",
-           "first-aid": "Erste-Hilfe-Abzeichen",
-           "police-certificate": "Polizeiliches Führungszeugnis (optional)"
+            "id-verified": "Ausweis verifiziert",
+            "first-aid": "Erste-Hilfe-Abzeichen",
+            "police-certificate": "Polizeiliches Führungszeugnis (optional)"
         }
     },
     "popular": "Aktuell in Ihrer Nähe beliebt",
@@ -24,19 +24,24 @@
     "how-it-works": {
         "title": "Wie es funktioniert",
         "description": "Einfach, schnell und für Minijobs in Deutschland konzipiert.",
-        "first": {
-            "title": "Veröffentlichen Sie Ihren Job",
-            "description": "Beschreiben Sie Aufgaben, Zeit und Bezahlung. Laden Sie Helfer in der Nähe automatisch ein."
-        },
-        "second": {
-            "title": "Bewerber vergleichen",
-            "description": "Sehen Sie Entfernung, Bewertungen, Abzeichen und Antwortrate. Chatten Sie, um sich abzustimmen."
-        },
-        "third": {
-            "title": "Stellen Sie mit Zuversicht ein",
-            "description": "Befolgen Sie nach der Einstellung die Checkliste für Minijobs im Haushalt und bleiben Sie innerhalb der monatlichen Obergrenze."
-        },
-        "button": "Erfahren Sie mehr"
+        "button": "Erfahren Sie mehr",
+        "steps": [
+            {
+                "icon": "FileText",
+                "title": "Veröffentlichen Sie Ihren Job",
+                "description": "Beschreiben Sie Aufgaben, Zeit und Bezahlung. Laden Sie Helfer in der Nähe automatisch ein."
+            },
+            {
+                "icon": "Send",
+                "title": "Bewerber vergleichen",
+                "description": "Sehen Sie Entfernung, Bewertungen, Abzeichen und Antwortrate. Chatten Sie, um sich abzustimmen."
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "Stellen Sie mit Zuversicht ein",
+                "description": "Befolgen Sie nach der Einstellung die Checkliste für Minijobs im Haushalt und bleiben Sie innerhalb der monatlichen Obergrenze."
+            }
+        ]
     },
     "categories": {
         "title": "Kategorien durchsuchen",
@@ -47,18 +52,23 @@
     "trust-safety": {
         "title": "Vertrauen und Sicherheit",
         "description": "Auf deutsche Minijobs zugeschnittene Überprüfung und Beratung.",
-        "first": {
-            "title": "Verifizierte Abzeichen",
-            "description": "ID-Prüfung, Erste Hilfe und optionales erweitertes polizeiliches Führungszeugnis (für die Kinderbetreuung) werden in den Profilen hervorgehoben."
-        },
-        "second": {
-            "title": "Klare Preise und Verfügbarkeit",
-            "description": "Filtern Sie nach Entfernung, Zeitfenster, Preis, Sprachen und Abzeichen. Behalten Sie alles lokal."
-        },
-        "third": {
-            "title": "Minijobberatung",
-            "description": "In-App-Checkliste für Haushaltscheck-Registrierung, Mindestlohn und monatliche Obergrenzen-Erinnerungen."
-        }
+        "steps": [
+            {
+                "icon": "CheckCircle2",
+                "title": "Verifizierte Abzeichen",
+                "description": "ID-Prüfung, Erste Hilfe und optionales erweitertes polizeiliches Führungszeugnis (für die Kinderbetreuung) werden in den Profilen hervorgehoben."
+            },
+            {
+                "icon": "Clock",
+                "title": "Klare Preise und Verfügbarkeit",
+                "description": "Filtern Sie nach Entfernung, Zeitfenster, Preis, Sprachen und Abzeichen. Behalten Sie alles lokal."
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "Minijobberatung",
+                "description": "In-App-Checkliste für Haushaltscheck-Registrierung, Mindestlohn und monatliche Obergrenzen-Erinnerungen."
+            }
+        ]
     },
     "help": {
         "title": "Bereit, Hilfe zu finden?",

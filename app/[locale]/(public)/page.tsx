@@ -21,6 +21,7 @@ import { getIconForCategory } from "@/components/ui/icon-category";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "../layout";
+import { getIcon } from "../how-it-works/page";
 
 export default function Page() {
   const collections = useCollections();
@@ -60,6 +61,8 @@ export default function Page() {
   const { user } = useAuth();
   const { push } = useLocalizedRouter();
   const t = useT("home");
+  const howItWorks = t('how-it-works.steps') || []
+  const trustSafety = t('trust-safety') || []
 
   return (
     <main>
@@ -184,39 +187,21 @@ export default function Page() {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="h-full">
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                <FileText className="h-4 w-4" />
-              </div>
-              <h3 className="font-medium">1) {t('how-it-works.first.title')}</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                {t('how-it-works.first.description')}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="h-full">
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                <Send className="h-4 w-4" />
-              </div>
-              <h3 className="font-medium">2) {t('how-it-works.second.title')}</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                {t('how-it-works.second.description')}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="h-full">
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <h3 className="font-medium">3) {t('how-it-works.third.title')}</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                {t('how-it-works.third.description')}
-              </p>
-            </CardContent>
-          </Card>
+          {howItWorks.map((step: any, i: number) => {
+            const IconComponent = getIcon(step.icon);
+
+            return (
+              <Card key={i} className="h-full">
+                <CardContent className="p-5">
+                  <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                    <IconComponent className="h-4 w-4" /> {/* ✅ dynamic icon */}
+                  </div>
+                  <h3 className="font-medium">{i + 1}) {step.title}</h3>
+                  <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
         <div className="mt-6">
           <button
@@ -289,39 +274,23 @@ export default function Page() {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-              <h3 className="font-medium">{t('trust-safety.first.title')}</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                {t('trust-safety.first.description')}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                <Clock className="h-4 w-4" />
-              </div>
-              <h3 className="font-medium">{t('trust-safety.second.title')}</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                {t('trust-safety.second.description')}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-5">
-              <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <h3 className="font-medium">{t('trust-safety.third.title')}</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                {t('trust-safety.third.description')}
-              </p>
-            </CardContent>
-          </Card>
+          {howItWorks.map((step: any, i: number) => {
+            const IconComponent = getIcon(step.icon);
+
+            return (
+              <Card key={i}>
+                <CardContent className="p-5">
+                  <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                    <IconComponent className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-medium">{step.title}</h3>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    {step.description}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 

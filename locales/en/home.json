@@ -24,19 +24,24 @@
     "how-it-works": {
         "title": "How it works",
         "description": "Simple, fast, and built for mini‑jobs in Germany.",
-        "first": {
-            "title": "Post your job",
-            "description": "Describe tasks, time, and pay. Auto‑invite nearby helpers."
-        },
-        "second": {
-            "title": "Compare applicants",
-            "description": "See distance, ratings, badges, and response rate. Chat to align."
-        },
-        "third": {
-            "title": "Hire with confidence",
-            "description": "After hiring, follow the household mini‑job checklist & stay within the monthly cap."
-        },
-        "button": "Learn more"
+        "button": "Learn more",
+        "steps": [
+            {
+                "icon": "FileText",
+                "title": "Post your job",
+                "description": "Describe tasks, time, and pay. Auto‑invite nearby helpers."
+            },
+            {
+                "icon": "Send",
+                "title": "Compare applicants",
+                "description": "See distance, ratings, badges, and response rate. Chat to align."
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "Hire with confidence",
+                "description": "After hiring, follow the household mini‑job checklist & stay within the monthly cap."
+            }
+        ]
     },
     "categories": {
         "title": "Browse categories",
@@ -47,18 +52,23 @@
     "trust-safety": {
         "title": "Trust & Safety",
         "description": "Verification and guidance tailored to German mini‑jobs.",
-        "first": {
-            "title": "Verified badges",
-            "description": "ID check, First Aid, and optional enhanced police certificate (for childcare) highlighted on profiles."
-        },
-        "second": {
-            "title": "Clear rates & availability",
-            "description": "Filter by distance, time window, price, languages, and badges. Keep everything local."
-        },
-        "third": {
-            "title": "Mini‑job guidance",
-            "description": "In‑app checklist for Haushaltsscheck registration, minimum wage, and monthly cap reminders."
-        }
+        "steps": [
+            {
+                "icon": "CheckCircle2",
+                "title": "Verified badges",
+                "description": "ID check, First Aid, and optional enhanced police certificate (for childcare) highlighted on profiles."
+            },
+            {
+                "icon": "Clock",
+                "title": "Clear rates & availability",
+                "description": "Filter by distance, time window, price, languages, and badges. Keep everything local."
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "In‑app checklist for Haushaltsscheck registration, minimum wage, and monthly cap reminders",
+                "description": "After hiring, follow the household mini‑job checklist & stay within the monthly cap."
+            }
+        ]
     },
     "help": {
         "title": "Ready to find help?",
