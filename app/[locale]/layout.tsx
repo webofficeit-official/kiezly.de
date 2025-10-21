@@ -13,10 +13,10 @@ export function useT(fileName?: string) {
   const context = useContext(TranslationContext);
   if (!context) throw new Error("useT must be used within TranslationProvider");
 
-  return (key: string) => {
+  return (key: string, vars: Record<string, string | number> = {}) => {
     let value: any = context.messages;
 
-    // Use namespace if provided
+    // Scope to specific file
     if (fileName) {
       value = value?.[fileName];
     }
@@ -24,10 +24,12 @@ export function useT(fileName?: string) {
     const keys = key.split(".");
     for (const k of keys) value = value?.[k];
 
-    return value ?? key;
+    if (!value) return key;
+
+    // Replace placeholders like {name}
+    return value.replace(/\{(\w+)\}/g, (_, v) => vars[v] ?? `{${v}}`);
   };
 }
-
 
 function CategoriesSeoJsonLd() {
   const jsonLd = {
@@ -63,7 +65,7 @@ export default function LocaleLayout({ children, params }: any) {
   const [messages, setMessages] = useState<any>({});
 
   // List of JSON files to load for each locale
-  const files = ["header", "footer"]; // add more as needed
+  const files = ["header", "footer", "home"]; // add more as needed
 
   useEffect(() => {
     async function loadMessages() {

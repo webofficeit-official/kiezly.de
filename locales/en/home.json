@@ -1,0 +1,69 @@
+{
+    "heading": "Find trusted help for",
+    "heading-underline": "everyday mini‑jobs",
+    "subheader": "Babysitting, cleaning, pet sitting, senior support and more — book local, verified helpers in minutes.",
+    "form": {
+        "keyword": {
+            "label": "What",
+            "placeholder": "e.g., Babysitting"
+        },
+        "location": {
+            "label": "Where",
+            "placeholder": "City or postcode"
+        },
+        "button": "Search",
+        "description": "Tip: use your neighborhood (e.g., \"Braunschweig, Weststadt\") to see nearby helpers.",
+        "badge": {
+           "id-verified": "ID verified",
+           "first-aid": "First Aid badge",
+           "police-certificate": "Police certificate (optional)"
+        }
+    },
+    "popular": "Popular right now near you",
+    "popular-rate": "from €15/h",
+    "how-it-works": {
+        "title": "How it works",
+        "description": "Simple, fast, and built for mini‑jobs in Germany.",
+        "first": {
+            "title": "Post your job",
+            "description": "Describe tasks, time, and pay. Auto‑invite nearby helpers."
+        },
+        "second": {
+            "title": "Compare applicants",
+            "description": "See distance, ratings, badges, and response rate. Chat to align."
+        },
+        "third": {
+            "title": "Hire with confidence",
+            "description": "After hiring, follow the household mini‑job checklist & stay within the monthly cap."
+        },
+        "button": "Learn more"
+    },
+    "categories": {
+        "title": "Browse categories",
+        "description": "From quick chores to recurring help.",
+        "subtitle": "Typical tasks · from €15/h",
+        "post-job": "Post a {name} job"
+    },
+    "trust-safety": {
+        "title": "Trust & Safety",
+        "description": "Verification and guidance tailored to German mini‑jobs.",
+        "first": {
+            "title": "Verified badges",
+            "description": "ID check, First Aid, and optional enhanced police certificate (for childcare) highlighted on profiles."
+        },
+        "second": {
+            "title": "Clear rates & availability",
+            "description": "Filter by distance, time window, price, languages, and badges. Keep everything local."
+        },
+        "third": {
+            "title": "Mini‑job guidance",
+            "description": "In‑app checklist for Haushaltsscheck registration, minimum wage, and monthly cap reminders."
+        }
+    },
+    "help": {
+        "title": "Ready to find help?",
+        "description": "Post your mini‑job for free — start getting applications today.",
+        "mini‑job": "Post a mini‑job",
+        "helper": "Become a helper"
+    }
+}
