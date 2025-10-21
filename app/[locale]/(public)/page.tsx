@@ -35,7 +35,7 @@ export default function Page() {
   const { push } = useLocalizedRouter();
   const t = useT("home");
   const howItWorks = t("how-it-works.steps") || [];
-  const trustSafety = t("trust-safety") || [];
+  const trustSafety = t("trust-safety.steps") || [];
 
   const doSearch = () => {
     push(
@@ -270,7 +270,7 @@ export default function Page() {
           <p className="text-neutral-600">{t("trust-safety.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {howItWorks.map((step: any, i: number) => {
+          {trustSafety.map((step: any, i: number) => {
             const IconComponent = getIcon(step.icon);
 
             return (

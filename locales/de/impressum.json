@@ -1,0 +1,26 @@
+{
+    "header": "Impressum",
+    "description": "Stand: 16. Oktober 2025",
+    "lists": [
+        {
+            "title": "Angaben gemäß § 5 TMG",
+            "description": [
+                "Sivaprasad Sisupalan<br /> Speckenkamp 12<br /> 38162 Sülfeld, Deutschland",
+                "Telefon: <a href=\"tel:+4915779151890\">+49 1577 9151890</a><br /> E-Mail: <a href=\"mailto:siva@webofficeit.com\">siva@webofficeit.com</a>, <a href=\"mailto:sabeel@webofficeit.com\">sabeel@webofficeit.com</a><br />Webseite: <a href=\"https://kiezly.de\">https://kiezly.de</a>"
+            ]
+        },
+        {
+            "title": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV",
+            "description": [
+                "Sivaprasad Sisupalan (Anschrift wie oben)"
+            ]
+        },
+        {
+            "title": "Hinweis zum Status",
+            "description": [
+                "Diese Website ist ein <strong>privates, nicht-kommerzielle­s Projekt</strong> und befindet sich in der Entwicklung."
+            ]
+        }
+    ],
+    "go-back": "Zurück nach Hause"
+}
