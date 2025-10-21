@@ -72,7 +72,7 @@ export default function LocaleLayout({ children, params }: any) {
   const [messages, setMessages] = useState<any>({});
 
   // List of JSON files to load for each locale
-  const files = ["header", "footer", "home", "signup", "signin", "howItWorks", "impressum", "terms"]; // add more as needed
+  const files = ["header", "footer", "home", "signup", "signin", "howItWorks", "impressum", "terms", "privacy"]; // add more as needed
 
   useEffect(() => {
     async function loadMessages() {
