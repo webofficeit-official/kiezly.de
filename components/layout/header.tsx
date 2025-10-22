@@ -112,18 +112,12 @@ export default function Header() {
             <LocalizedLink href="/how-it-works" className="hover:opacity-80">
               {t("how-it-works")}
             </LocalizedLink>
-            <button
-              onClick={() => push("/#categories")}
-              className="hover:opacity-80"
-            >
+            <LocalizedLink href="/#categories" className="hover:opacity-80">
               {t("categories")}
-            </button>
-            <button
-              onClick={() => push("/#trust")}
-              className="hover:opacity-80"
-            >
+            </LocalizedLink>
+            <LocalizedLink href="/#trust" className="hover:opacity-80">
               {t("trust-safety")}
-            </button>
+            </LocalizedLink>
             <LocalizedLink href={"/jobs"} className="hover:opacity-80">
               {t("jobs")}
             </LocalizedLink>

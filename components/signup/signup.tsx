@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
 import { SelectWithFilter } from "../input/select";
 import ZipAutocomplete from "../input/autocomplete";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 
@@ -285,7 +285,11 @@ export function renderRichText(
 export default function RegisterPage() {
   const t = useT("signup");
   const searchParams = useSearchParams();
-  const [role, setRole] = React.useState(searchParams.get("role") || "helper");
+  const pathname = usePathname();
+  const router = useRouter();
+  const roleFromUrl =
+    searchParams.get("role") === "client" ? "client" : "helper";
+  const [role, setRole] = React.useState(roleFromUrl);
   const [showPassword, setShowPassword] = React.useState(false);
   const [agree, setAgree] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
@@ -318,6 +322,18 @@ export default function RegisterPage() {
   const signup = useSignup();
   const collections = useCollections();
   const getCity = getCityByZip();
+
+  React.useEffect(() => {
+    setRole(roleFromUrl);
+  }, [roleFromUrl]);
+
+  // Helper to update both state and the URL (without page reload)
+  function setRoleAndUrl(nextRole: "helper" | "client") {
+    setRole(nextRole);
+    const params = new URLSearchParams(searchParams);
+    params.set("role", nextRole);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   React.useEffect(() => {
     collections.mutate(
@@ -578,7 +594,7 @@ export default function RegisterPage() {
           <div className="mt-6 inline-flex rounded-full bg-gray-100 p-1 text-sm">
             <button
               type="button"
-              onClick={() => setRole("helper")}
+              onClick={() => setRoleAndUrl("helper")}
               className={`rounded-full px-4 py-2 ${
                 role === "helper"
                   ? "bg-white shadow ring-1 ring-black/5"
@@ -589,7 +605,7 @@ export default function RegisterPage() {
             </button>
             <button
               type="button"
-              onClick={() => setRole("client")}
+              onClick={() => setRoleAndUrl("client")}
               className={`rounded-full px-4 py-2 ${
                 role === "client"
                   ? "bg-white shadow ring-1 ring-black/5"
