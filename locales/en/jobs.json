@@ -1,0 +1,90 @@
+{
+    "filter": {
+        "search": "Search",
+        "active-filters": "Active filters",
+        "reset": "Reset",
+        "form": {
+            "keyword": {
+                "placeholder": "Keyword.."
+            },
+            "location": {
+                "label": "Location",
+                "placeholder": "City or postcode"
+            },
+            "distance": {
+                "label": "Distance (km)"
+            },
+            "category": {
+                "label": "Category"
+            },
+            "job-type": {
+                "label": "Job Type"
+            },
+            "hourly-pay": {
+                "label": "Hourly pay (€)",
+                "min": {
+                    "placeholder": "Min"
+                },
+                "max": {
+                    "placeholder": "Max"
+                }
+            },
+            "job-experience": {
+                "label": "Job Experience"
+            },
+            "job-tags": {
+                "label": "Job Tags"
+            },
+            "start-date": {
+                "placeholder": "Start Date"
+            },
+            "end-date": {
+                "placeholder": "End Date"
+            },
+            "date-posted": {
+                "label": "Date posted",
+                "options": {
+                    "any": "Any time",
+                    "day": "Last 24 hours",
+                    "week": "Last 7 days",
+                    "month": "Last 30 days"
+                }
+            },
+            "sort-by": {
+                "label": "Sort by",
+                "options": {
+                    "new": "Newest",
+                    "desc": "Pay: High → Low",
+                    "asc": "Pay: Low → High"
+                }
+            },
+            "submit": "Apply",
+            "clear": "Clear all"
+        }
+    },
+    "list": {
+        "total-jobs": "{total} jobs",
+        "page-out-of": "Page {page} of {totalPages}",
+        "per-page": {
+            "label": "Per page"
+        },
+        "away": "km away",
+        "start": "Start",
+        "end": "End",
+        "new": "New",
+        "not-specified": "Not specified",
+        "posted": "Posted",
+        "view": "View",
+        "no-jobs": "No jobs match your filters.",
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Prev",
+            "next": "Next"
+        }
+    },
+    "mobile": {
+        "active-count": "{activeCount} active filters",
+        "update-results": "Tap Apply to update results",
+        "apply": "Apply"
+    }
+}

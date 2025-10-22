@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { JobList } from "@/lib/types/job";
 import { Select } from "../job-filter-select/select-option";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
+import { useT } from "@/app/[locale]/layout";
 const perPageOptions = [
   { label: "5", value: "5" },
   { label: "10", value: "10" },
@@ -50,19 +51,21 @@ export function JobResults({
     return diffHours <= 72;
   };
 
+  const t = useT("jobs");
+
   return (
     <section className="lg:col-span-2 space-y-4">
       {/* Stats + controls */}
       <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{total} jobs</h2>
+          <h2 className="text-lg font-semibold">{t("list.total-jobs", { total })}</h2>
           <p className="text-sm text-gray-600">
-            Page {page} of {totalPages}
+            {t("list.page-out-of", { page, totalPages })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Select
-            label="Per page"
+            label={t("list.per-page.label")}
             value={String(pageSize)}
             onChange={(v: string) => {
               const newSize = Number(v);
@@ -104,7 +107,7 @@ export function JobResults({
                       ? `${job.currency} ${job.price_min} – ${job.price_max}`
                       : job?.price_value
                         ? `${job.currency} ${job.price_value}`
-                        : "Not specified"}
+                        : t("list.Not specified")}
                     {job?.price_type && (
                       <span className="inline-flex items-center gap-1">
                         / {job.price_type}
@@ -124,7 +127,7 @@ export function JobResults({
                       .join(", ")}
                   </span>
                   {job?.distance && (
-                    <span>• {(job.distance / 1000).toFixed(2)} km away</span>
+                    <span>• {(job.distance / 1000).toFixed(2)}  {t("list.away")}</span>
                   )}
                   {job?.category_name && <span>• {job.category_name}</span>}
                   {job?.job_type && <span>• {job.job_type.join(", ")}</span>}
@@ -133,13 +136,13 @@ export function JobResults({
                   )}
                   {job?.starts_at && (
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> Start:{" "}
+                      <Clock className="h-3 w-3" />  {t("list.start")}:{" "}
                       {dayjs(job.starts_at).format("MMM D, YYYY")}
                     </span>
                   )}
                   {job?.ends_at && (
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> End:{" "}
+                      <Clock className="h-3 w-3" />  {t("list.end")}:{" "}
                       {dayjs(job.ends_at).format("MMM D, YYYY")}
                     </span>
                   )}
@@ -172,10 +175,10 @@ export function JobResults({
                       variant="outline"
                       className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"
                     >
-                      <span className="h-3">New</span>
+                      <span className="h-3"> {t("list.new")}</span>
                     </Button>
                   ) : (
-                    "Posted " + new Date(job?.created_at).toLocaleDateString()
+                    `${t("list.posted")} ${new Date(job?.created_at).toLocaleDateString()}`
                   )}
 
                   {savedJobs.some((j) => j.id === job.id) ? (
@@ -201,7 +204,7 @@ export function JobResults({
                   className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
                   onClick={() => push(`/jobs/${job.slug}`)}
                 >
-                  View
+                  {t("list.view")}
                 </button>
               </div>
             </article>
@@ -209,7 +212,7 @@ export function JobResults({
 
           {jobs.length === 0 && (
             <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-              No jobs match your filters.
+              {t("list.no-jobs")}
             </div>
           )}
         </div>
@@ -219,14 +222,14 @@ export function JobResults({
       {/* Pagination */}
       <nav
         className="flex items-center justify-between gap-2"
-        aria-label="Pagination"
+        aria-label={t("list.pagination.aria-label")}
       >
         <button
           className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page <= 1}
         >
-          Prev
+          {t("list.pagination.prev")}
         </button>
         <div className="flex items-center gap-1" data-testid="pager">
           {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -247,7 +250,7 @@ export function JobResults({
           onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           disabled={page >= totalPages}
         >
-          Next
+          {t("list.pagination.next")}
         </button>
       </nav>
     </section>

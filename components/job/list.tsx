@@ -22,6 +22,7 @@ import { JobFilterSidebar } from "./job-filter/job-filter";
 import FilterSidebarSkeleton from "../shared-ui/skeleton/filter-side-bar-skeleton";
 import { JobResults } from "./job-list-card/job-list-card";
 import { useDelayedLoading } from "@/lib/custom-hook/delayed-loading";
+import { useT } from "@/app/[locale]/layout";
 // ---- Types ----
 
 function useDebounced<T>(value: T, delay = 300) {
@@ -231,7 +232,7 @@ export default function JobFilterPage({
       );
       const url = `${window.location.pathname}${qs ? "?" + qs : ""}`;
       window.history.replaceState(window.history.state, "", url);
-    } catch {}
+    } catch { }
   }, [filters, persistToUrl, canModifyHistory, collections]);
 
   const update = (patch: Partial<Filters>) =>
@@ -327,6 +328,8 @@ export default function JobFilterPage({
     }
   };
 
+  const t = useT("jobs");
+
   if (pendingCategorySlug && collections?.jobCategories?.length) {
     return <JobSkeleton count={4} />;
   }
@@ -356,9 +359,8 @@ export default function JobFilterPage({
 
         {/* Right: Job list + debug preview */}
         <section
-          className={`lg:col-span-2 space-y-4  ${
-            delayedFetching ? "opacity-60" : "opacity-100"
-          }`}
+          className={`lg:col-span-2 space-y-4  ${delayedFetching ? "opacity-60" : "opacity-100"
+            }`}
         >
           {delayedFetching && !isInitialLoad && <JobSkeleton count={4} />}
 
@@ -384,15 +386,15 @@ export default function JobFilterPage({
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
         <div className="bg-white border shadow-xl rounded-2xl p-3 flex items-center justify-between">
           <div className="text-sm">
-            <div className="font-medium">{activeCount} active filters</div>
-            <div className="text-gray-600">Tap Apply to update results</div>
+            <div className="font-medium">{t("mobile.active-count", { activeCount })}</div>
+            <div className="text-gray-600">{t("mobile.update-results")}</div>
           </div>
           <button
             type="button"
             onClick={() => onChange?.(filters)}
             className="inline-flex items-center justify-center rounded-xl bg-black text-white px-4 py-2 text-sm"
           >
-            Apply
+            {t("mobile.apply")}
           </button>
         </div>
       </div>
