@@ -21,7 +21,8 @@ import { getIconForCategory } from "@/components/ui/icon-category";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "../layout";
-import { getIcon } from "../how-it-works/page";
+import { getIcon } from "@/lib/icons/icons";
+
 
 export default function Page() {
   const collections = useCollections();

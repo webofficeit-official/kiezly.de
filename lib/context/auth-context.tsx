@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<UserProfile>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const { push } = useLocalizedRouter();
+    const { push,replace } = useLocalizedRouter();
     const pathname = usePathname();
     const loginMutation = useLogin();
     useSyncFavoritesOnLogin(user);
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (user && isPublic) {
             // logged in but trying to access signin/signup
-            router.replace("/jobs");
+            replace("/jobs");
         }
 
 

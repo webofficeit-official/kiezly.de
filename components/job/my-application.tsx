@@ -7,6 +7,7 @@ import { useMyApplications } from "@/lib/react-query/queries/apply-job";
 import { MyApplications } from "@/lib/types/apply-job";
 import { formatDate } from "date-fns";
 import { Select } from "./job-filter-select/select-option";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 /**
  * Helper to check if a job was created recently (within 72h)
@@ -41,9 +42,14 @@ export default function AppliedJobList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalApplications, setTotalApplications] = useState(0);
   const [status, setStatus] = useState("");
+  const { push, prefetch } = useLocalizedRouter();
 
   // Fetch data using custom hook
-  const { data: mpApplications, isLoading } = useMyApplications(status, page, pageSize);
+  const { data: mpApplications, isLoading } = useMyApplications(
+    status,
+    page,
+    pageSize
+  );
 
   useEffect(() => {
     if (mpApplications) {
@@ -83,7 +89,8 @@ export default function AppliedJobList() {
         <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between gap-10">
           {/* Header */}
           <h2 className="text-lg font-semibold">
-            {status === "" ? "Applied Jobs" : `${capitalize(status)} Jobs`} ({totalApplications})
+            {status === "" ? "Applied Jobs" : `${capitalize(status)} Jobs`} (
+            {totalApplications})
           </h2>
           {/* Filters */}
           <div className="flex items-center justify-between gap-6">
@@ -106,7 +113,6 @@ export default function AppliedJobList() {
 
         {/* Application cards */}
         <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-
           {/* Right: Job list + debug preview */}
           <section className="lg:col-span-3 space-y-4">
             {/* Stats + controls */}
@@ -117,12 +123,25 @@ export default function AppliedJobList() {
                   className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
                 >
                   {/* Header */}
-                  <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
-                    <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
+                  <div
+                    className="cursor-pointer"
+                    onMouseEnter={() => prefetch(`/jobs/${app.job.slug}`)}
+                    onClick={() => push(`/jobs/${app.job.slug}`)}
+                  >
+                    <div
+                      className="flex items-start justify-between"
+                      onMouseEnter={() => prefetch(`/jobs/${app.job.slug}`)}
+                      onClick={() => push(`/jobs/${app.job.slug}`)}
+                    >
                       <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
                         {formatDate(app.created_at, "dd MMM, yyyy")}
                       </span>
-                      <div className="text-xs"> <span className={getStatusClasses(app.status)}>{app.status}</span></div>
+                      <div className="text-xs">
+                        {" "}
+                        <span className={getStatusClasses(app.status)}>
+                          {app.status}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Title */}
@@ -130,7 +149,8 @@ export default function AppliedJobList() {
                       {app.job.title}
                     </h3>
                     <p className="text-xs text-gray-500 mt-1 tracking-wide font-medium">
-                      <span className="font-bold text-black">Note: </span>{app.cover_note}
+                      <span className="font-bold text-black">Note: </span>
+                      {app.cover_note}
                     </p>
 
                     {/* Tags */}
@@ -161,7 +181,8 @@ export default function AppliedJobList() {
 
                     <button
                       className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
-                      onClick={() => window.location.href = `/jobs/${app.job.slug}`}
+                      onMouseEnter={() => prefetch(`/jobs/${app.job.slug}`)}
+                      onClick={() => push(`/jobs/${app.job.slug}`)}
                     >
                       View
                     </button>
@@ -174,12 +195,14 @@ export default function AppliedJobList() {
                 </div>
               )}
             </div>
-
           </section>
         </main>
 
         {/* Pagination */}
-        <nav className="flex items-center justify-between gap-2" aria-label="Pagination">
+        <nav
+          className="flex items-center justify-between gap-2"
+          aria-label="Pagination"
+        >
           <button
             className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
             onClick={() => handlePageChange(page - 1)}
@@ -194,7 +217,9 @@ export default function AppliedJobList() {
               .map((n) => (
                 <button
                   key={n}
-                  className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""}`}
+                  className={`rounded-xl border px-3 py-2 text-sm ${
+                    n === page ? "bg-black text-white" : ""
+                  }`}
                   onClick={() => handlePageChange(n)}
                 >
                   {n}

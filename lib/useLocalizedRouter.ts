@@ -1,59 +1,55 @@
-"use client";
+// /lib/useLocalizedRouter.ts
+'use client'
 
-import { useRouter, usePathname } from "next/navigation";
-import { useContext, useCallback } from "react";
-import { TranslationContext } from "../app/[locale]/layout";
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useContext, useEffect, useRef, useTransition } from 'react'
+import NProgress from 'nprogress'
+import { TranslationContext } from '@/app/[locale]/layout'
+
+function withLocale(href: string, locale: string) {
+  try {
+    const url = new URL(href, 'http://x')
+    const segs = url.pathname.split('/').filter(Boolean)
+    if (segs[0] !== locale) url.pathname = '/' + [locale, ...segs].join('/')
+    return url.pathname + url.search + url.hash
+  } catch {
+    return '/' + locale + (href.startsWith('/') ? href : '/' + href)
+  }
+}
 
 export function useLocalizedRouter() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { locale } = useContext(TranslationContext);
+  const router = useRouter()
+  const { locale } = useContext(TranslationContext)
+  const [ , startTransition] = useTransition()
 
-  const push = useCallback(
-    (rawPath: string) => {
-      if (!rawPath) return;
+  // Stop the bar once URL actually changes (path OR search)
+  const pathname = usePathname()
+  const search = useSearchParams()
+  const last = useRef(pathname + '?' + search.toString())
+  useEffect(() => {
+    const now = pathname + '?' + search.toString()
+    if (now !== last.current) {
+      NProgress.done()
+      last.current = now
+    }
+  }, [pathname, search])
 
-      // 1️ Handle external links
-      if (
-        /^https?:\/\//i.test(rawPath) ||
-        rawPath.startsWith("mailto:") ||
-        rawPath.startsWith("tel:")
-      ) {
-        window.location.href = rawPath;
-        return;
-      }
+  const push = (href: string) => {
+    const finalHref = withLocale(href, locale)
+    NProgress.start()
+    startTransition(() => router.push(finalHref))
+  }
 
-      // 2️ Handle hash-only links (same page)
-      if (rawPath.startsWith("#")) {
-        const id = rawPath.slice(1);
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        history.replaceState(null, "", rawPath);
-        return;
-      }
+  const replace = (href: string) => {
+    const finalHref = withLocale(href, locale)
+    NProgress.start()
+    startTransition(() => router.replace(finalHref))
+  }
 
-      // 3️ Normalize internal paths and preserve query/hash
-      const url = new URL(rawPath, "http://x"); // dummy base
-      const path = url.pathname.startsWith("/")
-        ? url.pathname
-        : "/" + url.pathname;
-      const segs = path.split("/").filter(Boolean);
+  const prefetch = (href: string) => {
+    const finalHref = withLocale(href, locale)
+    router.prefetch?.(finalHref)
+  }
 
-      const LOCALES = ["en", "de"] as const;
-      if (!LOCALES.includes(segs[0] as any)) segs.unshift(locale);
-      
-      const nextPath = "/" + segs.join("/");
-      const finalUrl = nextPath + url.search + url.hash;
-
-      // 4️ Avoid reloading same page with different hash
-      if (pathname === nextPath && url.hash) {
-        router.replace(finalUrl, { scroll: true });
-      } else {
-        router.push(finalUrl, { scroll: true });
-      }
-    },
-    [router, pathname, locale]
-  );
-
-  return { push };
+  return { push, replace, back: router.back, prefetch }
 }

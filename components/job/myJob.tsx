@@ -80,7 +80,7 @@ export default function MyJobs({
     jobs?: JobList[];
 }) {
     const { user } = useAuth();
-    const { push } = useLocalizedRouter();
+    const { push,prefetch } = useLocalizedRouter();
     const [filters, setFilters] = useState<Filters>(() => {
         if (typeof window === "undefined") return DEFAULT_FILTERS;
         const initial = fromQuery(window.location.search);
@@ -222,6 +222,7 @@ export default function MyJobs({
                                                                     <TooltipTrigger asChild>
                                                                         <button
                                                                             className="p-1 rounded hover:bg-gray-100"
+                                                                            onMouseEnter={() => prefetch(`/jobs/${job.slug}`)}
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
                                                                                 push(`/post-job/basic-details?slug=${job.slug}`)

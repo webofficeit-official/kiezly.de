@@ -41,7 +41,7 @@ export function JobResults({
   handleUnSaveJob,
 }: Props) {
   const router = useRouter();
-  const { push } = useLocalizedRouter();
+  const { push,prefetch } = useLocalizedRouter();
 
   const isNew = (created_at: string) => {
     if (!created_at) return false;
@@ -91,6 +91,7 @@ export function JobResults({
               <div className="flex-1 min-w-0">
                 <h3
                   className="text-base sm:text-lg font-semibold truncate cursor-pointer"
+                   onMouseEnter={() => prefetch(`/jobs/${job.slug}`)}
                   onClick={() => push(`/jobs/${job.slug}`)}
                 >
                   {job.title}
@@ -202,6 +203,7 @@ export function JobResults({
 
                 <button
                   className="mt-2 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+                  onMouseEnter={() => prefetch(`/jobs/${job.slug}`)}
                   onClick={() => push(`/jobs/${job.slug}`)}
                 >
                   {t("list.view")}

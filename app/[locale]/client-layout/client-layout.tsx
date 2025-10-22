@@ -6,6 +6,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { AuthProvider } from "@/lib/context/auth-context";
 import NextTopLoader from "nextjs-toploader";
+import NavigationProgress from "@/app/NavigationProgress";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,6 +22,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <NextTopLoader color="#3f4040ff" showSpinner={false} />
+         <NavigationProgress/>
         <Header />
         {children}
         <Footer />

@@ -86,6 +86,6 @@ export default function HowItWorksPage() {
   )
 }
 
-export function getIcon(name: string): React.ElementType {
+ function getIcon(name: string): React.ElementType {
   return (Icons[name] as React.ElementType) || Icons.FileText;
 }
