@@ -64,6 +64,7 @@ export default function Header() {
 
   useEffect(() => {
     const segments = pathname.split('/').filter(Boolean);
+    localStorage.setItem("locale", segments[0])
     setActiveLanguage(segments[0])
   }, []);
 
@@ -75,6 +76,7 @@ export default function Header() {
     } else {
       segments.unshift(locale);
     }
+    localStorage.setItem("locale", locale)
     setActiveLanguage(locale)
     const newPath = '/' + segments.join('/');
     router.push(newPath);
