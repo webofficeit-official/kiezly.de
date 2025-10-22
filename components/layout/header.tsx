@@ -23,6 +23,8 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 import LocalizedLink from "@/lib/localizedLink";
+const LOCALES = ['en', 'de'] as const;
+const DEFAULT = 'en';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -76,27 +78,25 @@ export default function Header() {
     });
   };
 
-  const locales = ["en", "de"];
 
   useEffect(() => {
-    const segments = pathname.split("/").filter(Boolean);
-    localStorage.setItem("locale", segments[0]);
-    setActiveLanguage(segments[0]);
-  }, []);
+  const seg = pathname.split('/').filter(Boolean)[0];
+  setActiveLanguage(LOCALES.includes(seg as any) ? seg : DEFAULT);
+}, [pathname]);
 
-  const handleChange = (locale: string) => {
-    // Replace current locale in URL
-    const segments = pathname.split("/").filter(Boolean);
-    if (locales.includes(segments[0])) {
-      segments[0] = locale;
-    } else {
-      segments.unshift(locale);
-    }
-    localStorage.setItem("locale", locale);
-    setActiveLanguage(locale);
-    const newPath = "/" + segments.join("/");
-    router.push(newPath);
-  };
+  const handleChange = (next: 'en' | 'de') => {
+  // Remember for a year (readable by middleware & server)
+  document.cookie = `NEXT_LOCALE=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
+
+  const parts = pathname.split('/').filter(Boolean);
+  const rest = LOCALES.includes(parts[0] as any) ? parts.slice(1) : parts;
+
+  // Keep the rest of the path/query/hash
+  const search = window.location.search || '';
+  const hash = window.location.hash || '';
+
+  router.replace(`/${next}/${rest.join('/')}${search}${hash}`);
+};
 
   return (
     <>
@@ -131,13 +131,13 @@ export default function Header() {
               >
                 <LanguagesIcon className="h-6 w-6 text-gray-700" />
                 <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                  {activeLanguag}
+                   {(LOCALES.includes(activeLanguag as any) ? activeLanguag : DEFAULT).toUpperCase()}
                 </span>
               </button>
               {/* Dropdown */}
               {languageOpen && (
                 <div className="absolute right-0 top-full mt-2 w-12 rounded-lg border bg-white shadow-md z-50">
-                  {locales.map((locale) => (
+                  {LOCALES.map((locale) => (
                     <button
                       key={locale}
                       onClick={() => {

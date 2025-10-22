@@ -273,7 +273,7 @@ function LoginPage() {
               className="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-white disabled:opacity-60"
               aria-disabled={submitDisabled}
             >
-              {submitting ? "Signing in…" : "Sign in"}
+              {submitting ?  t("cta.signing_in") : t("cta.signin")}
             </button>
 
             <p className="text-sm text-gray-600">
