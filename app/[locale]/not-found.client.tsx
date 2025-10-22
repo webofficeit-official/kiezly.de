@@ -5,9 +5,9 @@ import { ArrowRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { RichList } from '@/components/ui/rich-list';
 import { useLocalizedRouter } from '@/lib/useLocalizedRouter';
-import { useT } from '../layout';
+import { useT } from './layout';
 
-export default function DatenschutzPage() {
+export default function NotFoundClient() {
     const { push } = useLocalizedRouter();
     const t = useT("404");
 
