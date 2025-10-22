@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import ClientLayout from "./client-layout/client-layout";
@@ -43,7 +43,8 @@ function CategoriesSeoJsonLd() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Browse kiezly Categories",
-    description: "Finde geprüfte Helfer für Babysitting, Umzug, Garten, Haustiere, Seniorenbetreuung, Besorgungen und Events in deiner Nähe.",
+    description:
+      "Finde geprüfte Helfer für Babysitting, Umzug, Garten, Haustiere, Seniorenbetreuung, Besorgungen und Events in deiner Nähe.",
     url: "https://www.kiezly.de/jobs",
     isPartOf: {
       "@type": "WebSite",
@@ -59,11 +60,14 @@ function CategoriesSeoJsonLd() {
       { "@type": "Thing", name: "Garden" },
       { "@type": "Thing", name: "Events" },
     ],
-
   } as const;
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} suppressHydrationWarning />
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      suppressHydrationWarning
+    />
   );
 }
 
@@ -72,7 +76,18 @@ export default function LocaleLayout({ children, params }: any) {
   const [messages, setMessages] = useState<any>({});
 
   // List of JSON files to load for each locale
-  const files = ["header", "footer", "home", "signup", "signin", "howItWorks", "impressum", "terms", "privacy", "404"]; // add more as needed
+  const files = [
+    "header",
+    "footer",
+    "home",
+    "signup",
+    "signin",
+    "howItWorks",
+    "impressum",
+    "terms",
+    "privacy",
+    "404",
+  ]; // add more as needed
 
   useEffect(() => {
     async function loadMessages() {
@@ -97,13 +112,12 @@ export default function LocaleLayout({ children, params }: any) {
     loadMessages();
   }, [locale]);
 
-  if (Object.keys(messages).length === 0) return <></>;
-
+  const isReady = Object.keys(messages).length > 0;
 
   return (
     <TranslationContext.Provider value={{ locale, messages }}>
       <ClientLayout>
-        <CategoriesSeoJsonLd />
+        {isReady && <CategoriesSeoJsonLd />}
         {children}
         <Toaster
           position="top-right"

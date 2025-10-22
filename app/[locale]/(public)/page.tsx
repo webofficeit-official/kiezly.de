@@ -184,7 +184,7 @@ export default function Page() {
           <p className="text-neutral-600">{t("how-it-works.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {howItWorks.map((step: any, i: number) => {
+          {Array.isArray(howItWorks) && howItWorks.map((step: any, i: number) => {
             const IconComponent = getIcon(step.icon);
 
             return (
@@ -270,7 +270,7 @@ export default function Page() {
           <p className="text-neutral-600">{t("trust-safety.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {trustSafety.map((step: any, i: number) => {
+          {Array.isArray(trustSafety)&&trustSafety.map((step: any, i: number) => {
             const IconComponent = getIcon(step.icon);
 
             return (
