@@ -788,6 +788,7 @@ export default function RegisterPage() {
                   zipOptions={zipOptions}
                   onZipChange={handleZip}
                   label={t("form.zip.label")}
+                  placeholder={t("form.zip.placeholder")}
                 />
               </div>
               <div>

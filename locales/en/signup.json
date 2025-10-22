@@ -19,7 +19,7 @@
       "error_min": "Password must be at least 8 characters."
     },
     "country": { "label": "Country" },
-    "zip": { "label": "ZIP" },
+    "zip": { "label": "ZIP" ,"placeholder": "Enter ZIP code"},
     "city": { "label": "City" },
     "rate": { "label": "Hourly rate (€)" },
     "skills": {
