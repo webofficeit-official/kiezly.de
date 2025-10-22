@@ -9,6 +9,7 @@ export function useLocalizedRouter() {
   const { locale } = useContext(TranslationContext);
 
   const push = (path: string) => {
+    alert(path)
     if (!path.startsWith('/')) path = '/' + path;
 
     // If the path already starts with the locale, do nothing
