@@ -86,5 +86,27 @@
         "active-count": "{activeCount} aktive Filter",
         "update-results": "Tippen Sie auf „Übernehmen“, um die Ergebnisse zu aktualisieren",
         "apply": "Anwenden"
+    },
+    "detail": {
+        "failed": "Der Job konnte nicht geladen werden.",
+        "application": {
+            "success": "Bewerbungsstatus erfolgreich aktualisiert!",
+            "failed": "Aktualisierung des Anwendungsstatus fehlgeschlagen.",
+            "submitted": "Ihre Bewerbung wurde übermittelt."
+        },
+        "header": {
+            "not-specified": "Nicht angegeben",
+            "posted": "Gepostet",
+            "start": "Start",
+            "end": "Ende",
+            "share": "Aktie",
+            "saved": "Gespeichert",
+            "save": "Speichern"
+        },
+        "description": {
+            "about-the-role": "Über die Rolle",
+            "requirement": "Anforderungen",
+            "tasks": "Aufgaben"
+        }
     }
 }

@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { addJobAsFavorite, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
+import { useT } from "@/app/[locale]/layout";
 // Extend dayjs with the plugin
 dayjs.extend(relativeTime);
 
@@ -61,6 +62,8 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
         }
     };
 
+    const t = useT("jobs");
+
     return (
         <>
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -92,10 +95,10 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
                                 ? `${jobDetails?.currency} ${jobDetails?.price_min}–${jobDetails?.price_max}`
                                 : jobDetails?.price_value
                                     ? `${jobDetails?.currency} ${jobDetails?.price_value}`
-                                    : "Not specified"}
+                                    : t("detail.header.not-specified")}
                         </span>
                         {jobDetails?.price_type && <span className="inline-flex items-center">/ {jobDetails?.price_type}</span>}
-                        <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" />Posted {dayjs(jobDetails?.created_at).fromNow()}</span>
+                        <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" />{t("detail.header.posted")} {dayjs(jobDetails?.created_at).fromNow()}</span>
 
                         {jobDetails?.category?.name && (
                             <span className="inline-flex items-center gap-1">
@@ -105,29 +108,29 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
 
                         {jobDetails?.starts_at && (
                             <span className="inline-flex items-center gap-1">
-                                <Clock className="h-3 w-3" /> Start: {dayjs(jobDetails.starts_at).format("MMM D, YYYY")}
+                                <Clock className="h-3 w-3" /> {t("detail.header.start")}: {dayjs(jobDetails.starts_at).format("MMM D, YYYY")}
                             </span>
                         )}
 
                         {jobDetails?.ends_at && (
                             <span className="inline-flex items-center gap-1">
-                                <Clock className="h-3 w-3" /> End: {dayjs(jobDetails.ends_at).format("MMM D, YYYY")}
+                                <Clock className="h-3 w-3" /> {t("detail.header.end")}: {dayjs(jobDetails.ends_at).format("MMM D, YYYY")}
                             </span>
                         )}
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" className="rounded-xl"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
+                    <Button variant="outline" className="rounded-xl"><Share2 className="mr-2 h-4 w-4" /> {t("detail.header.share")}</Button>
                     {savedJobs.some((j) => j.id === jobDetails.id) ? (
-                        <Button variant="outline" className="rounded-xl" onClick={() => handleUnsave()}><BookmarkCheck className="mr-2 h-4 w-4" /> Saved</Button>
+                        <Button variant="outline" className="rounded-xl" onClick={() => handleUnsave()}><BookmarkCheck className="mr-2 h-4 w-4" /> {t("detail.header.saved")}</Button>
                     ) : (
-                        <Button variant="outline" className="rounded-xl" onClick={() => handleSaveJob()}><Bookmark className="mr-2 h-4 w-4" /> Save</Button>
+                        <Button variant="outline" className="rounded-xl" onClick={() => handleSaveJob()}><Bookmark className="mr-2 h-4 w-4" /> {t("detail.header.save")}</Button>
                     )}
                 </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-                {jobDetails.tags.length > 0 && jobDetails.tags.map((t,index) => (
+                {jobDetails.tags.length > 0 && jobDetails.tags.map((t, index) => (
 
                     <Badge key={index} variant="secondary" className="rounded-full px-3 py-1">
                         {t?.name}

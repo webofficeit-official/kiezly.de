@@ -86,5 +86,27 @@
         "active-count": "{activeCount} active filters",
         "update-results": "Tap Apply to update results",
         "apply": "Apply"
+    },
+    "detail": {
+        "failed": "Failed to load job.",
+        "application": {
+            "success": "Application status updated successfully!",
+            "failed": "Failed to update application status.",
+            "submitted": "Your application has been submitted."
+        },
+        "header": {
+            "not-specified": "Not specified",
+            "posted": "Posted",
+            "start": "Start",
+            "end": "End",
+            "share": "Share",
+            "saved": "Saved",
+            "save": "Save"
+        },
+        "description": {
+            "about-the-role": "About the Role",
+            "requirement": "Requirements",
+            "tasks": "Tasks"
+        }
     }
 }
