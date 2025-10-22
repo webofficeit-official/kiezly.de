@@ -25,7 +25,7 @@ export default function HowItWorksPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {steps.map((step: any, i: number) => {
+          {Array.isArray(steps)&&steps.map((step: any, i: number) => {
             const IconComponent = getIcon(step.icon);
 
             return (
