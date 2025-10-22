@@ -1,0 +1,69 @@
+{
+    "apply-panel": {
+        "success": "Bewerbung erfolgreich eingereicht",
+        "failed": "Antrag konnte nicht übermittelt werden",
+        "withdrawed": {
+            "title": "Antrag zurückgezogen",
+            "description": "Bewerbung für {title} zurückgezogen",
+            "button": "Anwendung aktualisieren"
+        },
+        "applied": {
+            "title": "Bereits angewendet",
+            "description": "Ihre Bewerbung für {title}",
+            "button": "Anwendung aktualisieren"
+        },
+        "apply": {
+            "title": "Bereit, sich zu bewerben?",
+            "description": "Mit Ihrer Bewerbung stimmen Sie unseren Bedingungen zu und erkennen unsere Datenschutzrichtlinie an.",
+            "button": {
+                "logged": "Bewerben Sie sich als {name}",
+                "unauthenticate": "Mit Kiezly.de Profil bewerben"
+            }
+        },
+        "mini-facts": {
+            "police-verified": "Polizei bestätigt",
+            "first-aid": "Erste-Hilfe-Zertifikat wünschenswert"
+        },
+        "card": {
+            "cover-note": "Anmerkung zum Deckblatt:",
+            "proposed-rate": "Vorgeschlagener Preis:",
+            "withdraw": {
+                "trigger": "Zurückziehen",
+                "title": "Antrag zurückziehen?",
+                "description": "Möchten Sie Ihre Bewerbung für \"${jobDetails?.title}\" wirklich zurückziehen?",
+                "confirm": "Ja, zurückziehen",
+                "cancel": "Stornieren",
+                "success": "Antrag erfolgreich zurückgezogen!",
+                "failed": "Abhebung fehlgeschlagen."
+            },
+            "model": {
+                "header": "Anwendung aktualisieren",
+                "button": {
+                    "update": "Aktualisieren",
+                    "apply": "Anwenden"
+                }
+            }
+        },
+        "model": {
+            "update": {
+                "success": "Anwendung erfolgreich aktualisiert!",
+                "failed": "Fehler beim Aktualisieren der Anwendung"
+            },
+            "submit": {
+                "success": "Bewerbung erfolgreich eingereicht!",
+                "failed": "Antrag konnte nicht übermittelt werden"
+            },
+            "form": {
+                "description": "Bitte teilen Sie uns Ihre Anmerkung und den vorgeschlagenen Preis mit.",
+                "cover-note": {
+                    "label": "Begleitschreiben"
+                },
+                "proposed-rate": {
+                    "label": "Vorgeschlagener Satz ({currency})",
+                    "placeholder": "z. B. 18"
+                }
+            },
+            "close": "Schließen"
+        }
+    }
+}

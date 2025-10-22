@@ -1,0 +1,69 @@
+{
+    "apply-panel": {
+        "success": "Application submitted successfully",
+        "failed": "Failed to submit application",
+        "withdrawed": {
+            "title": "Application withdrawed",
+            "description": "Withdrawed application for {title}",
+            "button": "Update Application"
+        },
+        "applied": {
+            "title": "Already applied",
+            "description": "Your application for {title}",
+            "button": "Update Application"
+        },
+        "apply": {
+            "title": "Ready to apply?",
+            "description": "By applying, you agree to our Terms and acknowledge our Privacy Policy.",
+            "button": {
+                "logged": "Apply as {name}",
+                "unauthenticate": "Apply with Kiezly.de Profile"
+            }
+        },
+        "mini-facts": {
+            "police-verified": "Police Verified",
+            "first-aid": "First-aid certified preferred"
+        },
+        "card": {
+            "cover-note": "Cover Note:",
+            "proposed-rate": "Proposed Rate:",
+            "withdraw": {
+                "trigger": "Withdraw",
+                "title": "Withdraw Application?",
+                "description": "Are you sure you want to withdraw your application for \"{title}\"?",
+                "confirm": "Yes, Withdraw",
+                "cancel": "Cancel",
+                "success": "Application withdrawn successfully!",
+                "failed": "Failed to withdraw."
+            },
+            "model": {
+                "header": "Update application",
+                "button": {
+                    "update": "Update",
+                    "apply": "Apply"
+                }
+            }
+        },
+        "model": {
+            "update": {
+                "success": "Application updated successfully!",
+                "failed": "Failed to update application"
+            },
+            "submit": {
+                "success": "Application submitted successfully!",
+                "failed": "Failed to submit application"
+            },
+            "form": {
+                "description": "Please share your note and proposed rate.",
+                "cover-note": {
+                    "label": "Cover Note"
+                },
+                "proposed-rate": {
+                    "label": "Proposed Rate ({currency})",
+                    "placeholder": "e.g., 18"
+                }
+            },
+            "close": "Close"
+        }
+    }
+}

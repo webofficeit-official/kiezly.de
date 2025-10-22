@@ -7,13 +7,16 @@ import { X } from "lucide-react"
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { RichTextEditor } from "../add";
+import { useT } from "@/app/[locale]/layout";
 
-export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, application, jobDetails, buttonLabel, update = false }) {   
+export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, application, jobDetails, buttonLabel, update = false }) {
     const [coverNote, setCoverNote] = useState(application?.data?.application?.cover_note);
     const [proposedRate, setProposedRate] = useState(application?.data?.application?.proposed_rate);
     const applyJobMutation = useApplyJob();
     const updateJobMutation = useUpdateApplication();
     const withdrawMutation = useWithdrawApplication();
+
+    const t = useT("application");
 
     useEffect(() => {
         setCoverNote(application?.data?.application?.cover_note)
@@ -21,16 +24,16 @@ export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, 
     }, [application]);
 
     const handleApplySubmit = () => {
-        if (update) {            
+        if (update) {
             updateJobMutation.mutate(
                 { applicationId: application?.data?.application?.id, cover_note: coverNote, proposed_rate: proposedRate, status: application?.data?.application?.status },
                 {
                     onSuccess: () => {
-                        toast.success("Application updated successfully!");
+                        toast.success(t("apply-panel.model.update.success"));
                         setIsModalOpen(false)
                     },
                     onError: (error: any) => {
-                        toast.error(error?.message || "Failed to update application.");
+                        toast.error(error?.message || t("apply-panel.model.update.failed"));
                     },
                 }
             );
@@ -39,11 +42,11 @@ export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, 
                 { jobId: jobDetails.id, cover_note: coverNote, proposed_rate: proposedRate },
                 {
                     onSuccess: () => {
-                        toast.success("Application submitted successfully!");
+                        toast.success(t("apply-panel.model.submit.success"));
                         setIsModalOpen(false)
                     },
                     onError: (error: any) => {
-                        toast.error(error?.message || "Failed to submit application.");
+                        toast.error(error?.message || t("apply-panel.model.submit.failed"));
                     },
                 }
             );
@@ -84,18 +87,18 @@ export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, 
                                         <div className="py-2 space-y-1 overflow-auto px-6 mt-3 mb-4" style={{ maxHeight: '500px' }}>
                                             {application?.success ? (
                                                 <>
-                                                    <p className="text-sm text-gray-600">{!application?.success && "Please share your note and proposed rate."}</p>
+                                                    <p className="text-sm text-gray-600">{!application?.success && t("apply-panel.model.form.description")}</p>
                                                     <div className="grid gap-1">
                                                         <div className="mt-2">
-                                                            <RichTextEditor label="Cover Note" value={coverNote} onChange={setCoverNote} />
+                                                            <RichTextEditor label={t("apply-panel.model.form.cover-note.label")} value={coverNote} onChange={setCoverNote} />
                                                         </div>
                                                         <div className="mt-4">
                                                             <Input
-                                                                label={`Proposed Rate (${jobDetails?.currency})`}
+                                                                label={t("apply-panel.model.form.proposed-rate.label", { currency: jobDetails?.currency})}
                                                                 value={proposedRate}
                                                                 onChange={setProposedRate}
                                                                 type="number"
-                                                                placeholder="e.g., 18"
+                                                                placeholder={t("apply-panel.model.form.proposed-rate.placeholder")}
                                                                 min={0}
                                                             />
                                                         </div>
@@ -103,18 +106,18 @@ export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, 
                                                 </>
                                             ) : (
                                                 <>
-                                                    <p className="text-sm text-gray-600">{!application?.success && "Please share your note and proposed rate."}</p>
+                                                    <p className="text-sm text-gray-600">{!application?.success && t("apply-panel.model.form.description")}</p>
                                                     <div className="grid gap-1">
                                                         <div className="mt-2">
-                                                            <RichTextEditor label="Cover Note" value={coverNote} onChange={setCoverNote} />
+                                                            <RichTextEditor label={t("apply-panel.model.form.cover-note.label")} value={coverNote} onChange={setCoverNote} />
                                                         </div>
                                                         <div className="mt-4">
                                                             <Input
-                                                                label={`Proposed Rate (${jobDetails?.currency})`}
+                                                                label={t("apply-panel.model.form.proposed-rate.label", { currency: jobDetails?.currency})}
                                                                 value={proposedRate}
                                                                 onChange={setProposedRate}
                                                                 type="number"
-                                                                placeholder="e.g., 18"
+                                                                placeholder={t("apply-panel.model.form.proposed-rate.placeholder")}
                                                                 min={0}
                                                             />
                                                         </div>
@@ -132,7 +135,7 @@ export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, 
                                                 className="border-gray-300 text-gray-700 hover:bg-gray-100"
                                                 onClick={() => setIsModalOpen(false)}
                                             >
-                                                Close
+                                                {t("apply-panel.model.close")}
                                             </Button>
                                         </div>
 
