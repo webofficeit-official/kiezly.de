@@ -117,5 +117,12 @@
             "reports": "Reports",
             "applicants": "Applicants"
         }
+    },
+    "smilar": {
+        "title": "Similar Jobs",
+        "not-specified": "Not specified",
+        "away": "{distance} km away",
+        "view": "View",
+        "no-jobs": "No jobs match your filters."
     }
 }

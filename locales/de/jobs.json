@@ -117,5 +117,12 @@
             "reports": "Berichte",
             "applicants": "Bewerber"
         }
+    },
+    "smilar": {
+        "title": "Ähnliche Jobs",
+        "not-specified": "Nicht angegeben",
+        "away": "{distance} km entfernt",
+        "view": "Sicht",
+        "no-jobs": "Keine Jobs entsprechen Ihren Filtern."
     }
 }
