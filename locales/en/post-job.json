@@ -1,14 +1,5 @@
 {
   "page_title": "Post a Mini-Job",
-  "sidebar": {
-    "basic": "Basic Details",
-    "details": "Job Details",
-    "location": "Location Details",
-    "pricing": "Pricing Details",
-    "work": "Work Details",
-    "contact": "Contact Details"
-  },
-
   "common": {
     "next": "Next",
     "prev": "Previous",
@@ -55,7 +46,7 @@
   "details": {
     "header": {
       "title": "Job Details",
-      "description": "Provide detailed information about the job"
+      "description": "Provide detailed information"
     },
     "fields": {
       "description": "Job Description",
@@ -80,7 +71,8 @@
   "location": {
     "header": {
       "title": "Location Details",
-      "description": "Provide the location details for your job"
+      "sidebar_description": "Provide location details",
+      "description":"Provide detailed information about the job"
     },
     "fields": {
       "country": "Country",
@@ -143,6 +135,7 @@
   "work": {
     "header": {
       "title": "Work Details",
+      "sidebar_description":"",
       "description": "Provide details about work mode, schedule, and verification"
     },
     "fields": {

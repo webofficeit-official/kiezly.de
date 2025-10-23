@@ -152,43 +152,43 @@ export default function Page() {
             <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
               <div className="flex flex-wrap justify-center lg:flex-col gap-2 lg:space-y-4">
                 <WizardNavigation
-                  title="Basic Details"
-                  description="Provide the main information"
+                  title={t("basic.header.title")}
+                  description={t("basic.header.description")}
                   count={1}
                   current={false}
                   finished
                 />
                 <WizardNavigation
-                  title="Job Details"
-                  description="Provide detailed information"
+                  title={t("details.header.title")}
+                  description={t("details.header.sidebar_description")}
                   count={2}
                   current
                   finished={false}
                 />
                 <WizardNavigation
-                  title="Location Details"
-                  description="Provide location details"
+                  title={t("location.header.title")}
+                  description={t("location.header.description")}
                   count={3}
                   current={false}
                   finished={false}
                 />
                 <WizardNavigation
-                  title="Pricing Details"
-                  description="Set the pricing for this job"
+                  title={t("pricing.header.title")}
+                  description={t("pricing.header.description")}
                   count={4}
                   current={false}
                   finished={false}
                 />
                 <WizardNavigation
-                  title="Work Details"
-                  description="Provide work details"
+                  title={t("work.header.title")}
+                  description={t("work.header.sidebar_description")}
                   count={5}
                   current={false}
                   finished={false}
                 />
                 <WizardNavigation
-                  title="Contact Details"
-                  description="Provide how applicants can reach you"
+                  title={t("contact.header.title")}
+                  description={t("contact.header.description")}
                   count={6}
                   current={false}
                   finished={false}

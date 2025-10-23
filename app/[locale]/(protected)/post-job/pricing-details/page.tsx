@@ -10,7 +10,6 @@ import { useJobWizard } from "@/lib/context/job-wizard-context";
 import {
   useJob,
   useJobCollections,
-
   useUpdateJob,
 } from "@/lib/react-query/queries/useJob";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
@@ -32,9 +31,10 @@ export default function Page() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
   const { push } = useLocalizedRouter();
-   const t = useT("post-job");
+  const t = useT("post-job");
 
-  const { formData, updateForm, jobId, setJobId, mode, setMode } = useJobWizard();
+  const { formData, updateForm, jobId, setJobId, mode, setMode } =
+    useJobWizard();
   const { data: basicCollections } = useJobCollections();
   const updateJobMutation = useUpdateJob(jobId ?? undefined);
 
@@ -85,16 +85,13 @@ export default function Page() {
   /* ----------------------------- Data Mapping ----------------------------- */
   const countries: Country[] = basicCollections?.countries || [];
 
-  const currencyOptions =
-    countries
-      .filter((c) => !!c.currency)
-      .map((c) => ({
-        label: c.currency as string,
-        value: c.currency as string,
-      }))
-      .filter(
-        (v, i, self) => i === self.findIndex((x) => x.value === v.value)
-      );
+  const currencyOptions = countries
+    .filter((c) => !!c.currency)
+    .map((c) => ({
+      label: c.currency as string,
+      value: c.currency as string,
+    }))
+    .filter((v, i, self) => i === self.findIndex((x) => x.value === v.value));
 
   /* ----------------------------- Auto-Detect Currency ----------------------------- */
   useEffect(() => {
@@ -208,10 +205,10 @@ export default function Page() {
     formData.currency === "EUR"
       ? "€"
       : formData.currency === "USD"
-        ? "$"
-        : formData.currency === "INR"
-          ? "₹"
-          : "";
+      ? "$"
+      : formData.currency === "INR"
+      ? "₹"
+      : "";
 
   if (loading) {
     return (
@@ -237,12 +234,48 @@ export default function Page() {
             {/* Sidebar */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
               <div className="flex flex-wrap justify-center lg:flex-col gap-2  justify-between lg:space-x-0 lg:space-y-4">
-                <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={false} finished={true} />
-                <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={true} />
-                <WizardNavigation title="Location Details" description="Provide location details" count={3} current={false} finished={true} />
-                <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={true} finished={false} />
-                <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
-                <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
+                <WizardNavigation
+                  title={t("basic.header.title")}
+                  description={t("basic.header.description")}
+                  count={1}
+                  current={false}
+                  finished={true}
+                />
+                <WizardNavigation
+                  title={t("details.header.title")}
+                  description={t("details.header.sidebar_description")}
+                  count={2}
+                  current={false}
+                  finished={true}
+                />
+                <WizardNavigation
+                  title={t("location.header.title")}
+                  description={t("location.header.description")}
+                  count={3}
+                  current={false}
+                  finished={true}
+                />
+                <WizardNavigation
+                  title={t("pricing.header.title")}
+                  description={t("pricing.header.description")}
+                  count={4}
+                  current={true}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title={t("work.header.title")}
+                  description={t("work.header.sidebar_description")}
+                  count={5}
+                  current={false}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title={t("contact.header.title")}
+                  description={t("contact.header.description")}
+                  count={6}
+                  current={false}
+                  finished={false}
+                />
               </div>
             </div>
 

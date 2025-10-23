@@ -1,14 +1,5 @@
 {
   "page_title": "Minijob erstellen",
-  "sidebar": {
-    "basic": "Grunddaten",
-    "details": "Jobdetails",
-    "location": "Standortdetails",
-    "pricing": "Preisangaben",
-    "work": "Arbeitsdetails",
-    "contact": "Kontaktdaten"
-  },
-
   "common": {
     "next": "Weiter",
     "prev": "Zurück",
@@ -21,7 +12,7 @@
 
   "basic": {
     "header": {
-      "title": "Grunddaten",
+      "title": "Grundlegende Details",
       "description": "Geben Sie die wichtigsten Informationen an"
     },
     "fields": {
@@ -55,7 +46,8 @@
   "details": {
     "header": {
       "title": "Jobdetails",
-      "description": "Geben Sie detaillierte Informationen zum Job an"
+      "sidebar_description": "Geben Sie detaillierte Informationen an",
+      "description":"Geben Sie detaillierte Informationen zum Job an"
     },
     "fields": {
       "description": "Jobbeschreibung",
@@ -80,7 +72,7 @@
   "location": {
     "header": {
       "title": "Standortdetails",
-      "description": "Geben Sie die Standortdaten für Ihren Job an"
+      "description": "Geben Sie Standortdetails an"
     },
     "fields": {
       "country": "Land",
@@ -114,8 +106,8 @@
 
   "pricing": {
     "header": {
-      "title": "Preisangaben",
-      "description": "Legen Sie die Vergütung für diesen Job fest"
+      "title": "Preisdetails",
+      "description": "Legen Sie die Preise für diesen Auftrag fest"
     },
     "fields": {
       "currency": "Währung",
@@ -143,6 +135,7 @@
   "work": {
     "header": {
       "title": "Arbeitsdetails",
+      "sidebar_description":"Geben Sie Arbeitsdetails an",
       "description": "Details zu Arbeitsmodus, Zeitraum und Nachweisen"
     },
     "fields": {
@@ -170,7 +163,7 @@
   "contact": {
     "header": {
       "title": "Kontaktdaten",
-      "description": "Geben Sie an, wie Bewerbende Sie erreichen können"
+      "description": "Geben Sie an, wie Bewerber Sie erreichen können"
     },
     "fields": {
       "contact_method": "Kontaktmethode",

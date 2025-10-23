@@ -14,9 +14,9 @@
       "saved": "Gespeichert"
     },
     "per_page": {
-      "10": "10",
-      "25": "25",
-      "50": "50"
+      "10": "12",
+      "25": "24",
+      "50": "60"
     }
   },
   "tooltips": {
@@ -26,16 +26,16 @@
   },
   "alert": {
     "close_title": "Job schließen?",
-    "close_description": "Möchten Sie diesen Job wirklich schließen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "close_description": "Möchten Sie diesen Auftrag wirklich schließen? Diese Aktion kann nicht rückgängig gemacht werden.",
     "confirm": "Schließen",
-    "cancel": "Abbrechen"
+    "cancel": "stornieren"
   },
   "empty": "Keine Jobs entsprechen Ihren Filtern.",
   "buttons": {
-    "view": "Ansehen",
-    "prev": "Zurück",
-    "next": "Weiter",
-    "select": "Auswählen",
+    "view": "Sicht",
+    "prev": "Vorher",
+    "next": "Nächste",
+    "select": "wählen",
     "per_page": "Pro Seite"
   },
   "cards": {
