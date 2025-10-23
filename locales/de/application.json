@@ -65,5 +65,34 @@
             },
             "close": "Schließen"
         }
+    },
+    "applicants": {
+        "title": "Bewerber",
+        "rate": "Rate:",
+        "cover-note": "Begleitschreiben:",
+        "applied": "Angewendet am:",
+        "update": "Aktualisierungsstatus",
+        "view-all": "Alle Bewerber anzeigen",
+        "update-model": {
+            "update": {
+                "success": "Der Bewerbungsstatus wurde erfolgreich geändert!",
+                "failed": "Status konnte nicht aktualisiert werden."
+            },
+            "title": "Updatestatus für {name}",
+            "current-status": "Aktueller Status:",
+            "status": {
+                "label": "Status",
+                "options": {
+                    "shortlisted": "in die engere Wahl gezogen",
+                    "accepted": "Akzeptiert",
+                    "rejected": "Abgelehnt"
+                }
+            },
+            "rate": "Rate:",
+            "button": {
+                "cancel": "Stornieren",
+                "update": "Bestätigen Sie die Aktualisierung"
+            }
+        }
     }
 }

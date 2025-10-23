@@ -4,16 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useUpdateApplicantStatus } from '@/lib/react-query/queries/apply-job';
 import toast from 'react-hot-toast';
 import { Select } from '../job/job-filter-select/select-option';
+import { useT } from '@/app/[locale]/layout';
 // Assuming you have a Select component for the status change
-
-const statusOptions = [
-    { label: "Shortlisted", value: "shortlisted" },
-    { label: "Accepted", value: "accepted" },
-    { label: "Rejected", value: "rejected" },
-];
 
 export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
     if (!isOpen || !applicant) return null;
+
+    const t = useT("application");
 
     // Placeholder for internal state (selected status)
     const [newStatus, setNewStatus] = useState(applicant.status);
@@ -24,11 +21,16 @@ export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
             applicationId: applicant.id,
             status: newStatus
         }, {
-            onSuccess: () => toast.success("Application status changed successfully!"),
-            onError: (err: any) => toast.error(err?.message || "Failed to update status."),
+            onSuccess: () => toast.success(t("applicants.update-model.update.success")),
+            onError: (err: any) => toast.error(err?.message || t("applicants.update-model.update.failed")),
         })
-
     }
+
+    const statusOptions = [
+        { label: t("applicants.update-model.status.options.shortlisted"), value: "shortlisted" },
+        { label: t("applicants.update-model.status.options.accepted"), value: "accepted" },
+        { label: t("applicants.update-model.status.options.rejected"), value: "rejected" },
+    ];
 
     return (
         // 1. Modal Backdrop (Dark Overlay)
@@ -51,10 +53,10 @@ export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
                     {/* Header */}
                     <div className="bg-white px-6 py-4 border-b border-gray-100">
                         <h3 className="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                            Update Status for {applicant.user.first_name} {applicant.user.last_name}
+                            {t("applicants.update-model.title", { name: `${applicant.user.first_name} ${applicant.user.last_name}`})} 
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
-                            Current Status: <span className="font-semibold text-gray-800 capitalize">{applicant.status}</span>
+                            {t("applicants.update-model.current-status")} <span className="font-semibold text-gray-800 capitalize">{applicant.status}</span>
                         </p>
                     </div>
 
@@ -69,13 +71,13 @@ export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
                                 onChange={(v) => {
                                     setNewStatus(v)
                                 }}
-                                label="Status"
+                                label={t("applicants.update-model.status.label")}
                             />
                         </div>
 
                         {/* Applicant Details Snippet */}
                         <div className="text-sm text-gray-700 mt-4">
-                            <p><span className="font-semibold text-gray-800">Rate:</span> {applicant.proposed_rate} €</p>
+                            <p><span className="font-semibold text-gray-800">{t("applicants.update-model.rate")}</span> {applicant.proposed_rate} €</p>
                             {applicant.cover_note && (
                                 <p className="mt-2 text-gray-600 line-clamp-2 italic">"{applicant.cover_note}"</p>
                             )}
@@ -91,14 +93,14 @@ export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
                             className="border-gray-300 text-gray-700 hover:bg-gray-100"
                             onClick={onClose}
                         >
-                            Cancel
+                            {t("applicants.update-model.button.cancel")}
                         </Button>
                         <Button
                             type="button"
                             onClick={handleUpdateStatus}
                             className="bg-gray-900 text-white hover:bg-black focus:ring-gray-500"
                         >
-                            Confirm Update
+                            {t("applicants.update-model.button.update")}
                         </Button>
                     </div>
 
