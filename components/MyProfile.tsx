@@ -473,10 +473,10 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
 
   const errors = useMemo(() => {
     const e: string[] = [];
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) e.push("Valid email required");
-    if (!form.firstName) e.push("First name required");
-    if (!form.lastName) e.push("Last name required");
-    if (!form.address.city) e.push("City required");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) e.push(t("errors.email_required"));
+    if (!form.firstName) e.push(t("errors.first_required"));
+    if (!form.lastName) e.push(t("errors.last_required"));
+    if (!form.address.city) e.push(t("errors.city_required"));
     // if (!form.categories.length) e.push("Select at least one category");
     // if (form.rate.hourlyEUR < 12) e.push("Hourly rate must be ≥ 12 € (min wage)");
     return e;
@@ -549,9 +549,9 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     }, {
       onSuccess: (data) => {
         myProfile.loadUser()
-        toast.custom((t) => (
+        toast.custom((to) => (
           <div
-            className={`${t.visible ? "animate-enter" : "animate-leave"
+            className={`${to.visible ? "animate-enter" : "animate-leave"
               } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
           >
             {/* Icon */}
@@ -561,7 +561,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             {/* Text */}
             <div className="flex-1 w-0 p-4">
               <p className="text-sm font-semibold text-green-600">
-                Profile Updated!
+               {t("toasts.updated_title")}
               </p>
               <p className="mt-1 text-sm text-gray-700">
 
@@ -825,10 +825,10 @@ function PublicProfile({ user, jobCategories, languages }: {
       )}
       {myProfile?.user?.role == "helper" &&
         <section>
-          <h4 className="mb-2 text-lg font-semibold">Documents</h4>
+          <h4 className="mb-2 text-lg font-semibold">{t("preview.tiles.documents")}</h4>
           <div className="grid gap-3 sm:grid-cols-2">
-            <DocRow label="First Aid" value={user.verification.firstAid.completed ? `${user.verification.firstAid.provider || "Provider"}${user.verification.firstAid.completionDate ? ` • ${user.verification.firstAid.completionDate}` : ""}` : "Not provided"} href={user.verification.firstAid.fileUrl} />
-            <DocRow label="Police certificate" value={user.verification.policeCertificate.hasCertificate ? `${user.verification.policeCertificate.level || ""}${user.verification.policeCertificate.issueDate ? ` • ${user.verification.policeCertificate.issueDate}` : ""}` : "Not provided"} href={user.verification.policeCertificate.fileUrl} />
+            <DocRow label={t("preview.doc_rows.first_aid")} value={user.verification.firstAid.completed ? `${user.verification.firstAid.provider || "Provider"}${user.verification.firstAid.completionDate ? ` • ${user.verification.firstAid.completionDate}` : ""}` : t("preview.doc_rows.not_provided")} href={user.verification.firstAid.fileUrl} />
+            <DocRow label={t("preview.doc_rows.police")} value={user.verification.policeCertificate.hasCertificate ? `${user.verification.policeCertificate.level || ""}${user.verification.policeCertificate.issueDate ? ` • ${user.verification.policeCertificate.issueDate}` : ""}` :  t("preview.doc_rows.not_provided")} href={user.verification.policeCertificate.fileUrl} />
           </div>
         </section>
       }
@@ -864,11 +864,12 @@ function DocRow({ label, value, href }: { label: string; value: string; href?: s
 
 function Badges({ verification }: { verification: Verification }) {
   const myProfile = useAuth()
+  const t=useT("profile")
 
   const items: { label: string; active: boolean, hide: boolean }[] = [
-    { label: "ID", active: verification.idVerified, hide: false },
-    { label: "First Aid", active: verification.firstAid.completed, hide: myProfile?.user?.role == "client" },
-    { label: "Police", active: verification.policeCertificate.hasCertificate, hide: myProfile?.user?.role == "client" },
+    { label: t("preview.badges.id"), active: verification.idVerified, hide: false },
+    { label: t("preview.badges.first_aid"), active: verification.firstAid.completed, hide: myProfile?.user?.role == "client" },
+    { label: t("preview.badges.police"), active: verification.policeCertificate.hasCertificate, hide: myProfile?.user?.role == "client" },
   ];
   return (
     <div className="flex flex-wrap gap-1">
