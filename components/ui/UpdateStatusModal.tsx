@@ -53,7 +53,7 @@ export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
                     {/* Header */}
                     <div className="bg-white px-6 py-4 border-b border-gray-100">
                         <h3 className="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                            {t("applicants.update-model.title", { name: `${applicant.user.first_name} ${applicant.user.last_name}`})} 
+                            {t("applicants.update-model.title", { name: `${applicant.user.first_name} ${applicant.user.last_name}` })}
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
                             {t("applicants.update-model.current-status")} <span className="font-semibold text-gray-800 capitalize">{applicant.status}</span>
@@ -79,7 +79,10 @@ export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
                         <div className="text-sm text-gray-700 mt-4">
                             <p><span className="font-semibold text-gray-800">{t("applicants.update-model.rate")}</span> {applicant.proposed_rate} €</p>
                             {applicant.cover_note && (
-                                <p className="mt-2 text-gray-600 line-clamp-2 italic">"{applicant.cover_note}"</p>
+                                <div
+                                    className="mt-2 text-gray-600 line-clamp-2 italic"
+                                    dangerouslySetInnerHTML={{ __html: applicant.cover_note || "" }}
+                                />
                             )}
                         </div>
 

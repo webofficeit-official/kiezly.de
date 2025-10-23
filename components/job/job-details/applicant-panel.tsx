@@ -111,7 +111,10 @@ export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
                     {applicant.cover_note && (
                       <div className="rounded-lg text-gray-700">
                         <span className="font-semibold text-gray-800 block mb-1">Cover Note :</span>
-                        <p className="text-sm line-clamp-3">{applicant.cover_note}</p>
+                        <div
+                          className="text-sm line-clamp-3"
+                          dangerouslySetInnerHTML={{ __html: applicant.cover_note || "" }}
+                        />
                       </div>
                     )}
 

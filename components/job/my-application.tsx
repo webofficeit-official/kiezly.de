@@ -150,8 +150,11 @@ export default function AppliedJobList() {
                     </h3>
                     <p className="text-xs text-gray-500 mt-1 tracking-wide font-medium">
                       <span className="font-bold text-black">Note: </span>
-                      {app.cover_note}
                     </p>
+                    <div
+                      className="text-xs text-gray-500 mt-1 tracking-wide font-medium"
+                      dangerouslySetInnerHTML={{ __html: app.cover_note || "" }}
+                    />
 
                     {/* Tags */}
                     {app.job.tags?.length > 0 && (
@@ -217,9 +220,8 @@ export default function AppliedJobList() {
               .map((n) => (
                 <button
                   key={n}
-                  className={`rounded-xl border px-3 py-2 text-sm ${
-                    n === page ? "bg-black text-white" : ""
-                  }`}
+                  className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""
+                    }`}
                   onClick={() => handlePageChange(n)}
                 >
                   {n}
