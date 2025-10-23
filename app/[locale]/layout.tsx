@@ -91,6 +91,7 @@ export default function LocaleLayout({ children, params }: any) {
     "application",
     "profile",
     "company",
+    "my-jobs"
   ]; // add more as needed
 
   useEffect(() => {
