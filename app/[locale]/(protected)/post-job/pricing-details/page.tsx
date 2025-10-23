@@ -250,7 +250,7 @@ export default function Page() {
                 />
                 <WizardNavigation
                   title={t("location.header.title")}
-                  description={t("location.header.description")}
+                  description={t("location.header.sidebar_description")}
                   count={3}
                   current={false}
                   finished={true}
@@ -282,8 +282,8 @@ export default function Page() {
             {/* Main Form */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
               <WizardHeader
-                title="Pricing Details"
-                description="Set the pricing for this job"
+                 title={t("pricing.header.title")}
+                description={t("pricing.header.description")}
               />
 
               <div className="mt-5 space-y-4">

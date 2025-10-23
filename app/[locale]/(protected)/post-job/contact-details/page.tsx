@@ -209,8 +209,8 @@ export default function Page() {
               {/* Main Form */}
               <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
                 <WizardHeader
-                  title="Contact Details"
-                  description="Provide how applicants can reach you"
+                  title={t("contact.header.title")}
+                  description={t("contact.header.description")}
                 />
 
                 <div className="mt-5">
