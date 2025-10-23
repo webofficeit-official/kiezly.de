@@ -1,0 +1,206 @@
+{
+  "page_title": "Minijob erstellen",
+  "sidebar": {
+    "basic": "Grunddaten",
+    "details": "Jobdetails",
+    "location": "Standortdetails",
+    "pricing": "Preisangaben",
+    "work": "Arbeitsdetails",
+    "contact": "Kontaktdaten"
+  },
+
+  "common": {
+    "next": "Weiter",
+    "prev": "Zurück",
+    "save": "Speichern",
+    "loading": "Lädt…",
+    "fix_errors": "Bitte beheben Sie die markierten Felder.",
+    "creating": "Wird erstellt…",
+    "updating": "Wird aktualisiert…"
+  },
+
+  "basic": {
+    "header": {
+      "title": "Grunddaten",
+      "description": "Geben Sie die wichtigsten Informationen an"
+    },
+    "fields": {
+      "title": "Titel",
+      "subtitle": "Untertitel",
+      "slug": "Slug",
+      "category": "Jobkategorie",
+      "tags": "Tags",
+      "job_type": "Jobart",
+      "experience": "Erfahrungsstufe"
+    },
+    "helpers": {
+      "slug_autogen": "↻ Slug automatisch erzeugen",
+      "title_placeholder": "Babysitting-Job in Berlin",
+      "subtitle_placeholder": "Kurze Beschreibung",
+      "slug_placeholder": "babysitting-job-in-berlin"
+    },
+    "validation": {
+      "title_required": "Titel ist erforderlich",
+      "title_min": "Der Titel muss mindestens 8 Zeichen lang sein",
+      "slug_required": "Slug ist erforderlich",
+      "category_required": "Jobkategorie ist erforderlich"
+    },
+    "toasts": {
+      "create_success": "Job erfolgreich erstellt!",
+      "update_success": "Job erfolgreich aktualisiert!",
+      "failure": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
+
+  "details": {
+    "header": {
+      "title": "Jobdetails",
+      "description": "Geben Sie detaillierte Informationen zum Job an"
+    },
+    "fields": {
+      "description": "Jobbeschreibung",
+      "requirements": "Anforderungen",
+      "tasks": "Aufgaben",
+      "languages": "Sprachen"
+    },
+    "placeholders": {
+      "description": "Schreiben Sie hier die Jobbeschreibung…",
+      "requirements": "Schreiben Sie hier die Anforderungen…",
+      "tasks": "Schreiben Sie hier die Aufgaben…"
+    },
+    "validation": {
+      "description_required": "Die Jobbeschreibung ist erforderlich.",
+      "description_empty": "Die Jobbeschreibung darf nicht leer sein."
+    },
+    "toasts": {
+      "update_success": "Jobdetails aktualisiert!"
+    }
+  },
+
+  "location": {
+    "header": {
+      "title": "Standortdetails",
+      "description": "Geben Sie die Standortdaten für Ihren Job an"
+    },
+    "fields": {
+      "country": "Land",
+      "postal_code": "Postleitzahl",
+      "street": "Straße",
+      "city": "Stadt",
+      "state": "Bundesland",
+      "latitude": "Breitengrad",
+      "longitude": "Längengrad"
+    },
+    "placeholders": {
+      "postal_code": "PLZ eingeben",
+      "street": "Essen",
+      "city": "Berlin",
+      "state": "Nordrhein-Westfalen",
+      "lat": "51.4535",
+      "lng": "7.0102"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "country_required": "Land ist erforderlich",
+      "postal_code_required": "Postleitzahl ist erforderlich",
+      "street_required": "Straße ist erforderlich",
+      "city_required": "Stadt ist erforderlich",
+      "state_required": "Bundesland ist erforderlich"
+    },
+    "toasts": {
+      "update_success": "Standortdetails aktualisiert!"
+    }
+  },
+
+  "pricing": {
+    "header": {
+      "title": "Preisangaben",
+      "description": "Legen Sie die Vergütung für diesen Job fest"
+    },
+    "fields": {
+      "currency": "Währung",
+      "price_type": "Preistyp",
+      "price_value": "Festpreis",
+      "price_min": "Mindestpreis",
+      "price_max": "Höchstpreis"
+    },
+    "price_type_options": {
+      "fixed": "Fest",
+      "range": "Spanne"
+    },
+    "validation": {
+      "currency_required": "Währung ist erforderlich",
+      "price_type_required": "Preistyp ist erforderlich",
+      "fixed_gt_zero": "Der Festpreis muss größer als 0 sein",
+      "min_gte_zero": "Der Mindestpreis muss ≥ 0 sein",
+      "max_gte_min": "Der Höchstpreis muss ≥ Mindestpreis sein"
+    },
+    "toasts": {
+      "update_success": "Preisangaben aktualisiert!"
+    }
+  },
+
+  "work": {
+    "header": {
+      "title": "Arbeitsdetails",
+      "description": "Details zu Arbeitsmodus, Zeitraum und Nachweisen"
+    },
+    "fields": {
+      "work_mode": "Arbeitsmodus",
+      "start_date": "Startdatum",
+      "end_date": "Enddatum",
+      "first_aid": "Erste-Hilfe nachgewiesen",
+      "police": "Polizeiliches Führungszeugnis"
+    },
+    "validation": {
+      "work_mode_required": "Arbeitsmodus ist erforderlich",
+      "start_required": "Startdatum ist erforderlich",
+      "end_after_start": "Das Enddatum darf nicht vor dem Startdatum liegen"
+    },
+    "toasts": {
+      "update_success": "Arbeitsdetails aktualisiert!"
+    },
+    "work_mode_options": {
+      "on_site": "Vor Ort",
+      "remote": "Remote",
+      "hybrid": "Hybrid"
+    }
+  },
+
+  "contact": {
+    "header": {
+      "title": "Kontaktdaten",
+      "description": "Geben Sie an, wie Bewerbende Sie erreichen können"
+    },
+    "fields": {
+      "contact_method": "Kontaktmethode",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "link": "Externer Link"
+    },
+    "methods": {
+      "email_relay": "E-Mail-Weiterleitung",
+      "direct_email": "Direkte E-Mail",
+      "phone": "Telefon",
+      "external_link": "Externer Link"
+    },
+    "placeholders": {
+      "email": "sie@example.com",
+      "phone": "+49 123 456 7890",
+      "link": "https://beispiel.de"
+    },
+    "validation": {
+      "method_required": "Kontaktmethode ist erforderlich",
+      "email_required": "E-Mail ist erforderlich.",
+      "email_invalid": "Ungültiges E-Mail-Format.",
+      "phone_required": "Telefonnummer ist erforderlich.",
+      "link_required": "Externer Link ist erforderlich.",
+      "link_invalid": "Bitte geben Sie eine gültige URL ein (z. B. https://example.com).",
+      "link_protocol": "Nur HTTP- oder HTTPS-Links sind erlaubt."
+    },
+    "toasts": {
+      "save_success": "Kontaktdaten erfolgreich gespeichert!",
+      "save_failure": "Kontaktdaten konnten nicht gespeichert werden."
+    }
+  }
+}

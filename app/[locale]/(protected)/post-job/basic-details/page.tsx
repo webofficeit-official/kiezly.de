@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/app/[locale]/layout";
 import { Card } from "@/components/ui/card";
 import { WizardDirection } from "@/components/wizard/WizardDirection";
 import { WizardHeader } from "@/components/wizard/WizardHeader";
@@ -25,6 +26,7 @@ export default function Page() {
     const slug = searchParams.get("slug");
     const categorySlug = searchParams.get("category");
     const { push } = useLocalizedRouter();
+    const t=useT("post-job")
 
 
     const { data: basicCollections } = useJobCollections();
@@ -241,7 +243,7 @@ useEffect(() => {
                 <section className="lg:col-span-3 space-y-4">
                     <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
                         <h2 className="text-lg font-semibold">
-                            Post a Mini-Job
+                            {t("page_title")}
                         </h2>
                     </div>
                 </section>

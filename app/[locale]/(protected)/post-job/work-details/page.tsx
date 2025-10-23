@@ -17,6 +17,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
+import { useT } from "@/app/[locale]/layout";
 
 export default function Page() {
     const router = useRouter();
@@ -32,6 +33,7 @@ export default function Page() {
     const [showErrors, setShowErrors] = useState(false);
     const [loading, setLoading] = useState(false);
     const { push } = useLocalizedRouter();
+     const t = useT("post-job");
 
     /* ----------------------------- Fetch Existing Job ----------------------------- */
     useEffect(() => {
@@ -144,7 +146,7 @@ export default function Page() {
                 {/* Header */}
                 <section className="lg:col-span-3 space-y-4">
                     <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
-                        <h2 className="text-lg font-semibold">Post a mini-job</h2>
+                        <h2 className="text-lg font-semibold"> {t("page_title")}</h2>
                     </div>
                 </section>
 

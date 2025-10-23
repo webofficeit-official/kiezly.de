@@ -17,17 +17,20 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
+import { useT } from "@/app/[locale]/layout";
 
 export default function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
 
-  const { formData, updateForm, jobId, setJobId, mode, setMode } = useJobWizard();
+  const { formData, updateForm, jobId, setJobId, mode, setMode } =
+    useJobWizard();
   const updateJobMutation = useUpdateJob(jobId ?? undefined);
   const { data: basicCollections } = useJobCollections();
   const { mutateAsync: fetchZipcodes } = useZipcodes();
   const { push } = useLocalizedRouter();
+  const t = useT("post-job");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showErrors, setShowErrors] = useState(false);
@@ -83,7 +86,8 @@ export default function Page() {
         // default Germany for new job or missing value
         const germany = countryOptions.find(
           (c) =>
-            c.label.toLowerCase() === "germany" || c.code?.toLowerCase() === "de"
+            c.label.toLowerCase() === "germany" ||
+            c.code?.toLowerCase() === "de"
         );
         if (germany) {
           updateForm({ country_id: germany.value });
@@ -243,7 +247,7 @@ export default function Page() {
         {/* Header */}
         <section className="lg:col-span-3 space-y-4">
           <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Post a mini-job</h2>
+            <h2 className="text-lg font-semibold"> {t("page_title")}</h2>
           </div>
         </section>
 
@@ -252,18 +256,57 @@ export default function Page() {
             {/* Sidebar */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
               <div className="flex flex-wrap justify-center lg:flex-col gap-2  justify-between lg:space-x-0 lg:space-y-4">
-                <WizardNavigation title="Basic Details" description="Provide the main information" count={1} current={false} finished={true} />
-                <WizardNavigation title="Job Details" description="Provide detailed information" count={2} current={false} finished={true} />
-                <WizardNavigation title="Location Details" description="Provide location details" count={3} current={true} finished={false} />
-                <WizardNavigation title="Pricing Details" description="Set the pricing for this job" count={4} current={false} finished={false} />
-                <WizardNavigation title="Work Details" description="Provide work details" count={5} current={false} finished={false} />
-                <WizardNavigation title="Contact Details" description="Provide how applicants can reach you" count={6} current={false} finished={false} />
+                <WizardNavigation
+                  title="Basic Details"
+                  description="Provide the main information"
+                  count={1}
+                  current={false}
+                  finished={true}
+                />
+                <WizardNavigation
+                  title="Job Details"
+                  description="Provide detailed information"
+                  count={2}
+                  current={false}
+                  finished={true}
+                />
+                <WizardNavigation
+                  title="Location Details"
+                  description="Provide location details"
+                  count={3}
+                  current={true}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title="Pricing Details"
+                  description="Set the pricing for this job"
+                  count={4}
+                  current={false}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title="Work Details"
+                  description="Provide work details"
+                  count={5}
+                  current={false}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title="Contact Details"
+                  description="Provide how applicants can reach you"
+                  count={6}
+                  current={false}
+                  finished={false}
+                />
               </div>
             </div>
 
             {/* Main Form */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
-              <WizardHeader title="Location Details" description="Provide the location details for your job" />
+              <WizardHeader
+                title="Location Details"
+                description="Provide the location details for your job"
+              />
 
               <div className="mt-5 space-y-4">
                 {/* Country & Postal Code */}
@@ -292,19 +335,56 @@ export default function Page() {
 
                 {/* Street, City, State */}
                 <div className="flex flex-col md:flex-row gap-3">
-                  <WizardInput label="Street" placeholder="Essen" value={formData.street || ""} onChange={(v) => handleFieldChange("street", v)} required error={showErrors ? errors.street : ""} />
-                  <WizardInput label="City" placeholder="Berlin" value={formData.city || ""} onChange={(v) => handleFieldChange("city", v)} required error={showErrors ? errors.city : ""} />
-                  <WizardInput label="State" placeholder="Nordrhein-Westfalen" value={formData.state || ""} onChange={(v) => handleFieldChange("state", v)} required error={showErrors ? errors.state : ""} />
+                  <WizardInput
+                    label="Street"
+                    placeholder="Essen"
+                    value={formData.street || ""}
+                    onChange={(v) => handleFieldChange("street", v)}
+                    required
+                    error={showErrors ? errors.street : ""}
+                  />
+                  <WizardInput
+                    label="City"
+                    placeholder="Berlin"
+                    value={formData.city || ""}
+                    onChange={(v) => handleFieldChange("city", v)}
+                    required
+                    error={showErrors ? errors.city : ""}
+                  />
+                  <WizardInput
+                    label="State"
+                    placeholder="Nordrhein-Westfalen"
+                    value={formData.state || ""}
+                    onChange={(v) => handleFieldChange("state", v)}
+                    required
+                    error={showErrors ? errors.state : ""}
+                  />
                 </div>
 
                 {/* Latitude & Longitude */}
                 <div className="flex flex-col md:flex-row gap-3">
-                  <WizardInput label="Latitude" placeholder="51.4535" value={formData.lat || ""} onChange={(v) => updateForm({ lat: v })} />
-                  <WizardInput label="Longitude" placeholder="7.0102" value={formData.lng || ""} onChange={(v) => updateForm({ lng: v })} />
+                  <WizardInput
+                    label="Latitude"
+                    placeholder="51.4535"
+                    value={formData.lat || ""}
+                    onChange={(v) => updateForm({ lat: v })}
+                  />
+                  <WizardInput
+                    label="Longitude"
+                    placeholder="7.0102"
+                    value={formData.lng || ""}
+                    onChange={(v) => updateForm({ lng: v })}
+                  />
                 </div>
 
                 {/* Navigation */}
-                <WizardDirection prev onPrev={handlePrev} next onNext={handleNext} isNextLoading={updateJobMutation.isPending} />
+                <WizardDirection
+                  prev
+                  onPrev={handlePrev}
+                  next
+                  onNext={handleNext}
+                  isNextLoading={updateJobMutation.isPending}
+                />
               </div>
             </div>
           </div>
