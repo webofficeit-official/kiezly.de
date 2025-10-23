@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button-variant";
+import { useT } from "@/app/[locale]/layout";
 
 interface Applicant {
   id: string;
@@ -40,6 +41,15 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
         return "px-3 py-1 rounded-xl bg-gray-100 text-gray-600";
     }
   };
+  const t = useT("application");
+
+  const statusOptions = [
+    { label: t("applicants-panel.status.options.applied"), value: "applied" },
+    { label: t("applicants-panel.status.options.shortlisted"), value: "shortlisted" },
+    { label: t("applicants-panel.status.options.accepted"), value: "accepted" },
+    { label: t("applicants-panel.status.options.rejected"), value: "rejected" },
+    { label: t("applicants-panel.status.options.withdrawn"), value: "withdrawn" },
+  ];
 
   return (
     <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md transition-all duration-150 flex flex-col">
@@ -56,7 +66,7 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
         </div>
 
         <span className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusClasses(applicant.status)}`}>
-          {applicant.status}
+          {statusOptions.find(s => s.value == applicant.status)?.label}
         </span>
       </div>
 
@@ -67,14 +77,14 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
         {applicant.proposed_rate && (
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium text-gray-800">
-              Propsed Rate: <span className="font-bold text-gray-900">{applicant.proposed_rate} €</span>
+              {t("applicants.proposed-rate")} <span className="font-bold text-gray-900">{applicant.proposed_rate} €</span>
             </div>
           </div>
         )}
 
         {applicant.cover_note && (
           <div className="rounded-lg text-gray-700">
-            <span className="font-semibold text-gray-800 block mb-1">Cover Note:</span>
+            <span className="font-semibold text-gray-800 block mb-1">{t("applicants.cover-note")}</span>
             <div
               className="text-sm line-clamp-3"
               dangerouslySetInnerHTML={{ __html: applicant.cover_note || "" }}
@@ -86,7 +96,7 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
       {/* Footer / Action Row */}
       <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
         <div className="text-xs text-gray-500">
-          Applied: {new Date(applicant.created_at).toLocaleDateString()}
+          {t("applicants.applied")}: {new Date(applicant.created_at).toLocaleDateString()}
         </div>
         <div>
           <Button
@@ -94,7 +104,7 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
             className="text-sm font-medium text-gray-800 border-gray-300 hover:bg-gray-100 px-4 py-2 h-auto"
             onClick={() => openUpdateModal(applicant)}
           >
-            Update Status
+            {t("applicants.update")}
           </Button>
         </div>
       </div>

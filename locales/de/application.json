@@ -70,6 +70,7 @@
         "title": "Bewerber",
         "rate": "Rate:",
         "cover-note": "Begleitschreiben:",
+        "proposed-rate": "Vorgeschlagener Preis:",
         "applied": "Angewendet am:",
         "update": "Aktualisierungsstatus",
         "view-all": "Alle Bewerber anzeigen",
@@ -93,6 +94,35 @@
                 "cancel": "Stornieren",
                 "update": "Bestätigen Sie die Aktualisierung"
             }
+        }
+    },
+    "applicants-panel": {
+        "title": "Bewerber für {jobDetails.title}",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "Alle",
+                "applied": "Angewandt",
+                "shortlisted": "In die engere Wahl gezogen",
+                "accepted": "Akzeptiert",
+                "rejected": "Abgelehnt",
+                "withdrawn": "Zurückgezogen"
+            }
+        },
+        "proposed-rate": {
+            "label": "Vorgeschlagener Preis",
+            "options": {
+                "asc": "Aufsteigend",
+                "desc": "Absteigend"
+            }
+        },
+        "per-page": {
+            "label": "Per page"
+        },
+        "no-applicants": "Es haben sich noch keine Bewerber beworben.",
+        "pagination": {
+            "prev": "Vorher",
+            "next": "Nächste"
         }
     }
 }

@@ -70,6 +70,7 @@
         "title": "Applicants",
         "rate": "Rate:",
         "cover-note": "Cover Note:",
+        "proposed-rate": "Proposed Rate:",
         "applied": "Applied on:",
         "update": "Update Status",
         "view-all": "View all Applicants",
@@ -93,6 +94,35 @@
                 "cancel": "Cancel",
                 "update": "Confirm Update"
             }
+        }
+    },
+    "applicants-panel": {
+        "title": "Applicants for {title}",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "All",
+                "applied": "Applied",
+                "shortlisted": "Shortlisted",
+                "accepted": "Accepted",
+                "rejected": "Rejected",
+                "withdrawn": "Withdrawn"
+            }
+        },
+        "proposed-rate": {
+            "label": "Proposed Rate",
+            "options": {
+                "asc": "Ascending",
+                "desc": "Descending"
+            }
+        },
+        "per-page": {
+            "label": "Per page"
+        },
+        "no-applicants": "No applicants have applied yet.",
+        "pagination": {
+            "prev": "Prev",
+            "next": "Next"
         }
     }
 }

@@ -11,23 +11,10 @@ import React, { useEffect, useState } from "react";
 import ApplicantCard from "./applicant-card/applicant-card";
 import { Select } from "../job-filter-select/select-option";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
+import { useT } from "@/app/[locale]/layout";
 interface ApplicantsPageProps {
   params: { slug: string };
 }
-const perPageOptions = [
-  { label: "10", value: "10" },
-  { label: "25", value: "25" },
-  { label: "50", value: "50" },
-];
-
-const statusOptions = [
-  { label: "All", value: "" },
-  { label: "Applied", value: "applied" },
-  { label: "Shortlisted", value: "shortlisted" },
-  { label: "Accepted", value: "accepted" },
-  { label: "Rejected", value: "rejected" },
-  { label: "Withdrawn", value: "withdrawn" },
-];
 
 export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const { slug } = params;
@@ -43,6 +30,22 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const [pageSize, setPageSize] = useState<number>(12);
   const [totalPages, setTotalPages] = useState<number>(1);
   const { push } = useLocalizedRouter();
+  const t = useT("application");
+
+  const perPageOptions = [
+    { label: "10", value: "10" },
+    { label: "25", value: "25" },
+    { label: "50", value: "50" },
+  ];
+
+  const statusOptions = [
+    { label: t("applicants-panel.status.options.all"), value: "" },
+    { label: t("applicants-panel.status.options.applied"), value: "applied" },
+    { label: t("applicants-panel.status.options.shortlisted"), value: "shortlisted" },
+    { label: t("applicants-panel.status.options.accepted"), value: "accepted" },
+    { label: t("applicants-panel.status.options.rejected"), value: "rejected" },
+    { label: t("applicants-panel.status.options.withdrawn"), value: "withdrawn" },
+  ];
 
   const openUserModal = (userId: string) => {
     setSelectedUserId(userId);
@@ -139,7 +142,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold">
-            Applicants for {jobDetails.title}
+            {t("applicants-panel.title", { title: jobDetails.title})}
           </h2>
         </div>
 
@@ -148,7 +151,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
           {/* Left group */}
           <div className="flex items-center gap-6">
             <Select
-              label="Status"
+              label={t("applicants-panel.status.label")}
               value={statusFilter}
               onChange={handleStatusChange}
               options={statusOptions}
@@ -160,17 +163,17 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
           {/* Right group */}
           <div className="flex items-center gap-6">
             <Select
-              label="Proposed Rate"
+              label={t("applicants-panel.proposed-rate.label")}
               value={sort}
               onChange={(v: string) => handleSortChange(v as 'asc' | 'desc')}
               options={[
-                { label: 'Ascending', value: 'asc' },
-                { label: 'Descending', value: 'desc' },
+                { label: t("applicants-panel.proposed-rate.options.asc"), value: 'asc' },
+                { label: t("applicants-panel.proposed-rate.options.desc"), value: 'desc' },
               ]}
               width="w-32"
             />
             <Select
-              label="Per page"
+              label={t("applicants-panel.per-page.label")}
               value={String(pageSize)}
               onChange={(v: string) => handlePageSizeChange(Number(v))}
               options={perPageOptions}
@@ -193,7 +196,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
           ) : (
             <div className="md:col-span-2 lg:col-span-3">
               <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-base text-gray-600 shadow-md">
-                <p className="text-gray-500 text-sm italic py-2">No applicants have applied yet.</p>
+                <p className="text-gray-500 text-sm italic py-2">{t("applicants-panel.no-applicants")}</p>
               </div>
             </div>
           )}
@@ -205,7 +208,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             onClick={() => setPage(page - 1)}
             disabled={page <= 1}
           >
-            Prev
+            {t("applicants-panel.pagination.prev")}
           </button>
 
           <div className="flex items-center gap-1">
@@ -227,7 +230,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             onClick={() => setPage(page + 1)}
             disabled={page >= totalPages}
           >
-            Next
+            {t("applicants-panel.pagination.next")}
           </button>
         </nav>
 
