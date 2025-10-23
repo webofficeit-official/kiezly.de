@@ -124,5 +124,35 @@
             "prev": "Vorher",
             "next": "Nächste"
         }
+    },
+    "user": {
+        "salary-expectation": {
+            "label": "Gehaltsvorstellung",
+            "value": "€ {rate}/Std."
+        },
+        "work-experience": {
+            "label": "Berufserfahrung",
+            "value": "{years} Jahre"
+        },
+        "min-hours": {
+            "label": "Mindeststundenzahl",
+            "value": "{hours} Std."
+        },
+        "available days": {
+            "label": "Verfügbare Tage"
+        },
+        "gender": {
+            "label": "Gender"
+        },
+        "time-windows": {
+            "label": "Zeitfenster"
+        },
+        "contacts": "Kontakte",
+        "socials": "Soziale Netzwerke",
+        "since": "Mitglied seit",
+        "education": "Ausbildung",
+        "skills": "Fähigkeiten",
+        "first-aid": "Erste Hilfe",
+        "police-certificate": "Polizeizeugnis"
     }
 }

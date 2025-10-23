@@ -124,5 +124,35 @@
             "prev": "Prev",
             "next": "Next"
         }
+    },
+    "user": {
+        "salary-expectation": {
+            "label": "Salary expectation",
+            "value": "€ {rate}/Hr"
+        },
+        "work-experience": {
+            "label": "Work Experience",
+            "value": "{years} Years"
+        },
+        "min-hours": {
+            "label": "Minimum Hours",
+            "value": "{hours} Hr"
+        },
+        "available days": {
+            "label": "Available days"
+        },
+        "gender": {
+            "label": "Gender"
+        },
+        "time-windows": {
+            "label": "Time windows"
+        },
+        "contacts": "Contacts",
+        "socials": "Socials",
+        "since": "Member since",
+        "education": "Education",
+        "skills": "Skills",
+        "first-aid": "First Aid",
+        "police-certificate": "Police certificate"
     }
 }
