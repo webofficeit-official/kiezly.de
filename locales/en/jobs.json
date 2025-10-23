@@ -108,5 +108,14 @@
             "requirement": "Requirements",
             "tasks": "Tasks"
         }
+    },
+    "count": {
+        "title": "Job Counts",
+        "items": {
+            "views": "Views",
+            "saves": "Saves",
+            "reports": "Reports",
+            "applicants": "Applicants"
+        }
     }
 }

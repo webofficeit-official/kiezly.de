@@ -108,5 +108,14 @@
             "requirement": "Anforderungen",
             "tasks": "Aufgaben"
         }
+    },
+    "count": {
+        "title": "Job zählt",
+        "items": {
+            "views": "Ansichten",
+            "saves": "Spart",
+            "reports": "Berichte",
+            "applicants": "Bewerber"
+        }
     }
 }
