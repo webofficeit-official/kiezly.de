@@ -88,7 +88,8 @@ export default function LocaleLayout({ children, params }: any) {
     "privacy",
     "404",
     "jobs",
-    "application"
+    "application",
+    "company"
   ]; // add more as needed
 
   useEffect(() => {
