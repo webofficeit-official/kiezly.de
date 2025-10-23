@@ -117,7 +117,7 @@
             }
         },
         "per-page": {
-            "label": "Per page"
+            "label": "Pro Seite"
         },
         "no-applicants": "Es haben sich noch keine Bewerber beworben.",
         "pagination": {

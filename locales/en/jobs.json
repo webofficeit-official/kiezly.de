@@ -124,5 +124,41 @@
         "away": "{distance} km away",
         "view": "View",
         "no-jobs": "No jobs match your filters."
+    },
+    "saved": {
+        "title": "Saved Jobs",
+        "not-specified": "Not specified",
+        "view": "View",
+        "away": "{distance} km away",
+        "no-jobs": "No jobs match your filters."
+    },
+    "applied": {
+        "title": "Applied Jobs",
+        "not-specified": "Not specified",
+        "view": "View",
+        "away": "{distance} km away",
+        "no-jobs": "No jobs match your filters.",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "All",
+                "applied": "Applied",
+                "shortlisted": "Shortlisted",
+                "accepted": "Accepted",
+                "rejected": "Rejected",
+                "withdrawn": "Withdrawn"
+            }
+        },
+        "proposed-rate": {
+            "label": "Proposed Rate"
+        },
+        "per-page": {
+            "label": "Per page"
+        },
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Prev",
+            "next": "Next"
+        }
     }
 }

@@ -124,5 +124,41 @@
         "away": "{distance} km entfernt",
         "view": "Sicht",
         "no-jobs": "Keine Jobs entsprechen Ihren Filtern."
+    },
+    "saved": {
+        "title": "Gespeicherte Jobs",
+        "not-specified": "Nicht angegeben",
+        "away": "{distance} km entfernt",
+        "view": "Sicht",
+        "no-jobs": "Keine Jobs entsprechen Ihren Filtern."
+    },
+    "applied": {
+        "title": "Angewandte Jobs",
+        "not-specified": "Nicht angegeben",
+        "away": "{distance} km entfernt",
+        "view": "Sicht",
+        "no-jobs": "Keine Jobs entsprechen Ihren Filtern.",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "Alle",
+                "applied": "Angewandt",
+                "shortlisted": "In die engere Wahl gezogen",
+                "accepted": "Akzeptiert",
+                "rejected": "Abgelehnt",
+                "withdrawn": "Zurückgezogen"
+            }
+        },
+        "proposed-rate": {
+            "label": "Vorgeschlagener Preis"
+        },
+        "per-page": {
+            "label": "Pro Seite"
+        },
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Vorher",
+            "next": "Nächste"
+        }
     }
 }
