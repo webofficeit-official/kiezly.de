@@ -89,7 +89,8 @@ export default function LocaleLayout({ children, params }: any) {
     "404",
     "jobs",
     "application",
-    "company"
+    "profile",
+    "company",
   ]; // add more as needed
 
   useEffect(() => {
@@ -114,7 +115,7 @@ export default function LocaleLayout({ children, params }: any) {
 
     loadMessages();
   }, [locale]);
-   if (Object.keys(messages).length === 0) return <></>;
+  if (Object.keys(messages).length === 0) return <></>;
 
   const isReady = Object.keys(messages).length > 0;
 

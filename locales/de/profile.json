@@ -1,0 +1,147 @@
+{
+  "title": "Mein Profil",
+  "preview": {
+    "title": "Live-Profilvorschau",
+    "empty": "Beginne mit dem Ausfüllen – hier siehst du sofort deine öffentliche Profilvorschau.",
+    "tiles": {
+      "categories": "Kategorien",
+      "rate": "Stundensatz",
+      "availability": "Verfügbarkeit",
+      "experience": "Erfahrung",
+      "links": "Links",
+      "documents": "Dokumente",
+      "education": "Ausbildung"
+    },
+    "badges": {
+      "id": "ID",
+      "first_aid": "Erste Hilfe",
+      "police": "Polizeiliches Z."
+    },
+    "doc_rows": {
+      "first_aid": "Erste Hilfe",
+      "police": "Führungszeugnis",
+      "not_provided": "Nicht angegeben",
+      "view": "Ansehen"
+    },
+    "placeholders": {
+      "add_city": "Ort hinzufügen",
+      "new_helper": "Neuer Helfer"
+    },
+    "units": {
+      "per_hour": "€/h",
+      "min_hours": "min. {{hours}} Std",
+      "years": "Jahre"
+    }
+  },
+
+  "sections": {
+    "basic": {
+      "title": "Basisinformationen",
+      "description": "Diese Angaben erscheinen in deinem öffentlichen Profil."
+    },
+    "location": {
+      "title": "Standort"
+    },
+    "work": {
+      "title": "Arbeitspräferenzen"
+    },
+    "education": {
+      "title": "Ausbildung"
+    },
+    "verification": {
+      "title": "Verifizierung & Abzeichen",
+      "note": "Hinweis: Für Kinderbetreuung wird das erweiterte Führungszeugnis empfohlen."
+    },
+    "social": {
+      "title": "Social & Web"
+    }
+  },
+
+  "fields": {
+    "firstName": { "label": "Vorname" },
+    "lastName": { "label": "Nachname" },
+    "displayName": { "label": "Anzeigename (optional)" },
+    "orgName": { "label": "Haushalts-/Firmenname" },
+    "phone": { "label": "Telefon" },
+    "dob": { "label": "Geburtsdatum", "select_date": "Datum auswählen" },
+    "gender": {
+      "label": "Geschlecht",
+      "placeholder":"Wählen Sie Geschlecht aus"
+    },
+    "about": { "label": "Über dich" },
+    "photo": { "label": "Profilfoto", "accept": ".png,.jpeg,.jpg" },
+
+    "street": { "label": "Straße" },
+    "postcode": { "label": "PLZ" ,"placeholder": "PLZ eingeben"},
+    "city": { "label": "Stadt" },
+    "district": { "label": "Stadtteil / Kiez" },
+    "state": { "label": "Bundesland" },
+    "country": { "label": "Land" },
+
+    "lat": { "label": "Breitengrad" },
+    "lng": { "label": "Längengrad" },
+    "radius": { "label": "Einsatzradius (km)" },
+    "available_days": { "label": "Verfügbare Tage" },
+    "time_windows": { "label": "Zeitfenster" },
+
+    "categories": { "label": "Kategorien" },
+    "hourly": { "label": "Stundensatz (€)" },
+    "min_hours": { "label": "Min. Stunden pro Buchung" },
+    "fixed_price": { "label": "Pauschalpreis möglich" },
+    "languages": { "label": "Sprachen","placeholder":"Wählen Sie Sprachen aus" },
+    "work_permit": { "label": "hat eine Arbeitserlaubnis" },
+    "invoice": { "label": "Kann Rechnung ausstellen" },
+    "experience": { "label": "Jahre Berufserfahrung" },
+    "certificates": {
+      "label": "Zertifikate (durch Komma getrennt)",
+      "hint": "Mehrere Einträge mit Kommas trennen.",
+      "placeholder": "HACCP, Pflegebasiskurs…"
+    },
+
+    "edu_level": { "label": "Abschluss"},
+    "edu_field": { "label": "Fachrichtung" },
+    "edu_institution": { "label": "Institution" },
+    "edu_year": { "label": "Jahr" },
+    "edu_add": { "label": "+ Bildung hinzufügen" },
+    "remove": { "label": "Entfernen" },
+
+    "id_verified": { "label": "ID verifiziert" },
+    "first_aid_completed": { "label": "Erste-Hilfe abgeschlossen" },
+    "first_aid_provider": { "label": "Anbieter" },
+    "first_aid_id": { "label": "Zertifikatsnummer" },
+    "first_aid_completion": { "label": "Abschlussdatum" },
+    "first_aid_expiry": { "label": "Ablaufdatum (optional)" },
+    "first_aid_upload": { "label": "Nachweis hochladen", "accept": ".pdf,.doc,.docx" },
+
+    "police_has": { "label": "Führungszeugnis vorhanden" },
+    "police_level": { "label": "Art des Führungszeugnisses" },
+    "police_issue": { "label": "Ausstellungsdatum" },
+    "police_expiry": { "label": "Ablaufdatum" },
+    "police_upload": { "label": "Nachweis hochladen", "accept": ".pdf,.doc,.docx" },
+
+    "website": { "label": "Website", "placeholder": "https://…" },
+    "linkedin": { "label": "LinkedIn", "placeholder": "https://linkedin.com/in/…" },
+    "x": { "label": "X (Twitter)", "placeholder": "https://x.com/…" },
+    "instagram": { "label": "Instagram", "placeholder": "https://instagram.com/…" },
+    "facebook": { "label": "Facebook", "placeholder": "https://facebook.com/…" }
+  },
+
+  "buttons": {
+    "update": "Profil aktualisieren",
+    "select": "Auswählen",
+    "view": "Ansehen"
+  },
+
+  "errors": {
+    "email_required": "Gültige E-Mail erforderlich",
+    "first_required": "Vorname erforderlich",
+    "last_required": "Nachname erforderlich",
+    "city_required": "Stadt erforderlich",
+    "min_wage": "Stundensatz muss ≥ 12 € sein (Mindestlohn)"
+  },
+
+  "toasts": {
+    "updated_title": "Profil aktualisiert!",
+    "updated_body": ""
+  }
+}
