@@ -1,5 +1,4 @@
 "use client";
-import CreateJobForm from "@/components/job/add";
 import CreateEditJobForm from "@/components/job/create";
 import { Loader } from "@/components/ui/loader";
 import { useJob } from "@/lib/react-query/queries/useJob";
