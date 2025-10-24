@@ -104,7 +104,8 @@
       "state_required": "State is required"
     },
     "toasts": {
-      "update_success": "Location details updated!"
+      "update_success": "Location details updated!",
+      "update_failure":"Failed to update location details."
     }
   },
 
@@ -132,7 +133,8 @@
       "max_gte_min": "Maximum price must be ≥ Minimum price"
     },
     "toasts": {
-      "update_success": "Pricing details updated!"
+      "update_success": "Pricing details updated!",
+      "update_failure":"Failed to update pricing details."
     }
   },
 
@@ -155,7 +157,8 @@
       "end_after_start": "End date cannot be before start date"
     },
     "toasts": {
-      "update_success": "Work details updated!"
+      "update_success": "Work details updated!",
+      "update_failure":"Failed to update work details."
     },
     "work_mode_options": {
       "on_site": "On-site",

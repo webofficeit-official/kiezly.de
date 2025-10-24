@@ -60,15 +60,15 @@ export default function Page() {
   const validateFields = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.work_mode) newErrors.work_mode = "Work Mode is required";
+    if (!formData.work_mode) newErrors.work_mode = t("work.validation.work_mode_required");
 
-    if (!formData.starts_at) newErrors.starts_at = "Start Date is required";
+    if (!formData.starts_at) newErrors.starts_at = t("work.validation.start_required");
 
     if (formData.ends_at && formData.starts_at) {
       const start = new Date(formData.starts_at);
       const end = new Date(formData.ends_at);
       if (end < start)
-        newErrors.ends_at = "End date cannot be before start date";
+        newErrors.ends_at =  t("work.validation.end_after_start");
     }
 
     setErrors(newErrors);
@@ -90,7 +90,7 @@ export default function Page() {
     const validationErrors = validateFields();
     if (Object.keys(validationErrors).length > 0) {
       setShowErrors(true);
-      toast.error("Please fix the errors before continuing.");
+      toast.error(t("common.fix_errors"));
       return;
     }
 
@@ -114,7 +114,7 @@ export default function Page() {
             // toast.success("Work details updated successfully!");
             push(`/post-job/contact-details?slug=${slug}`);
           },
-          onError: () => toast.error("Failed to update work details."),
+          onError: () => toast.error(t("work.toasts.update_failure")),
         });
       }
     } catch (err) {

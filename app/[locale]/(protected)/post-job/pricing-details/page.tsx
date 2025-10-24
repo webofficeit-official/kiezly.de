@@ -116,14 +116,14 @@ export default function Page() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.currency || formData.currency === "")
-      newErrors.currency = "Currency is required";
+      newErrors.currency =  t("pricing.validation.currency_required");
 
     if (!formData.price_type || formData.price_type === "")
-      newErrors.price_type = "Price Type is required";
+      newErrors.price_type = t("pricing.validation.price_type_required");
 
     if (formData.price_type === "fixed") {
       if (!formData.price_value || Number(formData.price_value) <= 0)
-        newErrors.price_value = "Fixed price must be greater than 0";
+        newErrors.price_value = t("pricing.validation.fixed_gt_zero");
     }
 
     if (formData.price_type === "range") {
@@ -132,14 +132,14 @@ export default function Page() {
         formData.price_min === undefined ||
         Number(formData.price_min) < 0
       )
-        newErrors.price_min = "Minimum price must be ≥ 0";
+        newErrors.price_min =  t("pricing.validation.min_gte_zero");
 
       if (
         formData.price_max === "" ||
         formData.price_max === undefined ||
         Number(formData.price_max) < Number(formData.price_min)
       )
-        newErrors.price_max = "Maximum price must be ≥ Minimum price";
+        newErrors.price_max = t("pricing.validation.max_gte_min");
     }
 
     setErrors(newErrors);
@@ -167,7 +167,7 @@ export default function Page() {
     const newErrors = validateFields();
     if (Object.keys(newErrors).length > 0) {
       setShowErrors(true);
-      toast.error("Please fix the errors before continuing.");
+      toast.error(t("common.fix_errors"));
       return;
     }
 
@@ -187,7 +187,7 @@ export default function Page() {
             // toast.success("Pricing details updated successfully!");
             push(`/post-job/work-details?slug=${slug}`);
           },
-          onError: () => toast.error("Failed to update pricing details."),
+          onError: () => toast.error(t("pricing.toasts.update_failure")),
         });
       }
     } catch (err) {

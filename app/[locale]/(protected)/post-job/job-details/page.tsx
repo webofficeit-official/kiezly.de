@@ -72,10 +72,10 @@ export default function Page() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.description || formData.description.trim() === "") {
-      newErrors.description = "Job description is required.";
+      newErrors.description = t("details.validation.description_required");
     } else {
       const text = formData.description.replace(/<(.|\n)*?>/g, "").trim();
-      if (!text) newErrors.description = "Job description cannot be empty.";
+      if (!text) newErrors.description =  t("details.validation.description_empty");
     }
 
     setErrors(newErrors);
@@ -98,7 +98,7 @@ export default function Page() {
     const validationErrors = validateStep();
     if (Object.keys(validationErrors).length > 0) {
       setShowErrors(true);
-      toast.error("Please fix the required fields.");
+      toast.error(t("common.fix_errors"));
       return;
     }
 

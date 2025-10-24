@@ -42,7 +42,7 @@
     "toasts": {
       "create_success": "Job erfolgreich erstellt!",
       "update_success": "Job erfolgreich aktualisiert!",
-      "failure": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      "failure": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
     }
   },
 
@@ -64,8 +64,8 @@
       "tasks": "Schreiben Sie hier die Aufgaben…"
     },
     "validation": {
-      "description_required": "Die Jobbeschreibung ist erforderlich.",
-      "description_empty": "Die Jobbeschreibung darf nicht leer sein."
+      "description_required": "Eine Stellenbeschreibung ist erforderlich.",
+      "description_empty": "Die Stellenbeschreibung darf nicht leer sein."
     },
     "toasts": {
       "update_success": "Jobdetails aktualisiert!"
@@ -104,7 +104,8 @@
       "state_required": "Bundesland ist erforderlich"
     },
     "toasts": {
-      "update_success": "Standortdetails aktualisiert!"
+      "update_success": "Standortdetails aktualisiert!",
+      "update_failure":"Standortdetails konnten nicht aktualisiert werden."
     }
   },
 
@@ -128,11 +129,12 @@
       "currency_required": "Währung ist erforderlich",
       "price_type_required": "Preistyp ist erforderlich",
       "fixed_gt_zero": "Der Festpreis muss größer als 0 sein",
-      "min_gte_zero": "Der Mindestpreis muss ≥ 0 sein",
-      "max_gte_min": "Der Höchstpreis muss ≥ Mindestpreis sein"
+      "min_gte_zero": "Mindestpreis muss ≥ 0 sein",
+      "max_gte_min": "Der Höchstpreis muss ≥ dem Mindestpreis sein."
     },
     "toasts": {
-      "update_success": "Preisangaben aktualisiert!"
+      "update_success": "Preisangaben aktualisiert!",
+      "update_failure":"Aktualisierung der Preisdetails fehlgeschlagen."
     }
   },
 
@@ -155,7 +157,8 @@
       "end_after_start": "Das Enddatum darf nicht vor dem Startdatum liegen"
     },
     "toasts": {
-      "update_success": "Arbeitsdetails aktualisiert!"
+      "update_success": "Arbeitsdetails aktualisiert!",
+      "update_failure":"Die Arbeitsdetails konnten nicht aktualisiert werden."
     },
     "work_mode_options": {
       "on_site": "Vor Ort",
@@ -194,7 +197,7 @@
     },
     "toasts": {
       "save_success": "Kontaktdaten erfolgreich gespeichert!",
-      "save_failure": "Kontaktdaten konnten nicht gespeichert werden."
+      "save_failure": "Das Speichern der Kontaktdaten ist fehlgeschlagen."
     }
   }
 }

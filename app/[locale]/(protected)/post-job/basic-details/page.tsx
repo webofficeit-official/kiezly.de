@@ -97,17 +97,17 @@ export default function Page() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title || formData.title.trim() === "") {
-      newErrors.title = "Title is required";
+      newErrors.title = t("basic.validation.title_required");
     } else if (formData.title.length < 8) {
-      newErrors.title = "Title must be at least 8 characters long";
+      newErrors.title = t("basic.validation.title_min");
     }
 
     if (!formData.slug || formData.slug.trim() === "") {
-      newErrors.slug = "Slug is required";
+      newErrors.slug = t("basic.validation.slug_required");
     }
 
     if (!formData.category_id || formData.category_id === "") {
-      newErrors.category_id = "Job category is required";
+      newErrors.category_id = t("basic.validation.category_required");
     }
 
     setErrors(newErrors);
@@ -123,18 +123,18 @@ export default function Page() {
       delete updated[field];
 
       if (field === "title") {
-        if (!value || value.trim() === "") updated.title = "Title is required";
+        if (!value || value.trim() === "") updated.title = t("basic.validation.title_required");
         else if (value.length < 8)
-          updated.title = "Title must be at least 8 characters long";
+          updated.title = t("basic.validation.title_min");
       }
 
       if (field === "slug") {
-        if (!value || value.trim() === "") updated.slug = "Slug is required";
+        if (!value || value.trim() === "") updated.slug = t("basic.validation.slug_required");
       }
 
       if (field === "category_id") {
         if (!value || value === "")
-          updated.category_id = "Job category is required";
+          updated.category_id = t("basic.validation.category_required");
       }
 
       return updated;
@@ -164,7 +164,7 @@ export default function Page() {
   const handleNext = async () => {
     const newErrors = validateStep();
     if (Object.keys(newErrors).length > 0) {
-      toast.error("Please fix the errors before continuing.");
+      toast.error(t("common.fix_errors"));
       setShowErrors(true);
       return;
     }
@@ -206,7 +206,7 @@ export default function Page() {
       }
     } catch (err) {
       console.error("Job creation/update failed:", err);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("basic.toasts.failure"));
     }
   };
 

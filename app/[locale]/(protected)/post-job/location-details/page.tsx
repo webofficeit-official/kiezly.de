@@ -99,12 +99,12 @@ export default function Page() {
   /* -------------------------- Validation -------------------------- */
   const validateFields = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.country_id) newErrors.country_id = "Country is required";
+    if (!formData.country_id) newErrors.country_id =  t("location.validation.country_required");
     if (!formData.postal_code?.trim())
-      newErrors.postal_code = "Postal Code is required";
-    if (!formData.street?.trim()) newErrors.street = "Street is required";
-    if (!formData.city?.trim()) newErrors.city = "City is required";
-    if (!formData.state?.trim()) newErrors.state = "State is required";
+      newErrors.postal_code = t("location.validation.postal_code_required");
+    if (!formData.street?.trim()) newErrors.street =  t("location.validation.street_required");
+    if (!formData.city?.trim()) newErrors.city = t("location.validation.city_required");
+    if (!formData.state?.trim()) newErrors.state = t("location.validation.state_required");
     setErrors(newErrors);
     return newErrors;
   };
@@ -201,7 +201,7 @@ export default function Page() {
     const newErrors = validateFields();
     if (Object.keys(newErrors).length > 0) {
       setShowErrors(true);
-      toast.error("Please fill all required fields.");
+      toast.error(t("common.fix_errors"));
       return;
     }
 
@@ -222,7 +222,7 @@ export default function Page() {
           onSuccess: () => {
             push(`/post-job/pricing-details?slug=${slug}`);
           },
-          onError: () => toast.error("Failed to update location details."),
+          onError: () => toast.error(t("location.toasts.update_failure")),
         });
       }
     } catch (err) {

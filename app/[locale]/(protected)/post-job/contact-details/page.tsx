@@ -56,40 +56,40 @@ export default function Page() {
   const validateFields = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!contactMethod) newErrors.contact_method = "Contact Method is required";
+    if (!contactMethod) newErrors.contact_method = t("contact.validation.method_required");
 
     if (
       ["email_relay", "direct_email"].includes(contactMethod) &&
       !formData.contact_email?.trim()
     ) {
-      newErrors.contact_email = "Email is required.";
+      newErrors.contact_email = t("contact.validation.email_required");
     } else if (
       ["email_relay", "direct_email"].includes(contactMethod) &&
       formData.contact_email
     ) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.contact_email)) {
-        newErrors.contact_email = "Invalid email format.";
+        newErrors.contact_email = t("contact.validation.email_invalid");
       }
     }
 
     if (contactMethod === "phone" && !formData.contact_phone?.trim()) {
-      newErrors.contact_phone = "Phone number is required.";
+      newErrors.contact_phone = t("contact.validation.phone_required");
     }
 
     if (contactMethod === "external_link") {
       if (!formData.contact_link?.trim()) {
-        newErrors.contact_link = "External link is required.";
+        newErrors.contact_link = t("contact.validation.link_required");
       } else {
         try {
           const url = new URL(formData.contact_link.trim());
           // allow only http and https
           if (!["http:", "https:"].includes(url.protocol)) {
-            newErrors.contact_link = "Only HTTP or HTTPS links are allowed.";
+            newErrors.contact_link = t("contact.validation.link_protocol");
           }
         } catch {
           newErrors.contact_link =
-            "Please enter a valid URL (e.g. https://example.com)";
+            t("contact.validation.link_invalid");
         }
       }
     }
@@ -113,7 +113,7 @@ export default function Page() {
     const validationErrors = validateFields();
     if (Object.keys(validationErrors).length > 0) {
       setShowErrors(true);
-      toast.error("Please fix the highlighted errors.");
+      toast.error(t("common.fix_errors"));
       return;
     }
 
@@ -129,10 +129,10 @@ export default function Page() {
       if (jobId) {
         await updateJobMutation.mutateAsync(payload, {
           onSuccess: () => {
-            toast.success("Contact details saved successfully!");
+            toast.success(t("contact.toasts.save_success"));
             push(`/jobs/${slug}`); // redirect to job page or summary
           },
-          onError: () => toast.error("Failed to save contact details."),
+          onError: () => toast.error(t("contact.toasts.save_failure")),
         });
       }
     } catch (err) {
