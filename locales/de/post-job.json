@@ -1,13 +1,16 @@
 {
   "page_title": "Minijob veröffentlichen",
   "common": {
-    "next": "Weiter",
-    "prev": "Zurück",
+    "next": "Nächste",
+    "prev": "Vorher",
     "save": "Speichern",
-    "loading": "Lädt…",
-    "fix_errors": "Bitte beheben Sie die markierten Felder.",
-    "creating": "Wird erstellt…",
-    "updating": "Wird aktualisiert…"
+    "loading": "Wird geladen",
+    "fix_errors": "Bitte korrigieren Sie die markierten Felder.",
+    "creating": "Wird erstellt...",
+    "updating": "Wird aktualisiert…",
+    "saving":"Wird gespeichert…",
+    "save_changes":"Änderungen speichern",
+    "create_job":"Job erstellen"
   },
 
   "basic": {
