@@ -58,7 +58,7 @@ export default function Page() {
     description: job.description || "",
     tasks: job.tasks || "",
     requirements: job.requirements || "",
-    languages: job.languages?.map((t: any) => String(t.id)) || [],
+    languages: job.job_languages?.map((t: any) => String(t.id)) || []
   });
   /* ----------------------------- Options ----------------------------- */
   const languageOptions =
@@ -67,6 +67,9 @@ export default function Page() {
       value: String(lang.id),
     })) || [];
 
+  const selectedLanguageOptions = languageOptions.filter((opt) =>
+    (formData?.languages || []).map(String).includes(opt.value)
+  );
   /* ----------------------------- Validation ----------------------------- */
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
@@ -75,7 +78,8 @@ export default function Page() {
       newErrors.description = t("details.validation.description_required");
     } else {
       const text = formData.description.replace(/<(.|\n)*?>/g, "").trim();
-      if (!text) newErrors.description =  t("details.validation.description_empty");
+      if (!text)
+        newErrors.description = t("details.validation.description_empty");
     }
 
     setErrors(newErrors);
@@ -119,8 +123,6 @@ export default function Page() {
           },
           onError: () => toast.error("Failed to update job details."),
         });
-      } else {
-        push(`/post-job/location-details?slug=${formData.slug || slug}`);
       }
     } catch (err) {
       console.error("Error updating job details:", err);
@@ -206,7 +208,7 @@ export default function Page() {
               <div className="mt-5 space-y-4">
                 {/* Description */}
                 <WizardRichText
-                   label={t("details.fields.description")}
+                  label={t("details.fields.description")}
                   value={formData?.description || ""}
                   onChange={(v) => handleFieldChange("description", v)}
                   placeholder={t("details.placeholders.description")}
@@ -216,7 +218,7 @@ export default function Page() {
 
                 {/* Languages */}
                 <WizardMultiSelect
-                 label={t("details.fields.languages")}
+                  label={t("details.fields.languages")}
                   values={formData?.languages || []}
                   onChange={(v) => updateForm({ languages: v })}
                   options={languageOptions || []}
@@ -234,7 +236,7 @@ export default function Page() {
                     label={t("details.fields.tasks")}
                     value={formData?.tasks || ""}
                     onChange={(v) => updateForm({ tasks: v })}
-                     placeholder={t("details.placeholders.tasks")}
+                    placeholder={t("details.placeholders.tasks")}
                   />
                 </div>
 
