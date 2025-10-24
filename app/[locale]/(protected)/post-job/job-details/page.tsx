@@ -206,17 +206,17 @@ export default function Page() {
               <div className="mt-5 space-y-4">
                 {/* Description */}
                 <WizardRichText
-                  label="Job Description"
+                   label={t("details.fields.description")}
                   value={formData?.description || ""}
                   onChange={(v) => handleFieldChange("description", v)}
-                  placeholder="Write the job description here..."
+                  placeholder={t("details.placeholders.description")}
                   required
                   error={showErrors ? errors.description : ""}
                 />
 
                 {/* Languages */}
                 <WizardMultiSelect
-                  label="Languages"
+                 label={t("details.fields.languages")}
                   values={formData?.languages || []}
                   onChange={(v) => updateForm({ languages: v })}
                   options={languageOptions || []}
@@ -225,16 +225,16 @@ export default function Page() {
                 {/* Requirements & Tasks */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <WizardRichText
-                    label="Requirements"
+                    label={t("details.fields.requirements")}
                     value={formData?.requirements || ""}
                     onChange={(v) => updateForm({ requirements: v })}
-                    placeholder="Write the requirements here..."
+                    placeholder={t("details.placeholders.requirements")}
                   />
                   <WizardRichText
-                    label="Tasks"
+                    label={t("details.fields.tasks")}
                     value={formData?.tasks || ""}
                     onChange={(v) => updateForm({ tasks: v })}
-                    placeholder="Write the tasks here..."
+                     placeholder={t("details.placeholders.tasks")}
                   />
                 </div>
 

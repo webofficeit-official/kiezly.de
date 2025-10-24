@@ -216,7 +216,7 @@ export default function Page() {
                 <div className="mt-5">
                   <div className="flex flex-col md:flex-row gap-3">
                     <WizardSelect
-                      label="Contact Method"
+                      label={t("contact.fields.contact_method")}
                       value={contactMethod}
                       onChange={(e) => {
                         setContactMethod(e);
@@ -236,7 +236,7 @@ export default function Page() {
                     {(contactMethod === "email_relay" ||
                       contactMethod === "direct_email") && (
                       <WizardInput
-                        label="Email"
+                        label={t("contact.fields.email")}
                         placeholder="you@example.com"
                         value={formData.contact_email || ""}
                         onChange={(v) => handleFieldChange("contact_email", v)}
@@ -247,7 +247,7 @@ export default function Page() {
 
                     {contactMethod === "phone" && (
                       <WizardInput
-                        label="Phone"
+                        label={t("contact.fields.phone")}
                         placeholder="+49 123 456 7890"
                         value={formData.contact_phone || ""}
                         onChange={(v) => handleFieldChange("contact_phone", v)}
@@ -258,7 +258,7 @@ export default function Page() {
 
                     {contactMethod === "external_link" && (
                       <WizardInput
-                        label="External Link"
+                       label={t("contact.fields.external_link")}
                         placeholder="https://example.com"
                         value={formData.contact_link || ""}
                         onChange={(v) => handleFieldChange("contact_link", v)}

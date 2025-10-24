@@ -211,7 +211,7 @@ export default function Page() {
                 {/* Work Mode */}
                 <div className="flex flex-col md:flex-row">
                   <WizardSelect
-                    label="Work Mode"
+                    label={t("work.fields.work_mode")}
                     value={formData.work_mode || ""}
                     onChange={(v) => handleFieldChange("work_mode", v)}
                     options={workModeOptions}
@@ -223,14 +223,14 @@ export default function Page() {
                 {/* Dates */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <WizardDateInput
-                    label="Start Date"
+                    label={t("work.fields.start_date")}
                     value={formData.starts_at || ""}
                     onChange={(v) => handleFieldChange("starts_at", v)}
                     required
                     error={showErrors ? errors.starts_at : ""}
                   />
                   <WizardDateInput
-                    label="End Date"
+                    label={t("work.fields.end_date")}
                     value={formData.ends_at || ""}
                     onChange={(v) => handleFieldChange("ends_at", v)}
                     required={false}
@@ -241,12 +241,12 @@ export default function Page() {
                 {/* Switches */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <WizardSwitch
-                    label="First Aid Verified"
+                    label={t("work.fields.first_aid")}
                     checked={!!formData.first_aid_verified}
                     onChange={(v) => handleFieldChange("first_aid_verified", v)}
                   />
                   <WizardSwitch
-                    label="Police Verified"
+                    label={t("work.fields.police")}
                     checked={!!formData.police_verified}
                     onChange={(v) => handleFieldChange("police_verified", v)}
                   />

@@ -312,7 +312,7 @@ export default function Page() {
                 {/* Country & Postal Code */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <WizardSelectSearch
-                    label="Country"
+                    label={t("location.fields.country")}
                     value={formData.country_id || ""}
                     onChange={handleCountryChange}
                     options={countryOptions}
@@ -321,8 +321,8 @@ export default function Page() {
                   />
 
                   <WizardInputSearch
-                    label="Postal Code"
-                    placeholder="Type postal code"
+                    label={t("location.fields.postal_code")}
+                    placeholder={t("location.placeholders.postal_code")}
                     value={formData.postal_code || ""}
                     onChangeValue={(v) => handleFieldChange("postal_code", v)}
                     fetchOptions={fetchZipOptions}
@@ -336,24 +336,24 @@ export default function Page() {
                 {/* Street, City, State */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <WizardInput
-                    label="Street"
-                    placeholder="Essen"
+                    label={t("location.fields.street")}
+                    placeholder={t("location.placeholders.street")}
                     value={formData.street || ""}
                     onChange={(v) => handleFieldChange("street", v)}
                     required
                     error={showErrors ? errors.street : ""}
                   />
                   <WizardInput
-                    label="City"
-                    placeholder="Berlin"
+                    label={t("location.fields.city")}
+                    placeholder={t("location.placeholders.city")}
                     value={formData.city || ""}
                     onChange={(v) => handleFieldChange("city", v)}
                     required
                     error={showErrors ? errors.city : ""}
                   />
                   <WizardInput
-                    label="State"
-                    placeholder="Nordrhein-Westfalen"
+                    label={t("location.fields.state")}
+                    placeholder={t("location.placeholders.state")}
                     value={formData.state || ""}
                     onChange={(v) => handleFieldChange("state", v)}
                     required
@@ -364,13 +364,13 @@ export default function Page() {
                 {/* Latitude & Longitude */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <WizardInput
-                    label="Latitude"
+                    label={t("location.fields.latitude")}
                     placeholder="51.4535"
                     value={formData.lat || ""}
                     onChange={(v) => updateForm({ lat: v })}
                   />
                   <WizardInput
-                    label="Longitude"
+                    label={t("location.fields.longitude")}
                     placeholder="7.0102"
                     value={formData.lng || ""}
                     onChange={(v) => updateForm({ lng: v })}

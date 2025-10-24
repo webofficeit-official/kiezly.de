@@ -290,7 +290,7 @@ export default function Page() {
                 {/* Currency + Price Type */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <WizardSelect
-                    label="Currency"
+                    label={t("pricing.fields.currency")}
                     value={formData.currency || ""}
                     onChange={(v) => handleFieldChange("currency", v)}
                     options={currencyOptions}
@@ -299,7 +299,7 @@ export default function Page() {
                   />
 
                   <WizardSelect
-                    label="Price Type"
+                     label={t("pricing.fields.price_type")}
                     value={formData.price_type || "fixed"}
                     onChange={(v) => handlePriceTypeChange(v)}
                     options={[
@@ -315,7 +315,7 @@ export default function Page() {
                 {isFixed && (
                   <div className="flex flex-col md:flex-row">
                     <WizardInput
-                      label={`Fixed Price (${symbol})`}
+                      label={`${t("pricing.fields.price_value")} (${symbol})`}
                       placeholder="50"
                       value={formData.price_value || ""}
                       onChange={(v) => handleFieldChange("price_value", v)}
@@ -329,7 +329,7 @@ export default function Page() {
                 {isRange && (
                   <div className="flex flex-col md:flex-row gap-3">
                     <WizardInput
-                      label={`Minimum Price (${symbol})`}
+                      label={`${t("pricing.fields.price_min")} (${symbol})`}
                       placeholder="10"
                       value={formData.price_min || ""}
                       onChange={(v) => handleFieldChange("price_min", v)}
@@ -337,7 +337,7 @@ export default function Page() {
                       error={showErrors ? errors.price_min : ""}
                     />
                     <WizardInput
-                      label={`Maximum Price (${symbol})`}
+                      label={`${t("pricing.fields.price_max")} (${symbol})`}
                       placeholder="100"
                       value={formData.price_max || ""}
                       onChange={(v) => handleFieldChange("price_max", v)}

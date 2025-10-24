@@ -179,9 +179,6 @@
       "external_link": "External Link"
     },
     "placeholders": {
-      "email": "you@example.com",
-      "phone": "+49 123 456 7890",
-      "link": "https://example.com"
     },
     "validation": {
       "method_required": "Contact Method is required",

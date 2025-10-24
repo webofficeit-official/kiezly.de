@@ -21,14 +21,14 @@
       "slug": "Slug",
       "category": "Jobkategorie",
       "tags": "Tags",
-      "job_type": "Jobart",
-      "experience": "Erfahrungsstufe"
+      "job_type": "Jobtyp",
+      "experience": "Erfahrungsniveau"
     },
     "helpers": {
-      "slug_autogen": "↻ Slug automatisch erzeugen",
-      "title_placeholder": "Babysitting-Job in Berlin",
+      "slug_autogen": "↻ Slug automatisch generieren",
+      "title_placeholder": "Babysitter-Job in Berlin",
       "subtitle_placeholder": "Kurze Beschreibung",
-      "slug_placeholder": "babysitting-job-in-berlin"
+      "slug_placeholder": "babysitter-job-in-berlin"
     },
     "validation": {
       "title_required": "Titel ist erforderlich",
@@ -50,13 +50,13 @@
       "description":"Geben Sie detaillierte Informationen zum Job an"
     },
     "fields": {
-      "description": "Jobbeschreibung",
+      "description": "Stellenbeschreibung",
       "requirements": "Anforderungen",
       "tasks": "Aufgaben",
       "languages": "Sprachen"
     },
     "placeholders": {
-      "description": "Schreiben Sie hier die Jobbeschreibung…",
+      "description": "Schreiben Sie hier die Stellenbeschreibung…",
       "requirements": "Schreiben Sie hier die Anforderungen…",
       "tasks": "Schreiben Sie hier die Aufgaben…"
     },
@@ -85,7 +85,7 @@
       "longitude": "Längengrad"
     },
     "placeholders": {
-      "postal_code": "PLZ eingeben",
+      "postal_code": "Geben Sie die Postleitzahl ein",
       "street": "Essen",
       "city": "Berlin",
       "state": "Nordrhein-Westfalen",
@@ -112,10 +112,10 @@
     },
     "fields": {
       "currency": "Währung",
-      "price_type": "Preistyp",
+      "price_type": "Preisart",
       "price_value": "Festpreis",
       "price_min": "Mindestpreis",
-      "price_max": "Höchstpreis"
+      "price_max": "Maximaler Preis"
     },
     "price_type_options": {
       "fixed": "Fest",
@@ -143,7 +143,7 @@
       "work_mode": "Arbeitsmodus",
       "start_date": "Startdatum",
       "end_date": "Enddatum",
-      "first_aid": "Erste-Hilfe nachgewiesen",
+      "first_aid": "Erste Hilfe verifiziert",
       "police": "Polizeiliches Führungszeugnis"
     },
     "validation": {
@@ -179,9 +179,6 @@
       "external_link": "Externer Link"
     },
     "placeholders": {
-      "email": "sie@example.com",
-      "phone": "+49 123 456 7890",
-      "link": "https://beispiel.de"
     },
     "validation": {
       "method_required": "Kontaktmethode ist erforderlich",

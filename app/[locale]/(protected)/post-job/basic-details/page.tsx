@@ -311,8 +311,8 @@ export default function Page() {
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="flex-1">
                     <WizardInput
-                      label="Title"
-                      placeholder="Babysitting job in Berlin"
+                      label={t("basic.fields.title")}
+                      placeholder={t("basic.helpers.title_placeholder")}
                       value={formData?.title || ""}
                       onChange={handleTitleChange}
                       error={showErrors ? errors.title : ""}
@@ -321,8 +321,8 @@ export default function Page() {
                   </div>
                   <div className="flex-1">
                     <WizardInput
-                      label="Subtitle"
-                      placeholder="Short description"
+                      label={t("basic.fields.subtitle")}
+                      placeholder={t("basic.helpers.subtitle_placeholder")}
                       value={formData?.subtitle || ""}
                       onChange={(v) => updateForm({ subtitle: v })}
                     />
@@ -332,8 +332,8 @@ export default function Page() {
                 {/* Slug */}
                 <div>
                   <WizardInput
-                    label="Slug"
-                    placeholder="babysitting-job-in-berlin"
+                    label={t("basic.fields.slug")}
+                    placeholder={t("basic.helpers.slug_placeholder")}
                     value={formData?.slug || ""}
                     onChange={(v) => {
                       setSlugEdited(true);
@@ -349,7 +349,7 @@ export default function Page() {
                       onClick={handleSlugAutoGenerate}
                       className="text-gray-600 text-sm underline mt-1 hover:text-gray-900"
                     >
-                      ↻ Slug Auto-generate
+                     {t("basic.helpers.slug_autogen")}
                     </button>
                   )}
                 </div>
@@ -358,7 +358,7 @@ export default function Page() {
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="flex-1">
                     <WizardSelect
-                      label="Job Category"
+                       label={t("basic.fields.category")}
                       value={formData?.category_id || ""}
                       onChange={(v) => handleFieldChange("category_id", v)}
                       options={categoryOptions || []}
@@ -368,7 +368,7 @@ export default function Page() {
                   </div>
                   <div className="flex-1">
                     <WizardMultiSelect
-                      label="Tags"
+                      label={t("basic.fields.tags")}
                       values={formData?.tag_ids || []}
                       onChange={(v) => updateForm({ tag_ids: v })}
                       options={tagOptions || []}
@@ -380,7 +380,7 @@ export default function Page() {
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="flex-1">
                     <WizardMultiSelect
-                      label="Job Type"
+                     label={t("basic.fields.job_type")}
                       values={
                         Array.isArray(formData?.job_type)
                           ? formData.job_type
@@ -392,7 +392,7 @@ export default function Page() {
                   </div>
                   <div className="flex-1">
                     <WizardMultiSelect
-                      label="Experience Level"
+                      label={t("basic.fields.experience")}
                       values={
                         Array.isArray(formData?.job_experience)
                           ? formData.job_experience
