@@ -6,12 +6,14 @@ import { CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useVerifyEmail, VerifyEmailResponse } from "@/lib/react-query/queries/user/user-verify";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export default function VerifyEmailPage() {
     const router = useRouter()
+    const { push } = useLocalizedRouter();
     const { id } = useParams();
     const searchParams = useSearchParams();
     const token = searchParams.get("token") || "";
@@ -36,7 +38,7 @@ export default function VerifyEmailPage() {
 
             // Redirect after 2 seconds
             const timer = setTimeout(() => {
-                router.push("/signin");
+                push("/signin");
             }, 2000);
 
             return () => clearTimeout(timer);

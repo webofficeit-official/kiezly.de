@@ -8,6 +8,7 @@ import { Bookmark, BookmarkCheck, Eye } from "lucide-react";
 import { useSavedJobs, useUnsaveJob } from "@/lib/react-query/queries/useJob";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { formatDate } from "date-fns";
+import { useT } from "@/app/[locale]/layout";
 
 export type Status = "draft" | "pending_review" | "open" | "closed" | "rejected" | "expired" | "saved";
 
@@ -64,6 +65,7 @@ export default function SavedJobs({
 }) {
     const [savedJobs, setSavedJobs] = useState([]);
     const { user } = useAuth();
+    const t = useT('jobs');
 
 
 
@@ -110,7 +112,7 @@ export default function SavedJobs({
             <main className="max-w-6xl mx-auto px-4 py-6 gap-6">
                 <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
                     <h2 className="text-lg font-semibold">
-                        Saved Jobs ({pageSlice.length})
+                        {t("saved.title")} ({pageSlice.length})
                     </h2>
                 </div>
             </main>
@@ -136,8 +138,8 @@ export default function SavedJobs({
                                             <Button
                                                 variant="outline"
                                                 className="text-green-600 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition"
-                                                onClick={(e) =>{
-                                                      e.stopPropagation();
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     handleUnSaveJob(job.id)
                                                 }}
                                             >
@@ -179,7 +181,7 @@ export default function SavedJobs({
                                                 ? `${job.currency} ${job.price_min} – ${job.price_max}`
                                                 : job?.price_value
                                                     ? `${job.currency} ${job.price_value}`
-                                                    : "Not specified"}
+                                                    : t("saved.not-specified")}
                                             {job?.price_type && (
                                                 <span className="text-gray-500 text-xs ml-1">
                                                     / {job.price_type}
@@ -188,7 +190,7 @@ export default function SavedJobs({
                                         </p>
                                         {job?.distance && (
                                             <p className="text-gray-500 text-xs mt-1">
-                                                {(job.distance / 1000).toFixed(2)} km away
+                                                {t("saved.away", { distance: (job.distance / 1000).toFixed(2)})}
                                             </p>
                                         )}
                                         <p className="text-gray-500 text-xs mt-1">
@@ -200,14 +202,14 @@ export default function SavedJobs({
                                         className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
                                         onClick={() => window.location.href = `/jobs/${job.slug}`}
                                     >
-                                        View
+                                        {t("saved.view")}
                                     </button>
                                 </div>
                             </article>
                         ))}
                         {pageSlice.length === 0 && (
                             <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-                                No jobs match your filters.
+                                {t("saved.no-jobs")}
                             </div>
                         )}
                     </div>

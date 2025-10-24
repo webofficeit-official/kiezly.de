@@ -1,0 +1,147 @@
+{
+  "title": "My Profile",
+  "preview": {
+    "title": "Live profile preview",
+    "empty": "Start typing in the form to see your live public profile preview here.",
+    "tiles": {
+      "categories": "Categories",
+      "rate": "Rate",
+      "availability": "Availability",
+      "experience": "Experience",
+      "links": "Links",
+      "documents": "Documents",
+      "education": "Education"
+    },
+    "badges": {
+      "id": "ID",
+      "first_aid": "First Aid",
+      "police": "Police"
+    },
+    "doc_rows": {
+      "first_aid": "First Aid",
+      "police": "Police certificate",
+      "not_provided": "Not provided",
+      "view": "View"
+    },
+    "placeholders": {
+      "add_city": "Add your city",
+      "new_helper": "New helper"
+    },
+    "units": {
+      "per_hour": "€/h",
+      "min_hours": "min {{hours}} h",
+      "years": "years"
+    }
+  },
+
+  "sections": {
+    "basic": {
+      "title": "Basic information",
+      "description": "This appears on your public profile."
+    },
+    "location": {
+      "title": "Location"
+    },
+    "work": {
+      "title": "Work preferences"
+    },
+    "education": {
+      "title": "Education"
+    },
+    "verification": {
+      "title": "Verification & badges",
+      "note": "Note: For childcare, the enhanced police certificate (Erweitertes Führungszeugnis) is recommended."
+    },
+    "social": {
+      "title": "Social & web"
+    }
+  },
+
+  "fields": {
+    "firstName": { "label": "First name" },
+    "lastName": { "label": "Last name" },
+    "displayName": { "label": "Display name (optional)" },
+    "orgName": { "label": "Household/Company name" },
+    "phone": { "label": "Phone" },
+    "dob": { "label": "Date of birth", "select_date": "Select date" },
+    "gender": {
+      "label": "Gender",
+      "placeholder":"Select gender"
+    },
+    "about": { "label": "About you" },
+    "photo": { "label": "Profile photo", "accept": ".png,.jpeg,.jpg" },
+
+    "street": { "label": "Street" },
+    "postcode": { "label": "Postcode" ,"placeholder": "Enter ZIP code"},
+    "city": { "label": "City" },
+    "district": { "label": "District / Kiez" },
+    "state": { "label": "State" },
+    "country": { "label": "Country" },
+
+    "lat": { "label": "Latitude" },
+    "lng": { "label": "Longitude" },
+    "radius": { "label": "Service radius (km)" },
+    "available_days": { "label": "Available days" },
+    "time_windows": { "label": "Time windows" },
+
+    "categories": { "label": "Categories" },
+    "hourly": { "label": "Hourly rate (€)" },
+    "min_hours": { "label": "Min hours per booking" },
+    "fixed_price": { "label": "Fixed price available" },
+    "languages": { "label": "Languages" ,"placeholder":"Select languages"},
+    "work_permit": { "label": "Has work permit" },
+    "invoice": { "label": "Can issue invoice" },
+    "experience": { "label": "Years of experience" },
+    "certificates": {
+      "label": "Certificates (comma separated)",
+      "hint": "Use commas to separate multiple entries.",
+      "placeholder": "HACCP, Pflegebasiskurs…"
+    },
+
+    "edu_level": { "label": "Level" },
+    "edu_field": { "label": "Field of study" },
+    "edu_institution": { "label": "Institution" },
+    "edu_year": { "label": "Year" },
+    "edu_add": { "label": "+ Add education" },
+    "remove": { "label": "Remove" },
+
+    "id_verified": { "label": "ID verified" },
+    "first_aid_completed": { "label": "First Aid completed" },
+    "first_aid_provider": { "label": "Provider" },
+    "first_aid_id": { "label": "Certificate ID" },
+    "first_aid_completion": { "label": "Completion date" },
+    "first_aid_expiry": { "label": "Expiry date (optional)" },
+    "first_aid_upload": { "label": "Proof file Upload", "accept": ".pdf,.doc,.docx" },
+
+    "police_has": { "label": "Police certificate available" },
+    "police_level": { "label": "Police certificate level"},
+    "police_issue": { "label": "Issue date" },
+    "police_expiry": { "label": "Expiry date" },
+    "police_upload": { "label": "Proof file Upload", "accept": ".pdf,.doc,.docx" },
+
+    "website": { "label": "Website", "placeholder": "https://…" },
+    "linkedin": { "label": "LinkedIn", "placeholder": "https://linkedin.com/in/…" },
+    "x": { "label": "X (Twitter)", "placeholder": "https://x.com/…" },
+    "instagram": { "label": "Instagram", "placeholder": "https://instagram.com/…" },
+    "facebook": { "label": "Facebook", "placeholder": "https://facebook.com/…" }
+  },
+
+  "buttons": {
+    "update": "Update account",
+    "select": "Select",
+    "view": "View"
+  },
+
+  "errors": {
+    "email_required": "Valid email required",
+    "first_required": "First name required",
+    "last_required": "Last name required",
+    "city_required": "City required",
+    "min_wage": "Hourly rate must be ≥ 12 € (min wage)"
+  },
+
+  "toasts": {
+    "updated_title": "Profile Updated!",
+    "updated_body": ""
+  }
+}

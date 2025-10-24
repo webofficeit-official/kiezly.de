@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import Switch from "../shared-ui/switch/switch";
 import { useZipcodes } from "@/lib/react-query/queries/collection";
 import { DynamicAutocomplete } from "../shared-ui/auto-complete/dynamic-auto-complete";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 
 /* ----------------------------- Type Definitions ---------------------------- */
@@ -588,6 +589,7 @@ function OnboardingForm({ mode, initialData, collections, countries, refetchJob 
     const debouncedTitle = useDebounce(titleValue, 400); // wait 400ms after typing
 
     const router = useRouter()
+    const { push } = useLocalizedRouter();
     const createJobMutation = useCreateJob();
     const generateSlugMutation = useGenerateSlug();
 
@@ -998,7 +1000,7 @@ function OnboardingForm({ mode, initialData, collections, countries, refetchJob 
                     setShowErrors(false);
                     setFormSubmitted(true); //  final success
                     sessionStorage.removeItem("currentStep")
-                    router.push(`/jobs/${data?.job?.slug}`)
+                    push(`/jobs/${data?.job?.slug}`)
                 },
                 onError: (err) => toast.error(err?.message || "Failed to update job"),
             });

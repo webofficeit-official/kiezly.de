@@ -1,4 +1,3 @@
-import ClientLayout from './client-layout/client-layout';
 import './globals.css';
 import { Toaster } from "react-hot-toast";
 import * as React from "react";
@@ -83,62 +82,12 @@ export const viewport = {
   themeColor: "#dadcdcff",
 };
 
-function CategoriesSeoJsonLd() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Browse kiezly Categories",
-    description: "Finde geprüfte Helfer für Babysitting, Umzug, Garten, Haustiere, Seniorenbetreuung, Besorgungen und Events in deiner Nähe.",
-    url: "https://www.kiezly.de/jobs",
-    isPartOf: {
-      "@type": "WebSite",
-      name: "Kiezly",
-      url: "https://kiezly.de",
-    },
-    about: [
-      { "@type": "Thing", name: "Childcare" },
-      { "@type": "Thing", name: "Cleaning" },
-      { "@type": "Thing", name: "Pet care" },
-      { "@type": "Thing", name: "Senior support" },
-      { "@type": "Thing", name: "Errands" },
-      { "@type": "Thing", name: "Garden" },
-      { "@type": "Thing", name: "Events" },
-    ],
-
-  } as const;
-
-  return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} suppressHydrationWarning />
-  );
-}
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
 
       <body className='min-h-screen bg-gradient-to-b from-neutral-50 to-white text-neutral-900 w-full'>
-        <ClientLayout>
-          <CategoriesSeoJsonLd />
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              className: "rounded-xl shadow-md",
-              success: {
-                style: {
-                  background: "#10B981",
-                  color: "white",
-                },
-              },
-              error: {
-                style: {
-                  background: "#EF4444",
-                  color: "white",
-                },
-              },
-            }}
-          />
-        </ClientLayout>
+        {children}
       </body>
 
     </html>

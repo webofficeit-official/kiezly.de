@@ -1,0 +1,164 @@
+{
+    "filter": {
+        "search": "Search",
+        "active-filters": "Active filters",
+        "reset": "Reset",
+        "form": {
+            "keyword": {
+                "placeholder": "Keyword.."
+            },
+            "location": {
+                "label": "Location",
+                "placeholder": "City or postcode"
+            },
+            "distance": {
+                "label": "Distance (km)"
+            },
+            "category": {
+                "label": "Category"
+            },
+            "job-type": {
+                "label": "Job Type"
+            },
+            "hourly-pay": {
+                "label": "Hourly pay (€)",
+                "min": {
+                    "placeholder": "Min"
+                },
+                "max": {
+                    "placeholder": "Max"
+                }
+            },
+            "job-experience": {
+                "label": "Job Experience"
+            },
+            "job-tags": {
+                "label": "Job Tags"
+            },
+            "start-date": {
+                "placeholder": "Start Date"
+            },
+            "end-date": {
+                "placeholder": "End Date"
+            },
+            "date-posted": {
+                "label": "Date posted",
+                "options": {
+                    "any": "Any time",
+                    "day": "Last 24 hours",
+                    "week": "Last 7 days",
+                    "month": "Last 30 days"
+                }
+            },
+            "sort-by": {
+                "label": "Sort by",
+                "options": {
+                    "new": "Newest",
+                    "desc": "Pay: High → Low",
+                    "asc": "Pay: Low → High"
+                }
+            },
+            "submit": "Apply",
+            "clear": "Clear all"
+        }
+    },
+    "list": {
+        "total-jobs": "{total} jobs",
+        "page-out-of": "Page {page} of {totalPages}",
+        "per-page": {
+            "label": "Per page"
+        },
+        "away": "km away",
+        "start": "Start",
+        "end": "End",
+        "new": "New",
+        "not-specified": "Not specified",
+        "posted": "Posted",
+        "view": "View",
+        "no-jobs": "No jobs match your filters.",
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Prev",
+            "next": "Next"
+        }
+    },
+    "mobile": {
+        "active-count": "{activeCount} active filters",
+        "update-results": "Tap Apply to update results",
+        "apply": "Apply"
+    },
+    "detail": {
+        "failed": "Failed to load job.",
+        "application": {
+            "success": "Application status updated successfully!",
+            "failed": "Failed to update application status.",
+            "submitted": "Your application has been submitted."
+        },
+        "header": {
+            "not-specified": "Not specified",
+            "posted": "Posted",
+            "start": "Start",
+            "end": "End",
+            "share": "Share",
+            "saved": "Saved",
+            "save": "Save"
+        },
+        "description": {
+            "about-the-role": "About the Role",
+            "requirement": "Requirements",
+            "tasks": "Tasks"
+        }
+    },
+    "count": {
+        "title": "Job Counts",
+        "items": {
+            "views": "Views",
+            "saves": "Saves",
+            "reports": "Reports",
+            "applicants": "Applicants"
+        }
+    },
+    "smilar": {
+        "title": "Similar Jobs",
+        "not-specified": "Not specified",
+        "away": "{distance} km away",
+        "view": "View",
+        "no-jobs": "No jobs match your filters."
+    },
+    "saved": {
+        "title": "Saved Jobs",
+        "not-specified": "Not specified",
+        "view": "View",
+        "away": "{distance} km away",
+        "no-jobs": "No jobs match your filters."
+    },
+    "applied": {
+        "title": "Applied Jobs",
+        "not-specified": "Not specified",
+        "view": "View",
+        "away": "{distance} km away",
+        "no-jobs": "No jobs match your filters.",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "All",
+                "applied": "Applied",
+                "shortlisted": "Shortlisted",
+                "accepted": "Accepted",
+                "rejected": "Rejected",
+                "withdrawn": "Withdrawn"
+            }
+        },
+        "proposed-rate": {
+            "label": "Proposed Rate"
+        },
+        "per-page": {
+            "label": "Per page"
+        },
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Prev",
+            "next": "Next"
+        }
+    }
+}

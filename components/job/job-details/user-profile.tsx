@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { Briefcase, BriefcaseMedical, CalendarClock, CalendarMinus2, CircleSlash, Euro, Eye, Facebook, Globe, GraduationCap, Hourglass, IceCream, Instagram, Linkedin, Scale, View, X } from "lucide-react";
+import { useT } from "@/app/[locale]/layout";
 
 interface UserProfileProps {
   user: any;
@@ -14,6 +15,7 @@ interface UserProfileProps {
 
 export default function UserProfile({ user, onClose }: UserProfileProps) {
   if (!user) return null;
+  const t = useT("application")
 
   return (
     <>
@@ -32,32 +34,32 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
             )}
             <div className="mt-10">
               {user.rate ? (
-                <LeftType label="Salary expectation" value={`€ ${user.rate}/Hr`} Icon={<Euro />} />
+                <LeftType label={t("user.salary-expectation.label")} value={t("user.salary-expectation.value", { rate: user.rate})} Icon={<Euro />} />
               ) : ""}
               {user.experience ? (
-                <LeftType label="Work Experience" value={`${user.experience} Years`} Icon={<Briefcase />} />
+                <LeftType label={t("user.work-experience.label")} value={t("user.work-experience.value", { years: user.experience})} Icon={<Briefcase />} />
               ) : ""}
               {user.min_hours ? (
-                <LeftType label="Minimum Hours" value={`${user.min_hours} Hr`} Icon={<Hourglass />} />
+                <LeftType label={t("user.min-hours.label")} value={t("user.min-hours.value", { hours: user.min_hours })} Icon={<Hourglass />} />
               ) : ""}
               {user.gender ? (
-                <LeftType label="Gender" value={`${user.gender}`} Icon={<CircleSlash />} />
+                <LeftType label={t("user.gender.label")} value={`${user.gender}`} Icon={<CircleSlash />} />
               ) : ""}
               {user.weekdays.length > 0 ? (
-                <LeftType label="Available days" value={`${user.weekdays.join(', ')}`} Icon={<CalendarClock />} />
+                <LeftType label={t("user.available days.label")} value={`${user.weekdays.join(', ')}`} Icon={<CalendarClock />} />
               ) : ""}
               {user.time_windows.length > 0 ? (
-                <LeftType label="Time windows" value={`${user.time_windows.join(', ')}`} Icon={<CalendarMinus2 />} />
+                <LeftType label={t("user.time-windows.label")} value={`${user.time_windows.join(', ')}`} Icon={<CalendarMinus2 />} />
               ) : ""}
             </div>
             <div className="mt-10">
-              <p className="font-medium text-lg">Contacts</p>
+              <p className="font-medium text-lg">{t("user.contacts")}</p>
               <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`mailto:${user.email}`}>{user.email}</a></p>
               <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`tel:${user.phone}`}>{user.phone}</a></p>
             </div>
             {user.social_links.length > 0 ? (
               <div className="mt-10">
-                <p className="font-medium text-lg mb-3">Socials</p>
+                <p className="font-medium text-lg mb-3">{t("user.socials")}</p>
                 <div className="flex items-center gap-1">
                   {user.social_links.find(s => s.platform === 'website') ? (
                     <SocialIcons Icon={<Globe className="h-4 w-4 text-gray-600 hover:text-black" />} link={user.social_links.find(s => s.platform === 'website')?.url} />
@@ -93,13 +95,13 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
               {user.city} . {user.state} . {user.country}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              Member since {new Date(user.created_at).toLocaleDateString()}
+              {t("user.since")} {new Date(user.created_at).toLocaleDateString()}
             </p>
 
             {/* --- Bio --- */}
             {user.bio && user.bio.trim() && (
               <div className="mt-4">
-                <p className="text-sm text-gray-500 leading-relaxed">{user.bio}</p>
+                <div className="text-sm text-gray-500 leading-relaxed" dangerouslySetInnerHTML={{  __html: user.bio }} />
               </div>
             )}
             <hr className="mt-4" />
@@ -108,7 +110,7 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
             {user.education?.length > 0 && (
               <>
                 <div className="mt-5">
-                  <p className="font-medium text-gray-500 text-sm mb-3">Education</p>
+                  <p className="font-medium text-gray-500 text-sm mb-3">{t("user.education")}</p>
                   <div className="mt-4">
                     {user.education.map((e: any) => (
                       <EducationType label={e.institution} value={e.field} year={e.year} Icon={<GraduationCap />} />
@@ -123,7 +125,7 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
             {user.skills?.length > 0 && (
               <>
                 <div className="mt-5">
-                  <p className="font-medium text-gray-500 text-sm mb-3">Skills</p>
+                  <p className="font-medium text-gray-500 text-sm mb-3">{t("user.skills")}</p>
                   <div className="flex flex-wrap gap-2">
                     {user.skills.map((skill: any) => (
                       <span
@@ -144,13 +146,13 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
               <div className="mt-3">
                 {user.has_first_aid ? (
                   <>
-                    <p className="font-medium text-gray-500 text-sm mb-2">First Aid</p>
+                    <p className="font-medium text-gray-500 text-sm mb-2">{t("user.first-aid")}</p>
                     <CertificateType value={`${user.first_aid.provider} - ${user.first_aid.certificateId}`} label={`${user.first_aid.completionDate} - ${user.first_aid.expiryDate}`} Icon={<BriefcaseMedical />} fileUrl={user.first_aid.fileUrl} />
                   </>
                 ) : ''}
                 {user.police_verified ? (
                   <>
-                    <p className="font-medium text-gray-500 text-sm mb-2 mt-3">Police certificate</p>
+                    <p className="font-medium text-gray-500 text-sm mb-2 mt-3">{t("user.police-certificate")}</p>
                     <CertificateType value={`${user.police_certificate.level}`} label={`${user.police_certificate.issueDate} - ${user.police_certificate.expiryDate}`} Icon={<Scale />} fileUrl={user.first_aid.fileUrl} />
                   </>
                 ) : ''}

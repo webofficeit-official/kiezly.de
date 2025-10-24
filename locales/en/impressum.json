@@ -1,0 +1,26 @@
+{
+    "header": "Legal Notice (English)",
+    "description": "English translation for convenience. German version above is legally authoritative.",
+    "lists": [
+        {
+            "title": "According to § 5 TMG",
+            "description": [
+                "Sivaprasad Sisupalan<br /> Speckenkamp 12<br /> 38162 Sülfeld, Germany",
+                "Phone: <a href=\"tel:+4915779151890\">+49 1577 9151890</a><br /> Email: <a href=\"mailto:siva@webofficeit.com\">siva@webofficeit.com</a>, <a href=\"mailto:sabeel@webofficeit.com\">sabeel@webofficeit.com</a><br /> Website: <a href=\"https://kiezly.de\">https://kiezly.de</a>"
+            ]
+        },
+        {
+            "title": "Responsible for Content (§ 55 II RStV)",
+            "description": [
+                "Sivaprasad Sisupalan (same address)"
+            ]
+        },
+        {
+            "title": "Status Note",
+            "description": [
+                "This site is a <strong>private, non-commercial project</strong> under development."
+            ]
+        }
+    ],
+    "go-back": "Back to home"
+}

@@ -13,6 +13,7 @@ import { UserProfile } from "@/components/MyProfile";
 import { Loader } from "@/components/ui/loader";
 import toast from "react-hot-toast";
 import { useSyncFavoritesOnLogin } from "../utils/saved-job-helper";
+import { useLocalizedRouter } from "../useLocalizedRouter";
 
 type AuthContextType = {
     user: UserProfile;
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<UserProfile>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { push,replace } = useLocalizedRouter();
     const pathname = usePathname();
     const loginMutation = useLogin();
     useSyncFavoritesOnLogin(user);
@@ -69,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (user && isPublic) {
             // logged in but trying to access signin/signup
-            router.replace("/jobs");
+            replace("/jobs");
         }
 
 
@@ -112,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setAccessToken(null);
             setRefreshToken(null);
             setUser(null);
-            router.push('/signin')
+            push('/signin')
         }
     }
 
@@ -125,10 +127,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // }
 
     return (
-       <AuthContext.Provider value={{ user, login, logout, loading, loadUser }}>
-           
-                {children}
-           
+        <AuthContext.Provider value={{ user, login, logout, loading, loadUser }}>
+
+            {children}
+
         </AuthContext.Provider>
     );
 }

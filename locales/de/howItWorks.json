@@ -1,0 +1,48 @@
+{
+    "header": "Wie es funktioniert",
+    "subheader": "Einfach, schnell und für Minijobs in Deutschland konzipiert.",
+    "steps": [
+        {
+            "icon": "FileText",
+            "title": "Veröffentlichen Sie Ihren Job",
+            "description": "Beschreiben Sie Aufgaben, Zeitaufwand und Bezahlung. Wir vermitteln Ihren Auftrag an relevante Helfer vor Ort."
+        },
+        {
+            "icon": "Send",
+            "title": "Bewerber vergleichen",
+            "description": "Überprüfen Sie Bewertungen, Abzeichen, Entfernung und Antwortrate. Chatten Sie, um Details abzustimmen."
+        },
+        {
+            "icon": "ShieldCheck",
+            "title": "Stellen Sie mit Zuversicht ein",
+            "description": "Bestätigen Sie die Buchung und befolgen Sie unsere Minijob-Checkliste (Tarife, Anmeldung, monatliche Obergrenze)."
+        }
+    ],
+    "fees-payment": {
+        "title": "Gebühren & Bezahlung",
+        "points": [
+            "Das Einstellen eines Jobs ist kostenlos. Sie bezahlen Ihren Helfer lediglich direkt gemäß dem vereinbarten Stundensatz.",
+            "Vereinbaren Sie vor Arbeitsbeginn einen Stunden- oder Festpreis. Führen Sie ein einfaches Stundenprotokoll.",
+            "Bei Minijobs im Haushalt sind Bargeld oder Banküberweisungen üblich. Bewahren Sie die Quittungen für Ihre Unterlagen auf."
+        ]
+    },
+    "trust-safety": {
+        "title": "Vertrauen und Sicherheit",
+        "points": [
+            "Überprüfen Sie Profile auf Abzeichen wie Ausweis und Erste Hilfe.",
+            "Verwenden Sie den In-App-Chat, um Aufgaben, Tools und Erwartungen zu klären.",
+            "Geben Sie nur das Nötigste weiter und vereinbaren Sie, wenn dies hilfreich ist, ein kurzes Einführungstreffen."
+        ]
+    },
+    "checklist": {
+        "title": "Checkliste für Minijobs (Deutschland)",
+        "description": "Dies dient nur zur Information und nicht als Rechtsberatung.",
+        "list": [
+            "Stellen Sie sicher, dass der Stundensatz dem gesetzlichen Mindestlohn entspricht oder diesen übersteigt.",
+            "Handelt es sich um einen wiederkehrenden Minijob im Haushalt, melden Sie sich bei Bedarf über den Haushaltscheck an.",
+            "Halten Sie Ihr monatliches Einkommen innerhalb der Minijob-Schwelle, um Ihren Status zu behalten.",
+            "Klären Sie ggf. den Haftpflicht-/Unfallschutz für Hausarbeiten"
+        ]
+    },
+    "go-back": "Zurück nach Hause"
+}

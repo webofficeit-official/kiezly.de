@@ -1,0 +1,164 @@
+{
+    "filter": {
+        "search": "Suchen",
+        "active-filters": "Aktive Filter",
+        "reset": "Zurücksetzen",
+        "form": {
+            "keyword": {
+                "placeholder": "Stichwort.."
+            },
+            "location": {
+                "label": "Standort",
+                "placeholder": "Stadt oder Postleitzahl"
+            },
+            "distance": {
+                "label": "Entfernung (km)"
+            },
+            "category": {
+                "label": "Kategorie"
+            },
+            "job-type": {
+                "label": "Jobtyp"
+            },
+            "hourly-pay": {
+                "label": "Stundenlohn (€)",
+                "min": {
+                    "placeholder": "Min"
+                },
+                "max": {
+                    "placeholder": "Max"
+                }
+            },
+            "job-experience": {
+                "label": "Berufserfahrung"
+            },
+            "job-tags": {
+                "label": "Job-Tags"
+            },
+            "start-date": {
+                "placeholder": "Startdatum"
+            },
+            "end-date": {
+                "placeholder": "Enddatum"
+            },
+            "date-posted": {
+                "label": "Datum der Veröffentlichung",
+                "options": {
+                    "any": "Jederzeit",
+                    "day": "Letzte 24 Stunden",
+                    "week": "Letzte 7 Tage",
+                    "month": "Letzte 30 Tage"
+                }
+            },
+            "sort-by": {
+                "label": "Sortieren nach",
+                "options": {
+                    "new": "Neueste",
+                    "desc": "Bezahlung: Hoch → Niedrig",
+                    "asc": "Bezahlung: Niedrig → Hoch"
+                }
+            },
+            "submit": "Anwenden",
+            "clear": "Alles löschen"
+        }
+    },
+    "list": {
+        "total-jobs": "{total} Arbeitsplätze",
+        "page-out-of": "Seite {page} von {totalPages}",
+        "per-page": {
+            "label": "Pro Seite"
+        },
+        "away": "km entfernt",
+        "start": "Start",
+        "end": "Ende",
+        "new": "Neu",
+        "not-specified": "Nicht angegeben",
+        "posted": "Gepostet",
+        "view": "Sicht",
+        "no-jobs": "Keine Jobs entsprechen Ihren Filtern.",
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Vorher",
+            "next": "Nächste"
+        }
+    },
+    "mobile": {
+        "active-count": "{activeCount} aktive Filter",
+        "update-results": "Tippen Sie auf „Übernehmen“, um die Ergebnisse zu aktualisieren",
+        "apply": "Anwenden"
+    },
+    "detail": {
+        "failed": "Der Job konnte nicht geladen werden.",
+        "application": {
+            "success": "Bewerbungsstatus erfolgreich aktualisiert!",
+            "failed": "Aktualisierung des Anwendungsstatus fehlgeschlagen.",
+            "submitted": "Ihre Bewerbung wurde übermittelt."
+        },
+        "header": {
+            "not-specified": "Nicht angegeben",
+            "posted": "Gepostet",
+            "start": "Start",
+            "end": "Ende",
+            "share": "Aktie",
+            "saved": "Gespeichert",
+            "save": "Speichern"
+        },
+        "description": {
+            "about-the-role": "Über die Rolle",
+            "requirement": "Anforderungen",
+            "tasks": "Aufgaben"
+        }
+    },
+    "count": {
+        "title": "Job zählt",
+        "items": {
+            "views": "Ansichten",
+            "saves": "Spart",
+            "reports": "Berichte",
+            "applicants": "Bewerber"
+        }
+    },
+    "smilar": {
+        "title": "Ähnliche Jobs",
+        "not-specified": "Nicht angegeben",
+        "away": "{distance} km entfernt",
+        "view": "Sicht",
+        "no-jobs": "Keine Jobs entsprechen Ihren Filtern."
+    },
+    "saved": {
+        "title": "Gespeicherte Jobs",
+        "not-specified": "Nicht angegeben",
+        "away": "{distance} km entfernt",
+        "view": "Sicht",
+        "no-jobs": "Keine Jobs entsprechen Ihren Filtern."
+    },
+    "applied": {
+        "title": "Angewandte Jobs",
+        "not-specified": "Nicht angegeben",
+        "away": "{distance} km entfernt",
+        "view": "Sicht",
+        "no-jobs": "Keine Jobs entsprechen Ihren Filtern.",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "Alle",
+                "applied": "Angewandt",
+                "shortlisted": "In die engere Wahl gezogen",
+                "accepted": "Akzeptiert",
+                "rejected": "Abgelehnt",
+                "withdrawn": "Zurückgezogen"
+            }
+        },
+        "proposed-rate": {
+            "label": "Vorgeschlagener Preis"
+        },
+        "per-page": {
+            "label": "Pro Seite"
+        },
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Vorher",
+            "next": "Nächste"
+        }
+    }
+}

@@ -1,0 +1,158 @@
+{
+    "apply-panel": {
+        "success": "Application submitted successfully",
+        "failed": "Failed to submit application",
+        "withdrawed": {
+            "title": "Application withdrawed",
+            "description": "Withdrawed application for {title}",
+            "button": "Update Application"
+        },
+        "applied": {
+            "title": "Already applied",
+            "description": "Your application for {title}",
+            "button": "Update Application"
+        },
+        "apply": {
+            "title": "Ready to apply?",
+            "description": "By applying, you agree to our Terms and acknowledge our Privacy Policy.",
+            "button": {
+                "logged": "Apply as {name}",
+                "unauthenticate": "Apply with Kiezly.de Profile"
+            }
+        },
+        "mini-facts": {
+            "police-verified": "Police Verified",
+            "first-aid": "First-aid certified preferred"
+        },
+        "card": {
+            "cover-note": "Cover Note:",
+            "proposed-rate": "Proposed Rate:",
+            "withdraw": {
+                "trigger": "Withdraw",
+                "title": "Withdraw Application?",
+                "description": "Are you sure you want to withdraw your application for \"{title}\"?",
+                "confirm": "Yes, Withdraw",
+                "cancel": "Cancel",
+                "success": "Application withdrawn successfully!",
+                "failed": "Failed to withdraw."
+            },
+            "model": {
+                "header": "Update application",
+                "button": {
+                    "update": "Update",
+                    "apply": "Apply"
+                }
+            }
+        },
+        "model": {
+            "update": {
+                "success": "Application updated successfully!",
+                "failed": "Failed to update application"
+            },
+            "submit": {
+                "success": "Application submitted successfully!",
+                "failed": "Failed to submit application"
+            },
+            "form": {
+                "description": "Please share your note and proposed rate.",
+                "cover-note": {
+                    "label": "Cover Note"
+                },
+                "proposed-rate": {
+                    "label": "Proposed Rate ({currency})",
+                    "placeholder": "e.g., 18"
+                }
+            },
+            "close": "Close"
+        }
+    },
+    "applicants": {
+        "title": "Applicants",
+        "rate": "Rate:",
+        "cover-note": "Cover Note:",
+        "proposed-rate": "Proposed Rate:",
+        "applied": "Applied on:",
+        "update": "Update Status",
+        "view-all": "View all Applicants",
+        "update-model": {
+            "update": {
+                "success": "Application status changed successfully!",
+                "failed": "Failed to update status."
+            },
+            "title": "Update Status for {name}",
+            "current-status": "Current Status:",
+            "status": {
+                "label": "Status",
+                "options": {
+                    "shortlisted": "Shortlisted",
+                    "accepted": "Accepted",
+                    "rejected": "Rejected"
+                }
+            },
+            "rate": "Rate:",
+            "button": {
+                "cancel": "Cancel",
+                "update": "Confirm Update"
+            }
+        }
+    },
+    "applicants-panel": {
+        "title": "Applicants for {title}",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "All",
+                "applied": "Applied",
+                "shortlisted": "Shortlisted",
+                "accepted": "Accepted",
+                "rejected": "Rejected",
+                "withdrawn": "Withdrawn"
+            }
+        },
+        "proposed-rate": {
+            "label": "Proposed Rate",
+            "options": {
+                "asc": "Ascending",
+                "desc": "Descending"
+            }
+        },
+        "per-page": {
+            "label": "Per page"
+        },
+        "no-applicants": "No applicants have applied yet.",
+        "pagination": {
+            "prev": "Prev",
+            "next": "Next"
+        }
+    },
+    "user": {
+        "salary-expectation": {
+            "label": "Salary expectation",
+            "value": "€ {rate}/Hr"
+        },
+        "work-experience": {
+            "label": "Work Experience",
+            "value": "{years} Years"
+        },
+        "min-hours": {
+            "label": "Minimum Hours",
+            "value": "{hours} Hr"
+        },
+        "available days": {
+            "label": "Available days"
+        },
+        "gender": {
+            "label": "Gender"
+        },
+        "time-windows": {
+            "label": "Time windows"
+        },
+        "contacts": "Contacts",
+        "socials": "Socials",
+        "since": "Member since",
+        "education": "Education",
+        "skills": "Skills",
+        "first-aid": "First Aid",
+        "police-certificate": "Police certificate"
+    }
+}

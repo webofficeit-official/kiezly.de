@@ -12,6 +12,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMont
 import { SelectWithFilter } from "./input/select";
 import ZipAutocomplete from "./input/autocomplete";
 import { RichTextEditor } from "./shared-ui/rich-text-editor/rich-text-editor";
+import { useT } from "@/app/[locale]/layout";
 
 /**
  * Kiezly – User Creation & Profile (fixed)
@@ -204,6 +205,7 @@ function classNames(...xs: Array<string | false | undefined | null>) {
 // ----------------------------
 export default function MyProfile() {
   const collections = useCollections();
+   const t = useT("profile");
 
   const [data, setData] = useState<User | null>(null);
   const [weekdays, setWeekdays] = useState([]);
@@ -229,7 +231,7 @@ export default function MyProfile() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-3xl font-semibold tracking-tight">My Profile</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">{t("title")}</h1>
       {/* <p className="mt-1 text-sm text-gray-600">Create your account and build a strong profile. Badges like ID, First Aid and Police Certificate help clients hire confidently.</p> */}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
@@ -237,11 +239,11 @@ export default function MyProfile() {
           <OnboardingForm onChange={setData} weekdays={weekdays} timeWindows={timeWindows} jobCategories={jobCategories} languages={languages} countries={countries} />
         </div>
         <div className="rounded-2xl border p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold">Live profile preview</h2>
+          <h2 className="mb-4 text-xl font-semibold">{t("preview.title")}</h2>
           {data ? (
             <PublicProfile user={data} jobCategories={jobCategories} languages={languages} />
           ) : (
-            <div className="text-sm text-gray-500">Start typing in the form to see your live public profile preview here.</div>
+            <div className="text-sm text-gray-500">{t("preview.empty")}</div>
           )}
         </div>
       </div>
@@ -268,6 +270,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
 
   const myProfile = useAuth()
   const getCity = getCityByZip();
+  const t=useT('profile')
 
   let formatted = ''
   if (myProfile?.user?.date_of_birth) {
@@ -470,10 +473,10 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
 
   const errors = useMemo(() => {
     const e: string[] = [];
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) e.push("Valid email required");
-    if (!form.firstName) e.push("First name required");
-    if (!form.lastName) e.push("Last name required");
-    if (!form.address.city) e.push("City required");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) e.push(t("errors.email_required"));
+    if (!form.firstName) e.push(t("errors.first_required"));
+    if (!form.lastName) e.push(t("errors.last_required"));
+    if (!form.address.city) e.push(t("errors.city_required"));
     // if (!form.categories.length) e.push("Select at least one category");
     // if (form.rate.hourlyEUR < 12) e.push("Hourly rate must be ≥ 12 € (min wage)");
     return e;
@@ -546,9 +549,9 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     }, {
       onSuccess: (data) => {
         myProfile.loadUser()
-        toast.custom((t) => (
+        toast.custom((to) => (
           <div
-            className={`${t.visible ? "animate-enter" : "animate-leave"
+            className={`${to.visible ? "animate-enter" : "animate-leave"
               } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
           >
             {/* Icon */}
@@ -558,7 +561,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             {/* Text */}
             <div className="flex-1 w-0 p-4">
               <p className="text-sm font-semibold text-green-600">
-                Profile Updated!
+               {t("toasts.updated_title")}
               </p>
               <p className="mt-1 text-sm text-gray-700">
 
@@ -622,26 +625,26 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Basic info */}
-      <Section title="Basic information" description="This appears on your public profile.">
+      <Section title={t("sections.basic.title")} description={t("sections.basic.description")}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="First name" value={form.firstName} onChange={(v) => update((d) => (d.firstName = v))} required />
-          <Input label="Last name" value={form.lastName} onChange={(v) => update((d) => (d.lastName = v))} required />
+          <Input label={t("fields.firstName.label")} value={form.firstName} onChange={(v) => update((d) => (d.firstName = v))} required />
+          <Input label={t("fields.lastName.label")} value={form.lastName} onChange={(v) => update((d) => (d.lastName = v))} required />
           {myProfile?.user?.role == "helper" ?
-            <Input label="Display name (optional)" value={form.displayName || ""} onChange={(v) => update((d) => (d.displayName = v))} /> :
-            <Input label="Household/Company name" value={form.orgName || ""} onChange={(v) => update((d) => (d.orgName = v))} />
+            <Input label={t("fields.displayName.label")} value={form.displayName || ""} onChange={(v) => update((d) => (d.displayName = v))} /> :
+            <Input label={t("fields.orgName.label")} value={form.orgName || ""} onChange={(v) => update((d) => (d.orgName = v))} />
           }
-          <Input label="Phone" value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
-          <DateInput label="Date of birth" value={form.dateOfBirth || ""} onChange={(v) => update((d) => (d.dateOfBirth = v))} />
-          <Select label="Gender" value={form.gender || ""} onChange={(v) => update((d) => (d.gender = v))} options={["", "Female", "Male", "Non-binary", "Prefer not to say"]} />
+          <Input label={t("fields.phone.label")} value={form.phone || ""} onChange={(v) => update((d) => (d.phone = v))} />
+          <DateInput label={t("fields.dob.label")} value={form.dateOfBirth || ""} onChange={(v) => update((d) => (d.dateOfBirth = v))} placeholder={t("fields.dob.select_date")}/>
+          <Select label={t("fields.gender.label")} value={form.gender || ""} onChange={(v) => update((d) => (d.gender = v))} options={["", "Female", "Male", "Non-binary", "Prefer not to say"]} placeholder={t("fields.gender.placeholder")} />
         </div>
-        <RichTextEditor label="About you" value={form.about || ""} onChange={(v) => update((d) => (d.about = v))} />
-        <FileInput label="Profile photo" accept=".png,.jpeg,.jpg" onChange={(v) => handleFileUpload(v, 'profile_pic')} />
+        <RichTextEditor label={t("fields.about.label")} value={form.about || ""} onChange={(v) => update((d) => (d.about = v))} />
+        <FileInput label={t("fields.photo.label")} accept={t("fields.photo.accept")} onChange={(v) => handleFileUpload(v, 'profile_pic')} />
       </Section>
 
       {/* Location */}
-      <Section title="Location">
+      <Section title={t("sections.location.title")}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Street" value={form.address.street || ""} onChange={(v) => update((d) => (d.address.street = v))} />
+          <Input label={t("fields.street.label")} value={form.address.street || ""} onChange={(v) => update((d) => (d.address.street = v))} />
           <ZipAutocomplete
             zip={form.address.postcode}
             setZip={(v) => update((d) => (d.address.postcode = v))}
@@ -649,98 +652,99 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
             setSelectedObject={setSelectedZip}
             zipOptions={zipOptions}
             onZipChange={handleZip}
-            label="Postcode"
+            label={t("fields.postcode.label")}
             labelClass="mb-1 block text-gray-700 text-sm"
             className="w-full rounded-xl border px-2 py-1.5 outline-none ring-0 focus:border-black"
+            placeholder={t("fields.postcode.placeholder")}
           />
-          <Input label="City" value={form.address.city || ""} onChange={(v) => update((d) => (d.address.city = v))} required />
-          <Input label="District / Kiez" value={form.address.districtOrKiez || ""} onChange={(v) => update((d) => (d.address.districtOrKiez = v))} />
-          <Input label="State" value={form.address.state || ""} onChange={(v) => update((d) => (d.address.state = v))} />
+          <Input label={t("fields.city.label")} value={form.address.city || ""} onChange={(v) => update((d) => (d.address.city = v))} required />
+          <Input label={t("fields.district.label")} value={form.address.districtOrKiez || ""} onChange={(v) => update((d) => (d.address.districtOrKiez = v))} />
+          <Input label={t("fields.state.label")} value={form.address.state || ""} onChange={(v) => update((d) => (d.address.state = v))} />
           {/* <Input label="Country" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} /> */}
-          <SelectWithFilter label="Country" labelClass="mb-1 block text-gray-700" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} options={countries} />
+          <SelectWithFilter label={t("fields.country.label")} labelClass="mb-1 block text-gray-700" value={form.address.country || ""} onChange={(v) => update((d) => (d.address.country = v))} options={countries} />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Latitude" type="number" value={form.availability.lat} onChange={(v) => update((d) => (d.availability.lat = Number(v)))} />
-          <Input label="Longitude" type="number" value={form.availability.lng} onChange={(v) => update((d) => (d.availability.lng = Number(v)))} />
-          {myProfile?.user?.role == "helper" && <Input label="Service radius (km)" type="number" min={1} max={100} value={form.availability.radiusKm} onChange={(v) => update((d) => (d.availability.radiusKm = Number(v)))} />}
-          {myProfile?.user?.role == "helper" && <MultiCheckbox label="Available days" values={form.availability.weekdays} onChange={(vals) => update((d) => (d.availability.weekdays = vals))} options={Array.from(weekdays)} />}
+          <Input label={t("fields.lat.label")} type="number" value={form.availability.lat} onChange={(v) => update((d) => (d.availability.lat = Number(v)))} />
+          <Input label={t("fields.lng.label")} type="number" value={form.availability.lng} onChange={(v) => update((d) => (d.availability.lng = Number(v)))} />
+          {myProfile?.user?.role == "helper" && <Input label={t("fields.radius.label")} type="number" min={1} max={100} value={form.availability.radiusKm} onChange={(v) => update((d) => (d.availability.radiusKm = Number(v)))} />}
+          {myProfile?.user?.role == "helper" && <MultiCheckbox label={t("fields.available_days.label")} values={form.availability.weekdays} onChange={(vals) => update((d) => (d.availability.weekdays = vals))} options={Array.from(weekdays)} />}
         </div>
-        {myProfile?.user?.role == "helper" && <MultiCheckbox label="Time windows" values={form.availability.timeWindows} onChange={(vals) => update((d) => (d.availability.timeWindows = vals))} options={Array.from(timeWindows)} />}
+        {myProfile?.user?.role == "helper" && <MultiCheckbox label={t("fields.time_windows.label")} values={form.availability.timeWindows} onChange={(vals) => update((d) => (d.availability.timeWindows = vals))} options={Array.from(timeWindows)} />}
       </Section>
 
       {/* Work */}
-      {myProfile?.user?.role == "helper" && <Section title="Work preferences">
+      {myProfile?.user?.role == "helper" && <Section title={t("sections.work.title")}>
         <div className="py-2">
-          <MultiCheckboxWithObject label="Categories" values={form.categories} onChange={(vals) => update((d) => (d.categories = vals))} options={Array.from(jobCategories)} />
+          <MultiCheckboxWithObject label={t("fields.categories.label")} values={form.categories} onChange={(vals) => update((d) => (d.categories = vals))} options={Array.from(jobCategories)} />
         </div>
         <div className="grid gap-6 md:grid-cols-2 py-2">
-          <Input label="Hourly rate (€)" type="number" min={12} max={200} value={form.rate.hourlyEUR} onChange={(v) => update((d) => (d.rate.hourlyEUR = Number(v)))} />
-          <Input label="Min hours per booking" type="number" min={1} max={12} value={form.rate.minHoursPerBooking || 1} onChange={(v) => update((d) => (d.rate.minHoursPerBooking = Number(v)))} />
+          <Input label={t("fields.hourly.label")} type="number" min={12} max={200} value={form.rate.hourlyEUR} onChange={(v) => update((d) => (d.rate.hourlyEUR = Number(v)))} />
+          <Input label={t("fields.min_hours.label")} type="number" min={1} max={12} value={form.rate.minHoursPerBooking || 1} onChange={(v) => update((d) => (d.rate.minHoursPerBooking = Number(v)))} />
         </div>
         <div className="grid gap-6 md:grid-cols-2 py-2">
-          <Switch label="Fixed price available" checked={form.rate.fixedPriceAvailable} onChange={(v) => update((d) => (d.rate.fixedPriceAvailable = v))} />
-          <MultiSelect label="Languages" values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(languages)} />
+          <Switch label={t("fields.fixed_price.label")} checked={form.rate.fixedPriceAvailable} onChange={(v) => update((d) => (d.rate.fixedPriceAvailable = v))} />
+          <MultiSelect label={t("fields.languages.label")} values={form.languages} onChange={(vals) => update((d) => (d.languages = vals))} options={Array.from(languages)} placeholder={t("fields.languages.placeholder")}/>
         </div>
         <div className="grid gap-4 md:grid-cols-2 py-2">
-          <Switch label="Has work permit" checked={!!form.hasWorkPermit} onChange={(v) => update((d) => (d.hasWorkPermit = v))} />
-          <Switch label="Can issue invoice" checked={!!form.canInvoice} onChange={(v) => update((d) => (d.canInvoice = v))} />
+          <Switch label={t("fields.work_permit.label")} checked={!!form.hasWorkPermit} onChange={(v) => update((d) => (d.hasWorkPermit = v))} />
+          <Switch label={t("fields.invoice.label")} checked={!!form.canInvoice} onChange={(v) => update((d) => (d.canInvoice = v))} />
         </div>
         <div className="grid gap-4 md:grid-cols-2 py-2">
-          <Input label="Years of experience" type="number" min={0} max={40} value={form.experienceYears || 0} onChange={(v) => update((d) => (d.experienceYears = Number(v)))} />
-          <TagInput label="Certificates (comma separated)" placeholder="HACCP, Pflegebasiskurs…" value={(form.certificates || []).join(", ")}
-            onChange={(v) => update((d) => (d.certificates = v.split(",").map((s) => s.trim()).filter(Boolean)))} />
+          <Input label={t("fields.experience.label")} type="number" min={0} max={40} value={form.experienceYears || 0} onChange={(v) => update((d) => (d.experienceYears = Number(v)))} />
+          <TagInput label={t("fields.certificates.label")} placeholder={t("fields.certificates.placeholder")} value={(form.certificates || []).join(", ")}
+            onChange={(v) => update((d) => (d.certificates = v.split(",").map((s) => s.trim()).filter(Boolean)))} hint={t("fields.certificates.hint")}/>
         </div>
       </Section>}
 
       {/* Education */}
-      {myProfile?.user?.role == "helper" && <Section title="Education">
-        <EducationEditor value={form.education || []} onChange={(val) => update((d) => (d.education = val))} />
+      {myProfile?.user?.role == "helper" && <Section title={t("sections.education.title")}>
+        <EducationEditor value={form.education || []} onChange={(val) => update((d) => (d.education = val))} hint={t("fields.edu_add.label")} />
       </Section>}
 
       {/* Verification */}
-      {myProfile?.user?.role == "helper" && <Section title="Verification & badges">
+      {myProfile?.user?.role == "helper" && <Section title={t("sections.verification.title")}>
         <div className="grid gap-6 md:grid-cols-2">
-          <Switch label="ID verified" checked={form.verification.idVerified} onChange={(v) => update((d) => (d.verification.idVerified = v))} />
-          <Switch label="First Aid completed" checked={form.verification.firstAid.completed} onChange={(v) => update((d) => (d.verification.firstAid.completed = v))} />
+          <Switch label={t("fields.id_verified.label")} checked={form.verification.idVerified} onChange={(v) => update((d) => (d.verification.idVerified = v))} />
+          <Switch label={t("fields.first_aid_completed.label")} checked={form.verification.firstAid.completed} onChange={(v) => update((d) => (d.verification.firstAid.completed = v))} />
         </div>
         {form.verification.firstAid.completed && (
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <Input label="Provider" value={form.verification.firstAid.provider || ""} onChange={(v) => update((d) => (d.verification.firstAid.provider = v))} />
-            <Input label="Certificate ID" value={form.verification.firstAid.certificateId || ""} onChange={(v) => update((d) => (d.verification.firstAid.certificateId = v))} />
-            <DateInput label="Completion date" value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
-            <DateInput label="Expiry date (optional)" value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
-            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />
+            <Input label={t("fields.first_aid_provider.label")} value={form.verification.firstAid.provider || ""} onChange={(v) => update((d) => (d.verification.firstAid.provider = v))} />
+            <Input label={t("fields.first_aid_id.label")} value={form.verification.firstAid.certificateId || ""} onChange={(v) => update((d) => (d.verification.firstAid.certificateId = v))} />
+            <DateInput label={t("fields.first_aid_completion.label")} value={form.verification.firstAid.completionDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.completionDate = v))} />
+            <DateInput label={t("fields.first_aid_expiry.label")} value={form.verification.firstAid.expiryDate || ""} onChange={(v) => update((d) => (d.verification.firstAid.expiryDate = v))} />
+            <FileInput label={t("fields.first_aid_upload.label")} accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'first_aid')} />
           </div>
         )}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Switch label="Police certificate available" checked={form.verification.policeCertificate.hasCertificate} onChange={(v) => update((d) => (d.verification.policeCertificate.hasCertificate = v))} />
-          <Select label="Police certificate level" value={form.verification.policeCertificate.level || "Enhanced"} onChange={(v) => update((d) => (d.verification.policeCertificate.level = v as any))} options={["Normal", "Enhanced"]} />
+          <Switch label={t("fields.police_has.label")} checked={form.verification.policeCertificate.hasCertificate} onChange={(v) => update((d) => (d.verification.policeCertificate.hasCertificate = v))} />
+          <Select label={t("fields.police_level.label")} value={form.verification.policeCertificate.level || "Enhanced"} onChange={(v) => update((d) => (d.verification.policeCertificate.level = v as any))} options={["Normal", "Enhanced"]} />
         </div>
         {form.verification.policeCertificate.hasCertificate && (
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <DateInput label="Issue date" value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
-            <DateInput label="Expiry date" value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
-            <FileInput label="Proof file Upload" accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
+            <DateInput label={t("fields.police_issue.label")} value={form.verification.policeCertificate.issueDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.issueDate = v))} />
+            <DateInput label={t("fields.police_expiry.label")} value={form.verification.policeCertificate.expiryDate || ""} onChange={(v) => update((d) => (d.verification.policeCertificate.expiryDate = v))} />
+            <FileInput label={t("fields.police_upload.label")} accept=".pdf,.doc,.docx" onChange={(v) => handleFileUpload(v, 'police_clearance')} />
           </div>
         )}
-        <p className="mt-2 text-xs text-gray-500">Note: For childcare, the enhanced police certificate (Erweitertes Führungszeugnis) is recommended.</p>
+        <p className="mt-2 text-xs text-gray-500">{t("sections.verification.note")}</p>
       </Section>}
 
       {/* Socials */}
-      <Section title="Social & web">
+      <Section title={t("sections.social.title")}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Website" placeholder="https://…" value={form.socials.website || ""} onChange={(v) => update((d) => (d.socials.website = v))} />
-          <Input label="LinkedIn" placeholder="https://linkedin.com/in/…" value={form.socials.linkedin || ""} onChange={(v) => update((d) => (d.socials.linkedin = v))} />
-          <Input label="X (Twitter)" placeholder="https://x.com/…" value={form.socials.x || ""} onChange={(v) => update((d) => (d.socials.x = v))} />
-          <Input label="Instagram" placeholder="https://instagram.com/…" value={form.socials.instagram || ""} onChange={(v) => update((d) => (d.socials.instagram = v))} />
-          <Input label="Facebook" placeholder="https://facebook.com/…" value={form.socials.facebook || ""} onChange={(v) => update((d) => (d.socials.facebook = v))} />
+          <Input label={t("fields.website.label")} placeholder="https://…" value={form.socials.website || ""} onChange={(v) => update((d) => (d.socials.website = v))} />
+          <Input label={t("fields.linkedin.label")} placeholder="https://linkedin.com/in/…" value={form.socials.linkedin || ""} onChange={(v) => update((d) => (d.socials.linkedin = v))} />
+          <Input label={t("fields.x.label")}  placeholder="https://x.com/…" value={form.socials.x || ""} onChange={(v) => update((d) => (d.socials.x = v))} />
+          <Input label={t("fields.instagram.label")}  placeholder="https://instagram.com/…" value={form.socials.instagram || ""} onChange={(v) => update((d) => (d.socials.instagram = v))} />
+          <Input label={t("fields.facebook.label")} placeholder="https://facebook.com/…" value={form.socials.facebook || ""} onChange={(v) => update((d) => (d.socials.facebook = v))} />
         </div>
       </Section>
 
       <div className="flex items-center justify-between gap-4">
         <div className="text-sm text-red-600">{errors[0] || ""}</div>
         <button type="submit" className={classNames("rounded-xl px-5 py-2 text-white", errors.length ? "bg-gray-400" : "bg-black hover:bg-gray-800")} disabled={!!errors.length}>
-          Update account
+         {t("buttons.update")}
         </button>
       </div>
     </form>
@@ -763,6 +767,7 @@ function PublicProfile({ user, jobCategories, languages }: {
   const name = hasName ? ((user?.role == "helper" ? user.displayName : user.orgName) || `${user.firstName} ${user.lastName}`.trim()) : "New helper";
   const cityLine = [user.address?.city, user.address?.districtOrKiez, user.address?.state, user.address?.country].filter(Boolean).join(" • ");
   const myProfile = useAuth();
+  const t=useT("profile")
 
   return (
     <div className="space-y-6">
@@ -786,15 +791,15 @@ function PublicProfile({ user, jobCategories, languages }: {
       </div>
 
       {myProfile?.user?.role == "helper" && <div className="grid gap-4 sm:grid-cols-2">
-        <InfoTile title="Categories" content={user.categories?.length ? user.categories.map(id => jobCategories.find(cat => cat.id === id)?.name || "Unknown").join(", ") : "–"} />
-        <InfoTile title="Rate" content={`${user.rate?.hourlyEUR ?? "–"} €/h${user.rate?.minHoursPerBooking ? ` • min ${user.rate.minHoursPerBooking} h` : ""}`} />
-        <InfoTile title="Availability" content={`${(user.availability?.weekdays || []).join(", ") || "–"} • ${(user.availability?.timeWindows || []).join(", ") || "–"}`} />
-        <InfoTile title="Experience" content={`${user.experienceYears ?? 0} years`} />
+        <InfoTile title={t("preview.tiles.categories")} content={user.categories?.length ? user.categories.map(id => jobCategories.find(cat => cat.id === id)?.name || "Unknown").join(", ") : "–"} />
+        <InfoTile title={t("preview.tiles.rate")} content={`${user.rate?.hourlyEUR ?? "–"} €/h${user.rate?.minHoursPerBooking ? ` • min ${user.rate.minHoursPerBooking} h` : ""}`} />
+        <InfoTile title={t("preview.tiles.availability")} content={`${(user.availability?.weekdays || []).join(", ") || "–"} • ${(user.availability?.timeWindows || []).join(", ") || "–"}`} />
+        <InfoTile title={t("preview.tiles.experience")} content={`${user.experienceYears ?? 0} years`} />
       </div>}
 
       {myProfile?.user?.role == "helper" && user.education?.length ? (
         <section>
-          <h4 className="mb-2 text-lg font-semibold">Education</h4>
+          <h4 className="mb-2 text-lg font-semibold">{t("preview.tiles.education")}</h4>
           <ul className="space-y-2">
             {user.education.map((ed, i) => (
               <li key={i} className="rounded-xl border p-3">
@@ -808,22 +813,22 @@ function PublicProfile({ user, jobCategories, languages }: {
 
       {(user.socials && Object.values(user.socials).some(Boolean)) && (
         <section>
-          <h4 className="mb-2 text-lg font-semibold">Links</h4>
+          <h4 className="mb-2 text-lg font-semibold">{t("preview.tiles.links")} </h4>
           <div className="flex flex-wrap gap-2 text-sm">
-            {user.socials.website && <a className="rounded-full border px-3 py-1" href={user.socials.website} target="__blank">Website</a>}
-            {user.socials.linkedin && <a className="rounded-full border px-3 py-1" href={user.socials.linkedin} target="__blank">LinkedIn</a>}
-            {user.socials.x && <a className="rounded-full border px-3 py-1" href={user.socials.x} target="__blank">X</a>}
-            {user.socials.instagram && <a className="rounded-full border px-3 py-1" href={user.socials.instagram} target="__blank">Instagram</a>}
-            {user.socials.facebook && <a className="rounded-full border px-3 py-1" href={user.socials.facebook} target="__blank">Facebook</a>}
+            {user.socials.website && <a className="rounded-full border px-3 py-1" href={user.socials.website} target="__blank">{t("fields.website.label")}</a>}
+            {user.socials.linkedin && <a className="rounded-full border px-3 py-1" href={user.socials.linkedin} target="__blank">{t("fields.linkedin.label")}</a>}
+            {user.socials.x && <a className="rounded-full border px-3 py-1" href={user.socials.x} target="__blank">{t("fields.x.label")}</a>}
+            {user.socials.instagram && <a className="rounded-full border px-3 py-1" href={user.socials.instagram} target="__blank">{t("fields.instagram.label")}</a>}
+            {user.socials.facebook && <a className="rounded-full border px-3 py-1" href={user.socials.facebook} target="__blank">{t("fields.facebook.label")}</a>}
           </div>
         </section>
       )}
       {myProfile?.user?.role == "helper" &&
         <section>
-          <h4 className="mb-2 text-lg font-semibold">Documents</h4>
+          <h4 className="mb-2 text-lg font-semibold">{t("preview.tiles.documents")}</h4>
           <div className="grid gap-3 sm:grid-cols-2">
-            <DocRow label="First Aid" value={user.verification.firstAid.completed ? `${user.verification.firstAid.provider || "Provider"}${user.verification.firstAid.completionDate ? ` • ${user.verification.firstAid.completionDate}` : ""}` : "Not provided"} href={user.verification.firstAid.fileUrl} />
-            <DocRow label="Police certificate" value={user.verification.policeCertificate.hasCertificate ? `${user.verification.policeCertificate.level || ""}${user.verification.policeCertificate.issueDate ? ` • ${user.verification.policeCertificate.issueDate}` : ""}` : "Not provided"} href={user.verification.policeCertificate.fileUrl} />
+            <DocRow label={t("preview.doc_rows.first_aid")} value={user.verification.firstAid.completed ? `${user.verification.firstAid.provider || "Provider"}${user.verification.firstAid.completionDate ? ` • ${user.verification.firstAid.completionDate}` : ""}` : t("preview.doc_rows.not_provided")} href={user.verification.firstAid.fileUrl} />
+            <DocRow label={t("preview.doc_rows.police")} value={user.verification.policeCertificate.hasCertificate ? `${user.verification.policeCertificate.level || ""}${user.verification.policeCertificate.issueDate ? ` • ${user.verification.policeCertificate.issueDate}` : ""}` :  t("preview.doc_rows.not_provided")} href={user.verification.policeCertificate.fileUrl} />
           </div>
         </section>
       }
@@ -841,6 +846,7 @@ function InfoTile({ title, content }: { title: string; content: string }) {
 }
 
 function DocRow({ label, value, href }: { label: string; value: string; href?: string }) {
+  const t=useT("profile")
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl border p-3">
       <div>
@@ -848,7 +854,7 @@ function DocRow({ label, value, href }: { label: string; value: string; href?: s
         <div className="text-sm text-gray-600">{value}</div>
       </div>
       {href ? (
-        <a className="rounded-lg border px-3 py-1 text-sm" href={href}>View</a>
+        <a className="rounded-lg border px-3 py-1 text-sm" href={href}>{t("buttons.view")}</a>
       ) : (
         <span className="text-xs text-gray-400">–</span>
       )}
@@ -858,11 +864,12 @@ function DocRow({ label, value, href }: { label: string; value: string; href?: s
 
 function Badges({ verification }: { verification: Verification }) {
   const myProfile = useAuth()
+  const t=useT("profile")
 
   const items: { label: string; active: boolean, hide: boolean }[] = [
-    { label: "ID", active: verification.idVerified, hide: false },
-    { label: "First Aid", active: verification.firstAid.completed, hide: myProfile?.user?.role == "client" },
-    { label: "Police", active: verification.policeCertificate.hasCertificate, hide: myProfile?.user?.role == "client" },
+    { label: t("preview.badges.id"), active: verification.idVerified, hide: false },
+    { label: t("preview.badges.first_aid"), active: verification.firstAid.completed, hide: myProfile?.user?.role == "client" },
+    { label: t("preview.badges.police"), active: verification.policeCertificate.hasCertificate, hide: myProfile?.user?.role == "client" },
   ];
   return (
     <div className="flex flex-wrap gap-1">
@@ -876,7 +883,8 @@ function Badges({ verification }: { verification: Verification }) {
 // ----------------------------
 // Editors & Controls
 // ----------------------------
-function EducationEditor({ value, onChange }: { value: Education[]; onChange: (v: Education[]) => void }) {
+function EducationEditor({ value, onChange,hint="Add" }: { value: Education[]; onChange: (v: Education[]) => void ,hint?:string}) {
+  const t=useT('profile')
   const [items, setItems] = useState<Education[]>(value);
   useEffect(() => setItems(value), [value]);
 
@@ -900,16 +908,16 @@ function EducationEditor({ value, onChange }: { value: Education[]; onChange: (v
     <div className="space-y-3">
       {items.map((ed, i) => (
         <div key={i} className="grid gap-3 md:grid-cols-4">
-          <Select label="Level" value={ed.level} onChange={(v) => updateAt(i, { level: v as Education["level"] })} options={["Secondary", "Vocational", "Bachelor", "Master", "PhD", "Other"]} />
-          <Input label="Field of study" value={ed.field || ""} onChange={(v) => updateAt(i, { field: v })} />
-          <Input label="Institution" value={ed.institution || ""} onChange={(v) => updateAt(i, { institution: v })} />
+          <Select label={t("fields.edu_level.label")} value={ed.level} onChange={(v) => updateAt(i, { level: v as Education["level"] })} options={["Secondary", "Vocational", "Bachelor", "Master", "PhD", "Other"]} />
+          <Input label={t("fields.edu_field.label")} value={ed.field || ""} onChange={(v) => updateAt(i, { field: v })} />
+          <Input label={t("fields.edu_institution.label")} value={ed.institution || ""} onChange={(v) => updateAt(i, { institution: v })} />
           <div className="flex items-end gap-2">
-            <Input label="Year" type="number" value={ed.year || ""} onChange={(v) => updateAt(i, { year: v })} />
+            <Input label={t("fields.edu_year.label")}  type="number" value={ed.year || ""} onChange={(v) => updateAt(i, { year: v })} />
             <button type="button" onClick={() => remove(i)} className="h-10 rounded-lg border px-3 text-sm"><FaTrash /></button>
           </div>
         </div>
       ))}
-      <button type="button" onClick={pushBlank} className="rounded-xl border px-3 py-2 text-sm">+ Add education</button>
+      <button type="button" onClick={pushBlank} className="rounded-xl border px-3 py-2 text-sm">{hint}</button>
     </div>
   );
 }
@@ -959,11 +967,13 @@ function DateInput({
   value,
   onChange,
   required,
+  placeholder="Select date"
 }: {
   label: string;
   value: string | null;
   onChange: (v: string) => void;
   required?: boolean;
+  placeholder?:string;
 }) {
   const [month, setMonth] = useState(new Date());
 
@@ -996,7 +1006,7 @@ function DateInput({
 
       <Popover className="relative">
         <Popover.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-left shadow-sm focus:border-black">
-          {value ? format(new Date(value), "yyyy-MM-dd") : "Select date"}
+          {value ? format(new Date(value), "yyyy-MM-dd") : placeholder}
           <CalendarIcon className="h-4 w-4 text-gray-400" />
         </Popover.Button>
 
@@ -1124,11 +1134,13 @@ function Select({
   value,
   onChange,
   options,
+  placeholder="Select"
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: string[];
+  placeholder?:string
 }) {
   return (
     <div className="text-sm">
@@ -1137,7 +1149,7 @@ function Select({
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
           <Listbox.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-black">
-            {value || "Select"}
+            {value || placeholder}
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </Listbox.Button>
 
@@ -1232,11 +1244,13 @@ function MultiSelect({
   options,
   values,
   onChange,
+  placeholder="Select..."
 }: {
   label: string;
   options: { id: string; name: string }[];
   values: string[];
   onChange: (next: string[]) => void;
+  placeholder?:string;
 }) {
   function toggle(val: string) {
     const set = new Set(values);
@@ -1255,7 +1269,7 @@ function MultiSelect({
                 .filter((o) => values.includes(o.id))
                 .map((o) => o.name)
                 .join(", ")
-              : "Select..."}
+              : placeholder}
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </Listbox.Button>
           <Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
@@ -1277,12 +1291,12 @@ function MultiSelect({
 }
 
 
-function TagInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+function TagInput({ label, value, onChange, placeholder,hint="" }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string,hint?:string }) {
   return (
     <label className="block text-sm">
       <span className="mb-1 block text-gray-700">{label}</span>
       <input className="w-full rounded-xl border px-3 py-2 outline-none focus:border-black" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
-      <span className="mt-1 block text-xs text-gray-500">Use commas to separate multiple entries.</span>
+      <span className="mt-1 block text-xs text-gray-500">{hint}</span>
     </label>
   );
 }

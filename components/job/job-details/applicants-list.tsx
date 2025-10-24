@@ -8,6 +8,7 @@ import UpdateStatusModal from "@/components/ui/UpdateStatusModal";
 import { useRouter } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { Job } from "@/lib/types/job";
+import { useT } from "@/app/[locale]/layout";
 
 interface ApplicantsPanelProps {
     job: Job;
@@ -43,6 +44,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
+    const t = useT("application");
 
     const openUpdateModal = (applicant: any) => {
         setSelectedApplicant(applicant);
@@ -63,7 +65,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
             <Card className="shadow-lg border-gray-100 bg-white">
                 <CardHeader className="border-b border-gray-100 p-4 sm:p-5">
                     <CardTitle className="text-xl font-bold text-gray-900">
-                        Applicants ({data&&data?.total_items || 0})
+                        {t("applicants.title")} ({data && data?.total_items || 0})
                     </CardTitle>
                 </CardHeader>
 
@@ -102,20 +104,23 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
                                 {/* Description/Snippet (Moved below title for better hierarchy) */}
                                 <div className="flex items-center justify-between">
                                     <div className="text-sm font-medium text-gray-800">
-                                        Rate: <span className="font-bold text-gray-900">{app.proposed_rate} €</span>
+                                        {t("applicants.rate")} <span className="font-bold text-gray-900">{app.proposed_rate} €</span>
                                     </div>
                                 </div>
                                 {app.cover_note && (
                                     <div className="rounded-lg text-gray-700">
-                                        <span className="font-semibold text-gray-800 block mb-1">Cover Note:</span>
-                                        <p className="text-sm line-clamp-3">{app.cover_note}</p>
+                                        <span className="font-semibold text-gray-800 block mb-1">{t("applicants.cover-note")}</span>
+                                        <div
+                                            className="text-sm line-clamp-3"
+                                            dangerouslySetInnerHTML={{ __html: app.cover_note || "" }}
+                                        />
                                     </div>
                                 )}
 
                                 {/* Footer: Rate (Highlighted) */}
                                 <div className="flex justify-between items-center pt-1">
                                     <div className="text-xs text-gray-500">
-                                        Applied: {new Date(app.created_at).toLocaleDateString()}
+                                        {t("applicants.applied")} {new Date(app.created_at).toLocaleDateString()}
                                     </div>
 
                                     {/* Status Update Button */}
@@ -124,7 +129,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
                                         className="text-sm font-medium text-gray-800 border-gray-300 hover:bg-gray-100 px-4 py-2 h-auto"
                                         onClick={() => openUpdateModal(app)}
                                     >
-                                        Update Status
+                                        {t("applicants.update")}
                                     </Button>
                                 </div>
                             </div>
@@ -137,7 +142,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
                             href={`/jobs/${job.slug}/applicants`}
                             className="inline-flex items-center gap-2 text-base font-semibold text-gray-800 hover:text-black hover:underline"
                         >
-                            View all Applicants
+                            {t("applicants.view-all")}
                             <ExternalLink className="h-4 w-4" />
                         </a>
                     </div>

@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { Filters, DatePosted, SortBy } from "@/lib/types/job";
 import { DateInput } from "../add";
 import { Select } from "../job-filter-select/select-option";
+import { useT } from "@/app/[locale]/layout";
 
 type Props = {
   filters: Filters;
@@ -16,19 +17,6 @@ type Props = {
   onChange?: (f: Filters) => void;
 };
 
-const postedOptions = [
-  { label: "Any time", value: "any" },
-  { label: "Last 24 hours", value: "1" },
-  { label: "Last 7 days", value: "7" },
-  { label: "Last 30 days", value: "30" },
-];
-
-const sortByOptions = [
-  { label: "Newest", value: "new" },
-  { label: "Pay: High → Low", value: "price_desc" },
-  { label: "Pay: Low → High", value: "price_asc" },
-];
-
 export function JobFilterSidebar({
   filters,
   update,
@@ -39,16 +27,32 @@ export function JobFilterSidebar({
   user,
   onChange,
 }: Props) {
+
+  const t = useT("jobs");
+
+  const postedOptions = [
+    { label: t("filter.form.date-posted.options.any"), value: "any" },
+    { label: t("filter.form.date-posted.options.day"), value: "1" },
+    { label: t("filter.form.date-posted.options.week"), value: "7" },
+    { label: t("filter.form.date-posted.options.month"), value: "30" },
+  ];
+
+  const sortByOptions = [
+    { label: t("filter.form.sort-by.options.new"), value: "new" },
+    { label: t("filter.form.sort-by.options.desc"), value: "price_desc" },
+    { label: t("filter.form.sort-by.options.asc"), value: "price_asc" },
+  ];
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 space-y-6">
       {/*  Search */}
       <div>
         <div className="flex items-center justify-between">
           <label htmlFor="q" className="text-sm font-medium">
-            Search
+            {t("filter.search")}
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Active filters</span>
+            <span className="text-sm text-gray-600">{t("filter.active-filters")}</span>
             <span className="inline-flex items-center justify-center rounded-full bg-gray-900 text-white text-xs w-6 h-6">
               {activeCount}
             </span>
@@ -57,7 +61,7 @@ export function JobFilterSidebar({
               onClick={resetAll}
               className="text-sm underline underline-offset-4 text-gray-700 hover:text-black"
             >
-              Reset
+              {t("filter.reset")}
             </button>
           </div>
         </div>
@@ -68,7 +72,7 @@ export function JobFilterSidebar({
           inputMode="search"
           value={filters.q}
           onChange={(e) => update({ q: e.target.value })}
-          placeholder="Keyword.."
+          placeholder={t("filter.form.keyword.placeholder")}
           className="mt-2 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
         />
       </div>
@@ -77,21 +81,21 @@ export function JobFilterSidebar({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
         <div className="sm:col-span-2">
           <label htmlFor="city" className="block text-sm font-medium">
-            Location
+            {t("filter.form.location.label")}
           </label>
           <input
             id="city"
             type="text"
             value={filters.city}
             onChange={(e) => update({ city: e.target.value })}
-            placeholder="City or postcode"
+            placeholder={t("filter.form.location.placeholder")}
             className="mt-2 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
         {user?.lat && user?.lng && (
           <div>
             <label htmlFor="radius_km" className="block text-sm font-medium">
-              Distance (km)
+              {t("filter.form.distance.label")}
             </label>
             <input
               id="radius_km"
@@ -113,7 +117,7 @@ export function JobFilterSidebar({
       {/*  Category */}
       {collections?.jobCategories?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">Category</legend>
+          <legend className="block text-sm font-medium">{t("filter.form.category.label")}</legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobCategories.map((cat: any) => (
               <label
@@ -135,7 +139,7 @@ export function JobFilterSidebar({
       {/* Job Type */}
       {collections?.jobType?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">Job Type</legend>
+          <legend className="block text-sm font-medium">{t("filter.form.job-type.label")}</legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobType.map((type: string) => (
               <label
@@ -156,13 +160,13 @@ export function JobFilterSidebar({
 
       {/*  Pay range */}
       <div>
-        <span className="block text-sm font-medium">Hourly pay (€)</span>
+        <span className="block text-sm font-medium">{t("filter.form.hourly-pay.label")}</span>
         <div className="mt-2 grid grid-cols-2 gap-3">
           <input
             id="min_price"
             inputMode="decimal"
             pattern="[0-9]*"
-            placeholder="Min"
+            placeholder={t("filter.form.hourly-pay.min.placeholder")}
             value={filters.min_price}
             onChange={(e) => update({ min_price: e.target.value })}
             className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -171,7 +175,7 @@ export function JobFilterSidebar({
             id="max_price"
             inputMode="decimal"
             pattern="[0-9]*"
-            placeholder="Max"
+            placeholder={t("filter.form.hourly-pay.max.placeholder")}
             value={filters.max_price}
             onChange={(e) => update({ max_price: e.target.value })}
             className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -182,7 +186,7 @@ export function JobFilterSidebar({
       {/*  Job Experience */}
       {collections?.jobExperience?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">Job Experience</legend>
+          <legend className="block text-sm font-medium">{t("filter.form.job-experience.label")}</legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobExperience.map((exp: string) => (
               <label
@@ -204,7 +208,7 @@ export function JobFilterSidebar({
       {/* 🏷 Job Tags */}
       {collections?.jobTags?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">Job Tags</legend>
+          <legend className="block text-sm font-medium">{t("filter.form.job-tags.label")}</legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobTags.map((tag: any) => (
               <label
@@ -226,7 +230,7 @@ export function JobFilterSidebar({
       {/*  Date range */}
       <div className="mt-2 grid grid-cols-2 gap-3">
         <DateInput
-          label="Start Date"
+          label={t("filter.form.start-date.placeholder")}
           value={filters.starts_at || null}
           onChange={(v) => {
             update({ starts_at: v });
@@ -237,7 +241,7 @@ export function JobFilterSidebar({
         />
 
         <DateInput
-          label="End Date"
+          label={t("filter.form.end-date.placeholder")}
           value={filters.ends_at || null}
           onChange={(v) => update({ ends_at: v })}
           minDate={
@@ -248,7 +252,7 @@ export function JobFilterSidebar({
 
       {/*  Date posted */}
       <Select
-        label="Date posted"
+        label={t("filter.form.date-posted.label")}
         value={filters.posted}
         onChange={(v: string) => update({ posted: v as DatePosted })}
         options={postedOptions}
@@ -256,7 +260,7 @@ export function JobFilterSidebar({
 
       {/*  Sort by */}
       <Select
-        label="Sort by"
+        label={t("filter.form.sort-by.label")}
         value={filters.sort}
         onChange={(v: string) => update({ sort: v as SortBy })}
         options={sortByOptions}
@@ -269,14 +273,14 @@ export function JobFilterSidebar({
           onClick={() => onChange?.(filters)}
           className="inline-flex items-center justify-center rounded-xl bg-black text-white px-4 py-2 text-sm hover:opacity-90"
         >
-          Apply
+          {t("filter.form.submit")}
         </button>
         <button
           type="button"
           onClick={resetAll}
           className="text-sm underline underline-offset-4"
         >
-          Clear all
+          {t("filter.form.clear")}
         </button>
       </div>
     </div>

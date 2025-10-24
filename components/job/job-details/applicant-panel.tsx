@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"; // Placeholder for your Button 
 import { useJobApplicants, useUpdateApplicantStatus } from "@/lib/react-query/queries/apply-job";
 import UpdateStatusModal from "@/components/ui/UpdateStatusModal";
 import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 
 interface ApplicantsPanelProps {
   jobId: string | number;
@@ -32,13 +33,13 @@ const getStatusClasses = (status: string) => {
 export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
   if (!jobId) return null;
   const { data, isLoading } = useJobApplicants({
-         jobId:jobId.toString(),
-         page: 1,
-         pageSize: 3,
-         status: '',
-         sort: 'asc',
-         enabled: user?.role === 'client', // <-- include here if your hook supports it
-     });
+    jobId: jobId.toString(),
+    page: 1,
+    pageSize: 3,
+    status: '',
+    sort: 'asc',
+    enabled: user?.role === 'client', // <-- include here if your hook supports it
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
 
@@ -53,6 +54,7 @@ export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
   };
 
   const router = useRouter()
+  const { push } = useLocalizedRouter();
 
   if (user?.role !== "client") return null;
 
@@ -68,7 +70,7 @@ export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
         <CardContent className="p-4 sm:p-5">
           {isLoading ? (
             <p className="text-gray-500 text-sm italic">Loading applicants...</p>
-          ) : data&&data?.applicants && data?.applicants.length > 0 ? (
+          ) : data && data?.applicants && data?.applicants.length > 0 ? (
             <ul className="space-y-4">
               {data?.applicants.map((applicant: any) => (
                 <li
@@ -78,7 +80,7 @@ export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
                   {/* Top section: Name and Status */}
                   <div className="flex items-start justify-between">
                     <div onClick={() => {
-                      router.push(`/`)
+                      push(`/`)
                     }}>
                       <div className="font-semibold text-lg text-gray-900 line-clamp-1">
                         {applicant.user.first_name} {applicant.user.last_name}
@@ -109,7 +111,10 @@ export default function ApplicantsPanel({ jobId, user }: ApplicantsPanelProps) {
                     {applicant.cover_note && (
                       <div className="rounded-lg text-gray-700">
                         <span className="font-semibold text-gray-800 block mb-1">Cover Note :</span>
-                        <p className="text-sm line-clamp-3">{applicant.cover_note}</p>
+                        <div
+                          className="text-sm line-clamp-3"
+                          dangerouslySetInnerHTML={{ __html: applicant.cover_note || "" }}
+                        />
                       </div>
                     )}
 

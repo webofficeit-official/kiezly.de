@@ -1,0 +1,48 @@
+{
+    "header": "How it works",
+    "subheader": "Simple, fast, and built for mini‑jobs in Germany.",
+    "steps": [
+        {
+            "icon": "FileText",
+            "title": "Post your job",
+            "description": "Describe the tasks, time and pay. We surface your job to relevant local helpers."
+        },
+        {
+            "icon": "Send",
+            "title": "Compare applicants",
+            "description": "Review ratings, badges, distance and response rate. Chat to align on details."
+        },
+        {
+            "icon": "ShieldCheck",
+            "title": "Hire with confidence",
+            "description": "Confirm the booking and follow our mini‑job checklist (rates, registration, monthly cap)."
+        }
+    ],
+    "fees-payment": {
+        "title": "Fees & payment",
+        "points": [
+            "Posting a job is free. You only pay your helper directly according to the agreed rate.",
+            "Agree on hourly vs fixed price before the work starts. Keep a simple log of hours.",
+            "Cash or bank transfer are common for household mini‑jobs; keep receipts for your records."
+        ]
+    },
+    "trust-safety": {
+        "title": "Trust & safety",
+        "points": [
+            "Check profiles for badges like ID and First Aid.",
+            "Use in‑app chat to clarify tasks, tools and expectations.",
+            "Share only what’s necessary and arrange a brief intro meeting if helpful."
+        ]
+    },
+    "checklist": {
+        "title": "Mini‑job checklist (Germany)",
+        "description": "This is for information only and not legal advice",
+        "list": [
+            "Ensure the hourly rate meets or exceeds the legal minimum wage.",
+            "If it’s a recurring household mini‑job, register via Haushaltsscheck when required.",
+            "Keep monthly earnings within the mini‑job threshold to maintain status.",
+            "Clarify liability/accident coverage as applicable for household work"
+        ]
+    },
+    "go-back": "Back to home"
+}

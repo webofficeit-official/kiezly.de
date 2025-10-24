@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useApplyJob, useCheckApplied, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
 import { useRouter } from "next/navigation";
 import ApplicationCard from "./application-card";
+import { useT } from "@/app/[locale]/layout";
 
 interface ApplyPanelProps {
   user: any;
@@ -16,6 +17,8 @@ export default function ApplyPanel({ user, jobDetails }: ApplyPanelProps) {
   const router = useRouter();
   const [coverNote, setCoverNote] = useState("");
   const [proposedRate, setProposedRate] = useState("");
+
+  const t = useT("application");
 
   // Hooks inside the component
   const { data: application, isLoading: isChecking } = useCheckApplied(jobDetails.id);
@@ -35,10 +38,10 @@ export default function ApplyPanel({ user, jobDetails }: ApplyPanelProps) {
       { jobId: jobDetails.id, cover_note: coverNote, proposed_rate: proposedRate },
       {
         onSuccess: () => {
-          toast.success("Application submitted successfully!");
+          toast.success(t("apply-panel.success"));
         },
         onError: (error: any) => {
-          toast.error(error?.message || "Failed to submit application.");
+          toast.error(error?.message || t("apply-panel.failed"));
         },
       }
     );
@@ -50,45 +53,45 @@ export default function ApplyPanel({ user, jobDetails }: ApplyPanelProps) {
         application?.success ? (
           application?.data?.application?.status == "withdrawn" ?
             <ApplicationCard
-              title="Application withdrawed"
-              description={`Withdrawed application for ${jobDetails.title}`}
+              title={t("apply-panel.withdrawed.title")}
+              description={t("apply-panel.withdrawed.description", { title: jobDetails.title})}
               coverNote={coverNote}
               proposedRate={proposedRate}
               application={application}
               jobDetails={jobDetails}
-              buttonLabel={`Update Application`}
+              buttonLabel={t("apply-panel.withdrawed.button")}
               withdraw
             /> :
             <ApplicationCard
-              title="Already applied"
-              description={`Your application for ${jobDetails.title}`}
+              title={t("apply-panel.applied.title")}
+              description={t("apply-panel.applied.description", { title: jobDetails.title})}
               coverNote={coverNote}
               proposedRate={proposedRate}
               application={application}
               jobDetails={jobDetails}
-              buttonLabel={`Update Application`}
+              buttonLabel={t("apply-panel.applied.button")}
               applied
             />
         ) : <ApplicationCard
-          title="Ready to apply?"
-          description="By applying, you agree to our Terms and acknowledge our Privacy Policy."
+          title={t("apply-panel.apply.title")}
+          description={t("apply-panel.apply.description")}
           application={application}
           jobDetails={jobDetails}
-          buttonLabel={user ? `Apply as ${user.first_name} ${user.last_name}` : `Apply with Kiezly.de Profile`}
+          buttonLabel={user ? t("apply-panel.apply.button.logged", { name: `${user.first_name} ${user.last_name}`}) : t("apply-panel.apply.button.unauthenticate")}
           logged={user ? true : false}
         />
       }
-      
+
       {/* Mini facts */}
       <div className="mt-6 space-y-2 text-sm text-muted-foreground">
         {jobDetails?.police_verified && (
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4" /> Police Verified
+            <CheckCircle2 className="h-4 w-4" /> {t("apply-panel.mini-facts.police-verified")}
           </div>
         )}
         {jobDetails?.first_aid_verified && (
           <div className="flex items-center gap-2">
-            <GraduationCap className="h-4 w-4" /> First-aid certified preferred
+            <GraduationCap className="h-4 w-4" /> {t("apply-panel.mini-facts.first-aid")}
           </div>
         )}
       </div>

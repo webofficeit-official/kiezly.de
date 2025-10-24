@@ -7,6 +7,8 @@ import { useMyApplications } from "@/lib/react-query/queries/apply-job";
 import { MyApplications } from "@/lib/types/apply-job";
 import { formatDate } from "date-fns";
 import { Select } from "./job-filter-select/select-option";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
+import { useT } from "@/app/[locale]/layout";
 
 /**
  * Helper to check if a job was created recently (within 72h)
@@ -16,23 +18,6 @@ const isNew = (createdAt: string) => {
   return hours <= 72;
 };
 
-const perPageOptions = [
-  { label: "1", value: "1" },
-  { label: "5", value: "5" },
-  { label: "10", value: "10" },
-  { label: "25", value: "25" },
-  { label: "50", value: "50" },
-];
-
-const statusOptions = [
-  { label: "All", value: "" },
-  { label: "Applied", value: "applied" },
-  { label: "Shortlisted", value: "shortlisted" },
-  { label: "Accepted", value: "accepted" },
-  { label: "Rejected", value: "rejected" },
-  { label: "Withdrawn", value: "withdrawn" },
-];
-
 export default function AppliedJobList() {
   const router = useRouter();
   const [applications, setApplications] = useState<MyApplications[]>([]);
@@ -41,9 +26,33 @@ export default function AppliedJobList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalApplications, setTotalApplications] = useState(0);
   const [status, setStatus] = useState("");
+  const { push, prefetch } = useLocalizedRouter();
+
+  const t = useT("jobs");
+
+  const perPageOptions = [
+    { label: "1", value: "1" },
+    { label: "5", value: "5" },
+    { label: "10", value: "10" },
+    { label: "25", value: "25" },
+    { label: "50", value: "50" },
+  ];
+
+  const statusOptions = [
+    { label: t("applied.status.options.all"), value: "" },
+    { label: t("applied.status.options.applied"), value: "applied" },
+    { label: t("applied.status.options.shortlisted"), value: "shortlisted" },
+    { label: t("applied.status.options.accepted"), value: "accepted" },
+    { label: t("applied.status.options.rejected"), value: "rejected" },
+    { label: t("applied.status.options.withdrawn"), value: "withdrawn" },
+  ];
 
   // Fetch data using custom hook
-  const { data: mpApplications, isLoading } = useMyApplications(status, page, pageSize);
+  const { data: mpApplications, isLoading } = useMyApplications(
+    status,
+    page,
+    pageSize
+  );
 
   useEffect(() => {
     if (mpApplications) {
@@ -83,19 +92,20 @@ export default function AppliedJobList() {
         <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between gap-10">
           {/* Header */}
           <h2 className="text-lg font-semibold">
-            {status === "" ? "Applied Jobs" : `${capitalize(status)} Jobs`} ({totalApplications})
+            {status === "" ? t("applied.title") : `${statusOptions.find(s => s.value == status)?.label} Jobs`} (
+            {totalApplications})
           </h2>
           {/* Filters */}
           <div className="flex items-center justify-between gap-6">
             <Select
-              label="Status"
+              label={t("applied.status.label")}
               value={status}
               onChange={handleStatusChange}
               options={statusOptions}
               width="w-32"
             />
             <Select
-              label="Per page"
+              label={t("applied.per-page.label")}
               value={String(pageSize)}
               onChange={(v: string) => handlePageSizeChange(Number(v))}
               options={perPageOptions}
@@ -106,7 +116,6 @@ export default function AppliedJobList() {
 
         {/* Application cards */}
         <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-
           {/* Right: Job list + debug preview */}
           <section className="lg:col-span-3 space-y-4">
             {/* Stats + controls */}
@@ -117,12 +126,25 @@ export default function AppliedJobList() {
                   className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
                 >
                   {/* Header */}
-                  <div className="cursor-pointer" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
-                    <div className="flex items-start justify-between" onClick={() => window.location.href = `/jobs/${app.job.slug}`}>
+                  <div
+                    className="cursor-pointer"
+                    onMouseEnter={() => prefetch(`/jobs/${app.job.slug}`)}
+                    onClick={() => push(`/jobs/${app.job.slug}`)}
+                  >
+                    <div
+                      className="flex items-start justify-between"
+                      onMouseEnter={() => prefetch(`/jobs/${app.job.slug}`)}
+                      onClick={() => push(`/jobs/${app.job.slug}`)}
+                    >
                       <span className="inline-block text-sm text-gray-800 py-1 rounded-full">
                         {formatDate(app.created_at, "dd MMM, yyyy")}
                       </span>
-                      <div className="text-xs"> <span className={getStatusClasses(app.status)}>{app.status}</span></div>
+                      <div className="text-xs">
+                        {" "}
+                        <span className={getStatusClasses(app.status)}>
+                          {statusOptions.find(s => s.value == app.status)?.label}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Title */}
@@ -130,8 +152,12 @@ export default function AppliedJobList() {
                       {app.job.title}
                     </h3>
                     <p className="text-xs text-gray-500 mt-1 tracking-wide font-medium">
-                      <span className="font-bold text-black">Note: </span>{app.cover_note}
+                      <span className="font-bold text-black">{t("applied.status.options.all")} </span>
                     </p>
+                    <div
+                      className="text-xs text-gray-500 mt-1 tracking-wide font-medium"
+                      dangerouslySetInnerHTML={{ __html: app.cover_note || "" }}
+                    />
 
                     {/* Tags */}
                     {app.job.tags?.length > 0 && (
@@ -154,38 +180,41 @@ export default function AppliedJobList() {
                       <p className="font-semibold text-sm text-gray-900">
                         {app.proposed_rate}
                         <span className="text-gray-500 text-xs ml-1">
-                          / Proposed Rate
+                          / {t("applied.proposed-rate.label")}
                         </span>
                       </p>
                     </div>
 
                     <button
                       className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
-                      onClick={() => window.location.href = `/jobs/${app.job.slug}`}
+                      onMouseEnter={() => prefetch(`/jobs/${app.job.slug}`)}
+                      onClick={() => push(`/jobs/${app.job.slug}`)}
                     >
-                      View
+                      {t("applied.view")}
                     </button>
                   </div>
                 </article>
               ))}
               {applications.length === 0 && (
                 <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-                  No jobs match your filters.
+                  {t("applied.no-jobs")}
                 </div>
               )}
             </div>
-
           </section>
         </main>
 
         {/* Pagination */}
-        <nav className="flex items-center justify-between gap-2" aria-label="Pagination">
+        <nav
+          className="flex items-center justify-between gap-2"
+          aria-label={t("applied.pagination.aria-label")}
+        >
           <button
             className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
             onClick={() => handlePageChange(page - 1)}
             disabled={page <= 1}
           >
-            Prev
+            {t("applied.pagination.prev")}
           </button>
 
           <div className="flex items-center gap-1" data-testid="pager">
@@ -194,7 +223,8 @@ export default function AppliedJobList() {
               .map((n) => (
                 <button
                   key={n}
-                  className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""}`}
+                  className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""
+                    }`}
                   onClick={() => handlePageChange(n)}
                 >
                   {n}
@@ -207,7 +237,7 @@ export default function AppliedJobList() {
             onClick={() => handlePageChange(page + 1)}
             disabled={page >= totalPages}
           >
-            Next
+            {t("applied.pagination.next")}
           </button>
         </nav>
       </main>

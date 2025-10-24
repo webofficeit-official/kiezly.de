@@ -1,0 +1,56 @@
+{
+  "title": "Erstellen Sie Ihr Konto",
+  "subtitle_html": "Ein Konto, um <strong>Minijobs zu veröffentlichen</strong> oder sich <strong>als Helfer zu bewerben</strong>.",
+  "roles": {
+    "helper": "Ich bin Helfer",
+    "client": "Ich möchte Jobs veröffentlichen"
+  },
+  "form": {
+    "firstName": { "label": "Vorname *", "error_required": "Vorname ist erforderlich.", "error_min": "Der Vorname muss mindestens 2 Zeichen haben." },
+    "lastName": { "label": "Nachname *", "error_required": "Nachname ist erforderlich.", "error_min": "Der Nachname muss mindestens 2 Zeichen haben." },
+    "email": { "label": "E-Mail *", "error_required": "E-Mail ist erforderlich.", "error_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein." },
+    "phone": { "label": "Telefon (optional)" },
+    "password": {
+      "label": "Passwort *",
+      "show": "Anzeigen",
+      "hide": "Ausblenden",
+      "hint": "Verwenden Sie mindestens 8 Zeichen mit Buchstaben, Zahlen und Symbolen.",
+      "error_required": "Passwort ist erforderlich.",
+      "error_min": "Das Passwort muss mindestens 8 Zeichen haben."
+    },
+    "country": { "label": "Land" },
+    "zip": { "label": "PLZ" ,"placeholder": "PLZ eingeben"},
+    "city": { "label": "Stadt" },
+    "rate": { "label": "Stundensatz (€)" },
+    "skills": {
+      "label": "Fähigkeiten / Leistungen",
+      "placeholder": "z. B. Reinigung, Babysitting, Gartenarbeit",
+      "error_required": "Bitte fügen Sie mindestens eine Fähigkeit hinzu."
+    },
+    "agree": {
+      "label_html": "Ich stimme den <linkTerms>Nutzungsbedingungen</linkTerms> und der <linkPrivacy>Datenschutzerklärung</linkPrivacy> zu.",
+      "error_required": "Sie müssen den Bedingungen & dem Datenschutz zustimmen."
+    },
+    "orgName": { "label": "Haushalts-/Firmenname" },
+    "website": { "label": "Website (optional)" }
+  },
+  "sections": {
+    "client": "Zusätzlich (für Jobanbieter)",
+    "helper": "Zusätzlich (für Helfer)"
+  },
+  "cta": {
+    "create": "Konto erstellen",
+    "creating": "Konto wird erstellt…",
+    "signin_prompt": "Sie haben bereits ein Konto?",
+    "signin": "Anmelden"
+  },
+  "toasts": {
+    "success_title": "Registrierung erfolgreich!",
+    "success_body": "Bitte bestätigen Sie Ihre E-Mail, um Ihr Konto zu aktivieren.",
+    "error_fallback": "Registrierung fehlgeschlagen!"
+  },
+  "messages": {
+    "fix_fields": "Bitte korrigieren Sie die markierten Felder."
+  }
+}
+

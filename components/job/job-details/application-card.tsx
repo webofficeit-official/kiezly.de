@@ -6,11 +6,16 @@ import AlertBox from "@/components/shared-ui/delete-alert-box/delet-alert-box";
 import { useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
+import { useT } from "@/app/[locale]/layout";
 
 export default function ApplicationCard({ title, description, buttonLabel, application, jobDetails, applied = false, withdraw = false, coverNote = "", proposedRate = "", logged = true }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
-      const withdrawMutation = useWithdrawApplication();
-      const router = useRouter()
+    const withdrawMutation = useWithdrawApplication();
+    const router = useRouter()
+    const { push } = useLocalizedRouter();
+
+    const t = useT("application");
 
     return (
         <Card className="shadow-sm">
@@ -26,32 +31,32 @@ export default function ApplicationCard({ title, description, buttonLabel, appli
                         {description}
                     </p>}
 
-                    {coverNote && <p className="text-gray-700 text-sm leading-relaxed">Cover Note: <br />
+                    {coverNote && <p className="text-gray-700 text-sm leading-relaxed">{t("apply-panel.card.cover-note")} <br />
                         <div
                             className="text-gray-700 text-sm leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: coverNote || "" }}
                         />
                     </p>}
-                    {proposedRate && <p className="text-gray-700 text-sm leading-relaxed">Proposed Rate: <span className="font-semibold">{proposedRate} {jobDetails?.currency}</span></p>}
+                    {proposedRate && <p className="text-gray-700 text-sm leading-relaxed">{t("apply-panel.card.proposed-rate")} <span className="font-semibold">{proposedRate} {jobDetails?.currency}</span></p>}
                     <div className="flex gap-3">
                         {
                             !withdraw &&
-                            <Button onClick={() => logged ? setIsModalOpen(true) : router.push("/signup")} className="w-full rounded-xl">
+                            <Button onClick={() => logged ? setIsModalOpen(true) : push("/signup")} className="w-full rounded-xl">
                                 {buttonLabel}
                             </Button>
                         }
                         {
                             applied &&
                             <AlertBox
-                                trigger={<Button variant="destructive" className="w-full rounded-xl">Withdraw</Button>}
-                                title="Withdraw Application?"
-                                description={`Are you sure you want to withdraw your application for "${jobDetails?.title}"?`}
-                                confirmText="Yes, Withdraw"
-                                cancelText="Cancel"
+                                trigger={<Button variant="destructive" className="w-full rounded-xl">{t("apply-panel.card.withdraw.trigger")}</Button>}
+                                title={t("apply-panel.card.withdraw.title")}
+                                description={t("apply-panel.card.withdraw.description", { title: jobDetails?.title })}
+                                confirmText={t("apply-panel.card.withdraw.confirm")}
+                                cancelText={t("apply-panel.card.withdraw.cancel")}
                                 onConfirm={() =>
                                     withdrawMutation.mutate(application.data.application.id, {
-                                        onSuccess: () => toast.success("Application withdrawn successfully!"),
-                                        onError: (err: any) => toast.error(err?.message || "Failed to withdraw."),
+                                        onSuccess: () => toast.success(t("apply-panel.card.withdraw.success")),
+                                        onError: (err: any) => toast.error(err?.message || t("apply-panel.card.withdraw.failed")),
                                     })
                                 }
                             />
@@ -60,10 +65,10 @@ export default function ApplicationCard({ title, description, buttonLabel, appli
                     <ApplicationModel
                         isModalOpen={isModalOpen}
                         setIsModalOpen={setIsModalOpen}
-                        header={applied ? "Update application" : title}
+                        header={applied ? t("apply-panel.card.model.header") : title}
                         application={application}
                         jobDetails={jobDetails}
-                        buttonLabel={applied ? "Update" : "Apply"}
+                        buttonLabel={applied ? t("apply-panel.card.model.button.update") : t("apply-panel.card.model.button.apply")}
                         update={applied ? true : false}
                     />
                 </div>
