@@ -141,7 +141,7 @@
   "work": {
     "header": {
       "title": "Work Details",
-      "sidebar_description":"",
+      "sidebar_description":"Provide work details",
       "description": "Provide details about work mode, schedule, and verification"
     },
     "fields": {
