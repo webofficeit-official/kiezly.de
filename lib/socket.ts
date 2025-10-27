@@ -2,12 +2,14 @@
 
 import { io } from "socket.io-client";
 
-const userId = localStorage.getItem("kUId") || null;
+let socket = null;
 
-const socket = io(process.env.NEXT_PUBLIC_BE_URL, {
-    auth: {
-        userId
-    }
-}); // backend URL
+if (typeof window !== "undefined") {
+    const userId = localStorage.getItem("kUId") || null;
+
+    socket = io(process.env.NEXT_PUBLIC_BE_URL, {
+        auth: { userId },
+    });
+}
 
 export default socket;
