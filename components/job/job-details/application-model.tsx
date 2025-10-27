@@ -6,8 +6,8 @@ import { useApplyJob, useUpdateApplicantStatus, useUpdateApplication, useWithdra
 import { X } from "lucide-react"
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { RichTextEditor } from "../add";
 import { useT } from "@/app/[locale]/layout";
+import { WizardRichText } from "@/components/wizard/WizardRichText";
 
 export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, application, jobDetails, buttonLabel, update = false }) {
     const [coverNote, setCoverNote] = useState(application?.data?.application?.cover_note);
@@ -90,7 +90,7 @@ export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, 
                                                     <p className="text-sm text-gray-600">{!application?.success && t("apply-panel.model.form.description")}</p>
                                                     <div className="grid gap-1">
                                                         <div className="mt-2">
-                                                            <RichTextEditor label={t("apply-panel.model.form.cover-note.label")} value={coverNote} onChange={setCoverNote} />
+                                                            <WizardRichText label={t("apply-panel.model.form.cover-note.label")} value={coverNote} onChange={setCoverNote} />
                                                         </div>
                                                         <div className="mt-4">
                                                             <Input
@@ -109,7 +109,7 @@ export default function ApplicationModel({ isModalOpen, setIsModalOpen, header, 
                                                     <p className="text-sm text-gray-600">{!application?.success && t("apply-panel.model.form.description")}</p>
                                                     <div className="grid gap-1">
                                                         <div className="mt-2">
-                                                            <RichTextEditor label={t("apply-panel.model.form.cover-note.label")} value={coverNote} onChange={setCoverNote} />
+                                                            <WizardRichText label={t("apply-panel.model.form.cover-note.label")} value={coverNote} onChange={setCoverNote} />
                                                         </div>
                                                         <div className="mt-4">
                                                             <Input

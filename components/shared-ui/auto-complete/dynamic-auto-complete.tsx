@@ -1,5 +1,18 @@
-import { ZipOption } from "@/components/job/create";
 import { useState } from "react";
+
+/* ----------------------------- Type Definitions ---------------------------- */
+export interface ZipOption {
+    id: string;         // always string, even if your API returns number
+    zipcode: string;
+    city: string;
+    state: string;
+    country_id: string;
+    latitude: number;
+    longitude: number;
+    street: string;
+}
+
+
 
 interface DynamicAutocompleteProps {
     label: string;
