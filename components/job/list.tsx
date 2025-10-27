@@ -3,7 +3,7 @@ import { useJobCollections, useJobs } from "@/lib/react-query/queries/useJob";
 import { Filters, JobList } from "@/lib/types/job";
 import dayjs from "dayjs";
 import { Bookmark, BookmarkCheck, Clock } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Button } from "../ui/button";
@@ -62,30 +62,33 @@ export default function JobFilterPage({
 }) {
   const { user } = useAuth();
   const router = useRouter();
-  const [filters, setFilters] = useState<Filters>(() => {
-    if (typeof window === "undefined") return DEFAULT_FILTERS;
-    const initial = fromQuery(window.location.search);
-    // If user has lat/lng in context, override them with defaults
-    if (user && user?.lat && user?.lng) {
-      return {
-        ...initial,
-        lat: user.lat,
-        lng: user.lng,
-        radius_km:
-          user?.lat && user?.lng
-            ? initial.radius_km || DEFAULT_FILTERS.radius_km
-            : undefined,
-      };
-    }
-
-    return initial;
-  });
+ const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
   const [localPageSize, setLocalPageSize] = useState(pageSize);
   const [savedJobs, setSavedJobs] = useState([]);
   const [pendingCategorySlug, setPendingCategorySlug] = useState<string | null>(
     null
   );
+
+const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!searchParams) return;
+
+    const q = searchParams.get("q") || "";
+    const city = searchParams.get("city") || "";
+    const category = searchParams.get("category");
+
+    const parsed = fromQuery(`?${searchParams.toString()}`);
+
+    setFilters((prev) => ({
+      ...prev,
+      ...parsed,
+      q,
+      city,
+      category_id: category ? prev.category_id : prev.category_id,
+    }));
+  }, [searchParams]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

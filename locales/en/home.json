@@ -14,9 +14,9 @@
         "button": "Search",
         "description": "Tip: use your neighborhood (e.g., \"Braunschweig, Weststadt\") to see nearby helpers.",
         "badge": {
-           "id-verified": "ID verified",
-           "first-aid": "First Aid badge",
-           "police-certificate": "Police certificate (optional)"
+            "id-verified": "ID verified",
+            "first-aid": "First Aid badge",
+            "police-certificate": "Police certificate (optional)"
         }
     },
     "popular": "Popular right now near you",
@@ -47,7 +47,8 @@
         "title": "Browse categories",
         "description": "From quick chores to recurring help.",
         "subtitle": "Typical tasks · from €15/h",
-        "post-job": "Post a {name} job"
+        "post-job": "Post a {name} job",
+        "find-job": "Find {name} jobs"
     },
     "trust-safety": {
         "title": "Trust & Safety",
