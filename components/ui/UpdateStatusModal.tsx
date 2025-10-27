@@ -21,7 +21,10 @@ export default function UpdateStatusModal({ isOpen, onClose, applicant }) {
             applicationId: applicant.id,
             status: newStatus
         }, {
-            onSuccess: () => toast.success(t("applicants.update-model.update.success")),
+            onSuccess: () => {
+                toast.success(t("applicants.update-model.update.success"))
+                onClose(true)
+            },
             onError: (err: any) => toast.error(err?.message || t("applicants.update-model.update.failed")),
         })
     }

@@ -142,7 +142,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold">
-            {t("applicants-panel.title", { title: jobDetails.title})}
+            {t("applicants-panel.title", { title: jobDetails.title })}
           </h2>
         </div>
 
@@ -234,18 +234,21 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
           </button>
         </nav>
 
+        {isModalOpen && (
+          <UpdateStatusModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            applicant={selectedApplicant}
+          />
+        )}
 
-        <UpdateStatusModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          applicant={selectedApplicant}
-        />
-
-        <ApplicantDetailModal
-          isOpen={isUserModalOpen}
-          onClose={closeUserModal}
-          userId={selectedUserId}
-        />
+        {isUserModalOpen && (
+          <ApplicantDetailModal
+            isOpen={isUserModalOpen}
+            onClose={closeUserModal}
+            userId={selectedUserId}
+          />
+        )}
 
       </main>
     </div>

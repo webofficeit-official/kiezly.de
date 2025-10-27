@@ -23,7 +23,6 @@ import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "../layout";
 import { getIcon } from "@/lib/icons/icons";
 
-
 export default function Page() {
   const collections = useCollections();
   const [what, setWhat] = React.useState("");
@@ -63,6 +62,14 @@ export default function Page() {
       }
     );
   }, []);
+
+  const doBrowserCategoryRedirect = (slug) => {
+    if (user?.role === "client") {
+      push(`/post-job/basic-details?category=${slug}`);
+    } else {
+      push(`/jobs?category=${encodeURIComponent(slug)}`);
+    }
+  };
 
   return (
     <main>
@@ -160,7 +167,7 @@ export default function Page() {
                   : categories.map(({ id, name, slug }) => (
                       <div
                         key={id}
-                        className="rounded-2xl border p-3 hover:shadow-sm"
+                        className="rounded-2xl border p-3 hover:shadow-sm cursor-pointer"
                         onClick={() => doCategory(slug)}
                       >
                         <div className="mb-2 flex items-center gap-2">
@@ -185,26 +192,27 @@ export default function Page() {
           <p className="text-neutral-600">{t("how-it-works.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {Array.isArray(howItWorks) && howItWorks.map((step: any, i: number) => {
-            const IconComponent = getIcon(step.icon);
+          {Array.isArray(howItWorks) &&
+            howItWorks.map((step: any, i: number) => {
+              const IconComponent = getIcon(step.icon);
 
-            return (
-              <Card key={i} className="h-full">
-                <CardContent className="p-5">
-                  <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                    <IconComponent className="h-4 w-4" />{" "}
-                    {/* ✅ dynamic icon */}
-                  </div>
-                  <h3 className="font-medium">
-                    {i + 1}) {step.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-neutral-600">
-                    {step.description}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
+              return (
+                <Card key={i} className="h-full">
+                  <CardContent className="p-5">
+                    <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                      <IconComponent className="h-4 w-4" />{" "}
+                      {/* ✅ dynamic icon */}
+                    </div>
+                    <h3 className="font-medium">
+                      {i + 1}) {step.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-neutral-600">
+                      {step.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
         </div>
         <div className="mt-6">
           <button
@@ -250,13 +258,13 @@ export default function Page() {
                     </p>
                     <div className="mt-3">
                       <button
-                        onClick={() =>
-                          push(`/post-job/basic-details?category=${slug}`)
-                        }
+                        onClick={() => doBrowserCategoryRedirect(slug)}
                         className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
                       transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
                       >
-                        {t("categories.post-job", { name: name })}
+                        {user?.role === "client"
+                          ? t("categories.post-job", { name: name })
+                          : t("categories.find-job",{ name: name }) }
                       </button>
                     </div>
                   </CardContent>
@@ -271,23 +279,24 @@ export default function Page() {
           <p className="text-neutral-600">{t("trust-safety.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {Array.isArray(trustSafety)&&trustSafety.map((step: any, i: number) => {
-            const IconComponent = getIcon(step.icon);
+          {Array.isArray(trustSafety) &&
+            trustSafety.map((step: any, i: number) => {
+              const IconComponent = getIcon(step.icon);
 
-            return (
-              <Card key={i}>
-                <CardContent className="p-5">
-                  <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                    <IconComponent className="h-4 w-4" />
-                  </div>
-                  <h3 className="font-medium">{step.title}</h3>
-                  <p className="mt-1 text-sm text-neutral-600">
-                    {step.description}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
+              return (
+                <Card key={i}>
+                  <CardContent className="p-5">
+                    <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
+                      <IconComponent className="h-4 w-4" />
+                    </div>
+                    <h3 className="font-medium">{step.title}</h3>
+                    <p className="mt-1 text-sm text-neutral-600">
+                      {step.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
         </div>
       </section>
 

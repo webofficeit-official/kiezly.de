@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const LOCALES = ['en', 'de'] as const;
-const DEFAULT = 'en';
+const DEFAULT = 'de';
 const COOKIE = 'NEXT_LOCALE';
 const COOKIE_OPTS = {
   path: '/',
