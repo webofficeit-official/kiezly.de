@@ -28,7 +28,7 @@ import { useT } from "@/app/[locale]/layout";
 import LocalizedLink from "@/lib/localizedLink";
 import socket from "@/lib/socket";
 const LOCALES = ["en", "de"] as const;
-const DEFAULT = "en";
+const DEFAULT = "de";
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -818,7 +818,7 @@ export default function Header() {
               <p className="mb-2 text-xs font-semibold text-gray-500">
                 {t("language")}
               </p>
-              <div className="flex justify-between gap-3">
+              <div className={`flex ${user ? "justify-between" : ""} gap-3`}>
                 {LOCALES.map((locale) => (
                   <button
                     key={locale}
