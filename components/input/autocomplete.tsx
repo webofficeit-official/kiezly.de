@@ -63,7 +63,8 @@ export default function ZipAutocomplete({
                     `cursor-pointer select-none px-4 py-2`
                   }
                 >
-                  {z.zipcode} - {z.city}
+                  {z.zipcode} - {z.city || z.state}
+                  
                 </Combobox.Option>
               ))
             )}
