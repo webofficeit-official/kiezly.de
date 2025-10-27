@@ -23,6 +23,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 import LocalizedLink from "@/lib/localizedLink";
+import socket from "@/lib/socket";
 const LOCALES = ['en', 'de'] as const;
 const DEFAULT = 'en';
 
@@ -65,6 +66,25 @@ export default function Header() {
     );
   }, []);
 
+  useEffect(() => {
+    socket.on("connect", () => console.log(`Connected to socket: ${socket.id}`))
+
+    socket.on("notification", (data) => {
+      console.log(data);
+      setNotifications((prev) => {
+        const updated = [data, ...prev];
+        // 2. Update latest three (most recent 3)
+        setLatestThree(updated.slice(0, 3));
+        // 3. Update count (if you track unread via a property like status = false)
+        setNotificationsCount(updated.filter((n) => !n.status).length);
+        return updated;
+      });
+    })
+    return () => {
+      socket.off("notification")
+    };
+  }, []);
+
   const updateNot = (id: string) => {
     uNot.mutate(id, {
       onSuccess: (data) => {
@@ -80,23 +100,23 @@ export default function Header() {
 
 
   useEffect(() => {
-  const seg = pathname.split('/').filter(Boolean)[0];
-  setActiveLanguage(LOCALES.includes(seg as any) ? seg : DEFAULT);
-}, [pathname]);
+    const seg = pathname.split('/').filter(Boolean)[0];
+    setActiveLanguage(LOCALES.includes(seg as any) ? seg : DEFAULT);
+  }, [pathname]);
 
   const handleChange = (next: 'en' | 'de') => {
-  // Remember for a year (readable by middleware & server)
-  document.cookie = `NEXT_LOCALE=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    // Remember for a year (readable by middleware & server)
+    document.cookie = `NEXT_LOCALE=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
 
-  const parts = pathname.split('/').filter(Boolean);
-  const rest = LOCALES.includes(parts[0] as any) ? parts.slice(1) : parts;
+    const parts = pathname.split('/').filter(Boolean);
+    const rest = LOCALES.includes(parts[0] as any) ? parts.slice(1) : parts;
 
-  // Keep the rest of the path/query/hash
-  const search = window.location.search || '';
-  const hash = window.location.hash || '';
+    // Keep the rest of the path/query/hash
+    const search = window.location.search || '';
+    const hash = window.location.hash || '';
 
-  router.replace(`/${next}/${rest.join('/')}${search}${hash}`);
-};
+    router.replace(`/${next}/${rest.join('/')}${search}${hash}`);
+  };
 
   return (
     <>
@@ -131,7 +151,7 @@ export default function Header() {
               >
                 <LanguagesIcon className="h-6 w-6 text-gray-700" />
                 <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                   {(LOCALES.includes(activeLanguag as any) ? activeLanguag : DEFAULT).toUpperCase()}
+                  {(LOCALES.includes(activeLanguag as any) ? activeLanguag : DEFAULT).toUpperCase()}
                 </span>
               </button>
               {/* Dropdown */}
@@ -144,9 +164,8 @@ export default function Header() {
                         setLanguageOpen(false);
                         handleChange(locale);
                       }}
-                      className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100 ${
-                        activeLanguag == locale && "bg-gray-200"
-                      }`}
+                      className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100 ${activeLanguag == locale && "bg-gray-200"
+                        }`}
                     >
                       {locale.toUpperCase()}
                     </button>
@@ -239,8 +258,8 @@ export default function Header() {
                       <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
                         {(user?.avatar_url ||
                           "https://placehold.co/96x96")?.[0].toUpperCase() || (
-                          <User className="w-4 h-4" />
-                        )}
+                            <User className="w-4 h-4" />
+                          )}
                       </div>
                     </>
                   )}

@@ -14,6 +14,7 @@ import { Loader } from "@/components/ui/loader";
 import toast from "react-hot-toast";
 import { useSyncFavoritesOnLogin } from "../utils/saved-job-helper";
 import { useLocalizedRouter } from "../useLocalizedRouter";
+import socket from "../socket";
 
 type AuthContextType = {
     user: UserProfile;
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const refreshToken = getCookie("refreshToken");
         if (!refreshToken) {
             setUser(null);
+            localStorage.setItem("kUId", null)
             setLoading(false);
             return;
         }
@@ -56,8 +58,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const res = await apiClient.get("/profile/me");
             setUser(res?.data?.user);
+            localStorage.setItem("kUId", res?.data?.user?.id || "")
+            socket.auth = { userId: res?.data?.user?.id }
+            socket.connect();
         } catch {
             setUser(null);
+            localStorage.setItem("kUId", null)
         } finally {
             setLoading(false);
         }
@@ -114,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setAccessToken(null);
             setRefreshToken(null);
             setUser(null);
+            localStorage.setItem("kUId", null)
             push('/signin')
         }
     }
