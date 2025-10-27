@@ -1,0 +1,203 @@
+{
+  "page_title": "Minijob veröffentlichen",
+  "common": {
+    "next": "Nächste",
+    "prev": "Vorher",
+    "save": "Speichern",
+    "loading": "Wird geladen",
+    "fix_errors": "Bitte korrigieren Sie die markierten Felder.",
+    "creating": "Wird erstellt...",
+    "updating": "Wird aktualisiert…",
+    "saving":"Wird gespeichert…",
+    "save_changes":"Änderungen speichern",
+    "create_job":"Job erstellen"
+  },
+
+  "basic": {
+    "header": {
+      "title": "Grundlegende Details",
+      "description": "Geben Sie die wichtigsten Informationen an"
+    },
+    "fields": {
+      "title": "Titel",
+      "subtitle": "Untertitel",
+      "slug": "Slug",
+      "category": "Jobkategorie",
+      "tags": "Tags",
+      "job_type": "Jobtyp",
+      "experience": "Erfahrungsniveau"
+    },
+    "helpers": {
+      "slug_autogen": "↻ Slug automatisch generieren",
+      "title_placeholder": "Babysitter-Job in Berlin",
+      "subtitle_placeholder": "Kurze Beschreibung",
+      "slug_placeholder": "babysitter-job-in-berlin"
+    },
+    "validation": {
+      "title_required": "Titel ist erforderlich",
+      "title_min": "Der Titel muss mindestens 8 Zeichen lang sein",
+      "slug_required": "Slug ist erforderlich",
+      "category_required": "Jobkategorie ist erforderlich"
+    },
+    "toasts": {
+      "create_success": "Job erfolgreich erstellt!",
+      "update_success": "Job erfolgreich aktualisiert!",
+      "failure": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    }
+  },
+
+  "details": {
+    "header": {
+      "title": "Jobdetails",
+      "sidebar_description": "Geben Sie detaillierte Informationen an",
+      "description":"Geben Sie detaillierte Informationen zum Job an"
+    },
+    "fields": {
+      "description": "Stellenbeschreibung",
+      "requirements": "Anforderungen",
+      "tasks": "Aufgaben",
+      "languages": "Sprachen"
+    },
+    "placeholders": {
+      "description": "Schreiben Sie hier die Stellenbeschreibung…",
+      "requirements": "Schreiben Sie hier die Anforderungen…",
+      "tasks": "Schreiben Sie hier die Aufgaben…"
+    },
+    "validation": {
+      "description_required": "Eine Stellenbeschreibung ist erforderlich.",
+      "description_empty": "Die Stellenbeschreibung darf nicht leer sein."
+    },
+    "toasts": {
+      "update_success": "Jobdetails aktualisiert!"
+    }
+  },
+
+  "location": {
+    "header": {
+      "title": "Standortdetails",
+      "sidebar_description":"Geben Sie Standortdetails an",
+      "description": "Geben Sie die Standortdetails für Ihren Job an"
+    },
+    "fields": {
+      "country": "Land",
+      "postal_code": "Postleitzahl",
+      "street": "Straße",
+      "city": "Stadt",
+      "state": "Bundesland",
+      "latitude": "Breitengrad",
+      "longitude": "Längengrad"
+    },
+    "placeholders": {
+      "postal_code": "Geben Sie die Postleitzahl ein",
+      "street": "Essen",
+      "city": "Berlin",
+      "state": "Nordrhein-Westfalen",
+      "lat": "51.4535",
+      "lng": "7.0102"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "country_required": "Land ist erforderlich",
+      "postal_code_required": "Postleitzahl ist erforderlich",
+      "street_required": "Straße ist erforderlich",
+      "city_required": "Stadt ist erforderlich",
+      "state_required": "Bundesland ist erforderlich"
+    },
+    "toasts": {
+      "update_success": "Standortdetails aktualisiert!",
+      "update_failure":"Standortdetails konnten nicht aktualisiert werden."
+    }
+  },
+
+  "pricing": {
+    "header": {
+      "title": "Preisdetails",
+      "description": "Legen Sie die Preise für diesen Auftrag fest"
+    },
+    "fields": {
+      "currency": "Währung",
+      "price_type": "Preisart",
+      "price_value": "Festpreis",
+      "price_min": "Mindestpreis",
+      "price_max": "Maximaler Preis"
+    },
+    "price_type_options": {
+      "fixed": "Fest",
+      "range": "Spanne"
+    },
+    "validation": {
+      "currency_required": "Währung ist erforderlich",
+      "price_type_required": "Preistyp ist erforderlich",
+      "fixed_gt_zero": "Der Festpreis muss größer als 0 sein",
+      "min_gte_zero": "Mindestpreis muss ≥ 0 sein",
+      "max_gte_min": "Der Höchstpreis muss ≥ dem Mindestpreis sein."
+    },
+    "toasts": {
+      "update_success": "Preisangaben aktualisiert!",
+      "update_failure":"Aktualisierung der Preisdetails fehlgeschlagen."
+    }
+  },
+
+  "work": {
+    "header": {
+      "title": "Arbeitsdetails",
+      "sidebar_description":"Geben Sie Arbeitsdetails an",
+      "description": "Details zu Arbeitsmodus, Zeitraum und Nachweisen"
+    },
+    "fields": {
+      "work_mode": "Arbeitsmodus",
+      "start_date": "Startdatum",
+      "end_date": "Enddatum",
+      "first_aid": "Erste Hilfe verifiziert",
+      "police": "Polizeiliches Führungszeugnis"
+    },
+    "validation": {
+      "work_mode_required": "Arbeitsmodus ist erforderlich",
+      "start_required": "Startdatum ist erforderlich",
+      "end_after_start": "Das Enddatum darf nicht vor dem Startdatum liegen"
+    },
+    "toasts": {
+      "update_success": "Arbeitsdetails aktualisiert!",
+      "update_failure":"Die Arbeitsdetails konnten nicht aktualisiert werden."
+    },
+    "work_mode_options": {
+      "on_site": "Vor Ort",
+      "remote": "Remote",
+      "hybrid": "Hybrid"
+    }
+  },
+
+  "contact": {
+    "header": {
+      "title": "Kontaktdaten",
+      "description": "Geben Sie an, wie Bewerber Sie erreichen können"
+    },
+    "fields": {
+      "contact_method": "Kontaktmethode",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "link": "Externer Link"
+    },
+    "methods": {
+      "email_relay": "E-Mail-Weiterleitung",
+      "direct_email": "Direkte E-Mail",
+      "phone": "Telefon",
+      "external_link": "Externer Link"
+    },
+    "placeholders": {
+    },
+    "validation": {
+      "method_required": "Kontaktmethode ist erforderlich",
+      "email_required": "E-Mail ist erforderlich.",
+      "email_invalid": "Ungültiges E-Mail-Format.",
+      "phone_required": "Telefonnummer ist erforderlich.",
+      "link_required": "Externer Link ist erforderlich.",
+      "link_invalid": "Bitte geben Sie eine gültige URL ein (z. B. https://example.com).",
+      "link_protocol": "Nur HTTP- oder HTTPS-Links sind erlaubt."
+    },
+    "toasts": {
+      "save_success": "Kontaktdaten erfolgreich gespeichert!",
+      "save_failure": "Das Speichern der Kontaktdaten ist fehlgeschlagen."
+    }
+  }
+}

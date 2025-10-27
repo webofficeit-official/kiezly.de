@@ -1,0 +1,55 @@
+{
+  "title": "Create your account",
+  "subtitle_html": "One account to <strong>post mini-jobs</strong> or <strong>apply as a helper</strong>.",
+  "roles": {
+    "helper": "I’m a Helper",
+    "client": "I want to Post Jobs"
+  },
+  "form": {
+    "firstName": { "label": "First name *", "error_required": "First name is required.", "error_min": "First name must be at least 2 characters." },
+    "lastName": { "label": "Last name *", "error_required": "Last name is required.", "error_min": "Last name must be at least 2 characters." },
+    "email": { "label": "Email *", "error_required": "Email is required.", "error_invalid": "Enter a valid email address." },
+    "phone": { "label": "Phone (optional)" },
+    "password": {
+      "label": "Password *",
+      "show": "Show",
+      "hide": "Hide",
+      "hint": "Use at least 8 characters with a mix of letters, numbers and symbols.",
+      "error_required": "Password is required.",
+      "error_min": "Password must be at least 8 characters."
+    },
+    "country": { "label": "Country" },
+    "zip": { "label": "ZIP" ,"placeholder": "Enter ZIP code"},
+    "city": { "label": "City" },
+    "rate": { "label": "Hourly rate (€)" },
+    "skills": {
+      "label": "Skills / Services",
+      "placeholder": "e.g. Cleaning, Babysitting, Gardening",
+      "error_required": "Please add at least one skill."
+    },
+    "agree": {
+      "label_html": "I agree to the <linkTerms>Terms</linkTerms> and <linkPrivacy>Privacy Policy</linkPrivacy>.",
+      "error_required": "You must accept Terms & Privacy."
+    },
+    "orgName": { "label": "Household/Company name" },
+    "website": { "label": "Website (optional)" }
+  },
+  "sections": {
+    "client": "Additional (for Job Posters)",
+    "helper": "Additional (for Helpers)"
+  },
+  "cta": {
+    "create": "Create account",
+    "creating": "Creating account…",
+    "signin_prompt": "Already have an account?",
+    "signin": "Sign in"
+  },
+  "toasts": {
+    "success_title": "Registration successful!",
+    "success_body": "Please verify your email to activate your account.",
+    "error_fallback": "Registration failed!"
+  },
+  "messages": {
+    "fix_fields": "Please fix the highlighted fields."
+  }
+}

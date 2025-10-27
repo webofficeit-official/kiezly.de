@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookmarkCheck, ExternalLink } from "lucide-react";
-import { Job } from "@/lib/types/job";
+import { Filters, Job } from "@/lib/types/job";
 import { useJobs, useSavedJobs } from "@/lib/react-query/queries/useJob";
-import { Filters, fromQuery } from "../list";
+
 import { useRouter } from "next/navigation";
 import { formatDate } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { fromQuery } from "@/lib/utils/job-query-filters";
+import { useT } from "@/app/[locale]/layout";
 
 export default function SimilarJobCard({ job }) {
     const router = useRouter();
@@ -25,6 +27,8 @@ export default function SimilarJobCard({ job }) {
         starts_at: undefined,
         ends_at: undefined,
     };
+    
+    const t = useT("jobs");
 
     const [filters, setFilters] = useState<Filters>(() => {
         if (typeof window === "undefined") return DEFAULT_FILTERS;
@@ -56,7 +60,7 @@ export default function SimilarJobCard({ job }) {
         <Card className="shadow-lg border-gray-100 bg-white">
             <CardHeader className="border-b border-gray-100 p-4 sm:p-5">
                 <CardTitle className="text-xl font-bold text-gray-900">
-                    Similar Jobs
+                    {t("smilar.title")}
                 </CardTitle>
             </CardHeader>
             <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white/80">
@@ -111,7 +115,7 @@ export default function SimilarJobCard({ job }) {
                                                 ? `${job.currency} ${job.price_min} – ${job.price_max}`
                                                 : job?.price_value
                                                     ? `${job.currency} ${job.price_value}`
-                                                    : "Not specified"}
+                                                    : t("smilar.not-specified")}
                                             {job?.price_type && (
                                                 <span className="text-gray-500 text-xs ml-1">
                                                     / {job.price_type}
@@ -120,7 +124,7 @@ export default function SimilarJobCard({ job }) {
                                         </p>
                                         {job?.distance && (
                                             <p className="text-gray-500 text-xs mt-1">
-                                                {(job.distance / 1000).toFixed(2)} km away
+                                                {t("smilar.away", { distance: (job.distance / 1000).toFixed(2)})}
                                             </p>
                                         )}
                                         <p className="text-gray-500 text-xs mt-1">
@@ -132,14 +136,14 @@ export default function SimilarJobCard({ job }) {
                                         className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
                                         onClick={() => window.location.href = `/jobs/${job.slug}`}
                                     >
-                                        View
+                                        {t("smilar.view")}
                                     </button>
                                 </div>
                             </article>
                         ))}
                         {similarJobs?.length === 0 && (
                             <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-                                No jobs match your filters.
+                                {t("smilar.no-jobs")}
                             </div>
                         )}
                     </div>

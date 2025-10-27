@@ -13,6 +13,8 @@ import { UserProfile } from "@/components/MyProfile";
 import { Loader } from "@/components/ui/loader";
 import toast from "react-hot-toast";
 import { useSyncFavoritesOnLogin } from "../utils/saved-job-helper";
+import { useLocalizedRouter } from "../useLocalizedRouter";
+import socket from "../socket";
 
 type AuthContextType = {
     user: UserProfile;
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<UserProfile>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { push,replace } = useLocalizedRouter();
     const pathname = usePathname();
     const loginMutation = useLogin();
     useSyncFavoritesOnLogin(user);
@@ -43,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const refreshToken = getCookie("refreshToken");
         if (!refreshToken) {
             setUser(null);
+            localStorage.setItem("kUId", null)
             setLoading(false);
             return;
         }
@@ -54,8 +58,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const res = await apiClient.get("/profile/me");
             setUser(res?.data?.user);
+            localStorage.setItem("kUId", res?.data?.user?.id || "")
+            socket.auth = { userId: res?.data?.user?.id }
+            socket.connect();
         } catch {
             setUser(null);
+            localStorage.setItem("kUId", null)
         } finally {
             setLoading(false);
         }
@@ -69,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (user && isPublic) {
             // logged in but trying to access signin/signup
-            router.replace("/jobs");
+            replace("/jobs");
         }
 
 
@@ -112,17 +120,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setAccessToken(null);
             setRefreshToken(null);
             setUser(null);
-            router.push('/signin')
+            localStorage.setItem("kUId", null)
+            push('/signin')
         }
     }
 
+    // if (loading && getCookie("refreshToken")) {
+    //     return (
+    //         <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
+    //             <Loader />
+    //         </div>
+    //     );
+    // }
+
     return (
         <AuthContext.Provider value={{ user, login, logout, loading, loadUser }}>
-            {loading || (user && ["/signin", "/signup"].includes(pathname)) ? (
-                <Loader />
-            ) : (
-                children
-            )}
+
+            {children}
+
         </AuthContext.Provider>
     );
 }

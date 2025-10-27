@@ -1,0 +1,36 @@
+{
+  "title": "Anmelden",
+  "subtitle": "Willkommen zurück! Bitte geben Sie Ihre Daten ein.",
+  "roles": {
+    "helper": "Helfer",
+    "client": "Kunde"
+  },
+  "form": {
+    "email": {
+      "label": "E-Mail *",
+      "placeholder": "E-Mail eingeben",
+      "error_required": "E-Mail ist erforderlich.",
+      "error_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+    },
+    "password": {
+      "label": "Passwort *",
+      "show": "Anzeigen",
+      "hide": "Ausblenden",
+      "error_required": "Passwort ist erforderlich."
+    },
+    "forgot": "Passwort vergessen?"
+  },
+  "cta": {
+    "signin": "Anmelden",
+    "signing_in": "Anmeldung…",
+    "signup_prompt": "Sie haben noch kein Konto?",
+    "signup": "Konto erstellen"
+  },
+  "toasts": {
+    "success": "Anmeldung erfolgreich!",
+    "error": "Anmeldung fehlgeschlagen."
+  },
+  "messages": {
+    "fix_fields": "Bitte korrigieren Sie die markierten Felder."
+  }
+}

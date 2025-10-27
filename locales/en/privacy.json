@@ -1,0 +1,39 @@
+{
+    "header": "Terms of Use (English)",
+    "description": "English translation for convenience. German version above is legally authoritative.",
+    "lists": [
+        {
+            "title": "Controller",
+            "description": "<p>Sivaprasad Sisupalan – Speckenkamp 12, 38162 Sülfeld, Germany<br /> Email: <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a>, <a href=\"mailto:sabeel@weboffice.com\">sabeel@weboffice.com</a>.</p>"
+        },
+        {
+            "title": "Purpose & Legal Basis",
+            "description": "<p>Private, non-commercial site. Processing only as needed to operate the website securely and reliably (Art. 6(1)(f) GDPR – legitimate interest).</p>"
+        },
+        {
+            "title": "Server Logs",
+            "description": "<p>Technical data (e.g., truncated IP, timestamp, requested resource, user agent) may be processed for delivery, troubleshooting, and security, and retained only as long as necessary.</p>"
+        },
+        {
+            "title": "Cookies & Tracking",
+            "description": "<p><strong>No analytics or tracking cookies are used.</strong> No external analytics services are integrated. </p>"
+        },
+        {
+            "title": "Recipients & Transfers",
+            "description": "<p>If a hosting provider is used, processing occurs solely to deliver this site. No third-country transfers occur except if technically necessary (e.g., CDN delivery).</p>"
+        },
+        {
+            "title": "Your Rights",
+            "description": "<p>Access, rectification, deletion, restriction, objection, and complaint to a supervisory authority. Email requests to <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a>, <a href=\"mailto:sabeel@weboffice.com\">sabeel@weboffice.com</a>.</p>"
+        },
+        {
+            "title": "External Links",
+            "description": "<p>No responsibility is assumed for third-party content.</p>"
+        },
+        {
+            "title": "Changes",
+            "description": "<p>This notice may be updated to reflect technical or legal changes.</p>"
+        }
+    ],
+    "go-back": "Back to home"
+}

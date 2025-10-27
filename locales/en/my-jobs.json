@@ -1,0 +1,48 @@
+{
+  "title": "My Jobs",
+  "title_with_status": "My Jobs - {{status}} Jobs ({{count}})",
+  "filters": {
+    "status_label": "Select status",
+    "per_page_label": "Per page",
+    "status": {
+      "draft": "Draft",
+      "pending_review": "Pending Review",
+      "open": "Published",
+      "closed": "Closed",
+      "rejected": "Rejected",
+      "expired": "Expired",
+      "saved": "Saved"
+    },
+    "per_page": {
+      "10": "12",
+      "25": "24",
+      "50": "60"
+    }
+  },
+  "tooltips": {
+    "edit": "Edit Job",
+    "continue": "Continue Job",
+    "close": "Close Job"
+  },
+  "alert": {
+    "close_title": "Close Job?",
+    "close_description": "Are you sure you want to close this job? This action cannot be undone.",
+    "confirm": "Close",
+    "cancel": "Cancel"
+  },
+  "empty": "No jobs match your filters.",
+  "buttons": {
+    "view": "View",
+    "prev": "Prev",
+    "next": "Next",
+    "select": "Select",
+    "per_page": "Per page"
+  },
+  "cards": {    
+    "distance_km": "{{km}} km away"
+  },
+  "toasts": {
+    "close_success": "Job closed successfully!",
+    "close_error": "Failed to close the job"
+  }
+}

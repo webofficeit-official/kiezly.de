@@ -39,7 +39,32 @@ export const useWithdrawApplication = () => {
 };
 
 
+export const useUpdateApplication = () => {
+  const queryClient = useQueryClient();
 
+  return useMutation({
+    mutationFn: ({
+      applicationId,
+      status,
+      cover_note = "",
+      proposed_rate = ""
+    }: {
+      applicationId: string;
+      status?: string;
+      cover_note?: string;
+      proposed_rate?: string;
+    }) => updateApplicationStatus(applicationId, status, cover_note || "", proposed_rate || ""),
+    onSuccess: () => {
+      // Optional: invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ["applied-job"] });
+      queryClient.invalidateQueries({ queryKey: ["my-application"] });
+      queryClient.invalidateQueries({ queryKey: ["jobs", "applications"] });
+    },
+    onError: (error: any) => {
+      console.error("Apply job failed:", error);
+    },
+  });
+};
 
 export const useCheckApplied = (jobId?: string) => {
   return useQuery({
@@ -107,10 +132,14 @@ export function useUpdateApplicantStatus() {
     mutationFn: ({
       applicationId,
       status,
+      cover_note = "",
+      proposed_rate = ""
     }: {
       applicationId: string;
-      status: string;
-    }) => updateApplicationStatus(applicationId, status),
+      status?: string;
+      cover_note?: string;
+      proposed_rate?: string;
+    }) => updateApplicationStatus(applicationId, status, cover_note || "", proposed_rate || ""),
 
     onSuccess: () => {
       // invalidate the applicants list

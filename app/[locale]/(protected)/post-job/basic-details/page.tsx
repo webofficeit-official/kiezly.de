@@ -1,0 +1,420 @@
+"use client";
+import { useT } from "@/app/[locale]/layout";
+import { Card } from "@/components/ui/card";
+import { WizardDirection } from "@/components/wizard/WizardDirection";
+import { WizardHeader } from "@/components/wizard/WizardHeader";
+import { WizardInput } from "@/components/wizard/WizardInput";
+import { WizardMultiSelect } from "@/components/wizard/WizardMultiSelect";
+import { WizardNavigation } from "@/components/wizard/WizardNavigation";
+import { WizardSelect } from "@/components/wizard/WizardSelect";
+import { useJobWizard } from "@/lib/context/job-wizard-context";
+import {
+  useCreateJob,
+  useGenerateSlug,
+  useJob,
+  useJobCollections,
+  useUpdateJob,
+} from "@/lib/react-query/queries/useJob";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
+export default function Page() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const slug = searchParams.get("slug");
+  const categorySlug = searchParams.get("category");
+  const { push } = useLocalizedRouter();
+  const t = useT("post-job");
+
+  const { data: basicCollections } = useJobCollections();
+  const generateSlugMutation = useGenerateSlug();
+  const createJobMutation = useCreateJob();
+
+  const {
+    formData,
+    updateForm,
+    mode,
+    setMode,
+    jobId,
+    setJobId,
+    fetchJobBySlug,
+  } = useJobWizard();
+
+  const updateJobMutation = useUpdateJob(jobId ?? undefined);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
+
+  // ---------------- Load job data ----------------
+  const { data: existingJob, isLoading } = useJob(slug || "");
+
+  useEffect(() => {
+    if (slug && existingJob?.job) {
+      setMode("edit");
+      setJobId(existingJob.job.id);
+      updateForm(normalizeJobForForm(existingJob.job));
+    } else if (!slug) {
+      setMode("create");
+    }
+  }, [slug, existingJob]);
+
+  //  When collections load and in create mode, set default category from URL
+  useEffect(() => {
+    if (
+      !slug &&
+      categorySlug &&
+      basicCollections?.jobCategories &&
+      mode === "create"
+    ) {
+      const matchedCategory = basicCollections?.jobCategories?.find(
+        (cat) =>
+          cat.slug?.toLowerCase() === categorySlug.toLowerCase() ||
+          cat.name?.toLowerCase() === categorySlug.toLowerCase()
+      );
+
+      if (matchedCategory) {
+        updateForm({ category_id: String(matchedCategory.id) });
+      }
+    }
+  }, [categorySlug, slug, basicCollections]);
+
+  const normalizeJobForForm = (job: any) => ({
+    title: job.title || "",
+    slug: job.slug || "",
+    subtitle: job.subtitle || "",
+    category_id: job.category_id ? String(job.category_id) : "",
+    tag_ids: job.tags?.map((t: any) => String(t.id)) || [],
+    job_type: job.job_type || [],
+    job_experience: job.job_experience || [],
+    status: job.status || "draft",
+  });
+
+  // ---------------- Validation ----------------
+  const validateStep = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.title || formData.title.trim() === "") {
+      newErrors.title = t("basic.validation.title_required");
+    } else if (formData.title.length < 8) {
+      newErrors.title = t("basic.validation.title_min");
+    }
+
+    if (!formData.slug || formData.slug.trim() === "") {
+      newErrors.slug = t("basic.validation.slug_required");
+    }
+
+    if (!formData.category_id || formData.category_id === "") {
+      newErrors.category_id = t("basic.validation.category_required");
+    }
+
+    setErrors(newErrors);
+    return newErrors;
+  };
+
+  // ---------------- Field Change (Live Error Update) ----------------
+  const handleFieldChange = (field: string, value: any) => {
+    updateForm({ [field]: value });
+
+    setErrors((prev) => {
+      const updated = { ...prev };
+      delete updated[field];
+
+      if (field === "title") {
+        if (!value || value.trim() === "") updated.title = t("basic.validation.title_required");
+        else if (value.length < 8)
+          updated.title = t("basic.validation.title_min");
+      }
+
+      if (field === "slug") {
+        if (!value || value.trim() === "") updated.slug = t("basic.validation.slug_required");
+      }
+
+      if (field === "category_id") {
+        if (!value || value === "")
+          updated.category_id = t("basic.validation.category_required");
+      }
+
+      return updated;
+    });
+  };
+
+  // ---------------- Title → Slug Auto Generate ----------------
+  const handleTitleChange = (value: string) => {
+    handleFieldChange("title", value);
+
+    if (!slugEdited && mode === "create") {
+      generateSlugMutation.mutate(value, {
+        onSuccess: (res) => updateForm({ slug: res.slug }),
+      });
+    }
+  };
+
+  // ---------------- Manual Slug Re-Generate ----------------
+  const handleSlugAutoGenerate = () => {
+    setSlugEdited(false);
+    generateSlugMutation.mutate(formData.title, {
+      onSuccess: (res) => updateForm({ slug: res.slug }),
+    });
+  };
+
+  // ---------------- Handle Next ----------------
+  const handleNext = async () => {
+    const newErrors = validateStep();
+    if (Object.keys(newErrors).length > 0) {
+      toast.error(t("common.fix_errors"));
+      setShowErrors(true);
+      return;
+    }
+
+    try {
+      const payload = {
+        title: formData?.title,
+        slug: formData?.slug,
+        subtitle: formData?.subtitle,
+        category_id: formData?.category_id,
+        tag_ids: formData?.tag_ids || [],
+        job_type: formData?.job_type || [],
+        job_experience: formData?.job_experience || [],
+        status: formData.status ? formData.status : "draft",
+      };
+
+      // --- CREATE JOB ---
+      if (mode === "create" && !jobId) {
+        const res = await createJobMutation.mutateAsync(payload);
+        if (res?.data?.id) {
+          setJobId(res.data.id);
+          setMode("edit");
+          updateForm({ slug: res.data.slug });
+          //   toast.success("Job created successfully!");
+          push(`/post-job/job-details?slug=${res.data.slug}`);
+        }
+      }
+      // --- UPDATE JOB ---
+      else if (mode === "edit" && jobId) {
+        await updateJobMutation.mutateAsync(payload, {
+          onSuccess: (res: any) => {
+            const updatedSlug = res?.job?.slug || formData.slug;
+            setJobId(res?.job?.id);
+            updateForm({ slug: updatedSlug });
+            // toast.success("Job updated successfully!");
+            push(`/post-job/job-details?slug=${updatedSlug}`);
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Job creation/update failed:", err);
+      toast.error(t("basic.toasts.failure"));
+    }
+  };
+
+  // ---------------- Dropdown Options ----------------
+  const categoryOptions =
+    basicCollections?.jobCategories?.map((c) => ({
+      label: c.name,
+      value: String(c.id),
+    })) || [];
+
+  const tagOptions =
+    basicCollections?.jobTags?.map((t) => ({
+      label: t.name,
+      value: String(t.id),
+    })) || [];
+
+  const jobTypeOptions =
+    basicCollections?.jobType?.map((t) => ({
+      label: t,
+      value: t,
+    })) || [];
+
+  const experienceOptions =
+    basicCollections?.jobExperience?.map((e) => ({
+      label: e,
+      value: e,
+    })) || [];
+
+  const isNextLoading =
+    createJobMutation.isPending || updateJobMutation.isPending || isLoading;
+
+  // ---------------- UI ----------------
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Header */}
+        <section className="lg:col-span-3 space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">{t("page_title")}</h2>
+          </div>
+        </section>
+
+        <Card className="lg:col-span-3 space-y-4">
+          <div className="grid grid-cols-12 gap-4">
+            {/* Sidebar */}
+            <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
+              <div className="flex flex-wrap justify-center lg:flex-col gap-2 lg:space-y-4">
+                <WizardNavigation
+                  title={t("basic.header.title")}
+                  description={t("basic.header.description")}
+                  count={1}
+                  current={true}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title={t("details.header.title")}
+                  description={t("details.header.description")}
+                  count={2}
+                  current={false}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title={t("location.header.title")}
+                  description={t("location.header.sidebar_description")}
+                  count={3}
+                  current={false}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title={t("pricing.header.title")}
+                  description={t("pricing.header.description")}
+                  count={4}
+                  current={false}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title={t("work.header.title")}
+                  description={t("work.header.sidebar_description")}
+                  count={5}
+                  current={false}
+                  finished={false}
+                />
+                <WizardNavigation
+                  title={t("contact.header.title")}
+                  description={t("contact.header.description")}
+                  count={6}
+                  current={false}
+                  finished={false}
+                />
+              </div>
+            </div>
+
+            {/* Main Section */}
+            <div className="col-span-12 sm:col-span-6 lg:col-span-7 bg-white p-6">
+              <WizardHeader
+                title={t("basic.header.title")}
+                description={t("basic.header.description")}
+              />
+
+              <div className="mt-5 space-y-4">
+                {/* Title & Subtitle */}
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="flex-1">
+                    <WizardInput
+                      label={t("basic.fields.title")}
+                      placeholder={t("basic.helpers.title_placeholder")}
+                      value={formData?.title || ""}
+                      onChange={handleTitleChange}
+                      error={showErrors ? errors.title : ""}
+                      required
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <WizardInput
+                      label={t("basic.fields.subtitle")}
+                      placeholder={t("basic.helpers.subtitle_placeholder")}
+                      value={formData?.subtitle || ""}
+                      onChange={(v) => updateForm({ subtitle: v })}
+                    />
+                  </div>
+                </div>
+
+                {/* Slug */}
+                <div>
+                  <WizardInput
+                    label={t("basic.fields.slug")}
+                    placeholder={t("basic.helpers.slug_placeholder")}
+                    value={formData?.slug || ""}
+                    onChange={(v) => {
+                      setSlugEdited(true);
+                      handleFieldChange("slug", v);
+                    }}
+                    error={showErrors ? errors.slug : ""}
+                    disabled={mode === "edit" ? true : false}
+                    required
+                  />
+                  {slugEdited && (
+                    <button
+                      type="button"
+                      onClick={handleSlugAutoGenerate}
+                      className="text-gray-600 text-sm underline mt-1 hover:text-gray-900"
+                    >
+                     {t("basic.helpers.slug_autogen")}
+                    </button>
+                  )}
+                </div>
+
+                {/* Category & Tags */}
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="flex-1">
+                    <WizardSelect
+                       label={t("basic.fields.category")}
+                      value={formData?.category_id || ""}
+                      onChange={(v) => handleFieldChange("category_id", v)}
+                      options={categoryOptions || []}
+                      error={showErrors ? errors.category_id : ""}
+                      required
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <WizardMultiSelect
+                      label={t("basic.fields.tags")}
+                      values={formData?.tag_ids || []}
+                      onChange={(v) => updateForm({ tag_ids: v })}
+                      options={tagOptions || []}
+                    />
+                  </div>
+                </div>
+
+                {/* Job Type & Experience */}
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="flex-1">
+                    <WizardMultiSelect
+                     label={t("basic.fields.job_type")}
+                      values={
+                        Array.isArray(formData?.job_type)
+                          ? formData.job_type
+                          : []
+                      }
+                      onChange={(v) => updateForm({ job_type: v })}
+                      options={jobTypeOptions || []}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <WizardMultiSelect
+                      label={t("basic.fields.experience")}
+                      values={
+                        Array.isArray(formData?.job_experience)
+                          ? formData.job_experience
+                          : []
+                      }
+                      onChange={(v) => updateForm({ job_experience: v })}
+                      options={experienceOptions || []}
+                    />
+                  </div>
+                </div>
+
+                {/* Navigation */}
+                <WizardDirection
+                  next
+                  onNext={handleNext}
+                  isNextLoading={isNextLoading}
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </main>
+    </div>
+  );
+}

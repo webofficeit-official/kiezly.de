@@ -67,19 +67,23 @@ export function useJobCollections() {
   });
 }
 
-export const useJobs = (filters: Record<string, any>) => {
+export const useJobs = (filters: Record<string, any>, options?: any) => {
   return useQuery<JobApiResponse>({
     queryKey: ["jobs", filters],
     queryFn: () => getJobsApi(filters),
     keepPreviousData: true, // works here
+    staleTime: 5000, // optional — prevents refetch on tab switch
+    ...options,
   } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
 };
 
-export const myJobs = (filters: Record<string, any>) => {
+export const myJobs = (filters: Record<string, any>, options?: Partial<UseQueryOptions<JobApiResponse>>) => {
   return useQuery<JobApiResponse>({
     queryKey: ["jobs", filters],
     queryFn: () => getMyJobsApi(filters),
     keepPreviousData: true, // works here
+    enabled: options?.enabled ?? true, // ✅ defaults to same behavior
+    ...options,
   } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
 };
 
@@ -88,6 +92,29 @@ export const useSavedJobs = () => {
     queryKey: ["savedJobs"],
     queryFn: () => getSavedJobsListApi(),
     keepPreviousData: true,
+  } as UseQueryOptions<
+    JobSaveApiResponse,
+    unknown,
+    JobSaveApiResponse,
+    readonly unknown[]
+  >);
+};
+
+type UseSavedJobsOptions = {
+  enabled?: boolean; // allows controlling when to fetch
+};
+export const useSavedJobsWhileLogin = (options?: UseSavedJobsOptions) => {
+  return useQuery<JobSaveApiResponse>({
+    queryKey: ["savedJobs"],
+    queryFn: () => getSavedJobsListApi(),
+    keepPreviousData: true,
+    enabled: options?.enabled ?? true, // ✅ only runs if true
+    // optional: prevent infinite retries on unauthorized errors
+    retry: (failureCount, error: any) => {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) return false; // stop retrying unauthorized
+      return failureCount < 2;
+    },
   } as UseQueryOptions<
     JobSaveApiResponse,
     unknown,

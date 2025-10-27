@@ -1,19 +1,22 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Facebook, Globe, Instagram, Linkedin, X } from "lucide-react";
+import { useT } from "@/app/[locale]/layout";
 
 export default function CompanyInfoCard({ job, role = "helper" }: { job: any, role: string }) {
+    const t = useT("company");
+
     return (
         <>
             <Card className="shadow-sm">
                 <div className="grid grid-cols-12">
                     <div className={`col-span-${role == "client" ? "12" : "5"} bg-gray-100 p-6`}>
                         <h2 className="text-lg font-semibold mb-4">
-                            About the company
+                            {t("title")}
                         </h2>
                         {job.client.avatar_url ? (
                             <>
-                                <img src={job.client?.avatar_url || "https://placehold.co/96x96"} alt={job.client?.display_name} className="h-100 w-full rounded-lg object-cover" />
+                                <img src={job.client?.avatar_url || "https://placehold.co/96x96"} alt={job.client?.display_name} className="rounded-lg object-cover" />
                             </>
                         ) : (
                             <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-full text-gray-600 font-semibold">
@@ -25,10 +28,10 @@ export default function CompanyInfoCard({ job, role = "helper" }: { job: any, ro
                             </div>
                         )}
                         <div className="mt-4">
-                            <p className="font-medium text-lg">Contact Method</p>
+                            <p className="font-medium text-lg">{t("contact-method")}</p>
                             {(job.contact_method == "email_relay" || job.contact_method == "direct_email") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`mailto:${job.contact_email}`}>{job.contact_email}</a></p>}
                             {(job.contact_method == "phone") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={`tel:${job.contact_phone}`}>{job.contact_phone}</a></p>}
-                            {(job.contact_method == "external_link") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={job.contact_link} target="__blank">{job.contact_link}</a></p>}
+                            {(job.contact_method == "external_link") && <p className="mt-3 font-semibold text-sm text-blue-700"><a href={job.contact_link} target="__blank">{t("click-here")}</a></p>}
                         </div>
                     </div>
                     <div className={`col-span-${role == "client" ? "12" : "7"} p-6`}>
@@ -61,7 +64,7 @@ export default function CompanyInfoCard({ job, role = "helper" }: { job: any, ro
                         <hr className="mt-4" />
                         {job.client.social_links.length > 0 ? (
                             <div className="mt-4">
-                                <p className="font-medium text-lg mb-3">Socials</p>
+                                <p className="font-medium text-lg mb-3">{t("socials")}</p>
                                 <div className="flex items-center gap-1">
                                     {job.client.social_links.find(s => s.platform === 'website') ? (
                                         <SocialIcons Icon={<Globe className="h-4 w-4 text-gray-600 hover:text-black" />} link={job.client.social_links.find(s => s.platform === 'website')?.url} />

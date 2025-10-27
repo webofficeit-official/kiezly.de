@@ -1,0 +1,48 @@
+{
+  "title": "Meine Jobs",
+  "title_with_status": "Meine Jobs – {{status}} Jobs ({{count}})",
+  "filters": {
+    "status_label": "Status auswählen",
+    "per_page_label": "Pro Seite",
+    "status": {
+      "draft": "Entwurf",
+      "pending_review": "Ausstehende Überprüfung",
+      "open": "Veröffentlicht",
+      "closed": "Geschlossen",
+      "rejected": "Abgelehnt",
+      "expired": "Abgelaufen",
+      "saved": "Gespeichert"
+    },
+    "per_page": {
+      "10": "12",
+      "25": "24",
+      "50": "60"
+    }
+  },
+  "tooltips": {
+    "edit": "Job bearbeiten",
+    "continue": "Job fortsetzen",
+    "close": "Job schließen"
+  },
+  "alert": {
+    "close_title": "Job schließen?",
+    "close_description": "Möchten Sie diesen Auftrag wirklich schließen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "confirm": "Schließen",
+    "cancel": "stornieren"
+  },
+  "empty": "Keine Jobs entsprechen Ihren Filtern.",
+  "buttons": {
+    "view": "Sicht",
+    "prev": "Vorher",
+    "next": "Nächste",
+    "select": "wählen",
+    "per_page": "Pro Seite"
+  },
+  "cards": {
+    "distance_km": "{{km}} km entfernt"
+  },
+  "toasts": {
+    "close_success": "Job erfolgreich geschlossen!",
+    "close_error": "Job konnte nicht geschlossen werden"
+  }
+}

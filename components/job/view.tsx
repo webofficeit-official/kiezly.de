@@ -31,6 +31,7 @@ import ApplicantsPanel from "./job-details/applicant-panel";
 import SimilarJobCard from "./job-details/similar-jobs";
 import ApplicantListCard from "./job-details/applicants-list";
 import JobCountCard from "./job-details/job-counts";
+import { useT } from "@/app/[locale]/layout";
 
 const statusOptions = [
     { id: 1, name: "applied" },
@@ -83,11 +84,13 @@ export default function JobDetail() {
         }
     }, [user])
 
+    const t = useT("jobs");
+
     // EARLY RETURNS: Now safe, since all hooks are called above
     if (isLoading) return <Loader />;
     if (isError) return (
         <div className="flex items-center justify-center min-h-screen">
-            <p className="text-red-600 text-lg">Failed to load job.</p>
+            <p className="text-red-600 text-lg">{t("detail.failed")}</p>
         </div>
     );
 
@@ -96,18 +99,15 @@ export default function JobDetail() {
 
     // Rest of your component logic (handleApplySubmit, handleSaveJob, etc.) remains unchanged
 
-
-
-
     const handleStatusChange = (applicationId: string, status: string) => {
         updateStatusMutation.mutate(
             { applicationId, status },
             {
                 onSuccess: () => {
-                    toast.success("Application status updated successfully!");
+                    toast.success(t("detail.application.success"));
                 },
                 onError: (error: any) => {
-                    toast.error(error?.message || "Failed to update application status.");
+                    toast.error(error?.message || t("detail.application.failed"));
                 },
             }
         );
@@ -121,7 +121,7 @@ export default function JobDetail() {
                 <div className="mb-6 rounded-2xl border bg-green-50 p-4 text-sm text-green-900">
                     <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-5 w-5" />
-                        <span>Your application has been submitted.</span>
+                        <span>{t("detail.application.submitted")}</span>
                     </div>
                 </div>
             )}
@@ -132,38 +132,30 @@ export default function JobDetail() {
                 <div>
                     <Card className="shadow-sm">
                         <CardHeader className="pb-4">
-                            <JobHeader job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} user={user} />
+                            <JobHeader key={jobDetails.id} job={jobDetails} savedJobs={savedJobs} setSavedJobs={setSavedJobs} user={user} />
                         </CardHeader>
 
                         <Separator />
 
                         <CardContent className="prose prose-sm max-w-none py-6">
-                            <JobDescription job={jobDetails} />
+                            <JobDescription key={jobDetails.id} job={jobDetails} />
                         </CardContent>
                     </Card>
-                    {/* Family card */}
-                    {user?.role === "helper" && (
-                        <div className="mt-6">
-                            <CompanyInfoCard job={jobDetails} role="helper" />
-                        </div>
-                    )}
 
                 </div>
+                <div>
 
-                {/* Right: sticky apply panel */}
-                {user?.role != 'client' && user?.id !== jobDetails?.client_id && (
-                    <ApplyPanel user={user} jobDetails={jobDetails} />
-                )}
-                {user?.role === "client" && user.id !== jobDetails?.client_id && (
-                    <div className="">
-                        <CompanyInfoCard job={jobDetails} role="client" />
-                    </div>
-                )}
-                {user?.role === "client" && user.id === jobDetails?.client_id && (
-                    <div className="">
+
+                    {/* Right: sticky apply panel */}
+                    {user?.role != 'client' && user?.id !== jobDetails?.client_id && (
+                        <ApplyPanel user={user} jobDetails={jobDetails} />
+                    )}
+                    {user?.role === "client" && user.id === jobDetails?.client_id ? (
                         <JobCountCard job={jobDetails} />
-                    </div>
-                )}
+                    ) : (
+                        <CompanyInfoCard job={jobDetails} role="client" />
+                    )}
+                </div>
 
             </section>
 

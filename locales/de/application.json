@@ -1,0 +1,158 @@
+{
+    "apply-panel": {
+        "success": "Bewerbung erfolgreich eingereicht",
+        "failed": "Antrag konnte nicht übermittelt werden",
+        "withdrawed": {
+            "title": "Antrag zurückgezogen",
+            "description": "Bewerbung für {title} zurückgezogen",
+            "button": "Anwendung aktualisieren"
+        },
+        "applied": {
+            "title": "Bereits angewendet",
+            "description": "Ihre Bewerbung für {title}",
+            "button": "Anwendung aktualisieren"
+        },
+        "apply": {
+            "title": "Bereit, sich zu bewerben?",
+            "description": "Mit Ihrer Bewerbung stimmen Sie unseren Bedingungen zu und erkennen unsere Datenschutzrichtlinie an.",
+            "button": {
+                "logged": "Bewerben Sie sich als {name}",
+                "unauthenticate": "Mit Kiezly.de Profil bewerben"
+            }
+        },
+        "mini-facts": {
+            "police-verified": "Polizei bestätigt",
+            "first-aid": "Erste-Hilfe-Zertifikat wünschenswert"
+        },
+        "card": {
+            "cover-note": "Anmerkung zum Deckblatt:",
+            "proposed-rate": "Vorgeschlagener Preis:",
+            "withdraw": {
+                "trigger": "Zurückziehen",
+                "title": "Antrag zurückziehen?",
+                "description": "Möchten Sie Ihre Bewerbung für \"${jobDetails?.title}\" wirklich zurückziehen?",
+                "confirm": "Ja, zurückziehen",
+                "cancel": "Stornieren",
+                "success": "Antrag erfolgreich zurückgezogen!",
+                "failed": "Abhebung fehlgeschlagen."
+            },
+            "model": {
+                "header": "Anwendung aktualisieren",
+                "button": {
+                    "update": "Aktualisieren",
+                    "apply": "Anwenden"
+                }
+            }
+        },
+        "model": {
+            "update": {
+                "success": "Anwendung erfolgreich aktualisiert!",
+                "failed": "Fehler beim Aktualisieren der Anwendung"
+            },
+            "submit": {
+                "success": "Bewerbung erfolgreich eingereicht!",
+                "failed": "Antrag konnte nicht übermittelt werden"
+            },
+            "form": {
+                "description": "Bitte teilen Sie uns Ihre Anmerkung und den vorgeschlagenen Preis mit.",
+                "cover-note": {
+                    "label": "Begleitschreiben"
+                },
+                "proposed-rate": {
+                    "label": "Vorgeschlagener Satz ({currency})",
+                    "placeholder": "z. B. 18"
+                }
+            },
+            "close": "Schließen"
+        }
+    },
+    "applicants": {
+        "title": "Bewerber",
+        "rate": "Rate:",
+        "cover-note": "Begleitschreiben:",
+        "proposed-rate": "Vorgeschlagener Preis:",
+        "applied": "Angewendet am:",
+        "update": "Aktualisierungsstatus",
+        "view-all": "Alle Bewerber anzeigen",
+        "update-model": {
+            "update": {
+                "success": "Der Bewerbungsstatus wurde erfolgreich geändert!",
+                "failed": "Status konnte nicht aktualisiert werden."
+            },
+            "title": "Updatestatus für {name}",
+            "current-status": "Aktueller Status:",
+            "status": {
+                "label": "Status",
+                "options": {
+                    "shortlisted": "in die engere Wahl gezogen",
+                    "accepted": "Akzeptiert",
+                    "rejected": "Abgelehnt"
+                }
+            },
+            "rate": "Rate:",
+            "button": {
+                "cancel": "Stornieren",
+                "update": "Bestätigen Sie die Aktualisierung"
+            }
+        }
+    },
+    "applicants-panel": {
+        "title": "Bewerber für {jobDetails.title}",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "Alle",
+                "applied": "Angewandt",
+                "shortlisted": "In die engere Wahl gezogen",
+                "accepted": "Akzeptiert",
+                "rejected": "Abgelehnt",
+                "withdrawn": "Zurückgezogen"
+            }
+        },
+        "proposed-rate": {
+            "label": "Vorgeschlagener Preis",
+            "options": {
+                "asc": "Aufsteigend",
+                "desc": "Absteigend"
+            }
+        },
+        "per-page": {
+            "label": "Pro Seite"
+        },
+        "no-applicants": "Es haben sich noch keine Bewerber beworben.",
+        "pagination": {
+            "prev": "Vorher",
+            "next": "Nächste"
+        }
+    },
+    "user": {
+        "salary-expectation": {
+            "label": "Gehaltsvorstellung",
+            "value": "€ {rate}/Std."
+        },
+        "work-experience": {
+            "label": "Berufserfahrung",
+            "value": "{years} Jahre"
+        },
+        "min-hours": {
+            "label": "Mindeststundenzahl",
+            "value": "{hours} Std."
+        },
+        "available days": {
+            "label": "Verfügbare Tage"
+        },
+        "gender": {
+            "label": "Gender"
+        },
+        "time-windows": {
+            "label": "Zeitfenster"
+        },
+        "contacts": "Kontakte",
+        "socials": "Soziale Netzwerke",
+        "since": "Mitglied seit",
+        "education": "Ausbildung",
+        "skills": "Fähigkeiten",
+        "first-aid": "Erste Hilfe",
+        "police-certificate": "Polizeizeugnis"
+    }
+}

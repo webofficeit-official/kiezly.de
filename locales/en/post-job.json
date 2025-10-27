@@ -1,0 +1,203 @@
+{
+  "page_title": "Post a Mini-Job",
+  "common": {
+    "next": "Next",
+    "prev": "Prev",
+    "save": "Save",
+    "loading": "Loading…",
+    "fix_errors": "Please fix the highlighted fields.",
+    "creating": "Creating…",
+    "updating": "Updating…",
+    "saving":"Saving...",
+    "save_changes":"Save Changes",
+    "create_job":"Create Job"
+  },
+
+  "basic": {
+    "header": {
+      "title": "Basic Details",
+      "description": "Provide the main information"
+    },
+    "fields": {
+      "title": "Title",
+      "subtitle": "Subtitle",
+      "slug": "Slug",
+      "category": "Job Category",
+      "tags": "Tags",
+      "job_type": "Job Type",
+      "experience": "Experience Level"
+    },
+    "helpers": {
+      "slug_autogen": "↻ Slug Auto-generate",
+      "title_placeholder": "Babysitting job in Berlin",
+      "subtitle_placeholder": "Short description",
+      "slug_placeholder": "babysitting-job-in-berlin"
+    },
+    "validation": {
+      "title_required": "Title is required",
+      "title_min": "Title must be at least 8 characters long",
+      "slug_required": "Slug is required",
+      "category_required": "Job category is required"
+    },
+    "toasts": {
+      "create_success": "Job created successfully!",
+      "update_success": "Job updated successfully!",
+      "failure": "Something went wrong. Please try again."
+    }
+  },
+
+  "details": {
+    "header": {
+      "title": "Job Details",
+      "sidebar_description": "Provide detailed information",
+      "description": "Provide detailed information about the job"
+    },
+    "fields": {
+      "description": "Job Description",
+      "requirements": "Requirements",
+      "tasks": "Tasks",
+      "languages": "Languages"
+    },
+    "placeholders": {
+      "description": "Write the job description here…",
+      "requirements": "Write the requirements here…",
+      "tasks": "Write the tasks here…"
+    },
+    "validation": {
+      "description_required": "Job description is required.",
+      "description_empty": "Job description cannot be empty."
+    },
+    "toasts": {
+      "update_success": "Job details updated!"
+    }
+  },
+
+  "location": {
+    "header": {
+      "title": "Location Details",
+      "sidebar_description": "Provide location details",
+      "description":"Provide the location details for your job"
+    },
+    "fields": {
+      "country": "Country",
+      "postal_code": "Postal Code",
+      "street": "Street",
+      "city": "City",
+      "state": "State",
+      "latitude": "Latitude",
+      "longitude": "Longitude"
+    },
+    "placeholders": {
+      "postal_code": "Type postal code",
+      "street": "Essen",
+      "city": "Berlin",
+      "state": "North Rhine-Westphalia",
+      "lat": "51.4535",
+      "lng": "7.0102"
+    },
+    "validation": {
+      "required": "This field is required",
+      "country_required": "Country is required",
+      "postal_code_required": "Postal Code is required",
+      "street_required": "Street is required",
+      "city_required": "City is required",
+      "state_required": "State is required"
+    },
+    "toasts": {
+      "update_success": "Location details updated!",
+      "update_failure":"Failed to update location details."
+    }
+  },
+
+  "pricing": {
+    "header": {
+      "title": "Pricing Details",
+      "description": "Set the pricing for this job"
+    },
+    "fields": {
+      "currency": "Currency",
+      "price_type": "Price Type",
+      "price_value": "Fixed Price",
+      "price_min": "Minimum Price",
+      "price_max": "Maximum Price"
+    },
+    "price_type_options": {
+      "fixed": "Fixed",
+      "range": "Range"
+    },
+    "validation": {
+      "currency_required": "Currency is required",
+      "price_type_required": "Price Type is required",
+      "fixed_gt_zero": "Fixed price must be greater than 0",
+      "min_gte_zero": "Minimum price must be ≥ 0",
+      "max_gte_min": "Maximum price must be ≥ Minimum price"
+    },
+    "toasts": {
+      "update_success": "Pricing details updated!",
+      "update_failure":"Failed to update pricing details."
+    }
+  },
+
+  "work": {
+    "header": {
+      "title": "Work Details",
+      "sidebar_description":"Provide work details",
+      "description": "Provide details about work mode, schedule, and verification"
+    },
+    "fields": {
+      "work_mode": "Work Mode",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "first_aid": "First Aid Verified",
+      "police": "Police Verified"
+    },
+    "validation": {
+      "work_mode_required": "Work mode is required",
+      "start_required": "Start Date is required",
+      "end_after_start": "End date cannot be before start date"
+    },
+    "toasts": {
+      "update_success": "Work details updated!",
+      "update_failure":"Failed to update work details."
+    },
+    "work_mode_options": {
+      "on_site": "On-site",
+      "remote": "Remote",
+      "hybrid": "Hybrid"
+    }
+  },
+
+  "contact": {
+    "header": {
+      "title": "Contact Details",
+      "description": "Provide how applicants can reach you"
+    },
+    "fields": {
+      "contact_method": "Contact Method",
+      "email": "Email",
+      "phone": "Phone",
+      "link": "External Link"
+    },
+    "methods": {
+      "email_relay": "Email Relay",
+      "direct_email": "Direct Email",
+      "phone": "Phone",
+      "external_link": "External Link"
+    },
+    "placeholders": {
+    },
+    "validation": {
+      "method_required": "Contact Method is required",
+      "email_required": "Email is required.",
+      "email_invalid": "Invalid email format.",
+      "phone_required": "Phone number is required.",
+      "link_required": "External link is required.",
+      "link_invalid": "Please enter a valid URL (e.g. https://example.com)",
+      "link_protocol": "Only HTTP or HTTPS links are allowed."
+    },
+    "toasts": {
+      "save_success": "Contact details saved successfully!",
+      "save_failure": "Failed to save contact details."
+    }
+  }
+}
