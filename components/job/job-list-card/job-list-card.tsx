@@ -41,7 +41,7 @@ export function JobResults({
   handleUnSaveJob,
 }: Props) {
   const router = useRouter();
-  const { push,prefetch } = useLocalizedRouter();
+  const { push, prefetch } = useLocalizedRouter();
 
   const isNew = (created_at: string) => {
     if (!created_at) return false;
@@ -58,7 +58,9 @@ export function JobResults({
       {/* Stats + controls */}
       <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{t("list.total-jobs", { total })}</h2>
+          <h2 className="text-lg font-semibold">
+            {t("list.total-jobs", { total })}
+          </h2>
           <p className="text-sm text-gray-600">
             {t("list.page-out-of", { page, totalPages })}
           </p>
@@ -73,14 +75,12 @@ export function JobResults({
               setPage(1);
             }}
             options={perPageOptions}
-
           />
         </div>
       </div>
 
       {/* Job Results */}
       <div className="relative">
-
         <div className="grid grid-cols-1 gap-4">
           {jobs.map((job) => (
             <article
@@ -89,9 +89,44 @@ export function JobResults({
             >
               {/* Main content */}
               <div className="flex-1 min-w-0">
+                <div className="sm:hidden mb-2 flex items-center justify-between text-xs text-gray-500">
+                  <div>
+                    {isNew(job?.created_at) ? (
+                      <Button
+                        variant="outline"
+                        className="rounded-xl px-2 text-xs flex items-center gap-1 bg-green-100 mr-1 hover:bg-green-100"
+                      >
+                        <span className="h-3">{t("list.new")}</span>
+                      </Button>
+                    ) : (
+                      `${t("list.posted")} ${new Date(
+                        job?.created_at
+                      ).toLocaleDateString()}`
+                    )}
+                  </div>
+                  <div>
+                    {savedJobs.some((j) => j.id === job.id) ? (
+                      <Button
+                        variant="default"
+                        className="rounded-xl px-2 py-1 text-xs flex items-center gap-1 bg-green-50 text-green-700 border border-green-200"
+                        onClick={() => handleUnSaveJob(job.id)}
+                      >
+                        <BookmarkCheck className="h-3 w-3" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="rounded-xl px-2 py-1 text-xs flex items-center gap-1"
+                        onClick={() => handleSaveJob(job.id)}
+                      >
+                        <Bookmark className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <h3
                   className="text-base sm:text-lg font-semibold truncate cursor-pointer"
-                   onMouseEnter={() => prefetch(`/jobs/${job.slug}`)}
+                  onMouseEnter={() => prefetch(`/jobs/${job.slug}`)}
                   onClick={() => push(`/jobs/${job.slug}`)}
                 >
                   {job.title}
@@ -103,12 +138,12 @@ export function JobResults({
                 <div className="mt-1 text-sm text-gray-700 flex flex-wrap gap-x-3 gap-y-1">
                   <span className="inline-flex items-center">
                     {job?.price_type === "range" &&
-                      job?.price_min &&
-                      job?.price_max
+                    job?.price_min &&
+                    job?.price_max
                       ? `${job.currency} ${job.price_min} – ${job.price_max}`
                       : job?.price_value
-                        ? `${job.currency} ${job.price_value}`
-                        : t("list.Not specified")}
+                      ? `${job.currency} ${job.price_value}`
+                      : t("list.Not specified")}
                     {job?.price_type && (
                       <span className="inline-flex items-center gap-1">
                         / {job.price_type}
@@ -128,7 +163,9 @@ export function JobResults({
                       .join(", ")}
                   </span>
                   {job?.distance && (
-                    <span>• {(job.distance / 1000).toFixed(2)}  {t("list.away")}</span>
+                    <span>
+                      • {(job.distance / 1000).toFixed(2)} {t("list.away")}
+                    </span>
                   )}
                   {job?.category_name && <span>• {job.category_name}</span>}
                   {job?.job_type && <span>• {job.job_type.join(", ")}</span>}
@@ -137,13 +174,13 @@ export function JobResults({
                   )}
                   {job?.starts_at && (
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3 w-3" />  {t("list.start")}:{" "}
+                      <Clock className="h-3 w-3" /> {t("list.start")}:{" "}
                       {dayjs(job.starts_at).format("MMM D, YYYY")}
                     </span>
                   )}
                   {job?.ends_at && (
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3 w-3" />  {t("list.end")}:{" "}
+                      <Clock className="h-3 w-3" /> {t("list.end")}:{" "}
                       {dayjs(job.ends_at).format("MMM D, YYYY")}
                     </span>
                   )}
@@ -166,10 +203,19 @@ export function JobResults({
                   className="mt-2 text-sm text-gray-600 line-clamp-2"
                   dangerouslySetInnerHTML={{ __html: job.description }}
                 />
+                <div className="sm:hidden mt-3 flex justify-end">
+                  <button
+                    className="inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+                    onMouseEnter={() => prefetch(`/jobs/${job.slug}`)}
+                    onClick={() => push(`/jobs/${job.slug}`)}
+                  >
+                    {t("list.view")}
+                  </button>
+                </div>
               </div>
 
               {/* Right-side controls */}
-              <div className="flex flex-col justify-between items-end min-h-[80px]">
+              <div className="hidden sm:flex  flex flex-col justify-between items-end min-h-[80px]">
                 <div className="text-xs text-gray-500">
                   {isNew(job?.created_at) ? (
                     <Button
@@ -179,7 +225,9 @@ export function JobResults({
                       <span className="h-3"> {t("list.new")}</span>
                     </Button>
                   ) : (
-                    `${t("list.posted")} ${new Date(job?.created_at).toLocaleDateString()}`
+                    `${t("list.posted")} ${new Date(
+                      job?.created_at
+                    ).toLocaleDateString()}`
                   )}
 
                   {savedJobs.some((j) => j.id === job.id) ? (
@@ -218,7 +266,6 @@ export function JobResults({
             </div>
           )}
         </div>
-
       </div>
 
       {/* Pagination */}
@@ -239,8 +286,9 @@ export function JobResults({
             .map((n) => (
               <button
                 key={n}
-                className={`rounded-xl border px-3 py-2 text-sm ${n === page ? "bg-black text-white" : ""
-                  }`}
+                className={`rounded-xl border px-3 py-2 text-sm ${
+                  n === page ? "bg-black text-white" : ""
+                }`}
                 onClick={() => setPage(n)}
               >
                 {n}

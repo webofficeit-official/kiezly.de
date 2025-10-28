@@ -1,5 +1,6 @@
 {
     "filter": {
+        "title":"Filters",
         "search": "Search",
         "active-filters": "Active filters",
         "reset": "Reset",
@@ -85,7 +86,9 @@
     "mobile": {
         "active-count": "{activeCount} active filters",
         "update-results": "Tap Apply to update results",
-        "apply": "Apply"
+        "apply": "Apply",
+        "filters":"Filters",
+        "clear":"Clear"
     },
     "detail": {
         "failed": "Failed to load job.",

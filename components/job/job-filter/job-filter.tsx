@@ -281,7 +281,7 @@ export function JobFilterSidebar({
       />
 
       {/*  Actions */}
-      <div className="flex items-center gap-3">
+      {/* <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => onChange?.(filters)}
@@ -296,7 +296,7 @@ export function JobFilterSidebar({
         >
           {t("filter.form.clear")}
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

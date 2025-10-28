@@ -1,5 +1,6 @@
 {
     "filter": {
+         "title":"Filter",
         "search": "Suchen",
         "active-filters": "Aktive Filter",
         "reset": "Zurücksetzen",
@@ -85,7 +86,9 @@
     "mobile": {
         "active-count": "{activeCount} aktive Filter",
         "update-results": "Tippen Sie auf „Übernehmen“, um die Ergebnisse zu aktualisieren",
-        "apply": "Anwenden"
+        "apply": "Anwenden",
+        "filters":"Filter",
+        "clear":"klar"
     },
     "detail": {
         "failed": "Der Job konnte nicht geladen werden.",
