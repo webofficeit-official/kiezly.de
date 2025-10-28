@@ -470,12 +470,12 @@ export default function JobFilterPage({
       </main>
       {/* Sticky mobile apply */}
      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
-        <div className="bg-white border shadow-xl rounded-2xl p-3 flex items-center gap-3">
+        <div className="bg-white shadow-xl rounded-2xl p-3 flex items-center gap-3">
           {/* Filters button */}
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm"
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm"
           >
             <SlidersHorizontal className="h-4 w-4" />
             {t("mobile.filters", { default: "Filters" })}
