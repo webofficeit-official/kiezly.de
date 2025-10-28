@@ -263,7 +263,7 @@ export default function Page() {
                         value={formData.contact_link || ""}
                         onChange={(v) => handleFieldChange("contact_link", v)}
                         required
-                        error={showErrors ? errors.contact_link : ""}
+                        error={showErrors ? errors.contact_link : ""} 
                       />
                     )}
                   </div>
