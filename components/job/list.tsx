@@ -2,11 +2,17 @@
 import { useJobCollections, useJobs } from "@/lib/react-query/queries/useJob";
 import { Filters, JobList } from "@/lib/types/job";
 import dayjs from "dayjs";
-import { Bookmark, BookmarkCheck, Clock } from "lucide-react";
+import { SlidersHorizontal, CheckCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Button } from "../ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   addJobAsFavorite,
   getSavedJobs,
@@ -62,15 +68,21 @@ export default function JobFilterPage({
 }) {
   const { user } = useAuth();
   const router = useRouter();
- const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
   const [localPageSize, setLocalPageSize] = useState(pageSize);
   const [savedJobs, setSavedJobs] = useState([]);
   const [pendingCategorySlug, setPendingCategorySlug] = useState<string | null>(
     null
   );
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [draftFilters, setDraftFilters] = useState<Filters>(filters);
 
-const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (isFilterOpen) setDraftFilters(filters);
+  }, [isFilterOpen, filters]);
 
   useEffect(() => {
     if (!searchParams) return;
@@ -235,7 +247,7 @@ const searchParams = useSearchParams();
       );
       const url = `${window.location.pathname}${qs ? "?" + qs : ""}`;
       window.history.replaceState(window.history.state, "", url);
-    } catch { }
+    } catch {}
   }, [filters, persistToUrl, canModifyHistory, collections]);
 
   const update = (patch: Partial<Filters>) =>
@@ -251,6 +263,24 @@ const searchParams = useSearchParams();
       return { ...f, [key]: Array.from(arr) } as Filters;
     });
   }
+
+  // Update draft (used by the sheet sidebar)
+  const updateDraft = (patch: Partial<Filters>) =>
+    setDraftFilters((f) => ({ ...f, ...patch }));
+
+  function toggleInArrayDraft<T extends string | number>(
+    key: keyof Filters,
+    val: T
+  ) {
+    setDraftFilters((f) => {
+      const arr = new Set(f[key] as unknown as T[]);
+      arr.has(val) ? arr.delete(val) : arr.add(val);
+      return { ...f, [key]: Array.from(arr) } as Filters;
+    });
+  }
+
+  // Optional: clear only the draft (while sheet is open)
+  const resetDraft = () => setDraftFilters(DEFAULT_FILTERS);
 
   const resetAll = () => {
     setFilters(DEFAULT_FILTERS);
@@ -339,11 +369,63 @@ const searchParams = useSearchParams();
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      {" "}
+      {/* Mobile sheet for filters */}
+      <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        <SheetContent side="left" className="p-0 w-full sm:max-w-md">
+          <SheetHeader className="p-4 border-b flex items-center gap-2">
+            <SheetTitle className="flex items-center gap-2">
+              {t("filter.title", { default: "Filters" })}
+              {activeCount > 0 && (
+                <CheckCircle
+                  className="h-5 w-5 text-black"
+                  aria-label="Filters active"
+                />
+              )}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="p-4 overflow-auto h-[calc(100vh-8rem)]">
+            {isCollectionsLoading && !collections ? (
+              <FilterSidebarSkeleton />
+            ) : (
+              <JobFilterSidebar
+                filters={draftFilters}
+                update={updateDraft}
+                toggleInArray={toggleInArrayDraft}
+                resetAll={resetDraft}
+                activeCount={activeCount}
+                collections={collections}
+                user={user}
+                onChange={onChange}
+              />
+            )}
+          </div>
+
+             <div className="p-4 border-t flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={resetDraft}
+              className="rounded-xl border px-4 py-2 text-sm"
+            >
+              {t("mobile.clear", { default: "Clear" })}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFilters({ ...draftFilters }); 
+                setPage(1);                      
+                setIsFilterOpen(false);           
+              }}
+              className="rounded-xl bg-black text-white px-4 py-2 text-sm"
+            >
+              {t("mobile.apply", { default: "Apply" })}
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Filters */}
-        <section className="lg:col-span-1">
+        <section className="lg:col-span-1 hidden lg:block">
           {isCollectionsLoading && !collections ? (
             <FilterSidebarSkeleton />
           ) : (
@@ -362,8 +444,9 @@ const searchParams = useSearchParams();
 
         {/* Right: Job list + debug preview */}
         <section
-          className={`lg:col-span-2 space-y-4  ${delayedFetching ? "opacity-60" : "opacity-100"
-            }`}
+          className={`lg:col-span-2 space-y-4  ${
+            delayedFetching ? "opacity-60" : "opacity-100"
+          }`}
         >
           {delayedFetching && !isInitialLoad && <JobSkeleton count={4} />}
 
@@ -386,19 +469,33 @@ const searchParams = useSearchParams();
         </section>
       </main>
       {/* Sticky mobile apply */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
-        <div className="bg-white border shadow-xl rounded-2xl p-3 flex items-center justify-between">
-          <div className="text-sm">
-            <div className="font-medium">{t("mobile.active-count", { activeCount })}</div>
-            <div className="text-gray-600">{t("mobile.update-results")}</div>
-          </div>
+     <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
+        <div className="bg-white border shadow-xl rounded-2xl p-3 flex items-center gap-3">
+          {/* Filters button */}
           <button
             type="button"
-            onClick={() => onChange?.(filters)}
-            className="inline-flex items-center justify-center rounded-xl bg-black text-white px-4 py-2 text-sm"
+            onClick={() => setIsFilterOpen(true)}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm"
           >
-            {t("mobile.apply")}
+            <SlidersHorizontal className="h-4 w-4" />
+            {t("mobile.filters", { default: "Filters" })}
+            {activeCount > 0 && (
+              <span className="inline-flex items-center justify-center rounded-full bg-black text-white text-[10px] px-1.5 py-0.5">
+                {activeCount}
+              </span>
+            )}
           </button>
+
+          {/* Clear applied filters (only visible if any active) */}
+          {activeCount > 0 && (
+            <button
+              type="button"
+              onClick={resetAll}
+              className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm border"
+            >
+              {t("mobile.clear", { default: "Clear" })}
+            </button>
+          )}
         </div>
       </div>
     </div>
