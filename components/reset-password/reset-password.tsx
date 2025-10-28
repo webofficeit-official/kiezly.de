@@ -26,19 +26,20 @@ type Props = { id: string };
 
 function InlineError({ text }: { text: string }) {
   const { push } = useLocalizedRouter();
+  const t=useT("reset-password")
 
   return (
     <div className="mx-auto  max-w-md rounded-xl border border-red-200 bg-red-50 p-4 text-center text-sm text-red-700 shadow-sm">
       <p className="font-medium text-red-700">{text}</p>
       <p className="mt-1 text-xs text-red-600">
-        Please request a new password reset link.
+        {t("reset_error.description")||"Please request a new password reset link."}
       </p>
 
       <button
         onClick={() => push("/forgot-password")}
         className="mt-3 inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 transition"
       >
-        Request New Link
+         {t("reset_error.requst_reset")||" Request New Link"}       
       </button>
     </div>
   );
@@ -67,7 +68,7 @@ export default function ResetPassword({ id }: Props) {
 
   if (verify.isLoading) return <Loader />;
   if (verify.isError || verify.data?.success === false)
-    return <InlineError text="Reset link is invalid or expired." />;
+    return <InlineError text={t("reset_error.title")||"Reset link is invalid or expired."} />;
 
   // i18n text
   const txt = {
