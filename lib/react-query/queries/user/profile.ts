@@ -64,6 +64,11 @@ export interface UpdateProfileData {
   education: Education[]
 }
 
+export interface UpdatePasswordData {
+  old_password: string;
+  new_password: string;
+}
+
 interface UploadResponse {
   success: boolean;
   message: string; // adjust to your backend response
@@ -91,6 +96,12 @@ interface UpdateProfileResponse {
   user: UserProfile;
 }
 
+interface UpdatePasswordResponse {
+  success: boolean;
+  message: string;
+  user: UserProfile;
+}
+
 export const getProfile = (): UseMutationResult<
   MyProfileResponse,   
   Error       
@@ -109,6 +120,17 @@ export const updateProfile = (): UseMutationResult<
   return useMutation({
     mutationFn: (data: UpdateProfileData) =>
       apiClient.put("/profile/me", data).then(res => res.data),
+  });
+};
+
+export const updatePassword = (): UseMutationResult<
+  UpdatePasswordResponse,      // Type of data returned
+  Error,               // Type of error
+  UpdatePasswordData           // Variables you pass to mutate()
+> => {
+  return useMutation({
+    mutationFn: (data: UpdatePasswordData) =>
+      apiClient.patch("/profile/change-password", data).then(res => res.data),
   });
 };
 
