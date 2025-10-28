@@ -379,7 +379,7 @@ export default function Header() {
                     >
                       {t("change-password")}
                     </button>
-                    {user.role === "client" ? (
+                    {user && user?.role === "client" ? (
                       <button
                         className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                         onClick={() => {
@@ -564,7 +564,7 @@ export default function Header() {
                 >
                   {user?.avatar_url ? (
                     <img
-                      src={user.avatar_url}
+                      src={user?.avatar_url}
                       alt="avatar"
                       className="h-full w-full object-cover"
                     />
@@ -628,7 +628,7 @@ export default function Header() {
                     {t("change-password")}
                   </button>
 
-                  {user.role === "client" ? (
+                  {user?.role === "client" ? (
                     <button
                       className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                       onClick={() => {
@@ -685,8 +685,202 @@ export default function Header() {
 
           {/* Drawer content */}
           <div className="p-4 space-y-6 overflow-y-auto">
-            {/* MAIN NAV LINKS (moved into drawer) */}
+            {user && (
+              <>
+                <div className="rounded-lg border">
+                  <button
+                    className="w-full px-3 py-3 flex items-center gap-3 hover:bg-gray-50"
+                    // onClick={() => setMobileUserSubOpen((v) => !v)}
+                    aria-expanded={mobileUserSubOpen}
+                  >
+                    {user?.avatar_url ? (
+                      <img
+                        src={user?.avatar_url || "https://placehold.co/96x96"}
+                        alt={displayName || "avatar"}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-white">
+                        {(displayName?.[0] || "U").toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 text-left">
+                      <p className="text-sm font-semibold">{displayName}</p>
+                      <p className="text-xs text-gray-500">
+                        {(user?.first_name || "") +
+                          " " +
+                          (user?.last_name || "")}
+                      </p>
+                    </div>
+                    {/* {mobileUserSubOpen ? (
+                      <ChevronUp className="h-5 w-5 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-gray-500" />
+                    )} */}
+                  </button>
+
+                  {/* {mobileUserSubOpen && (
+                    <div className="border-t">
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onClick={() => {
+                          push("/my-profile");
+                          setMobileOpen(false);
+                        }}
+                      >
+                        {t("my-profile")}
+                      </button>
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onClick={() => {
+                          push("/change-password");
+                          setMobileOpen(false);
+                        }}
+                      >
+                        {t("change-password")}
+                      </button>
+
+                      {user.role === "client" ? (
+                        <button
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                          onClick={() => {
+                            push("/my-jobs");
+                            setMobileOpen(false);
+                          }}
+                        >
+                          {t("my-jobs")}
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                            onClick={() => {
+                              push("/saved-job");
+                              setMobileOpen(false);
+                            }}
+                          >
+                            {t("saved-jobs")}
+                          </button>
+                          <button
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                            onClick={() => {
+                              push("/applied-jobs");
+                              setMobileOpen(false);
+                            }}
+                          >
+                            {t("applied-jobs")}
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onClick={() => {
+                          logout();
+                          setMobileOpen(false);
+                        }}
+                      >
+                        {t("logout")}
+                      </button>
+                    </div>
+                  )} */}
+                </div>
+              </>
+            )}
+            {user && (
+              <>
+                <nav className="space-y-2">
+                  <LocalizedLink
+                    href="/my-profile"
+                    className="block rounded-lg px-3 py-2 hover:bg-gray-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {t("my-profile")}
+                  </LocalizedLink>
+
+                  <LocalizedLink
+                    href="/change-password"
+                    className="block rounded-lg px-3 py-2 hover:bg-gray-100"
+                    onClick={() => {
+                      setMobileOpen(false);
+                    }}
+                  >
+                    {t("change-password")}
+                  </LocalizedLink>
+
+                  {user?.role === "client" ? (
+                    <LocalizedLink
+                      href="/my-jobs"
+                      className="block rounded-lg px-3 py-1 hover:bg-gray-100"
+                      onClick={() => {
+                        setMobileOpen(false);
+                      }}
+                    >
+                      {t("my-jobs")}
+                    </LocalizedLink>
+                  ) : (
+                    <>
+                      <LocalizedLink
+                        href="/saved-job"
+                        className="block rounded-lg px-3 py-1 hover:bg-gray-100"
+                        onClick={() => {
+                          setMobileOpen(false);
+                        }}
+                      >
+                        {t("saved-jobs")}
+                      </LocalizedLink>
+                      <LocalizedLink
+                        href="/applied-jobs"
+                        className="block rounded-lg px-3 py-1 hover:bg-gray-100"
+                        onClick={() => {
+                          setMobileOpen(false);
+                        }}
+                      >
+                        {t("applied-jobs")}
+                      </LocalizedLink>
+                    </>
+                  )}
+
+                  {user && (
+                    <button
+                      className="w-full text-left px-3 py-2 rounded-lg border text-sm text-sm hover:bg-gray-50 bg-gray-900 text-white border-gray-900"
+                      onClick={() => {
+                        logout();
+                        setMobileOpen(false);
+                      }}
+                    >
+                      {t("logout")}
+                    </button>
+                  )}
+                </nav>
+
+                <div className="flex items-center gap-0 my-4">
+                  <div className="flex-1 border-t border-gray-200"></div>
+                  {/* <span className="text-xs uppercase text-gray-400"></span> */}
+                  <div className="flex-1 border-t border-gray-200"></div>
+                </div>
+              </>
+            )}
+
             <nav className="space-y-2">
+              {!user && (
+                <>
+                  <div className="grid grid-cols-1 gap-2">
+                    <LocalizedLink
+                      href="/signin"
+                      className="inline-flex items-center justify-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
+                    >
+                      {t("signin")}
+                    </LocalizedLink>
+                  </div>
+                  <div className="flex items-center gap-0 my-4">
+                    <div className="flex-1 border-t border-gray-200"></div>
+                    {/* <span className="text-xs uppercase text-gray-400"></span> */}
+                    <div className="flex-1 border-t border-gray-200"></div>
+                  </div>
+                </>
+              )}
+
               <LocalizedLink
                 href="/how-it-works"
                 className="block rounded-lg px-3 py-2 hover:bg-gray-100"
@@ -715,169 +909,53 @@ export default function Header() {
               >
                 {t("jobs")}
               </LocalizedLink>
-              {user?.role === "client" && (
+            </nav>
+
+            {user && user?.role === "client" && (
+              <>
+                <div className="flex items-center gap-0 my-4">
+                  <div className="flex-1 border-t border-gray-200"></div>
+                  {/* <span className="text-xs uppercase text-gray-400"></span> */}
+                  <div className="flex-1 border-t border-gray-200"></div>
+                </div>
                 <div className="grid grid-cols-1 gap-2">
                   <LocalizedLink
                     href="/post-job/basic-details"
-                    className="inline-flex items-center justify-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
+                    className="inline-flex items-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                   >
                     {t("post-mini-job")}
                   </LocalizedLink>
                 </div>
-              )}
-            </nav>
-            {/* USER block with collapsible submenu */}
-            {user ? (
-              <div className="rounded-lg border">
-                <button
-                  className="w-full px-3 py-3 flex items-center gap-3 hover:bg-gray-50"
-                  onClick={() => setMobileUserSubOpen((v) => !v)}
-                  aria-expanded={mobileUserSubOpen}
-                >
-                  {user?.avatar_url ? (
-                    <img
-                      src={user?.avatar_url || "https://placehold.co/96x96"}
-                      alt={displayName || "avatar"}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-white">
-                      {(displayName?.[0] || "U").toUpperCase()}
-                    </div>
-                  )}
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-semibold">{displayName}</p>
-                    <p className="text-xs text-gray-500">
-                      {(user?.first_name || "") + " " + (user?.last_name || "")}
-                    </p>
-                  </div>
-                  {mobileUserSubOpen ? (
-                    <ChevronUp className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-500" />
-                  )}
-                </button>
-
-                {mobileUserSubOpen && (
-                  <div className="border-t">
-                    <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                      onClick={() => {
-                        push("/my-profile");
-                        setMobileOpen(false);
-                      }}
-                    >
-                      {t("my-profile")}
-                    </button>
-                    <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                      onClick={() => {
-                        push("/change-password");
-                        setMobileOpen(false);
-                      }}
-                    >
-                      {t("change-password")}
-                    </button>
-
-                    {user.role === "client" ? (
-                      <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                        onClick={() => {
-                          push("/my-jobs");
-                          setMobileOpen(false);
-                        }}
-                      >
-                        {t("my-jobs")}
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                          onClick={() => {
-                            push("/saved-job");
-                            setMobileOpen(false);
-                          }}
-                        >
-                          {t("saved-jobs")}
-                        </button>
-                        <button
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                          onClick={() => {
-                            push("/applied-jobs");
-                            setMobileOpen(false);
-                          }}
-                        >
-                          {t("applied-jobs")}
-                        </button>
-                      </>
-                    )}
-
-                    <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                      onClick={() => {
-                        logout();
-                        setMobileOpen(false);
-                      }}
-                    >
-                      {t("logout")}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-2">
-                <LocalizedLink
-                  href="/signup?role=helper"
-                  className="inline-flex items-center justify-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {t("become-helper")}
-                </LocalizedLink>
-                <LocalizedLink
-                  href="/signup?role=client"
-                  className="inline-flex items-center justify-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {t("post-mini-job")}
-                </LocalizedLink>
-              </div>
+              </>
             )}
 
-            {/* LANGUAGE QUICK PICK (inside drawer) */}
-            <div>
-              <p className="mb-2 text-xs font-semibold text-gray-500">
-                {t("language")}
-              </p>
-              <div className={`flex ${user ? "justify-between" : ""} gap-3`}>
-                {LOCALES.map((locale) => (
-                  <button
-                    key={locale}
-                    onClick={() => {
-                      handleChange(locale);
-                      setMobileOpen(false);
-                    }}
-                    className={`px-3 py-2 rounded-lg border text-sm ${
-                      activeLanguag === locale
-                        ? "bg-gray-900 text-white border-gray-900"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+            {user ? (
+              <></>
+            ) : (
+              <>
+                <div className="flex items-center gap-0 my-4">
+                  <div className="flex-1 border-t border-gray-200"></div>
+                  {/* <span className="text-xs uppercase text-gray-400"></span> */}
+                  <div className="flex-1 border-t border-gray-200"></div>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <LocalizedLink
+                    href="/signup?role=helper"
+                    className="inline-flex items-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
+                    onClick={() => setMobileOpen(false)}
                   >
-                    {locale.toUpperCase()}
-                  </button>
-                ))}
-                {user && (
-                  <button
-                    className="w-full text-left px-3 py-2 rounded-lg border text-sm text-sm hover:bg-gray-50 bg-gray-900 text-white border-gray-900"
-                    onClick={() => {
-                      logout();
-                      setMobileOpen(false);
-                    }}
+                    {t("become-helper")}
+                  </LocalizedLink>
+                  <LocalizedLink
+                    href="/signup?role=client"
+                    className="inline-flex items-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
+                    onClick={() => setMobileOpen(false)}
                   >
-                    {t("logout")}
-                  </button>
-                )}
-              </div>
-            </div>
+                    {t("post-mini-job")}
+                  </LocalizedLink>
+                </div>
+              </>
+            )}
           </div>
         </aside>
       </div>
