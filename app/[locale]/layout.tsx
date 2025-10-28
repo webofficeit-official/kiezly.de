@@ -23,13 +23,12 @@ export function useT(fileName?: string) {
 
     if (value === undefined) return key;
 
-    // ✅ Handle arrays — just return them as is
     if (Array.isArray(value)) return value;
 
-    // ✅ Handle objects (e.g. nested translation groups)
+    //  Handle objects (e.g. nested translation groups)
     if (typeof value === "object" && value !== null) return value;
 
-    // ✅ Replace placeholders in strings (like "Post a {name} job")
+    // Replace placeholders in strings (like "Post a {name} job")
     if (typeof value === "string") {
       return value.replace(/\{(\w+)\}/g, (_, v) => vars[v] ?? `{${v}}`);
     }
@@ -94,7 +93,8 @@ export default function LocaleLayout({ children, params }: any) {
     "my-jobs",
     "post-job",
     "reset-password",
-    "forgot-password"
+    "forgot-password",
+    "changePassword"
   ]; // add more as needed
 
   useEffect(() => {
