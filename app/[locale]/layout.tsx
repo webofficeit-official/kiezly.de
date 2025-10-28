@@ -93,6 +93,7 @@ export default function LocaleLayout({ children, params }: any) {
     "company",
     "my-jobs",
     "post-job",
+    "changePassword"
   ]; // add more as needed
 
   useEffect(() => {

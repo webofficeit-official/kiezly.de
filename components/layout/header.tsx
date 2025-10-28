@@ -370,6 +370,15 @@ export default function Header() {
                     >
                       {t("my-profile")}
                     </button>
+                    <button
+                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        push("/change-password");
+                      }}
+                    >
+                      {t("change-password")}
+                    </button>
                     {user.role === "client" ? (
                       <button
                         className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
@@ -607,6 +616,18 @@ export default function Header() {
                     {t("my-profile")}
                   </button>
 
+                  <button
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                    onClick={() => {
+                      setMobileHeaderDDOpen(false);
+                      setMobileOpen(false);
+                      push("/change-password");
+                    }}
+                    role="menuitem"
+                  >
+                    {t("change-password")}
+                  </button>
+
                   {user.role === "client" ? (
                     <button
                       className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
@@ -747,6 +768,15 @@ export default function Header() {
                       }}
                     >
                       {t("my-profile")}
+                    </button>
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      onClick={() => {
+                        push("/change-password");
+                        setMobileOpen(false);
+                      }}
+                    >
+                      {t("change-password")}
                     </button>
 
                     {user.role === "client" ? (
