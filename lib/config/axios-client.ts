@@ -3,6 +3,13 @@ import axios from "axios";
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
 const baseURL = process.env.NEXT_PUBLIC_API_URL || "";
 
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    _retry?: boolean;
+    skipAuthRefresh?: boolean;
+  }
+}
+
 // keep access in memory for speed
 let accessToken: string | null = null;
 
@@ -76,6 +83,9 @@ apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
+     if (originalRequest?.skipAuthRefresh) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

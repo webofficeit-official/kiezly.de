@@ -111,7 +111,7 @@ export const useLogin = (): UseMutationResult<
 > => {
   return useMutation({
     mutationFn: (data: LoginData) =>
-      apiClient.post("/auth/login", data).then(
+      apiClient.post("/auth/login", data,{ skipAuthRefresh: true }).then(
         (res) => {
           const loginData = res.data;
 
