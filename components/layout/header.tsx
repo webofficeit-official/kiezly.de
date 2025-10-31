@@ -206,8 +206,9 @@ export default function Header() {
               {t("jobs")}
             </LocalizedLink>
              <LocalizedLink href={"/signin"} className="hover:opacity-80">
-            {t("cta.signin")}
+            {t("signin")}
             </LocalizedLink>
+            
           </nav>
           <div className="flex items-center gap-2 relative">
             <div className="relative mr-2">
