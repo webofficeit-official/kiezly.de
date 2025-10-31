@@ -4,7 +4,7 @@ import { useT } from "@/app/[locale]/layout";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { getErrorMessage } from "@/lib/utils/error";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation"
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
@@ -56,7 +56,7 @@ function LoginPage() {
   const [message, setMessage] = React.useState(null);
   const [showPassword, setShowPassword] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [remember, setRemember] = React.useState(true);
+  const [remember, setRemember] = React.useState(false);
 
   const [role, setRole] = React.useState<"helper" | "client">(
     roleParam === "client" || roleParam === "helper" ? roleParam : "client"
@@ -131,6 +131,7 @@ function LoginPage() {
       // Simulate API call
 
       login(email, password, {
+        remember,
         onSuccess: () => {
           toast.custom((to) => (
             <div
@@ -260,14 +261,14 @@ function LoginPage() {
                 </p>
               )}
               <div className="mt-3 flex items-center justify-between">
-                {/* <label className="flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
                   />
                   {t("form.remember_me") ?? "Remember me"}
-                </label> */}
+                </label> 
                 <Link
                   href="/forgot-password"
                   className="text-gray-600 underline hover:text-black"
