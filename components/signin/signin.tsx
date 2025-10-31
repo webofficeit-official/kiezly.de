@@ -56,6 +56,8 @@ function LoginPage() {
   const [message, setMessage] = React.useState(null);
   const [showPassword, setShowPassword] = React.useState(false);
   const [errors, setErrors] = React.useState({});
+  const [remember, setRemember] = React.useState(true);
+
   const [role, setRole] = React.useState<"helper" | "client">(
     roleParam === "client" || roleParam === "helper" ? roleParam : "client"
   );
@@ -144,7 +146,7 @@ function LoginPage() {
               {/* Message */}
               <div className="flex-1 p-3">
                 <p className="text-sm font-semibold text-green-600">
-                  {t('toasts.success')}
+                  {t("toasts.success")}
                 </p>
               </div>
 
@@ -163,7 +165,7 @@ function LoginPage() {
           push("/jobs");
         },
         onError: (err) => {
-          toast.error(getErrorMessage(err) || `${t('toasts.error')}`);
+          toast.error(getErrorMessage(err) || `${t("toasts.error")}`);
         },
       });
       setSubmitting(false);
@@ -182,9 +184,7 @@ function LoginPage() {
         <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
           <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
 
-          <p className="mt-1 text-sm text-gray-600">
-           {t("subtitle")}
-          </p>
+          <p className="mt-1 text-sm text-gray-600">{t("subtitle")}</p>
 
           <form
             onSubmit={onSubmit}
@@ -193,7 +193,7 @@ function LoginPage() {
           >
             <div>
               <label htmlFor="email" className="mb-1 block text-sm font-medium">
-                 {t("form.email.label")}
+                {t("form.email.label")}
               </label>
               <input
                 id="email"
@@ -224,7 +224,7 @@ function LoginPage() {
                 htmlFor="password"
                 className="mb-1 block text-sm font-medium"
               >
-                 {t("form.password.label")}
+                {t("form.password.label")}
               </label>
               <div className="relative">
                 <input
@@ -249,7 +249,9 @@ function LoginPage() {
                   onClick={() => setShowPassword((s) => !s)}
                   className="absolute inset-y-0 right-2 my-auto rounded-lg px-2 text-xs text-gray-600 hover:bg-gray-100"
                 >
-                  {showPassword ? t("form.password.hide") : t("form.password.show")}
+                  {showPassword
+                    ? t("form.password.hide")
+                    : t("form.password.show")}
                 </button>
               </div>
               {getFieldError("password") && (
@@ -257,12 +259,20 @@ function LoginPage() {
                   {getFieldError("password")}
                 </p>
               )}
-              <div className="mt-2 text-right text-xs">
+              <div className="mt-3 flex items-center justify-between">
+                {/* <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                  />
+                  {t("form.remember_me") ?? "Remember me"}
+                </label> */}
                 <Link
                   href="/forgot-password"
                   className="text-gray-600 underline hover:text-black"
                 >
-                 {t("form.forgot")}
+                  {t("form.forgot")}
                 </Link>
               </div>
             </div>
@@ -273,13 +283,13 @@ function LoginPage() {
               className="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-white disabled:opacity-60"
               aria-disabled={submitDisabled}
             >
-              {submitting ?  t("cta.signing_in") : t("cta.signin")}
+              {submitting ? t("cta.signing_in") : t("cta.signin")}
             </button>
 
             <p className="text-sm text-gray-600">
-                 {t("cta.signup_prompt")}{" "}
+              {t("cta.signup_prompt")}{" "}
               <Link href="/signup" className="font-medium underline">
-                  {t("cta.signup")}
+                {t("cta.signup")}
               </Link>
             </p>
 
