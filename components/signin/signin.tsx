@@ -4,7 +4,7 @@ import { useT } from "@/app/[locale]/layout";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { getErrorMessage } from "@/lib/utils/error";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation"
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
@@ -56,7 +56,7 @@ function LoginPage() {
   const [message, setMessage] = React.useState(null);
   const [showPassword, setShowPassword] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [remember, setRemember] = React.useState(true);
+  const [remember, setRemember] = React.useState(false);
 
   const [role, setRole] = React.useState<"helper" | "client">(
     roleParam === "client" || roleParam === "helper" ? roleParam : "client"
