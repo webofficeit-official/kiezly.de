@@ -205,9 +205,12 @@ export default function Header() {
             <LocalizedLink href={"/jobs"} className="hover:opacity-80">
               {t("jobs")}
             </LocalizedLink>
-             <LocalizedLink href="/signin" className="hover:opacity-80">
+            {!user&&(
+               <LocalizedLink href="/signin" className="hover:opacity-80">
                 {t("signin")}
               </LocalizedLink>
+            )}
+            
           </nav>
 
          

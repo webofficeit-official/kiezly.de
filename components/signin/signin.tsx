@@ -131,6 +131,7 @@ function LoginPage() {
       // Simulate API call
 
       login(email, password, {
+        remember,
         onSuccess: () => {
           toast.custom((to) => (
             <div
@@ -260,14 +261,14 @@ function LoginPage() {
                 </p>
               )}
               <div className="mt-3 flex items-center justify-between">
-                {/* <label className="flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
                   />
                   {t("form.remember_me") ?? "Remember me"}
-                </label> */}
+                </label> 
                 <Link
                   href="/forgot-password"
                   className="text-gray-600 underline hover:text-black"
