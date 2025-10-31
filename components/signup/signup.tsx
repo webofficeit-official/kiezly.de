@@ -584,27 +584,25 @@ export default function RegisterPage() {
     <main className="flex-1 bg-gray-50">
       <section className="mx-auto max-w-3xl px-4 py-10">
         <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
-       {/* Title + subtitle with responsive sign-in link */}
-<div>
-  <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
 
-  <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600 gap-2">
-    {/* Subtitle */}
-    <p dangerouslySetInnerHTML={{ __html: t("subtitle_html") }} />
+            <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600 gap-2">
+              {/* Subtitle */}
+              <p dangerouslySetInnerHTML={{ __html: t("subtitle_html") }} />
 
-    {/* Sign-in link */}
-    <p className="text-sm text-gray-600">
-      {t("cta.signin_prompt")}{" "}
-      <Link
-        href={`/signin?role=${role}`}
-        className="text-black font-medium hover:underline"
-      >
-        {t("cta.signin")}
-      </Link>
-    </p>
-  </div>
-</div>
-
+              {/* Sign-in link */}
+              <p className="text-sm text-gray-600">
+                {t("cta.signin_prompt")}{" "}
+                <Link
+                  href={`/signin?role=${role}`}
+                  className="text-black font-medium hover:underline"
+                >
+                  {t("cta.signin")}
+                </Link>
+              </p>
+            </div>
+          </div>
 
           {/* Role selector */}
           <div className="mt-6 inline-flex rounded-full bg-gray-100 p-1 text-sm">
