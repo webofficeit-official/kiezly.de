@@ -317,7 +317,7 @@ export default function MyJobs({
                                     closeJobMutation.mutate(job.id, {
                                       onSuccess: () => {
                                         toast.success(
-                                         t("toasts.close_success")
+                                          t("toasts.close_success")
                                         );
                                         update({ status: "closed" });
                                       },
@@ -395,7 +395,9 @@ export default function MyJobs({
                             </p>
                           )}
                           <p className="text-gray-500 text-xs mt-1">
-                            {job.city}, {job.state}, {job.countries?.name}
+                            {[job.city, job.state, job.countries?.name]
+                              .filter(Boolean)
+                              .join(", ")}
                           </p>
                         </div>
 
