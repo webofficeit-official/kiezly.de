@@ -1,5 +1,6 @@
-import { useMutation, UseMutationResult } from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQuery, UseQueryResult } from "@tanstack/react-query";
 import apiClient, { setAccessToken, setRefreshToken } from "@/lib/config/axios-client";
+import { ForgotPasswordData, ForgotPasswordResponse, ResetPasswordData, ResetPasswordResponse, VerifyResetParams, VerifyResetResponse } from "@/lib/types/auth-type";
 
 export interface SignupData {
   first_name: string;
@@ -110,7 +111,7 @@ export const useLogin = (): UseMutationResult<
 > => {
   return useMutation({
     mutationFn: (data: LoginData) =>
-      apiClient.post("/auth/login", data).then(
+      apiClient.post("/auth/login", data,{ skipAuthRefresh: true }).then(
         (res) => {
           const loginData = res.data;
 
@@ -148,5 +149,53 @@ export const getCityByZip = (): UseMutationResult<
         country: data.country,
         limit: 5
       }).then(res => res.data),
+  });
+};
+
+export const useForgotPassword = (): UseMutationResult<
+  ForgotPasswordResponse,
+  Error,
+  ForgotPasswordData
+> => {
+  return useMutation({
+    mutationFn: (data: ForgotPasswordData) =>
+      apiClient.post("/auth/forgot-password", data).then((res) => res.data),
+  });
+};
+// Verify reset link
+export const useVerifyResetLink = (
+  params: VerifyResetParams | null
+): UseQueryResult<VerifyResetResponse, Error> => {
+  const enabled = !!params?.id && !!params?.token;
+  return useQuery({
+    queryKey: ["verify-reset", params?.id, params?.token],
+    enabled,
+    queryFn: async () => {
+      const { id, token } = params!;
+      const res = await apiClient.get(`/auth/verify-link/${id}`, {
+        params: { token },
+      });
+      return res.data as VerifyResetResponse;
+    },
+  
+    retry: false,
+  });
+};
+
+// Reset password 
+export const useResetPassword = (): UseMutationResult<
+  ResetPasswordResponse,
+  Error,
+  ResetPasswordData
+> => {
+  return useMutation({
+    mutationFn: async ({ id, token, password }) => {
+      const res = await apiClient.post(
+        `/auth/reset-password/${id}`,
+        { password },                  // body
+        { params: { token } }          // query ?token=...
+      );
+      return res.data as ResetPasswordResponse;
+    },
   });
 };

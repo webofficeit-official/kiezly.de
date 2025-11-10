@@ -2,14 +2,17 @@
 import React from "react";
 import dayjs from "dayjs";
 import { Filters, DatePosted, SortBy } from "@/lib/types/job";
-import { DateInput } from "../add";
 import { Select } from "../job-filter-select/select-option";
 import { useT } from "@/app/[locale]/layout";
+import { DateInput } from "@/components/DateInput/date-input";
 
 type Props = {
   filters: Filters;
   update: (patch: Partial<Filters>) => void;
-  toggleInArray: <T extends string | number>(key: keyof Filters, val: T) => void;
+  toggleInArray: <T extends string | number>(
+    key: keyof Filters,
+    val: T
+  ) => void;
   resetAll: () => void;
   activeCount: number;
   collections: any;
@@ -27,7 +30,6 @@ export function JobFilterSidebar({
   user,
   onChange,
 }: Props) {
-
   const t = useT("jobs");
 
   const postedOptions = [
@@ -52,7 +54,9 @@ export function JobFilterSidebar({
             {t("filter.search")}
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">{t("filter.active-filters")}</span>
+            <span className="text-sm text-gray-600">
+              {t("filter.active-filters")}
+            </span>
             <span className="inline-flex items-center justify-center rounded-full bg-gray-900 text-white text-xs w-6 h-6">
               {activeCount}
             </span>
@@ -117,7 +121,9 @@ export function JobFilterSidebar({
       {/*  Category */}
       {collections?.jobCategories?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">{t("filter.form.category.label")}</legend>
+          <legend className="block text-sm font-medium">
+            {t("filter.form.category.label")}
+          </legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobCategories.map((cat: any) => (
               <label
@@ -139,7 +145,9 @@ export function JobFilterSidebar({
       {/* Job Type */}
       {collections?.jobType?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">{t("filter.form.job-type.label")}</legend>
+          <legend className="block text-sm font-medium">
+            {t("filter.form.job-type.label")}
+          </legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobType.map((type: string) => (
               <label
@@ -160,7 +168,9 @@ export function JobFilterSidebar({
 
       {/*  Pay range */}
       <div>
-        <span className="block text-sm font-medium">{t("filter.form.hourly-pay.label")}</span>
+        <span className="block text-sm font-medium">
+          {t("filter.form.hourly-pay.label")}
+        </span>
         <div className="mt-2 grid grid-cols-2 gap-3">
           <input
             id="min_price"
@@ -186,7 +196,9 @@ export function JobFilterSidebar({
       {/*  Job Experience */}
       {collections?.jobExperience?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">{t("filter.form.job-experience.label")}</legend>
+          <legend className="block text-sm font-medium">
+            {t("filter.form.job-experience.label")}
+          </legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobExperience.map((exp: string) => (
               <label
@@ -208,7 +220,9 @@ export function JobFilterSidebar({
       {/* 🏷 Job Tags */}
       {collections?.jobTags?.length > 0 && (
         <fieldset>
-          <legend className="block text-sm font-medium">{t("filter.form.job-tags.label")}</legend>
+          <legend className="block text-sm font-medium">
+            {t("filter.form.job-tags.label")}
+          </legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {collections.jobTags.map((tag: any) => (
               <label
@@ -267,7 +281,7 @@ export function JobFilterSidebar({
       />
 
       {/*  Actions */}
-      <div className="flex items-center gap-3">
+      {/* <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => onChange?.(filters)}
@@ -282,7 +296,7 @@ export function JobFilterSidebar({
         >
           {t("filter.form.clear")}
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

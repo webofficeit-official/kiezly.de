@@ -258,12 +258,12 @@ export default function Page() {
 
                     {contactMethod === "external_link" && (
                       <WizardInput
-                       label={t("contact.fields.external_link")}
+                       label={t("contact.fields.link")}
                         placeholder="https://example.com"
                         value={formData.contact_link || ""}
                         onChange={(v) => handleFieldChange("contact_link", v)}
                         required
-                        error={showErrors ? errors.contact_link : ""}
+                        error={showErrors ? errors.contact_link : ""} 
                       />
                     )}
                   </div>

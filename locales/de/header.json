@@ -7,6 +7,7 @@
     "post-mini-job": "Minijob veröffentlichen",
     "view-all-notifications": "Alle Benachrichtigungen anzeigen",
     "my-profile": "Mein Profil",
+    "change-password": "Kennwort ändern",
     "my-jobs": "Meine Jobs",
     "saved-jobs": "Gespeicherte Jobs",
     "applied-jobs": "Angewandte Jobs",
@@ -15,5 +16,7 @@
     "close": "Schließen",
     "impressum": "Impressum",
     "privacy": "Datenschutz",
-    "terms": "Geschäftsbedingungen"
+    "terms": "Geschäftsbedingungen",
+    "signin":"Einloggen",
+    "signup":"Melden Sie sich an"
 }

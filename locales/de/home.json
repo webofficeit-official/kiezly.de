@@ -47,7 +47,8 @@
         "title": "Kategorien durchsuchen",
         "description": "Von schnellen Aufgaben bis hin zu wiederkehrender Hilfe.",
         "subtitle": "Typische Aufgaben · ab 15 €/h",
-        "post-job": "Einen {name}-Job veröffentlichen"
+        "post-job": "Einen {name}-Job veröffentlichen",
+        "find-job": "{name}-Jobs finden"
     },
     "trust-safety": {
         "title": "Vertrauen und Sicherheit",
