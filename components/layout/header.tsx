@@ -216,7 +216,15 @@ export default function Header() {
             <LocalizedLink href={"/jobs"} className="hover:opacity-80">
               {t("jobs")}
             </LocalizedLink>
+            {!user&&(
+               <LocalizedLink href="/signin" className="hover:opacity-80">
+                {t("signin")}
+              </LocalizedLink>
+            )}
+            
           </nav>
+
+         
           <div className="flex items-center gap-2 relative">
             <div className="relative mr-2">
               <button

@@ -18,7 +18,8 @@
       "hide": "Hide",
       "error_required": "Password is required."
     },
-    "forgot": "Forgot password?"
+    "forgot": "Forgot password?",
+    "remember_me":"Remember me"
   },
   "cta": {
     "signin": "Sign in",
