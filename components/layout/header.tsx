@@ -27,6 +27,8 @@ import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 import LocalizedLink from "@/lib/localizedLink";
 import socket from "@/lib/socket";
+import { useJobWizard } from "@/lib/context/job-wizard-context";
+import { useQueryClient } from "@tanstack/react-query";
 const LOCALES = ["en", "de"] as const;
 const DEFAULT = "de";
 
@@ -41,7 +43,9 @@ export default function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [activeLanguag, setActiveLanguage] = useState("");
+  const { reset,clearForm } = useJobWizard();
   const pathname = usePathname();
+  const qc = useQueryClient();
 
   // ====================== MOBILE DRAWER STATE (NEW) ======================
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -182,6 +186,13 @@ export default function Header() {
     setMobileHeaderDDOpen(false);
   }, [pathname]);
 
+  const handleStartNew = () => {
+    reset();
+   
+     qc.removeQueries({ queryKey: ["job"] });
+    push("/post-job/basic-details");
+  };
+
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
@@ -321,12 +332,12 @@ export default function Header() {
                 {/* Avatar button */}
                 {user?.role === "client" && (
                   <>
-                    <LocalizedLink
-                      href="/post-job/basic-details"
+                    <button
+                      onClick={handleStartNew}
                       className="hidden md:inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                     >
                       {t("post-mini-job")}
-                    </LocalizedLink>
+                    </button>
                   </>
                 )}
                 <button
@@ -919,12 +930,12 @@ export default function Header() {
                   <div className="flex-1 border-t border-gray-200"></div>
                 </div>
                 <div className="grid grid-cols-1 gap-2">
-                  <LocalizedLink
-                    href="/post-job/basic-details"
+                  <button
+                    onClick={handleStartNew}
                     className="inline-flex items-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                   >
                     {t("post-mini-job")}
-                  </LocalizedLink>
+                  </button>
                 </div>
               </>
             )}
