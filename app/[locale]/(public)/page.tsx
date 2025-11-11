@@ -22,12 +22,13 @@ import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "../layout";
 import { getIcon } from "@/lib/icons/icons";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
 
 export default function Page() {
   const collections = useCollections();
   const [what, setWhat] = React.useState("");
   const [where, setWhere] = React.useState("");
-  const [categories, setCategories] = React.useState([]);
+  const [categories, setCategories] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const router = useRouter();
 
@@ -38,12 +39,10 @@ export default function Page() {
   const trustSafety = t("trust-safety.steps") || [];
 
   const doSearch = () => {
-    push(
-      `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`
-    );
+    push(`/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`);
   };
 
-  const doCategory = (slug) => {
+  const doCategory = (slug: string) => {
     push(`/jobs?category=${encodeURIComponent(slug)}`);
   };
 
@@ -52,18 +51,16 @@ export default function Page() {
     collections.mutate(
       {},
       {
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
           setCategories(data.data.jobCategories);
           setIsLoading(false);
         },
-        onError: (err: any) => {
-          setIsLoading(false);
-        },
+        onError: () => setIsLoading(false),
       }
     );
   }, []);
 
-  const doBrowserCategoryRedirect = (slug) => {
+  const doBrowserCategoryRedirect = (slug: string) => {
     if (user?.role === "client") {
       push(`/post-job/basic-details?category=${slug}`);
     } else {
@@ -98,19 +95,21 @@ export default function Page() {
                       />
                     </div>
                   </div>
+
                   <div>
                     <Label className="mb-1">{t("form.location.label")}</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                      <Input
-                        className="pl-9"
-                        placeholder={t("form.location.placeholder")}
-                        value={where}
-                        onChange={(e) => setWhere(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && doSearch()}
-                      />
-                    </div>
+                    {/* Replaced the plain Input with Autocomplete (controlled) */}
+                    <LocationAutocomplete
+                      value={where}
+                      onValueChange={setWhere}
+                      onSelect={(s) => setWhere(s.label)} // optional, ensures sync on pick
+                      placeholder={t("form.location.placeholder")}
+                      withCoords
+                      onlyOpen
+                      limit={10}
+                    />
                   </div>
+
                   <div className="flex items-end">
                     <Button className="w-full" onClick={doSearch}>
                       <Search className="mr-2 h-4 w-4" /> {t("form.button")}
@@ -125,15 +124,13 @@ export default function Page() {
 
             <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-neutral-600">
               <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" />{" "}
-                {t("form.badge.id-verified")}
+                <CheckCircle2 className="h-4 w-4" /> {t("form.badge.id-verified")}
               </span>
               <span className="inline-flex items-center gap-1">
                 <CheckCircle2 className="h-4 w-4" /> {t("form.badge.first-aid")}
               </span>
               <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" />{" "}
-                {t("form.badge.police-certificate")}
+                <CheckCircle2 className="h-4 w-4" /> {t("form.badge.police-certificate")}
               </span>
             </div>
           </div>
@@ -151,14 +148,9 @@ export default function Page() {
               >
                 {isLoading
                   ? Array.from({ length: 9 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="rounded-2xl border p-3 hover:shadow-sm"
-                      >
-                        {/* Icon + name row */}
+                      <div key={i} className="rounded-2xl border p-3 hover:shadow-sm">
                         <div className="mb-1 flex items-center gap-2">
                           <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
                           <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
                         </div>
                         <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
@@ -174,9 +166,7 @@ export default function Page() {
                           {getIconForCategory(name)}
                           <span className="text-sm font-medium">{name}</span>
                         </div>
-                        <div className="text-xs text-neutral-500">
-                          {t("popular-rate")}
-                        </div>
+                        <div className="text-xs text-neutral-500">{t("popular-rate")}</div>
                       </div>
                     ))}
               </CardContent>
@@ -189,26 +179,20 @@ export default function Page() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold">{t("how-it-works.title")}</h2>
-          <p className="text-neutral-600">{t("how-it-works.description")}</p>
+        <p className="text-neutral-600">{t("how-it-works.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {Array.isArray(howItWorks) &&
             howItWorks.map((step: any, i: number) => {
               const IconComponent = getIcon(step.icon);
-
               return (
                 <Card key={i} className="h-full">
                   <CardContent className="p-5">
                     <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                      <IconComponent className="h-4 w-4" />{" "}
-                      {/* ✅ dynamic icon */}
+                      <IconComponent className="h-4 w-4" /> {/* dynamic icon */}
                     </div>
-                    <h3 className="font-medium">
-                      {i + 1}) {step.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-neutral-600">
-                      {step.description}
-                    </p>
+                    <h3 className="font-medium">{i + 1}) {step.title}</h3>
+                    <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -234,10 +218,8 @@ export default function Page() {
             ? Array.from({ length: 9 }).map((_, i) => (
                 <Card key={i} className="group hover:shadow-sm">
                   <CardContent className="p-5">
-                    {/* Icon + name row */}
                     <div className="mb-2 flex items-center gap-2 h-4">
                       <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-
                       <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
                     </div>
                     <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
@@ -253,18 +235,15 @@ export default function Page() {
                       </div>
                       <h3 className="font-medium">{name}</h3>
                     </div>
-                    <p className="text-sm text-neutral-600">
-                      {t("categories.subtitle")}
-                    </p>
+                    <p className="text-sm text-neutral-600">{t("categories.subtitle")}</p>
                     <div className="mt-3">
                       <button
                         onClick={() => doBrowserCategoryRedirect(slug)}
-                        className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2
-                      transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
+                        className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
                       >
                         {user?.role === "client"
-                          ? t("categories.post-job", { name: name })
-                          : t("categories.find-job",{ name: name }) }
+                          ? t("categories.post-job", { name })
+                          : t("categories.find-job", { name })}
                       </button>
                     </div>
                   </CardContent>
@@ -282,7 +261,6 @@ export default function Page() {
           {Array.isArray(trustSafety) &&
             trustSafety.map((step: any, i: number) => {
               const IconComponent = getIcon(step.icon);
-
               return (
                 <Card key={i}>
                   <CardContent className="p-5">
@@ -290,9 +268,7 @@ export default function Page() {
                       <IconComponent className="h-4 w-4" />
                     </div>
                     <h3 className="font-medium">{step.title}</h3>
-                    <p className="mt-1 text-sm text-neutral-600">
-                      {step.description}
-                    </p>
+                    <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -313,7 +289,7 @@ export default function Page() {
                   onClick={() => push("/signup?role=client")}
                   className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                 >
-                  {t("help.mini‑job")}
+                  {t("help.mini-job")}
                 </button>
                 <button
                   onClick={() => push("/signup?role=helper")}
