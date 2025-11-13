@@ -2,6 +2,7 @@
 import { useT } from "@/app/[locale]/layout";
 import { Card } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
+import { StepSidebar } from "@/components/wizard/StepSidebar";
 import { WizardDirection } from "@/components/wizard/WizardDirection";
 import { WizardHeader } from "@/components/wizard/WizardHeader";
 import { WizardMultiSelect } from "@/components/wizard/WizardMultiSelect";
@@ -23,7 +24,7 @@ export default function Page() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
 
-  const { formData, updateForm, jobId, setJobId, mode, setMode } =
+  const { formData, updateForm, jobId, setJobId, mode, setMode,version } =
     useJobWizard();
   const { data: basicCollections } = useJobCollections();
   const updateJobMutation = useUpdateJob(jobId ?? undefined);
@@ -139,7 +140,7 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div  key={version} className="min-h-screen bg-gray-50 text-gray-900">
       <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Header */}
         <section className="lg:col-span-3 space-y-4">
@@ -152,50 +153,7 @@ export default function Page() {
           <div className="grid grid-cols-12 gap-4">
             {/* Sidebar */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
-              <div className="flex flex-wrap justify-center lg:flex-col gap-2 lg:space-y-4">
-                <WizardNavigation
-                  title={t("basic.header.title")}
-                  description={t("basic.header.description")}
-                  count={1}
-                  current={false}
-                  finished
-                />
-                <WizardNavigation
-                  title={t("details.header.title")}
-                  description={t("details.header.sidebar_description")}
-                  count={2}
-                  current
-                  finished={false}
-                />
-                <WizardNavigation
-                  title={t("location.header.title")}
-                  description={t("location.header.sidebar_description")}
-                  count={3}
-                  current={false}
-                  finished={false}
-                />
-                <WizardNavigation
-                  title={t("pricing.header.title")}
-                  description={t("pricing.header.description")}
-                  count={4}
-                  current={false}
-                  finished={false}
-                />
-                <WizardNavigation
-                  title={t("work.header.title")}
-                  description={t("work.header.sidebar_description")}
-                  count={5}
-                  current={false}
-                  finished={false}
-                />
-                <WizardNavigation
-                  title={t("contact.header.title")}
-                  description={t("contact.header.description")}
-                  count={6}
-                  current={false}
-                  finished={false}
-                />
-              </div>
+            <StepSidebar current="details" slug={formData?.slug || slug} />
             </div>
 
             {/* Main Form */}

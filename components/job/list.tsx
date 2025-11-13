@@ -181,12 +181,17 @@ export default function JobFilterPage({
 
   useEffect(() => {
     if (user?.lat && user?.lng) {
-      setFilters((f) => ({
-        ...f,
-        lat: user.lat,
-        lng: user.lng,
-        radius_km: f.radius_km || DEFAULT_FILTERS.radius_km,
-      }));
+      setFilters((f) => {
+        // If radius already explicitly set (including >0), keep it.
+        if (typeof f.radius_km !== "undefined") return f;
+        return { ...f, radius_km: 0 }; // radius 0 = no geo filter
+      });
+    } else {
+      // if no user, make sure radius isn't present
+      setFilters((f) => {
+        if (typeof f.radius_km === "undefined") return f;
+        return { ...f, radius_km: undefined };
+      });
     }
   }, [user?.lat, user?.lng]);
 
@@ -280,10 +285,14 @@ export default function JobFilterPage({
   }
 
   // Optional: clear only the draft (while sheet is open)
-  const resetDraft = () => setDraftFilters(DEFAULT_FILTERS);
+  const resetDraft = () => {
+    const base = { ...DEFAULT_FILTERS, radius_km: 0 } as Partial<Filters>;
+    setDraftFilters(base as Filters);
+  };
 
   const resetAll = () => {
-    setFilters(DEFAULT_FILTERS);
+    const base = { ...DEFAULT_FILTERS, radius_km: 0 } as Partial<Filters>;
+    setFilters(base as Filters);
     setPage(1);
     setLocalPageSize(pageSize);
   };
@@ -312,7 +321,9 @@ export default function JobFilterPage({
     if (job_tags.length) c++;
     if (min_price || max_price) c++;
     if (posted !== "any") c++;
-    if (radius_km !== DEFAULT_FILTERS.radius_km) c++;
+    const currentRadius =
+      typeof radius_km === "number" ? radius_km : DEFAULT_FILTERS.radius_km;
+    if (currentRadius !== DEFAULT_FILTERS.radius_km) c++;
     if (sort !== "new") c++;
     return c;
   }, [filters]);
@@ -400,7 +411,7 @@ export default function JobFilterPage({
             )}
           </div>
 
-             <div className="p-4 border-t flex items-center justify-end gap-3">
+          <div className="p-4 border-t flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={resetDraft}
@@ -411,9 +422,20 @@ export default function JobFilterPage({
             <button
               type="button"
               onClick={() => {
-                setFilters({ ...draftFilters }); 
-                setPage(1);                      
-                setIsFilterOpen(false);           
+                const applied = { ...draftFilters } as Partial<Filters>;
+
+                if (applied.radius_km && applied.radius_km > 0) {
+                  applied.lat = applied.lat ?? user?.lat ?? undefined;
+                  applied.lng = applied.lng ?? user?.lng ?? undefined;
+                } else {
+                  applied.radius_km = 0;
+                  applied.lat = undefined;
+                  applied.lng = undefined;
+                }
+
+                setFilters(applied as Filters);
+                setPage(1);
+                setIsFilterOpen(false);
               }}
               className="rounded-xl bg-black text-white px-4 py-2 text-sm"
             >
@@ -469,7 +491,7 @@ export default function JobFilterPage({
         </section>
       </main>
       {/* Sticky mobile apply */}
-     <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
         <div className="bg-white shadow-xl rounded-2xl p-3 flex items-center gap-3">
           {/* Filters button */}
           <button

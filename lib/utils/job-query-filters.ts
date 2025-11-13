@@ -10,7 +10,7 @@ export const DEFAULT_FILTERS: Filters = {
   min_price: "",
   max_price: "",
   posted: "any",
-  radius_km: 10,
+  radius_km: 0,
   sort: "new",
   starts_at: undefined,
   ends_at: undefined,

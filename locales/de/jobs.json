@@ -1,6 +1,6 @@
 {
     "filter": {
-         "title":"Filter",
+        "title": "Filter",
         "search": "Suchen",
         "active-filters": "Aktive Filter",
         "reset": "Zurücksetzen",
@@ -13,7 +13,9 @@
                 "placeholder": "Stadt oder Postleitzahl"
             },
             "distance": {
-                "label": "Entfernung (km)"
+                "label": "Entfernung (km)",
+                "active": "Zeige Jobs innerhalb von {{km}} km",
+                "inactive": "Alle Jobs anzeigen"
             },
             "category": {
                 "label": "Kategorie"
@@ -87,8 +89,8 @@
         "active-count": "{activeCount} aktive Filter",
         "update-results": "Tippen Sie auf „Übernehmen“, um die Ergebnisse zu aktualisieren",
         "apply": "Anwenden",
-        "filters":"Filter",
-        "clear":"klar"
+        "filters": "Filter",
+        "clear": "klar"
     },
     "detail": {
         "failed": "Der Job konnte nicht geladen werden.",
