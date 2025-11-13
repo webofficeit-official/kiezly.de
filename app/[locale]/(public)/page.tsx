@@ -86,7 +86,7 @@ export default function Page() {
                 <div className="grid gap-3 md:grid-cols-3">
                   <div>
                     <Label className="mb-1">{t("form.keyword.label")}</Label>
-                    <div className="relative">
+                    <div className="relative mt-3">
                       <Input
                         placeholder={t("form.keyword.placeholder")}
                         value={what}

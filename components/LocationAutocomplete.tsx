@@ -114,7 +114,7 @@ export default function LocationAutocomplete({
   return (
     <div ref={rootRef} className={`relative w-full ${className ?? ""}`}>
       <input
-        className="w-full rounded-xl border px-3 py-2 outline-none focus:ring"
+        className="mt-2 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
         placeholder={placeholder}
         value={input}
         onChange={(e) => {

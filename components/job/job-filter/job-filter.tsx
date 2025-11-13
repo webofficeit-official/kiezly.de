@@ -5,6 +5,7 @@ import { Filters, DatePosted, SortBy } from "@/lib/types/job";
 import { Select } from "../job-filter-select/select-option";
 import { useT } from "@/app/[locale]/layout";
 import { DateInput } from "@/components/DateInput/date-input";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
 
 type Props = {
   filters: Filters;
@@ -87,13 +88,19 @@ export function JobFilterSidebar({
           <label htmlFor="city" className="block text-sm font-medium">
             {t("filter.form.location.label")}
           </label>
-          <input
-            id="city"
-            type="text"
+            <LocationAutocomplete
             value={filters.city}
-            onChange={(e) => update({ city: e.target.value })}
+            onValueChange={(v) => update({ city: v })}
+            onSelect={(s) => {
+              // set city text + coordinates into filters
+              update({
+                city: s.label,
+              });
+            }}
             placeholder={t("filter.form.location.placeholder")}
-            className="mt-2 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+            withCoords
+            onlyOpen
+            limit={8}
           />
         </div>
         {user?.lat && user?.lng && (
@@ -117,6 +124,8 @@ export function JobFilterSidebar({
           </div>
         )}
       </div>
+
+     
 
       {/*  Category */}
       {collections?.jobCategories?.length > 0 && (
