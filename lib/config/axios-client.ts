@@ -62,13 +62,15 @@ export const setRefreshToken = (token: string | null, opts: CookieOpts = {}) => 
 };
 
 const apiClient = axios.create({
-  baseURL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
 // attach token to requests
 apiClient.interceptors.request.use((config) => {
+  const locale = getCookie("NEXT_LOCALE") || "de";
+  config.baseURL = `${baseURL}/${locale}`
+  
   if (!accessToken) {
     accessToken = (getCookie("accessToken") as string | null) || null; // optional: pick up session cookie
   }
