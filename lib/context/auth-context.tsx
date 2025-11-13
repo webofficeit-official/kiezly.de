@@ -77,11 +77,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const normalizePath = (p?: string) => {
+  if (!p) return "/";
+  const trimmed = p.replace(/\/+$/, ""); // remove trailing slash
+  const parts = trimmed.split("/").filter(Boolean); // ["en","signin"] or ["signin"]
+  const locales = ["en", "de", "fr", "es"]; // adjust to your locales
+  const startIndex = parts.length && locales.includes(parts[0]) ? 1 : 0;
+  const base = parts.length > startIndex ? `/${parts[startIndex]}` : "/";
+  return base;
+};
+
   useEffect(() => {
     if (loading) return;
 
     const publicPaths = ["/signin", "/signup"];
-    const isPublic = publicPaths.includes(pathname);
+      const base = normalizePath(pathname);
+
+  const isPublic = publicPaths.includes(base);
 
     if (user && isPublic) {
       // logged in but trying to access signin/signup
