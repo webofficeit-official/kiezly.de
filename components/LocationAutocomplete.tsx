@@ -157,7 +157,7 @@ export default function LocationAutocomplete({
                 <div className="text-sm font-medium">
                   {highlightMatch(s.label, debounced)}
                 </div>
-                <div className="text-xs text-gray-500">{badgeForKind(s.kind)}</div>
+                {/* <div className="text-xs text-gray-500">{badgeForKind(s.kind)}</div> */}
                 {"lat" in s && "lng" in s ? (
                   <div className="mt-1 text-[11px] text-gray-400">
                     ({(s as any).lat.toFixed(5)}, {(s as any).lng.toFixed(5)})
