@@ -88,7 +88,7 @@ export function JobFilterSidebar({
           <label htmlFor="city" className="block text-sm font-medium">
             {t("filter.form.location.label")}
           </label>
-            <LocationAutocomplete
+          <LocationAutocomplete
             value={filters.city}
             onValueChange={(v) => update({ city: v })}
             onSelect={(s) => {
@@ -108,7 +108,7 @@ export function JobFilterSidebar({
             <label htmlFor="radius_km" className="block text-sm font-medium">
               {t("filter.form.distance.label")}
             </label>
-            <input
+            {/* <input
               id="radius_km"
               type="range"
               min={0}
@@ -117,15 +117,56 @@ export function JobFilterSidebar({
               value={filters.radius_km ?? 10}
               onChange={(e) => update({ radius_km: Number(e.target.value) })}
               className="mt-2 w-full"
+            /> */}
+            <input
+              id="radius_km"
+              type="range"
+              min={0}
+              max={150}
+              step={1}
+              value={filters.radius_km ?? 0}
+              onChange={(e) => {
+                const next = Number(e.target.value);
+
+                if (next > 0) {
+                  // User intends to filter by radius — attach user's coords if available.
+                  // If filters already contain lat/lng (e.g., from selecting a place), keep them.
+                  update({
+                    radius_km: next,
+                    lat: filters.lat ?? user?.lat ?? undefined,
+                    lng: filters.lng ?? user?.lng ?? undefined,
+                  });
+                } else {
+                  // radius == 0 -> disable geofilter: remove lat/lng
+                  update({
+                    radius_km: 0,
+                    lat: undefined,
+                    lng: undefined,
+                  });
+                }
+              }}
+              className="mt-2 w-full"
             />
+
             <div className="text-xs text-gray-600 mt-1">
-              {filters.radius_km ?? 10} km
+              {filters.radius_km ?? 0} km
+            </div>
+            {/* Status message: aria-live so screen readers get updates */}
+            <div
+              className={`text-xs font-medium ${
+                (filters.radius_km ?? 0) > 0
+                  ? "text-green-700"
+                  : "text-gray-500"
+              }`}
+              aria-live="polite"
+            >
+              {(filters.radius_km ?? 0) > 0
+                ? t("filter.form.distance.active", { km: filters.radius_km ?? 0 })
+                : t("filter.form.distance.inactive")}
             </div>
           </div>
         )}
       </div>
-
-     
 
       {/*  Category */}
       {collections?.jobCategories?.length > 0 && (
