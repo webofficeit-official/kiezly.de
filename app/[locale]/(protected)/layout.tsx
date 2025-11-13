@@ -18,7 +18,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
     // Not logged in -> send to signin
     if (!user) {
-      router.replace("/signin");
+      router.replace("/signin"); 
       return;
     }
 
