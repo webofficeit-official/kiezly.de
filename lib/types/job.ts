@@ -180,6 +180,8 @@ export interface JobList {
   geom: string;
   job_type: string[]; // array in response
   job_experience: string[]; // array in response
+  job_types: string[]; // array in response
+  job_experiences: string[]; // array in response
   first_aid_verified: boolean;
   police_verified: boolean;
   verified: boolean;
