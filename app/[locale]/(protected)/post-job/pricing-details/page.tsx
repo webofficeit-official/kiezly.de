@@ -261,8 +261,8 @@ export default function Page() {
                     value={formData.price_type || "fixed"}
                     onChange={(v) => handlePriceTypeChange(v)}
                     options={[
-                      { label: "Fixed", value: "fixed" },
-                      { label: "Range", value: "range" },
+                      { label: t("pricing.price_type_options.fixed"), value: "fixed" },
+                      { label: t("pricing.price_type_options.range"), value: "range" },
                     ]}
                     required
                     error={showErrors ? errors.price_type : ""}

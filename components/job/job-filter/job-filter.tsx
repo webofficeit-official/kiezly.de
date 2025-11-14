@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import dayjs from "dayjs";
-import { Filters, DatePosted, SortBy } from "@/lib/types/job";
+import { Filters, DatePosted, SortBy, JobExperience, JobType, JobTag } from "@/lib/types/job";
 import { Select } from "../job-filter-select/select-option";
 import { useT } from "@/app/[locale]/layout";
 import { DateInput } from "@/components/DateInput/date-input";
@@ -199,17 +199,17 @@ export function JobFilterSidebar({
             {t("filter.form.job-type.label")}
           </legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {collections.jobType.map((type: string) => (
+            {collections.jobType.map((type: JobType) => (
               <label
-                key={type}
+                key={type.id}
                 className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer"
               >
                 <input
                   type="checkbox"
-                  checked={filters.job_type.includes(type)}
-                  onChange={() => toggleInArray("job_type", type)}
+                  checked={filters.job_type.includes(type.id)}
+                  onChange={() => toggleInArray("job_type", type.id)}
                 />
-                <span className="text-sm">{type}</span>
+                <span className="text-sm">{type.name}</span>
               </label>
             ))}
           </div>
@@ -250,17 +250,17 @@ export function JobFilterSidebar({
             {t("filter.form.job-experience.label")}
           </legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {collections.jobExperience.map((exp: string) => (
+            {collections.jobExperience.map((exp: JobExperience) => (
               <label
-                key={exp}
+                key={exp.id}
                 className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer"
               >
                 <input
                   type="checkbox"
-                  checked={filters.job_experience.includes(exp)}
-                  onChange={() => toggleInArray("job_experience", exp)}
+                  checked={filters.job_experience.includes(exp.id)}
+                  onChange={() => toggleInArray("job_experience", exp.id)}
                 />
-                <span className="text-sm">{exp}</span>
+                <span className="text-sm">{exp.name}</span>
               </label>
             ))}
           </div>
@@ -274,7 +274,7 @@ export function JobFilterSidebar({
             {t("filter.form.job-tags.label")}
           </legend>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {collections.jobTags.map((tag: any) => (
+            {collections.jobTags.map((tag: JobTag) => (
               <label
                 key={tag.id}
                 className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer"

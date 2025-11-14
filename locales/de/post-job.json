@@ -122,8 +122,8 @@
       "price_max": "Maximaler Preis"
     },
     "price_type_options": {
-      "fixed": "Fest",
-      "range": "Spanne"
+      "fixed": "Behoben",
+      "range": "Reichweite"
     },
     "validation": {
       "currency_required": "Währung ist erforderlich",

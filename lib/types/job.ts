@@ -136,8 +136,8 @@ export interface JobMode {
 }
 
 export interface JobCollections {
-  jobType: string[];
-  jobExperience: string[];
+  jobType: JobType[];
+  jobExperience: JobExperience[];
   jobCategories: JobCategory[];
   jobTags: JobTag[];
   languages: jobLanguage[];
@@ -227,8 +227,8 @@ export type Filters = {
   q: string;
   city: string;
   category_id: number[];
-  job_type: string[];
-  job_experience: string[];
+  job_type: number[];
+  job_experience: number[];
   job_tags: number[];
   min_price: string;
   max_price: string;
@@ -240,3 +240,13 @@ export type Filters = {
   lat?: number;
   lng?: number;
 };
+
+export type JobExperience = {
+  id: number,
+  name: string
+}
+
+export type JobType = {
+  id: number,
+  name: string
+}
