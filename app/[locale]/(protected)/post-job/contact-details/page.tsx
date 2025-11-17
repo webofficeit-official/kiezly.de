@@ -38,12 +38,58 @@ export default function Page() {
     if (slug && existingJob?.job) {
       setMode("edit");
       setJobId(existingJob.job.id);
-      updateForm(normalizeJobForForm(existingJob.job));
+      updateForm(mapJobToForm(existingJob.job));
       setContactMethod(existingJob.job.contact_method || "email_relay");
     } else if (!slug) {
       setMode("create");
     }
   }, [slug, existingJob]);
+
+  const mapJobToForm = (job: any) => ({
+    // basic
+    title: job.title ?? "",
+    slug: job.slug ?? "",
+    subtitle: job.subtitle ?? "",
+    category_id: job.category_id ? String(job.category_id) : "",
+    tag_ids: job.tags?.map((t: any) => String(t.id)) ?? [],
+    job_type: job.job_type ?? [],
+    job_experience: job.job_experience ?? [],
+    status: job.status ?? "draft",
+
+    // details
+    description: job.description || "",
+    tasks: job.tasks || "",
+    requirements: job.requirements || "",
+    languages: job.job_languages?.map((t: any) => String(t.id)) || [],
+
+    //location
+    country_id: job.country_id ? String(job.country_id) : "",
+    postal_code: job.postal_code || "",
+    street: job.street || "",
+    city: job.city || "",
+    state: job.state || "",
+    lat: job.lat || "",
+    lng: job.lng || "",
+
+    //pricing
+    currency: job.currency || "",
+    price_type: job.price_type || "fixed",
+    price_value: job.price_value || "",
+    price_min: job.price_min || "",
+    price_max: job.price_max || "",
+    //work
+    work_mode: job.work_mode || "",
+    starts_at: job.starts_at ? job.starts_at.split("T")[0] : "", // format yyyy-mm-dd
+    ends_at: job.ends_at ? job.ends_at.split("T")[0] : "",
+    first_aid_verified: !!job.first_aid_verified,
+    police_verified: !!job.police_verified,
+
+    //contact
+    contact_method: job.contact_method || "email_relay",
+    contact_email: job.contact_email || "",
+    contact_phone: job.contact_phone || "",
+    contact_link: job.contact_link || "",
+  });
 
   /* ----------------------------- Normalize Data ----------------------------- */
   const normalizeJobForForm = (job: any) => ({
