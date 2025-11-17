@@ -128,7 +128,7 @@ export default function Page() {
   /* ----------------------------- Derived ----------------------------- */
   const workModeOptions =
     basicCollections?.jobMode?.map((mode) => ({
-      label: mode.label,
+      label: t(`work.work_mode_options.${mode.key}`),
       value: mode.key,
     })) || [];
 

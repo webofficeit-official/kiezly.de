@@ -181,10 +181,10 @@ export default function Page() {
                         updateForm({ contact_method: e });
                       }}
                       options={[
-                        { label: "Email Relay", value: "email_relay" },
-                        { label: "Direct Email", value: "direct_email" },
-                        { label: "Phone", value: "phone" },
-                        { label: "External Link", value: "external_link" },
+                        { label: t(`contact.methods.email_relay`), value: "email_relay" },
+                        { label: t(`contact.methods.direct_email`), value: "direct_email" },
+                        { label: t(`contact.methods.phone`), value: "phone" },
+                        { label: t(`contact.methods.external_link`), value: "external_link" },
                       ]}
                       required
                       error={showErrors ? errors.contact_method : ""}

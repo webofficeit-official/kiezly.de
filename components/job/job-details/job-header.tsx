@@ -89,7 +89,7 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
                             </span>
                         )}
 
-                        {jobDetails?.job_type && (<span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {jobDetails?.job_type.join(", ")} {jobDetails?.job_experience ? `. ${jobDetails?.job_experience}` : ""}</span>)}
+                        {jobDetails?.job_type && (<span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {jobDetails?.job_types?.join(", ")} {jobDetails?.job_experiences ? `. ${jobDetails?.job_experiences}` : ""}</span>)}
                         <span className="inline-flex items-center">
                             {jobDetails?.price_type === "range" && jobDetails?.price_min && jobDetails?.price_max
                                 ? `${jobDetails?.currency} ${jobDetails?.price_min}–${jobDetails?.price_max}`

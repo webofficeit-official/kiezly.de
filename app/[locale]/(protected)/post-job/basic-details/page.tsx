@@ -296,14 +296,14 @@ useEffect(() => {
 
   const jobTypeOptions =
     basicCollections?.jobType?.map((t) => ({
-      label: t,
-      value: t,
+      label: t.name,
+      value: String(t.id),
     })) || [];
 
   const experienceOptions =
     basicCollections?.jobExperience?.map((e) => ({
-      label: e,
-      value: e,
+      label: e.name,
+      value: String(e.id),
     })) || [];
 
   const isNextLoading =

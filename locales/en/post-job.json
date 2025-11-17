@@ -161,7 +161,7 @@
       "update_failure":"Failed to update work details."
     },
     "work_mode_options": {
-      "on_site": "On-site",
+      "on_site": "On site",
       "remote": "Remote",
       "hybrid": "Hybrid"
     }
