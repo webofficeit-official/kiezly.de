@@ -199,5 +199,50 @@
             "prev": "Prev",
             "next": "Next"
         }
+    },
+    "report": {
+        "title": "Reported jobs",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "All",
+                "pending": "Pending",
+                "reviewed": "Reviewed",
+                "rejected": "Rejected",
+                "resolved": "Resolved"
+            }
+        },
+        "reason": {
+            "options": {
+                "spam-promotional": "Spam / Promotional",
+                "fake-scam": "Fake Job / Scam",
+                "asking-money": "Asking for Money",
+                "misleading-information": "Misleading Information",
+                "offensive-content": "Offensive / Inappropriate Content",
+                "illegal-activity": "Illegal Activity",
+                "discrimination": "Discrimination",
+                "duplicate": "Duplicate Posting",
+                "expired": "Expired Job",
+                "low-quality": "Low Quality / Unprofessional",
+                "other": "Other (please specify)"
+            }
+        },
+        "sort": {
+            "label": "Sort",
+            "options": {
+                "asc": "New",
+                "desc": "Old"
+            }
+        },
+        "per-page": {
+            "label": "Per page"
+        },
+        "view": "View Job",
+        "no-reports": "No reports",
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Prev",
+            "next": "Next"
+        }
     }
 }

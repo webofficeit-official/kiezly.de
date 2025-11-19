@@ -12,3 +12,8 @@ export const reportJobApi = async ({
     });
     return data;
 };
+
+export const getMyReportedJobs = async (status: string, page: number, pageSize: number, sort: string = 'asc') => {
+    const { data } = await apiClient.get(`/jobs/report?status=${status}&page=${page}&page_size=${pageSize}&sort=${sort}`);
+    return data; // returns { success, message, data }
+};
