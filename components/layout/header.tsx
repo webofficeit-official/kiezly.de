@@ -428,6 +428,15 @@ export default function Header() {
                         >
                           {t("applied-jobs")}
                         </button>
+                        <button
+                          className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            push("/reported-jobs");
+                          }}
+                        >
+                          {t("reported-jobs")}
+                        </button>
                       </>
                     )}
 
@@ -683,6 +692,17 @@ export default function Header() {
                       >
                         {t("applied-jobs")}
                       </button>
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onClick={() => {
+                          setMobileHeaderDDOpen(false);
+                          setMobileOpen(false);
+                          push("/reported-jobs");
+                        }}
+                        role="menuitem"
+                      >
+                        {t("reported-jobs")}
+                      </button>
                     </>
                   )}
 
@@ -789,6 +809,15 @@ export default function Header() {
                           >
                             {t("applied-jobs")}
                           </button>
+                          <button
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                            onClick={() => {
+                              push("/reported-jobs");
+                              setMobileOpen(false);
+                            }}
+                          >
+                            {t("reported-jobs")}
+                          </button>
                         </>
                       )}
 
@@ -856,6 +885,15 @@ export default function Header() {
                         }}
                       >
                         {t("applied-jobs")}
+                      </LocalizedLink>
+                      <LocalizedLink
+                        href="/reported-jobs"
+                        className="block rounded-lg px-3 py-1 hover:bg-gray-100"
+                        onClick={() => {
+                          setMobileOpen(false);
+                        }}
+                      >
+                        {t("reported-jobs")}
                       </LocalizedLink>
                     </>
                   )}
