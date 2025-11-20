@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
+import { StepSidebar } from "@/components/wizard/StepSidebar";
 
 export default function Page() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function Page() {
   const { push } = useLocalizedRouter();
   const t = useT("post-job");
 
-  const { formData, updateForm, jobId, setJobId, mode, setMode } =
+  const { formData, updateForm, jobId, setJobId, mode, setMode,version } =
     useJobWizard();
   const { data: existingJob } = useJob(slug || "");
   const updateJobMutation = useUpdateJob(jobId ?? undefined);
@@ -37,12 +38,58 @@ export default function Page() {
     if (slug && existingJob?.job) {
       setMode("edit");
       setJobId(existingJob.job.id);
-      updateForm(normalizeJobForForm(existingJob.job));
+      updateForm(mapJobToForm(existingJob.job));
       setContactMethod(existingJob.job.contact_method || "email_relay");
     } else if (!slug) {
       setMode("create");
     }
   }, [slug, existingJob]);
+
+  const mapJobToForm = (job: any) => ({
+    // basic
+    title: job.title ?? "",
+    slug: job.slug ?? "",
+    subtitle: job.subtitle ?? "",
+    category_id: job.category_id ? String(job.category_id) : "",
+    tag_ids: job.tags?.map((t: any) => String(t.id)) ?? [],
+    job_type: job.job_type ?? [],
+    job_experience: job.job_experience ?? [],
+    status: job.status ?? "draft",
+
+    // details
+    description: job.description || "",
+    tasks: job.tasks || "",
+    requirements: job.requirements || "",
+    languages: job.job_languages?.map((t: any) => String(t.id)) || [],
+
+    //location
+    country_id: job.country_id ? String(job.country_id) : "",
+    postal_code: job.postal_code || "",
+    street: job.street || "",
+    city: job.city || "",
+    state: job.state || "",
+    lat: job.lat || "",
+    lng: job.lng || "",
+
+    //pricing
+    currency: job.currency || "",
+    price_type: job.price_type || "fixed",
+    price_value: job.price_value || "",
+    price_min: job.price_min || "",
+    price_max: job.price_max || "",
+    //work
+    work_mode: job.work_mode || "",
+    starts_at: job.starts_at ? job.starts_at.split("T")[0] : "", // format yyyy-mm-dd
+    ends_at: job.ends_at ? job.ends_at.split("T")[0] : "",
+    first_aid_verified: !!job.first_aid_verified,
+    police_verified: !!job.police_verified,
+
+    //contact
+    contact_method: job.contact_method || "email_relay",
+    contact_email: job.contact_email || "",
+    contact_phone: job.contact_phone || "",
+    contact_link: job.contact_link || "",
+  });
 
   /* ----------------------------- Normalize Data ----------------------------- */
   const normalizeJobForForm = (job: any) => ({
@@ -145,7 +192,7 @@ export default function Page() {
   /* ----------------------------- Render ----------------------------- */
   return (
     <>
-      <div className="min-h-screen bg-gray-50 text-gray-900">
+      <div  key={version} className="min-h-screen bg-gray-50 text-gray-900">
         <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Header */}
           <section className="lg:col-span-3 space-y-4">
@@ -160,50 +207,7 @@ export default function Page() {
             <div className="grid grid-cols-12 gap-4">
               {/* Sidebar */}
               <div className="col-span-12 sm:col-span-6 lg:col-span-5 bg-gray-100 p-6">
-                <div className="flex flex-wrap justify-center lg:flex-col gap-2 lg:space-y-4">
-                  <WizardNavigation
-                    title={t("basic.header.title")}
-                    description={t("basic.header.description")}
-                    count={1}
-                    current={false}
-                    finished={true}
-                  />
-                  <WizardNavigation
-                    title={t("details.header.title")}
-                    description={t("details.header.sidebar_description")}
-                    count={2}
-                    current={false}
-                    finished={true}
-                  />
-                  <WizardNavigation
-                    title={t("location.header.title")}
-                    description={t("location.header.description")}
-                    count={3}
-                    current={false}
-                    finished={true}
-                  />
-                  <WizardNavigation
-                    title={t("pricing.header.title")}
-                    description={t("pricing.header.description")}
-                    count={4}
-                    current={false}
-                    finished={true}
-                  />
-                  <WizardNavigation
-                    title={t("work.header.title")}
-                    description={t("work.header.sidebar_description")}
-                    count={5}
-                    current={false}
-                    finished={true}
-                  />
-                  <WizardNavigation
-                    title={t("contact.header.title")}
-                    description={t("contact.header.description")}
-                    count={6}
-                    current={true}
-                    finished={false}
-                  />
-                </div>
+                <StepSidebar current="contact" slug={formData?.slug || slug} />
               </div>
 
               {/* Main Form */}
@@ -223,10 +227,10 @@ export default function Page() {
                         updateForm({ contact_method: e });
                       }}
                       options={[
-                        { label: "Email Relay", value: "email_relay" },
-                        { label: "Direct Email", value: "direct_email" },
-                        { label: "Phone", value: "phone" },
-                        { label: "External Link", value: "external_link" },
+                        { label: t(`contact.methods.email_relay`), value: "email_relay" },
+                        { label: t(`contact.methods.direct_email`), value: "direct_email" },
+                        { label: t(`contact.methods.phone`), value: "phone" },
+                        { label: t(`contact.methods.external_link`), value: "external_link" },
                       ]}
                       required
                       error={showErrors ? errors.contact_method : ""}

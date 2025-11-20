@@ -10,12 +10,14 @@ import {
     DollarSign,
     CheckCircle2,
     BookmarkCheck,
+    Ban,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { addJobAsFavorite, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
 import { useT } from "@/app/[locale]/layout";
+import ReportJob from "./report-job";
 // Extend dayjs with the plugin
 dayjs.extend(relativeTime);
 
@@ -37,6 +39,25 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
                 }
                 localStorage.setItem('saved-jobs', JSON.stringify([...savedJobsLocal, { id: job.id }]))
             }
+        } catch (error) {
+            console.error("Failed to save job:", error);
+            setSavedJobs((prev) => prev.filter((j) => j.id !== job.id));
+        }
+    };
+
+    const handleReportJob = async () => {
+        try {
+            // setSavedJobs(prev => [...prev, { id: job.id }]);
+            // if (user) {
+            //     await addJobAsFavorite({ jobId: job.id });
+            // } else {
+            //     const localStoredJobs = localStorage.getItem("saved-jobs")
+            //     let savedJobsLocal = []
+            //     if (localStoredJobs) {
+            //         savedJobsLocal = JSON.parse(localStoredJobs)
+            //     }
+            //     localStorage.setItem('saved-jobs', JSON.stringify([...savedJobsLocal, { id: job.id }]))
+            // }
         } catch (error) {
             console.error("Failed to save job:", error);
             setSavedJobs((prev) => prev.filter((j) => j.id !== job.id));
@@ -89,7 +110,7 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
                             </span>
                         )}
 
-                        {jobDetails?.job_type && (<span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {jobDetails?.job_type.join(", ")} {jobDetails?.job_experience ? `. ${jobDetails?.job_experience}` : ""}</span>)}
+                        {jobDetails?.job_type && (<span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {jobDetails?.job_types?.join(", ")} {jobDetails?.job_experiences ? `. ${jobDetails?.job_experiences}` : ""}</span>)}
                         <span className="inline-flex items-center">
                             {jobDetails?.price_type === "range" && jobDetails?.price_min && jobDetails?.price_max
                                 ? `${jobDetails?.currency} ${jobDetails?.price_min}–${jobDetails?.price_max}`
@@ -126,6 +147,10 @@ export default function JobHeader({ job, savedJobs, setSavedJobs, user }) {
                     ) : (
                         <Button variant="outline" className="rounded-xl" onClick={() => handleSaveJob()}><Bookmark className="mr-2 h-4 w-4" /> {t("detail.header.save")}</Button>
                     )}
+                    <ReportJob 
+                        jobId={jobDetails.id}
+                        t={t}
+                    />
                 </div>
             </div>
 

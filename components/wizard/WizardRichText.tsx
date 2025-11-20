@@ -11,11 +11,12 @@ interface WizardRichTextProps {
     placeholder?: string;
     error?: string;
     required?: boolean;
+    labelClass?: string
 }
 
-export function WizardRichText({ label, value, onChange, placeholder, required = false, error }: WizardRichTextProps) {
+export function WizardRichText({ label, value, onChange, placeholder, required = false, error, labelClass='px-1.5' }: WizardRichTextProps) {
     return (
-        <div className="mt-4 px-1.5 w-full">
+        <div className={`mt-4 w-full ${labelClass}`}>
             <label className="mb-2 ml-1 font-medium text-[0.75rem] text-slate-700 dark:text-white/80">
                 {label}{required && <span className="text-red-600">*</span>}
             </label>

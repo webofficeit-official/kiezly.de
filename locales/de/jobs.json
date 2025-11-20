@@ -1,6 +1,6 @@
 {
     "filter": {
-         "title":"Filter",
+        "title": "Filter",
         "search": "Suchen",
         "active-filters": "Aktive Filter",
         "reset": "Zurücksetzen",
@@ -13,7 +13,9 @@
                 "placeholder": "Stadt oder Postleitzahl"
             },
             "distance": {
-                "label": "Entfernung (km)"
+                "label": "Entfernung (km)",
+                "active": "Zeige Jobs innerhalb von {{km}} km",
+                "inactive": "Alle Jobs anzeigen"
             },
             "category": {
                 "label": "Kategorie"
@@ -87,8 +89,8 @@
         "active-count": "{activeCount} aktive Filter",
         "update-results": "Tippen Sie auf „Übernehmen“, um die Ergebnisse zu aktualisieren",
         "apply": "Anwenden",
-        "filters":"Filter",
-        "clear":"klar"
+        "filters": "Filter",
+        "clear": "klar"
     },
     "detail": {
         "failed": "Der Job konnte nicht geladen werden.",
@@ -110,6 +112,39 @@
             "about-the-role": "Über die Rolle",
             "requirement": "Anforderungen",
             "tasks": "Aufgaben"
+        },
+        "report": {
+            "title": "Job melden",
+            "subtitle": "Bitte füllen Sie die folgenden Angaben aus, bevor Sie mit dem Bericht fortfahren!!!",
+            "reason": {
+                "label": "Grund",
+                "options": {
+                    "spam-promotional": "Spam/Werbung",
+                    "fake-scam": "Gefälschte Stellenanzeige / Betrug",
+                    "asking-money": "Um Geld bitten",
+                    "misleading-information": "Irreführende Informationen",
+                    "offensive-content": "Anstößige/unangemessene Inhalte",
+                    "illegal-activity": "Illegale Aktivität",
+                    "discrimination": "Diskriminierung",
+                    "duplicate": "Doppelter Beitrag",
+                    "expired": "Abgelaufener Auftrag",
+                    "low-quality": "Niedrige Qualität / Unprofessionell",
+                    "other": "Sonstige (bitte angeben)"
+                },
+                "error": "Sie müssen einen konkreten Grund angeben."
+            },
+            "description": {
+                "label": "Beschreibung",
+                "error": "Die detaillierte Begründung muss angegeben werden und sollte mehr als 8 Zeichen umfassen.",
+                "placeholder": "Geben Sie eine detaillierte Beschreibung an"
+            },
+            "submit": "Bericht",
+            "submitting": "Einreichen",
+            "close": "Schließen",
+            "message": {
+                "success": "Der Bericht wurde an die Administratoren übermittelt. Diese werden ihn prüfen und entsprechende Maßnahmen ergreifen.",
+                "error": "Etwas ist schiefgelaufen, versuchen Sie es später noch einmal."
+            }
         }
     },
     "count": {
@@ -158,6 +193,51 @@
         "per-page": {
             "label": "Pro Seite"
         },
+        "pagination": {
+            "aria-label": "Pagination",
+            "prev": "Vorher",
+            "next": "Nächste"
+        }
+    },
+    "report": {
+        "title": "Gemeldete Jobs",
+        "status": {
+            "label": "Status",
+            "options": {
+                "all": "Alle",
+                "pending": "Ausstehend",
+                "reviewed": "Bewertet",
+                "rejected": "Abgelehnt",
+                "resolved": "Gelöst"
+            }
+        },
+        "reason": {
+            "options": {
+                "spam-promotional": "Spam/Werbung",
+                "fake-scam": "Gefälschte Stellenanzeige / Betrug",
+                "asking-money": "Um Geld bitten",
+                "misleading-information": "Irreführende Informationen",
+                "offensive-content": "Anstößige/unangemessene Inhalte",
+                "illegal-activity": "Illegale Aktivität",
+                "discrimination": "Diskriminierung",
+                "duplicate": "Doppelter Beitrag",
+                "expired": "Abgelaufener Auftrag",
+                "low-quality": "Niedrige Qualität / Unprofessionell",
+                "other": "Sonstige (bitte angeben)"
+            }
+        },
+        "sort": {
+            "label": "Sortieren",
+            "options": {
+                "asc": "Neu",
+                "desc": "Alt"
+            }
+        },
+        "per-page": {
+            "label": "Pro Seite"
+        },
+        "view": "Job anzeigen",
+        "no-reports": "Keine Berichte",
         "pagination": {
             "aria-label": "Pagination",
             "prev": "Vorher",

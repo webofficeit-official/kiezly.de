@@ -168,9 +168,9 @@ export function JobResults({
                     </span>
                   )}
                   {job?.category_name && <span>• {job.category_name}</span>}
-                  {job?.job_type && <span>• {job.job_type.join(", ")}</span>}
-                  {job?.job_experience?.length > 0 && (
-                    <span>• {job.job_experience.join(", ")}</span>
+                  {job?.job_types && <span>• {job.job_types.join(", ")}</span>}
+                  {job?.job_experiences?.length > 0 && (
+                    <span>• {job.job_experiences.join(", ")}</span>
                   )}
                   {job?.starts_at && (
                     <span className="inline-flex items-center gap-1">
