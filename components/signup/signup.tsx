@@ -270,15 +270,40 @@ export function renderRichText(
   const out: React.ReactNode[] = [];
   let last = 0,
     m: RegExpExecArray | null;
+      let keyIndex = 0;
 
   while ((m = re.exec(text))) {
     const [full, tag, inner] = m;
-    if (m.index > last) out.push(text.slice(last, m.index));
+
+    if (m.index > last) {
+      out.push(
+        <React.Fragment key={`text-${keyIndex++}`}>
+          {text.slice(last, m.index)}
+        </React.Fragment>
+      );
+    }
+
     const C = components[tag];
-    out.push(C ? C(inner) : inner);
+
+    out.push(
+      <React.Fragment key={`tag-${keyIndex++}`}>
+        {C ? C(inner) : inner}
+      </React.Fragment>
+    );
+
     last = m.index + full.length;
   }
-  if (last < text.length) out.push(text.slice(last));
+
+  if (last < text.length) {
+
+    out.push(
+      <React.Fragment key={`end-${keyIndex++}`}>
+        {text.slice(last)}
+      </React.Fragment>
+    );
+  }
+
+
   return <>{out}</>;
 }
 
