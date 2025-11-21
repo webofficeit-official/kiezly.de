@@ -39,20 +39,13 @@ dayjs.extend(relativeTime);
 
 export default function JobDetail() {
     const [submitted, setSubmitted] = React.useState(false);
-    const [open, setOpen] = React.useState(false);
 
     const [savedJobs, setSavedJobs] = React.useState([]);
-    const [coverNote, setCoverNote] = useState('');
-    const [proposedRate, setProposedRate] = useState('');
     const { user } = useAuth(); // Get user from useUser  hook
-    const router = useRouter();
+   
 
-
-    // MOVE THESE HOOKS TO THE TOP: Call unconditionally before early returns
-    const { slug } = useParams(); // get /jobs/[slug]
+    const { slug } = useParams(); 
     const { data, isLoading, isError } = useJob(slug as string);
-
-    // Compute jobId early from data (safe: undefined initially)
     const jobId = data?.job?.id ?? undefined;
 
 
