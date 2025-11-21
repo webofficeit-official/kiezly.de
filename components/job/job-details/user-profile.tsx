@@ -112,8 +112,8 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
                 <div className="mt-5">
                   <p className="font-medium text-gray-500 text-sm mb-3">{t("user.education")}</p>
                   <div className="mt-4">
-                    {user.education.map((e: any) => (
-                      <EducationType label={e.institution} value={e.field} year={e.year} Icon={<GraduationCap />} />
+                    {user.education.map((e: any, index: number) => (
+                      <EducationType key={index} label={e.institution} value={e.field} year={e.year} Icon={<GraduationCap />} />
                     ))}
                   </div>
                 </div>
