@@ -37,6 +37,7 @@ export default function ImpressumPage() {
                                             list.description.map((des: string, j: number) => {
                                                 return (
                                                     <div
+                                                       key={j}
                                                         className="text-gray-700 text-sm leading-relaxed mt-3"
                                                         dangerouslySetInnerHTML={{ __html: des || "" }}
                                                     />

@@ -66,7 +66,7 @@ export const useUpdateApplication = () => {
   });
 };
 
-export const useCheckApplied = (jobId?: string) => {
+export const useCheckApplied = (jobId?: string,options: any = {}) => {
   return useQuery({
     queryKey: ["applied-job", jobId],
     queryFn: async () => {
@@ -75,7 +75,7 @@ export const useCheckApplied = (jobId?: string) => {
       const res = checkJobApplied(jobId);
       return res;
     },
-    enabled: !!jobId, // query runs only if jobId exists
+    enabled: options.enabled&&!!jobId, // query runs only if jobId exists
   });
 };
 

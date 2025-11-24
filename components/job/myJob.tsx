@@ -1,21 +1,10 @@
 "use client";
+import { useT } from "@/app/[locale]/layout";
+import { useAuth } from "@/lib/context/auth-context";
 import { myJobs, useCloseJob } from "@/lib/react-query/queries/useJob";
 import { JobList } from "@/lib/types/job";
-import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  Eye,
-  Pencil,
-  Trash2,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/lib/context/auth-context";
+import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { Listbox } from "@headlessui/react";
-import { Button } from "../ui/button";
-import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
-import toast from "react-hot-toast";
 import {
   Tooltip,
   TooltipContent,
@@ -23,8 +12,12 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
 import { formatDate } from "date-fns";
-import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
-import { useT } from "@/app/[locale]/layout";
+import { ArrowRight, Check, ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
+import JobCardSkeleton from "../ui/skeleton/JobCardSkeleton";
 
 export type Status =
   | "draft"
@@ -109,6 +102,7 @@ export default function MyJobs({
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const router = useRouter();
   const t = useT("my-jobs");
 
@@ -132,6 +126,10 @@ export default function MyJobs({
   );
   const { data, isLoading, error, isFetching } = myJobs(apiFilters);
   const dataSource = data?.data?.items ?? jobs ?? [];
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSkeleton(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     onChange?.(debouncedFilters);
@@ -245,177 +243,192 @@ export default function MyJobs({
                   </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {pageSlice?.map((job) => (
-                    <article
-                      key={`${job.id}-${job.slug}`}
-                      className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
-                    >
-                      {/* Header */}
-                      <div className="cursor-pointer">
-                        <div className="flex items-start justify-between">
-                          <span
-                            className="inline-block text-sm text-gray-800 py-1 rounded-full"
-                            onClick={() =>
-                              (window.location.href = `/jobs/${job.slug}`)
-                            }
-                          >
-                            {formatDate(job.starts_at, "dd MMM, yyyy")} –{" "}
-                            {formatDate(job.ends_at, "dd MMM, yyyy")}
-                          </span>
-                          <span className="space-x-2 ">
-                            {filters.status != "closed" && (
-                              <>
-                                {/* Edit */}
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button
-                                        className="p-1 rounded hover:bg-gray-100"
-                                        onMouseEnter={() =>
-                                          prefetch(`/jobs/${job.slug}`)
-                                        }
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          push(
-                                            `/post-job/basic-details?slug=${job.slug}`
-                                          );
-                                        }}
-                                      >
-                                        {job.status === "draft" ? (
-                                          <ArrowRight className="w-4 h-4 text-amber-500" />
-                                        ) : (
-                                          <Pencil className="w-4 h-4 text-amber-500" />
-                                        )}
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent
-                                      side="top"
-                                      className="text-xs"
-                                    >
-                                      {job.status === "draft"
-                                        ? t("tooltips.continue")
-                                        : t("tooltips.edit")}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
+                  {isLoading || showSkeleton ? (
+                    // Show 6 skeletons
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <JobCardSkeleton key={i} />
+                    ))
+                  ) : (
+                    <>
+                      {pageSlice?.map((job) => (
+                        <article
+                          key={`${job.id}-${job.slug}`}
+                          className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col justify-between"
+                        >
+                          {/* Header */}
+                          <div className="cursor-pointer">
+                            <div className="flex items-start justify-between">
+                              <span
+                                className="inline-block text-sm text-gray-800 py-1 rounded-full"
+                                onClick={() =>
+                                  (window.location.href = `/jobs/${job.slug}`)
+                                }
+                              >
+                                {formatDate(job.starts_at, "dd MMM, yyyy")} –{" "}
+                                {formatDate(job.ends_at, "dd MMM, yyyy")}
+                              </span>
 
-                                {/* Delete */}
-                                <AlertBox
-                                  trigger={
-                                    <CloseJobButton
-                                      onClick={(e) => {
-                                        e.stopPropagation();
+                              <span className="space-x-2">
+                                {filters.status !== "closed" && (
+                                  <>
+                                    {/* Edit Button */}
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <button
+                                            className="p-1 rounded hover:bg-gray-100"
+                                            onMouseEnter={() =>
+                                              prefetch(`/jobs/${job.slug}`)
+                                            }
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              push(
+                                                `/post-job/basic-details?slug=${job.slug}`
+                                              );
+                                            }}
+                                          >
+                                            {job.status === "draft" ? (
+                                              <ArrowRight className="w-4 h-4 text-amber-500" />
+                                            ) : (
+                                              <Pencil className="w-4 h-4 text-amber-500" />
+                                            )}
+                                          </button>
+                                        </TooltipTrigger>
+
+                                        <TooltipContent
+                                          side="top"
+                                          className="text-xs"
+                                        >
+                                          {job.status === "draft"
+                                            ? t("tooltips.continue")
+                                            : t("tooltips.edit")}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+
+                                    {/* Close/Delete Button */}
+                                    <AlertBox
+                                      trigger={
+                                        <CloseJobButton
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                          }}
+                                        />
+                                      }
+                                      title={t("alert.close_title")}
+                                      description={t("alert.close_description")}
+                                      confirmText={t("alert.confirm")}
+                                      cancelText={t("alert.cancel")}
+                                      onConfirm={(e) => {
+                                        e?.stopPropagation?.();
+                                        closeJobMutation.mutate(job.id, {
+                                          onSuccess: () => {
+                                            toast.success(
+                                              t("toasts.close_success")
+                                            );
+                                            update({ status: "closed" });
+                                          },
+                                          onError: (error: any) =>
+                                            toast.error(
+                                              error.message ||
+                                                t("toasts.close_error")
+                                            ),
+                                        });
                                       }}
                                     />
-                                  }
-                                  title={t("alert.close_title")}
-                                  description={t("alert.close_description")}
-                                  confirmText={t("alert.confirm")}
-                                  cancelText={t("alert.cancel")}
-                                  onConfirm={(e) => {
-                                    e?.stopPropagation?.();
-                                    closeJobMutation.mutate(job.id, {
-                                      onSuccess: () => {
-                                        toast.success(
-                                          t("toasts.close_success")
-                                        );
-                                        update({ status: "closed" });
-                                      },
-                                      onError: (error: any) =>
-                                        toast.error(
-                                          error.message ||
-                                            t("toasts.close_error")
-                                        ),
-                                    });
-                                  }}
-                                />
-                              </>
-                            )}
-                          </span>
-                        </div>
-
-                        {/* Category */}
-                        <p
-                          className="text-xs text-gray-500 mt-4 uppercase tracking-wide font-medium"
-                          onClick={() =>
-                            (window.location.href = `/jobs/${job.slug}`)
-                          }
-                        >
-                          {job.category_name}
-                        </p>
-
-                        {/* Title */}
-                        <h3
-                          className="text-base font-semibold text-gray-900 mt-1 line-clamp-2 hover:text-black transition"
-                          onClick={() =>
-                            (window.location.href = `/jobs/${job.slug}`)
-                          }
-                        >
-                          {job.title}
-                        </h3>
-
-                        {/* Tags */}
-                        {job.tags?.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {job.tags.map((tag, index) => (
-                              <span
-                                key={index}
-                                className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
-                              >
-                                {tag.name}
+                                  </>
+                                )}
                               </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                            </div>
 
-                      {/* Footer */}
-                      <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
-                        <div className="text-xs text-gray-600 leading-tight">
-                          <p className="font-semibold text-sm text-gray-900">
-                            {job?.price_type === "range" &&
-                            job?.price_min &&
-                            job?.price_max
-                              ? `${job.currency} ${job.price_min} – ${job.price_max}`
-                              : job?.price_value
-                              ? `${job.currency} ${job.price_value}`
-                              : "Not specified"}
-                            {job?.price_type && (
-                              <span className="text-gray-500 text-xs ml-1">
-                                / {job.price_type}
-                              </span>
-                            )}
-                          </p>
-                          {job.distance && (
-                            <p className="text-gray-500 text-xs mt-1">
-                              {t("cards.distance_km").replace(
-                                "{{km}}",
-                                (job.distance / 1000).toFixed(2)
-                              )}
+                            {/* Category */}
+                            <p
+                              className="text-xs text-gray-500 mt-4 uppercase tracking-wide font-medium"
+                              onClick={() =>
+                                (window.location.href = `/jobs/${job.slug}`)
+                              }
+                            >
+                              {job.category_name}
                             </p>
-                          )}
-                          <p className="text-gray-500 text-xs mt-1">
-                            {[job.city, job.state, job.countries?.name]
-                              .filter(Boolean)
-                              .join(", ")}
-                          </p>
-                        </div>
 
-                        <button
-                          className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
-                          onClick={() =>
-                            (window.location.href = `/jobs/${job.slug}`)
-                          }
-                        >
-                          {t("buttons.view")}
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                  {pageSlice?.length === 0 && (
-                    <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
-                      {t("empty")}
-                    </div>
+                            {/* Title */}
+                            <h3
+                              className="text-base font-semibold text-gray-900 mt-1 line-clamp-2 hover:text-black transition"
+                              onClick={() =>
+                                (window.location.href = `/jobs/${job.slug}`)
+                              }
+                            >
+                              {job.title}
+                            </h3>
+
+                            {/* Tags */}
+                            {job.tags?.length > 0 && (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {job.tags.map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2.5 py-1 text-xs bg-gray-100 border border-gray-200 text-gray-700 rounded-full"
+                                  >
+                                    {tag.name}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Footer */}
+                          <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
+                            <div className="text-xs text-gray-600 leading-tight">
+                              <p className="font-semibold text-sm text-gray-900">
+                                {job?.price_type === "range" &&
+                                job?.price_min &&
+                                job?.price_max
+                                  ? `${job.currency} ${job.price_min} – ${job.price_max}`
+                                  : job?.price_value
+                                  ? `${job.currency} ${job.price_value}`
+                                  : "Not specified"}
+                                {job?.price_type && (
+                                  <span className="text-gray-500 text-xs ml-1">
+                                    / {job.price_type}
+                                  </span>
+                                )}
+                              </p>
+
+                              {job.distance && (
+                                <p className="text-gray-500 text-xs mt-1">
+                                  {t("cards.distance_km").replace(
+                                    "{{km}}",
+                                    (job.distance / 1000).toFixed(2)
+                                  )}
+                                </p>
+                              )}
+
+                              <p className="text-gray-500 text-xs mt-1">
+                                {[job.city, job.state, job.countries?.name]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </p>
+                            </div>
+
+                            <button
+                              className="bg-black hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-full transition"
+                              onClick={() =>
+                                (window.location.href = `/jobs/${job.slug}`)
+                              }
+                            >
+                              {t("buttons.view")}
+                            </button>
+                          </div>
+                        </article>
+                      ))}
+
+                      {/* Empty State */}
+                      {pageSlice?.length === 0 && (
+                        <div className="bg-white rounded-2xl border p-6 text-center text-sm text-gray-600">
+                          {t("empty")}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

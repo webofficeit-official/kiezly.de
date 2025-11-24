@@ -43,7 +43,7 @@ export default function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [activeLanguag, setActiveLanguage] = useState("");
-  const { reset,clearForm } = useJobWizard();
+  const { reset, clearForm } = useJobWizard();
   const pathname = usePathname();
   const qc = useQueryClient();
 
@@ -66,6 +66,7 @@ export default function Header() {
   const uNot = updateNotification();
 
   useEffect(() => {
+    if (!user) return;
     not.mutate(
       {},
       {
@@ -81,9 +82,10 @@ export default function Header() {
         },
       }
     );
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+    if (!user) return;
     socket.on("connect", () =>
       console.log(`Connected to socket: ${socket.id}`)
     );
@@ -102,7 +104,7 @@ export default function Header() {
     return () => {
       socket.off("notification");
     };
-  }, []);
+  }, [user]);
 
   const updateNot = (id: string) => {
     uNot.mutate(id, {
@@ -188,8 +190,8 @@ export default function Header() {
 
   const handleStartNew = () => {
     reset();
-   
-     qc.removeQueries({ queryKey: ["job"] });
+
+    qc.removeQueries({ queryKey: ["job"] });
     push("/post-job/basic-details");
   };
 
@@ -216,15 +218,13 @@ export default function Header() {
             <LocalizedLink href={"/jobs"} className="hover:opacity-80">
               {t("jobs")}
             </LocalizedLink>
-            {!user&&(
-               <LocalizedLink href="/signin" className="hover:opacity-80">
+            {!user && (
+              <LocalizedLink href="/signin" className="hover:opacity-80">
                 {t("signin")}
               </LocalizedLink>
             )}
-            
           </nav>
 
-         
           <div className="flex items-center gap-2 relative">
             <div className="relative mr-2">
               <button

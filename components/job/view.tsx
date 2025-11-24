@@ -1,37 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-    GraduationCap,
-    CheckCircle2,
-    ExternalLink,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+    CheckCircle2
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 
-import { useParams, useRouter } from "next/navigation";
+import { useT } from "@/app/[locale]/layout";
+import { useAuth } from "@/lib/context/auth-context";
+import { getSavedJobs } from "@/lib/react-query/api-handler/job-save-api";
+import { useUpdateApplicantStatus } from "@/lib/react-query/queries/apply-job";
 import { useJob } from "@/lib/react-query/queries/useJob";
-import { Loader } from "../ui/loader";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { JobList } from "@/lib/types/job";
-import { addJobAsFavorite, getSavedJobs, unsaveJobAsFavorite } from "@/lib/react-query/api-handler/job-save-api";
-import { useAuth } from "@/lib/context/auth-context";
-import { useApplyJob, useCheckApplied, useJobApplicants, useUpdateApplicantStatus, useWithdrawApplication } from "@/lib/react-query/queries/apply-job";
-import Input from "../shared-ui/input/input";
+import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import AlertBox from "../shared-ui/delete-alert-box/delet-alert-box";
-import { Select } from "../shared-ui/custom-select/custom-select";
-import JobHeader from "./job-details/job-header";
-import JobDescription from "./job-details/job-decription";
-import CompanyInfoCard from "./job-details/company-info";
-import ApplyPanel from "./job-details/apply-panel";
-import ApplicantsPanel from "./job-details/applicant-panel";
-import SimilarJobCard from "./job-details/similar-jobs";
+import { Loader } from "../ui/loader";
 import ApplicantListCard from "./job-details/applicants-list";
+import ApplyPanel from "./job-details/apply-panel";
+import CompanyInfoCard from "./job-details/company-info";
 import JobCountCard from "./job-details/job-counts";
-import { useT } from "@/app/[locale]/layout";
+import JobDescription from "./job-details/job-decription";
+import JobHeader from "./job-details/job-header";
+import SimilarJobCard from "./job-details/similar-jobs";
 
 const statusOptions = [
     { id: 1, name: "applied" },
@@ -47,20 +39,13 @@ dayjs.extend(relativeTime);
 
 export default function JobDetail() {
     const [submitted, setSubmitted] = React.useState(false);
-    const [open, setOpen] = React.useState(false);
 
     const [savedJobs, setSavedJobs] = React.useState([]);
-    const [coverNote, setCoverNote] = useState('');
-    const [proposedRate, setProposedRate] = useState('');
     const { user } = useAuth(); // Get user from useUser  hook
-    const router = useRouter();
+   
 
-
-    // MOVE THESE HOOKS TO THE TOP: Call unconditionally before early returns
-    const { slug } = useParams(); // get /jobs/[slug]
+    const { slug } = useParams(); 
     const { data, isLoading, isError } = useJob(slug as string);
-
-    // Compute jobId early from data (safe: undefined initially)
     const jobId = data?.job?.id ?? undefined;
 
 

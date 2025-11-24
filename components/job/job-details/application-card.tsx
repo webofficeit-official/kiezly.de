@@ -47,13 +47,13 @@ export default function ApplicationCard({
           )}
 
           {coverNote && (
-            <p className="text-gray-700 text-sm leading-relaxed">
+            <div className="text-gray-700 text-sm leading-relaxed">
               {t("apply-panel.card.cover-note")} <br />
               <div
                 className="text-gray-700 text-sm leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: coverNote || "" }}
               />
-            </p>
+            </div>
           )}
           {proposedRate && (
             <p className="text-gray-700 text-sm leading-relaxed">

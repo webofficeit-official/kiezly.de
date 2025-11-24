@@ -4,7 +4,7 @@ import { useT } from "@/app/[locale]/layout";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { getErrorMessage } from "@/lib/utils/error";
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation";
 import * as React from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
@@ -212,6 +212,7 @@ function LoginPage() {
                     ? "border-red-400 focus:ring-red-200"
                     : "border-gray-300 focus:ring-black/20"
                 }`}
+                autoComplete="email"
               />
               {getFieldError("email") && (
                 <p id="email-error" className="mt-1 text-xs text-red-600">
@@ -244,6 +245,7 @@ function LoginPage() {
                       ? "border-red-400 focus:ring-red-200"
                       : "border-gray-300 focus:ring-black/20"
                   }`}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -268,7 +270,7 @@ function LoginPage() {
                     onChange={(e) => setRemember(e.target.checked)}
                   />
                   {t("form.remember_me") ?? "Remember me"}
-                </label> 
+                </label>
                 <Link
                   href="/forgot-password"
                   className="text-gray-600 underline hover:text-black"
