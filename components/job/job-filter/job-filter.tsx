@@ -185,7 +185,7 @@ export function JobFilterSidebar({
                   checked={filters.category_id.includes(cat.id)}
                   onChange={() => toggleInArray("category_id", cat.id)}
                 />
-                <span className="text-sm">{cat.name}</span>
+                <span className="text-sm  block break-words line-clamp-2 cursor-help">{cat.name}</span>
               </label>
             ))}
           </div>
@@ -209,7 +209,7 @@ export function JobFilterSidebar({
                   checked={filters.job_type.includes(type.id)}
                   onChange={() => toggleInArray("job_type", type.id)}
                 />
-                <span className="text-sm">{type.name}</span>
+                <span className="text-sm block break-words line-clamp-2 cursor-help">{type.name}</span>
               </label>
             ))}
           </div>
@@ -260,7 +260,7 @@ export function JobFilterSidebar({
                   checked={filters.job_experience.includes(exp.id)}
                   onChange={() => toggleInArray("job_experience", exp.id)}
                 />
-                <span className="text-sm">{exp.name}</span>
+                <span className="text-sm block break-words line-clamp-2 cursor-help">{exp.name}</span>
               </label>
             ))}
           </div>
@@ -284,7 +284,7 @@ export function JobFilterSidebar({
                   checked={filters.job_tags.includes(tag.id)}
                   onChange={() => toggleInArray("job_tags", tag.id)}
                 />
-                <span className="text-sm">{tag.name}</span>
+                <span className="text-sm block break-words line-clamp-2 cursor-help">{tag.name}</span>
               </label>
             ))}
           </div>

@@ -91,7 +91,6 @@ export default function Header() {
     );
 
     socket.on("notification", (data) => {
-      console.log(data);
       setNotifications((prev) => {
         const updated = [data, ...prev];
         // 2. Update latest three (most recent 3)
