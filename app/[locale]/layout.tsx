@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import ClientLayout from "./client-layout/client-layout";
 import { Toaster } from "react-hot-toast";
+import { Loader } from "@/components/ui/loader";
 
 export const TranslationContext = createContext({
   locale: "en",
@@ -119,7 +120,20 @@ export default function LocaleLayout({ children, params }: any) {
 
     loadMessages();
   }, [locale]);
-  if (Object.keys(messages).length === 0) return <></>;
+  if (Object.keys(messages).length === 0)
+    return (
+      <ClientLayout>
+        <div className="min-h-screen">
+          {/* Optional: use a skeleton that reserves header + sidebar space */}
+          <div className="flex">
+        
+            <div className="flex-1 flex items-center justify-center">
+              <Loader />
+            </div>
+          </div>
+        </div>
+      </ClientLayout>
+    );
 
   const isReady = Object.keys(messages).length > 0;
 
