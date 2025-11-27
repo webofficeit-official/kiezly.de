@@ -582,7 +582,7 @@ function OnboardingForm({ onChange, weekdays, timeWindows, jobCategories, langua
     }
 
     if (Array.isArray(file)) {
-      console.log("Multiple files:", file, type);
+      // console.log("Multiple files:", file, type);
     } else {
       if (type == 'profile_pic') {
         uploadProfile.mutate(

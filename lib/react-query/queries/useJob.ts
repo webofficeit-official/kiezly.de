@@ -9,8 +9,7 @@ export function useCreateJob() {
 
   return useMutation<CreateJobResponse, Error, Partial<CreateJobData>>({
     mutationFn: createJobApi,
-    onSuccess: (data) => {
-      console.log(" Job created:", data);
+    onSuccess: (data) => {    
       const newJob = data?.data;
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       if (newJob?.slug) queryClient.invalidateQueries({ queryKey: ["job", newJob.slug] });
@@ -43,7 +42,6 @@ export function useGenerateSlug() {
   return useMutation<{ slug: string }, Error, string>({
     mutationFn: (title) => generateSlugApi(title),
     onSuccess: (data) => {
-      console.log("Generated slug:", data.slug);
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
     },
     onError: (err) => console.error("Slug generation failed:", err),

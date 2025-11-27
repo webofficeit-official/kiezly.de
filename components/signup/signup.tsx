@@ -366,7 +366,6 @@ export default function RegisterPage() {
       {},
       {
         onSuccess: (data) => {
-          console.log(data);
           setJobCategories(data.data.jobCategories);
           setCountries(data.data.countries);
           setCountry(
@@ -453,7 +452,6 @@ export default function RegisterPage() {
       },
       {
         onSuccess: (data) => {
-          console.log(data);
           setZipOptions(data.data.zipcode);
         },
         onError: (err: any) => {},
