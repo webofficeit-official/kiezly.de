@@ -97,7 +97,7 @@
         }
     },
     "applicants-panel": {
-        "title": "Bewerber für {jobDetails.title}",
+        "title": "Bewerber für {title}",
         "status": {
             "label": "Status",
             "options": {

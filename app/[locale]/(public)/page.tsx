@@ -171,7 +171,7 @@ export default function Page() {
                       >
                         <div className="mb-2 flex items-center gap-2">
                           <div className="flex items-center justify-center h-5 w-5">
-                            {getIconForCategory(name)}
+                            {getIconForCategory(slug)}
                           </div>
 
                           <span className="text-sm font-medium block break-words line-clamp-2 cursor-help">
@@ -250,7 +250,7 @@ export default function Page() {
                   <CardContent className="p-5">
                     <div className="mb-2 flex items-center gap-2">
                       <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white">
-                        {getIconForCategory(name)}
+                        {getIconForCategory(slug)}
                       </div>
                       <h3 className="font-medium">{name}</h3>
                     </div>
