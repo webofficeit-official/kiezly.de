@@ -40,6 +40,7 @@ type Tag = {
 
 interface Country {
   id: string | number;
+  code?:string;
   name: string;
 }
 
@@ -325,7 +326,7 @@ export default function RegisterPage() {
   const [jobCategories, setJobCategories] = React.useState([]);
   const [countries, setCountries] = React.useState([]);
   const [country, setCountry] = React.useState(
-    countries?.find((c) => c.name == "Germany")?.id || ""
+    countries?.find((c) => c.code == "DE")?.id || ""
   );
   const [zip, setZip] = React.useState("");
   const [city, setCity] = React.useState("");
@@ -370,7 +371,7 @@ export default function RegisterPage() {
           setCountries(data.data.countries);
           setCountry(
             (data.data as ApiResponse).countries?.find(
-              (c) => c.name == "Germany"
+              (c) => c.code == "DE"
             )?.id || ""
           );
         },
