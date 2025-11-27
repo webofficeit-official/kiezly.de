@@ -39,7 +39,9 @@ export default function Page() {
   const trustSafety = t("trust-safety.steps") || [];
 
   const doSearch = () => {
-    push(`/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`);
+    push(
+      `/jobs?q=${encodeURIComponent(what)}&city=${encodeURIComponent(where)}`
+    );
   };
 
   const doCategory = (slug: string) => {
@@ -124,13 +126,15 @@ export default function Page() {
 
             <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-neutral-600">
               <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" /> {t("form.badge.id-verified")}
+                <CheckCircle2 className="h-4 w-4" />{" "}
+                {t("form.badge.id-verified")}
               </span>
               <span className="inline-flex items-center gap-1">
                 <CheckCircle2 className="h-4 w-4" /> {t("form.badge.first-aid")}
               </span>
               <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" /> {t("form.badge.police-certificate")}
+                <CheckCircle2 className="h-4 w-4" />{" "}
+                {t("form.badge.police-certificate")}
               </span>
             </div>
           </div>
@@ -148,7 +152,10 @@ export default function Page() {
               >
                 {isLoading
                   ? Array.from({ length: 9 }).map((_, i) => (
-                      <div key={i} className="rounded-2xl border p-3 hover:shadow-sm">
+                      <div
+                        key={i}
+                        className="rounded-2xl border p-3 hover:shadow-sm"
+                      >
                         <div className="mb-1 flex items-center gap-2">
                           <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
                           <div className="h-2 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
@@ -163,10 +170,18 @@ export default function Page() {
                         onClick={() => doCategory(slug)}
                       >
                         <div className="mb-2 flex items-center gap-2">
-                          {getIconForCategory(name)}
-                          <span className="text-sm font-medium">{name}</span>
+                          <div className="flex items-center justify-center h-5 w-5">
+                            {getIconForCategory(name)}
+                          </div>
+
+                          <span className="text-sm font-medium block break-words line-clamp-2 cursor-help">
+                            {name}
+                          </span>
                         </div>
-                        <div className="text-xs text-neutral-500">{t("popular-rate")}</div>
+
+                        <div className="text-xs text-neutral-500">
+                          {t("popular-rate")}
+                        </div>
                       </div>
                     ))}
               </CardContent>
@@ -179,7 +194,7 @@ export default function Page() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold">{t("how-it-works.title")}</h2>
-        <p className="text-neutral-600">{t("how-it-works.description")}</p>
+          <p className="text-neutral-600">{t("how-it-works.description")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {Array.isArray(howItWorks) &&
@@ -191,8 +206,12 @@ export default function Page() {
                     <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
                       <IconComponent className="h-4 w-4" /> {/* dynamic icon */}
                     </div>
-                    <h3 className="font-medium">{i + 1}) {step.title}</h3>
-                    <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
+                    <h3 className="font-medium">
+                      {i + 1}) {step.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-neutral-600">
+                      {step.description}
+                    </p>
                   </CardContent>
                 </Card>
               );
@@ -235,7 +254,9 @@ export default function Page() {
                       </div>
                       <h3 className="font-medium">{name}</h3>
                     </div>
-                    <p className="text-sm text-neutral-600">{t("categories.subtitle")}</p>
+                    <p className="text-sm text-neutral-600">
+                      {t("categories.subtitle")}
+                    </p>
                     <div className="mt-3">
                       <button
                         onClick={() => doBrowserCategoryRedirect(slug)}
@@ -268,7 +289,9 @@ export default function Page() {
                       <IconComponent className="h-4 w-4" />
                     </div>
                     <h3 className="font-medium">{step.title}</h3>
-                    <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
+                    <p className="mt-1 text-sm text-neutral-600">
+                      {step.description}
+                    </p>
                   </CardContent>
                 </Card>
               );
