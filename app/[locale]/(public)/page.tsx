@@ -312,7 +312,7 @@ export default function Page() {
                   onClick={() => push("/signup?role=client")}
                   className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                 >
-                  {t("help.mini-job")}
+                  {t("help.mini‑job")}
                 </button>
                 <button
                   onClick={() => push("/signup?role=helper")}

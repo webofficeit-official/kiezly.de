@@ -47,7 +47,7 @@ export function JobFilterSidebar({
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 space-y-6">
+    <div className="bg-white p-4 rounded-2xl shadow-sm sm:p-6 space-y-6 sticky top-4 overflow-y-auto">
       {/*  Search */}
       <div>
         <div className="flex items-center justify-between">
