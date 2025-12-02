@@ -92,7 +92,8 @@
             "rate": "Rate:",
             "button": {
                 "cancel": "Stornieren",
-                "update": "Bestätigen Sie die Aktualisierung"
+                "update": "Bestätigen Sie die Aktualisierung",
+                "updating":"Aktualisierung"
             }
         }
     },
