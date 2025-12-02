@@ -92,7 +92,8 @@
             "rate": "Rate:",
             "button": {
                 "cancel": "Cancel",
-                "update": "Confirm Update"
+                "update": "Confirm Update",
+                "updating":"Updating"
             }
         }
     },
