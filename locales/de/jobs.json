@@ -14,7 +14,7 @@
             },
             "distance": {
                 "label": "Entfernung (km)",
-                "active": "Zeige Jobs innerhalb von {{km}} km",
+                "active": "Zeige Jobs innerhalb von {km} km",
                 "inactive": "Alle Jobs anzeigen"
             },
             "category": {
