@@ -1,4 +1,4 @@
-// components/modals/UpdateStatusModal.jsx (Example structure)
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useUpdateApplicantStatus } from "@/lib/react-query/queries/apply-job";
