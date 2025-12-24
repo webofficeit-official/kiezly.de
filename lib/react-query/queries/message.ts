@@ -1,6 +1,6 @@
 import { MessageApiResponse, SendMessageData, SendMessageResponse } from "@/lib/types/message";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
-import { getConversationApi, sendMessageApi } from "../api-handler/message";
+import { countMessageApi, getConversationApi, sendMessageApi } from "../api-handler/message";
 
 export function useSendMessage() {
     const queryClient = useQueryClient();
@@ -25,6 +25,20 @@ export const useGetConversation = (
     return useQuery<MessageApiResponse>({
         queryKey: ["get-conversation", jobId, userId, filters], // Include all dependencies
         queryFn: () => getConversationApi(jobId, userId, filters),
+        placeholderData: (previousData) => previousData, // Replaces keepPreviousData in v5
+        staleTime: 5000,
+        ...options,
+    });
+};
+
+export const useCountMessage = (
+    jobId: string, 
+    userId: string, 
+    options?: any
+) => {
+    return useQuery<MessageApiResponse>({
+        queryKey: ["count-conversation", jobId, userId], // Include all dependencies
+        queryFn: () => countMessageApi(jobId, userId),
         placeholderData: (previousData) => previousData, // Replaces keepPreviousData in v5
         staleTime: 5000,
         ...options,

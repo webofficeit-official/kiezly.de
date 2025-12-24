@@ -29,12 +29,13 @@ export type MessageApiResponse = {
     status: boolean;
     message: string;
     data: {
-        messages: {
+        messages?: {
             items: Messages[];
             page: number;
             page_size: number;
             total_items: number;
             total_pages: number;
         }
+        count?: number
     };
 };

@@ -23,6 +23,7 @@ import JobDescription from "./job-details/job-decription";
 import JobHeader from "./job-details/job-header";
 import SimilarJobCard from "./job-details/similar-jobs";
 import Message from "../Chat/message";
+import { useCountMessage } from "@/lib/react-query/queries/message";
 
 const statusOptions = [
   { id: 1, name: "applied" },
@@ -45,6 +46,13 @@ export default function JobDetail() {
   const { slug } = useParams();
   const { data, isLoading, isError } = useJob(slug as string);
   const jobId = data?.job?.id ?? undefined;
+  const clientId = data?.job?.client_id ?? undefined;
+
+  const { data: count, isLoading: isCountChecking } = useCountMessage(
+    jobId,
+    clientId,
+    { enabled: !!jobId && !!clientId }
+  );
 
   const updateStatusMutation = useUpdateApplicantStatus();
 
@@ -155,31 +163,36 @@ export default function JobDetail() {
         )}
       </div>
 
+      {
+        count && count.data.count !== 0 && (
+          <>
+            <button
+              onClick={() => setIsMessageOpen(true)}
+              className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span className="hidden sm:inline">Chat</span>
+            </button>
 
-      <button
-        onClick={() => setIsMessageOpen(true)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
-      >
-        <MessageCircle className="h-5 w-5" />
-        <span className="hidden sm:inline">Chat</span>
-      </button>
-
-      <Message
-        isOpen={isMessageOpen}
-        onClose={() => setIsMessageOpen(false)}
-        title={jobDetails.title}
-        subtitle={jobDetails.client.org_name ?? [
-          jobDetails?.street,
-          jobDetails?.city,
-          jobDetails?.state,
-          jobDetails?.postal_code,
-          jobDetails?.country,
-        ]
-          .filter(Boolean)
-          .join(", ")}
-        jobId={jobDetails.id}
-        receiverId={jobDetails.client_id}
-      />
+            <Message
+              isOpen={isMessageOpen}
+              onClose={() => setIsMessageOpen(false)}
+              title={jobDetails.title}
+              subtitle={jobDetails.client.org_name ?? [
+                jobDetails?.street,
+                jobDetails?.city,
+                jobDetails?.state,
+                jobDetails?.postal_code,
+                jobDetails?.country,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+              jobId={jobDetails.id}
+              receiverId={jobDetails.client_id}
+            />
+          </>
+        )
+      }
     </main>
   );
 }

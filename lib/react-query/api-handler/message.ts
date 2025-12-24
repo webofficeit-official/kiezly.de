@@ -17,3 +17,8 @@ export const getConversationApi = async (jobId: string, userId: string, params: 
   const response = await apiClient.get(`/message/${jobId}/${userId}`, { params });
   return response.data;
 };
+
+export const countMessageApi = async (jobId: string, userId: string) => {
+  const response = await apiClient.get(`/message/${jobId}/${userId}/count`);
+  return response.data;
+};
