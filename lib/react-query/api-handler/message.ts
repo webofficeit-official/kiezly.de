@@ -12,3 +12,8 @@ export const sendMessageApi = async ({
   });
   return data;
 };
+
+export const getConversationApi = async (jobId: string, userId: string, params: Record<string, any>) => {
+  const response = await apiClient.get(`/message/${jobId}/${userId}`, { params });
+  return response.data;
+};

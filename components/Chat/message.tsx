@@ -2,10 +2,10 @@ import { MessageCircle, Send, X } from "lucide-react";
 import { Applicant } from "../job/job-details/applicant-card/applicant-card";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Job } from "@/lib/types/job";
 import { User } from "../MyProfile";
-import { useSendMessage } from "@/lib/react-query/queries/message";
+import { useGetConversation, useSendMessage } from "@/lib/react-query/queries/message";
 
 dayjs.extend(relativeTime);
 
@@ -30,10 +30,23 @@ type Message = {
 export default function Message({ applicant, isOpen, onClose }: MessageProps) {
     const [message, setMessage] = useState("");
 
-    const sendMsg = useSendMessage();
+    const jobId = applicant?.job_id ?? null;
+    const helperId = applicant?.helper_id ?? null;
 
-    // Dummy messages
-    const [messages, setMessages] = useState<Message[]>([]);
+    const filters = useMemo(
+        () => ({ page: 1, page_size: 10 }),
+        []
+    );
+
+    const { data, isLoading } = useGetConversation(
+        jobId,
+        helperId,
+        filters,
+        { enabled: !!jobId && !!helperId }
+    );
+    const messages = data?.data?.messages?.items ?? [];    
+
+    const sendMsg = useSendMessage();
 
     if (!isOpen) return null;
 
@@ -52,10 +65,9 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
 
     const sendMessage = () => {
         if (!message.trim()) return;
-        console.log(message, applicant);
         sendMsg.mutate({
-            jobId: applicant.job_id,
-            recipient_id: applicant.helper_id,
+            jobId: jobId,
+            recipient_id: helperId,
             body: message
         }, {
             onSuccess: () => {
@@ -108,14 +120,14 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
                             ) : (messages.map((msg, i) => (
                                 <div
                                     key={i}
-                                    className={`flex ${msg.sender_id === "user"
+                                    className={`flex ${msg.recipient_id === helperId
                                         ? "justify-end"
                                         : "justify-start"
                                         }`}
                                 >
                                     <div className="max-w-[75%]">
                                         <div
-                                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.sender_id === "user"
+                                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === helperId
                                                 ? "bg-primary text-white rounded-br-sm"
                                                 : "bg-white border rounded-bl-sm"
                                                 }`}
@@ -123,7 +135,7 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
                                             {msg.body}
                                         </div>
                                         <p
-                                            className={`mt-1 text-[10px] text-muted-foreground ${msg.sender_id === "user"
+                                            className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === helperId
                                                 ? "text-right"
                                                 : "text-left"
                                                 }`}
