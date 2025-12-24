@@ -10,7 +10,10 @@ import { useGetConversation, useSendMessage } from "@/lib/react-query/queries/me
 dayjs.extend(relativeTime);
 
 type MessageProps = {
-    applicant: Applicant;
+    title: string;
+    subtitle: string;
+    receiverId: string;
+    jobId: string;
     isOpen: boolean
     onClose: () => void;
 }
@@ -27,11 +30,8 @@ type Message = {
     recipient: User
 };
 
-export default function Message({ applicant, isOpen, onClose }: MessageProps) {
+export default function Message({ isOpen, onClose, receiverId, jobId, title, subtitle }: MessageProps) {
     const [message, setMessage] = useState("");
-
-    const jobId = applicant?.job_id ?? null;
-    const helperId = applicant?.helper_id ?? null;
 
     const filters = useMemo(
         () => ({ page: 1, page_size: 10 }),
@@ -40,11 +40,11 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
 
     const { data, isLoading } = useGetConversation(
         jobId,
-        helperId,
+        receiverId,
         filters,
-        { enabled: !!jobId && !!helperId }
+        { enabled: !!jobId && !!receiverId }
     );
-    const messages = data?.data?.messages?.items ?? [];    
+    const messages = data?.data?.messages?.items ?? [];
 
     const sendMsg = useSendMessage();
 
@@ -63,11 +63,13 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
         return msgDate.format("DD MMM YYYY");
     };
 
-    const sendMessage = () => {
+    const sendMessage = (e) => {
+        e.preventDefault()
+        
         if (!message.trim()) return;
         sendMsg.mutate({
             jobId: jobId,
-            recipient_id: helperId,
+            recipient_id: receiverId,
             body: message
         }, {
             onSuccess: () => {
@@ -86,10 +88,10 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
                         <div className="flex items-center justify-between border-b px-4 py-3">
                             <div className="flex flex-col">
                                 <span className="font-semibold text-gray-800">
-                                    {applicant.user.first_name} {applicant.user.last_name}
+                                    {title}
                                 </span>
                                 <span className="text-xs text-muted-foreground">
-                                    {applicant.user.email}
+                                    {subtitle}
                                 </span>
                             </div>
                             <button onClick={onClose}>
@@ -120,14 +122,14 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
                             ) : (messages.map((msg, i) => (
                                 <div
                                     key={i}
-                                    className={`flex ${msg.recipient_id === helperId
+                                    className={`flex ${msg.recipient_id === receiverId
                                         ? "justify-end"
                                         : "justify-start"
                                         }`}
                                 >
                                     <div className="max-w-[75%]">
                                         <div
-                                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === helperId
+                                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
                                                 ? "bg-primary text-white rounded-br-sm"
                                                 : "bg-white border rounded-bl-sm"
                                                 }`}
@@ -135,7 +137,7 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
                                             {msg.body}
                                         </div>
                                         <p
-                                            className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === helperId
+                                            className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === receiverId
                                                 ? "text-right"
                                                 : "text-left"
                                                 }`}
@@ -148,20 +150,22 @@ export default function Message({ applicant, isOpen, onClose }: MessageProps) {
                         </div>
 
                         {/* Input */}
-                        <div className="border-t p-3 flex gap-2">
-                            <input
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Type a message..."
-                                className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                            <button
-                                onClick={sendMessage}
-                                className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
-                            >
-                                <Send className="h-4 w-4" />
-                            </button>
-                        </div>
+                        <form onSubmit={sendMessage}>
+                            <div className="border-t p-3 flex gap-2">
+                                <input
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    placeholder="Type a message..."
+                                    className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                <button
+                                    type="submit"
+                                    className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
+                                >
+                                    <Send className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

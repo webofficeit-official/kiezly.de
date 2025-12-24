@@ -2,13 +2,13 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, MessageCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 import { useT } from "@/app/[locale]/layout";
 import { useAuth } from "@/lib/context/auth-context";
 import { getSavedJobs } from "@/lib/react-query/api-handler/job-save-api";
-import { useUpdateApplicantStatus } from "@/lib/react-query/queries/apply-job";
+import { useCheckApplied, useUpdateApplicantStatus } from "@/lib/react-query/queries/apply-job";
 import { useJob } from "@/lib/react-query/queries/useJob";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -22,7 +22,7 @@ import JobCountCard from "./job-details/job-counts";
 import JobDescription from "./job-details/job-decription";
 import JobHeader from "./job-details/job-header";
 import SimilarJobCard from "./job-details/similar-jobs";
-import ChatModal from "../chatModal/ChatModal";
+import Message from "../Chat/message";
 
 const statusOptions = [
   { id: 1, name: "applied" },
@@ -37,6 +37,7 @@ dayjs.extend(relativeTime);
 
 export default function JobDetail() {
   const [submitted, setSubmitted] = React.useState(false);
+  const [isMessageOpen, setIsMessageOpen] = useState(false);
 
   const [savedJobs, setSavedJobs] = React.useState([]);
   const { user } = useAuth(); // Get user from useUser  hook
@@ -46,11 +47,6 @@ export default function JobDetail() {
   const jobId = data?.job?.id ?? undefined;
 
   const updateStatusMutation = useUpdateApplicantStatus();
-
-  // const { data: applicants, isLoading: isApplicantsLoading } = useJobApplicants(
-  //     jobId,
-  //     user?.role === "client"   // only enable if client
-  // );
 
   useEffect(() => {
     if (user) {
@@ -80,6 +76,13 @@ export default function JobDetail() {
 
   const jobDetails = data?.job;
   if (!jobDetails) return <Loader />;
+
+  const { data: application, isLoading: isChecking } = useCheckApplied(
+    jobDetails.id,
+    {
+      enabled: !!user,
+    }
+  );
 
   // Rest of your component logic (handleApplySubmit, handleSaveJob, etc.) remains unchanged
 
@@ -159,19 +162,37 @@ export default function JobDetail() {
         )}
       </div>
 
-      <ChatModal
-        canOpen={canOpenChat}
-        recipientName={
-          user?.role === "helper"
-            ? jobDetails.client?.name ?? "Client"
-            : "Helper"
-        }
-        recipientEmail={
-          user?.role === "helper"
-            ? jobDetails.client?.email ?? "client@email.com"
-            : "helper@email.com"
-        }
-      />
+      {
+        application.data.application.status === "shortlisted" &&
+        (
+          <>
+            <button
+              onClick={() => setIsMessageOpen(true)}
+              className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span className="hidden sm:inline">Chat</span>
+            </button>
+
+            <Message
+              isOpen={isMessageOpen}
+              onClose={() => setIsMessageOpen(false)}
+              title={jobDetails.title}
+              subtitle={jobDetails.client.org_name ?? [
+                jobDetails?.street,
+                jobDetails?.city,
+                jobDetails?.state,
+                jobDetails?.postal_code,
+                jobDetails?.country,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+              jobId={jobDetails.id}
+              receiverId={jobDetails.client_id}
+            />
+          </>
+        )
+      }
     </main>
   );
 }

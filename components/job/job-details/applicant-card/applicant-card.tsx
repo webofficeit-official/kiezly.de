@@ -126,7 +126,10 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
       <Message 
         isOpen={isMessageOpen}
         onClose={() => setIsMessageOpen(false)}
-        applicant={applicant}
+        title={`${applicant.user.first_name} ${applicant.user.last_name}`}
+        subtitle={applicant.user.email}
+        jobId={applicant.job_id}
+        receiverId={applicant.helper_id}
       />
     </div>
   );
