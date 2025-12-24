@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button-variant";
 import { useT } from "@/app/[locale]/layout";
+import { MessageCircle } from "lucide-react";
+import Message from "@/components/Chat/message";
 
-interface Applicant {
+export interface Applicant {
   id: string;
   proposed_rate?: number;
   cover_note?: string;
@@ -16,6 +18,8 @@ interface Applicant {
     last_name: string;
     email: string;
   };
+  job_id: string
+  helper_id: string
 }
 
 interface ApplicantCardProps {
@@ -51,10 +55,12 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
     { label: t("applicants-panel.status.options.withdrawn"), value: "withdrawn" },
   ];
 
+  const [isMessageOpen, setIsMessageOpen] = useState(false);
+
   return (
     <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md transition-all duration-150 flex flex-col">
       {/* Top Section */}
-      <div className="flex items-start justify-between cursor-pointer" onClick={() => openUserModal(applicant.user.id)}>
+      <div className="flex items-start justify-between">
         <div
           onClick={() => openUserModal(applicant.user.id)}
           className="cursor-pointer"
@@ -64,10 +70,18 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
           </div>
           <div className="text-xs text-gray-500">{applicant.user.email}</div>
         </div>
-
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusClasses(applicant.status)}`}>
-          {statusOptions.find(s => s.value == applicant.status)?.label}
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span className="text-[10px] font-black px-2 py-0.5 rounded border border-black uppercase tracking-tighter bg-white text-black">
+            {statusOptions.find(s => s.value == applicant.status)?.label}
+          </span>
+          <button
+            onClick={() => setIsMessageOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-white hover:bg-black/80 transition-colors"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-xs font-bold uppercase tracking-wide">Chat</span>
+          </button>
+        </div>
       </div>
 
       <hr className="my-3 border-gray-100" />
@@ -108,6 +122,15 @@ export default function ApplicantCard({ applicant, openUserModal, openUpdateModa
           </Button>
         </div>
       </div>
+
+      <Message 
+        isOpen={isMessageOpen}
+        onClose={() => setIsMessageOpen(false)}
+        title={`${applicant.user.first_name} ${applicant.user.last_name}`}
+        subtitle={applicant.user.email}
+        jobId={applicant.job_id}
+        receiverId={applicant.helper_id}
+      />
     </div>
   );
 }
