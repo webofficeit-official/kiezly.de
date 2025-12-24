@@ -77,13 +77,6 @@ export default function JobDetail() {
   const jobDetails = data?.job;
   if (!jobDetails) return <Loader />;
 
-  const { data: application, isLoading: isChecking } = useCheckApplied(
-    jobDetails.id,
-    {
-      enabled: !!user,
-    }
-  );
-
   // Rest of your component logic (handleApplySubmit, handleSaveJob, etc.) remains unchanged
 
   const handleStatusChange = (applicationId: string, status: string) => {
@@ -162,37 +155,31 @@ export default function JobDetail() {
         )}
       </div>
 
-      {
-        application.data.application.status === "shortlisted" &&
-        (
-          <>
-            <button
-              onClick={() => setIsMessageOpen(true)}
-              className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
-            >
-              <MessageCircle className="h-5 w-5" />
-              <span className="hidden sm:inline">Chat</span>
-            </button>
 
-            <Message
-              isOpen={isMessageOpen}
-              onClose={() => setIsMessageOpen(false)}
-              title={jobDetails.title}
-              subtitle={jobDetails.client.org_name ?? [
-                jobDetails?.street,
-                jobDetails?.city,
-                jobDetails?.state,
-                jobDetails?.postal_code,
-                jobDetails?.country,
-              ]
-                .filter(Boolean)
-                .join(", ")}
-              jobId={jobDetails.id}
-              receiverId={jobDetails.client_id}
-            />
-          </>
-        )
-      }
+      <button
+        onClick={() => setIsMessageOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
+      >
+        <MessageCircle className="h-5 w-5" />
+        <span className="hidden sm:inline">Chat</span>
+      </button>
+
+      <Message
+        isOpen={isMessageOpen}
+        onClose={() => setIsMessageOpen(false)}
+        title={jobDetails.title}
+        subtitle={jobDetails.client.org_name ?? [
+          jobDetails?.street,
+          jobDetails?.city,
+          jobDetails?.state,
+          jobDetails?.postal_code,
+          jobDetails?.country,
+        ]
+          .filter(Boolean)
+          .join(", ")}
+        jobId={jobDetails.id}
+        receiverId={jobDetails.client_id}
+      />
     </main>
   );
 }
