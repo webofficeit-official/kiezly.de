@@ -26,6 +26,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     const roleRules: Record<string, string[]> = {
       "/client": ["client"],
       "/my-profile": ["client", "helper"],
+      "/my-inbox": ["client", "helper"],
       "/change-password": ["client", "helper"],
       "/helper": ["helper"],
       "/post-job": ["client"],
