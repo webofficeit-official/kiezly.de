@@ -95,7 +95,8 @@ export default function LocaleLayout({ children, params }: any) {
     "post-job",
     "reset-password",
     "forgot-password",
-    "changePassword"
+    "changePassword",
+    "inbox"
   ]; // add more as needed
 
   useEffect(() => {

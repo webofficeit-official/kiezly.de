@@ -392,6 +392,15 @@ export default function Header() {
                       className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
                       onClick={() => {
                         setDropdownOpen(false);
+                        push("/my-inbox");
+                      }}
+                    >
+                      {t("my-inbox")}
+                    </button>
+                    <button
+                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                      onClick={() => {
+                        setDropdownOpen(false);
                         push("/change-password");
                       }}
                     >
@@ -648,6 +657,18 @@ export default function Header() {
                     onClick={() => {
                       setMobileHeaderDDOpen(false);
                       setMobileOpen(false);
+                      push("/my-inbox");
+                    }}
+                    role="menuitem"
+                  >
+                    {t("my-inbox")}
+                  </button>
+
+                  <button
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                    onClick={() => {
+                      setMobileHeaderDDOpen(false);
+                      setMobileOpen(false);
                       push("/change-password");
                     }}
                     role="menuitem"
@@ -843,6 +864,13 @@ export default function Header() {
                     onClick={() => setMobileOpen(false)}
                   >
                     {t("my-profile")}
+                  </LocalizedLink>
+                  <LocalizedLink
+                    href="/my-inbox"
+                    className="block rounded-lg px-3 py-2 hover:bg-gray-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {t("my-inbox")}
                   </LocalizedLink>
 
                   <LocalizedLink
