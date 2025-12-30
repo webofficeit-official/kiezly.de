@@ -18,18 +18,21 @@ export function useSendMessage() {
 }
 
 export const useGetConversation = (
-    jobId: string, 
-    userId: string, 
-    filters: Record<string, any>, 
-    options?: any
+  jobId: string | null,
+  userId: string | null,
+  filters: Record<string, any>,
+  options?: any
 ) => {
-    return useQuery<MessageApiResponse>({
-        queryKey: ["get-conversation", jobId, userId, filters], // Include all dependencies
-        queryFn: () => getConversationApi(jobId, userId, filters),
-        placeholderData: (previousData) => previousData, // Replaces keepPreviousData in v5
-        staleTime: 5000,
-        ...options,
-    });
+  console.log("Hook mounted", jobId, userId);
+
+  return useQuery<MessageApiResponse>({
+    queryKey: ["get-conversation", jobId, userId, filters],
+    queryFn: () => getConversationApi(jobId!, userId!, filters),
+    staleTime: 0,
+    gcTime: 0,
+    ...options,
+    enabled: options?.enabled ?? (!!jobId && !!userId), // ✅ FIX
+  });
 };
 
 export const useCountMessage = (

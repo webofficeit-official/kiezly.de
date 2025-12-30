@@ -38,7 +38,6 @@ export default function MyInbox() {
 
   const dataSource =
     userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
-  console.log("inbox data", dataSource);
 
   // 2. Selection State
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -51,7 +50,10 @@ export default function MyInbox() {
     sort: "asc",
     enabled: user?.role === "client", // <-- include here if your hook supports it
   });
-  const jobApplicants = applicants?.applicants ?? [];
+  let jobApplicants = applicants?.applicants ?? [];
+  jobApplicants = jobApplicants.filter(a => {
+    return a.status === "shortlisted"
+  })
 
   const [selectedApplicantion, setSelectedApplicantion] =
     useState<Application | null>(null);
@@ -70,7 +72,7 @@ export default function MyInbox() {
     selectedJobId,
     recipientId,
     filters,
-    { enabled: !!selectedJobId && !!recipientId }
+    { enabled: userType === "helper" ? (!!selectedJobId && !!recipientId) : (!!selectedJobId && !!recipientId && !!selectedApplicantion) }
   );
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -165,7 +167,7 @@ export default function MyInbox() {
     setPage(1);
     setHasMore(true);
     isLoadingOlderRef.current = false;
-  }, [selectedJobId,selectedApplicantion, recipientId]);
+  }, [selectedJobId, selectedApplicantion, recipientId]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -192,6 +194,10 @@ export default function MyInbox() {
     setSelectedApplicantion(null);
     setSelectedJobId(job.id);
     setRecipientId(job.client_id);
+    setMessages([]);
+    setPage(1);
+    setHasMore(true);
+    isLoadingOlderRef.current = false;
   };
 
   /* =========================
@@ -201,6 +207,10 @@ export default function MyInbox() {
     setSelectedJobId(app.job_id);
     setSelectedApplicantion(app);
     setRecipientId(app.user.id);
+    setMessages([]);
+    setPage(1);
+    setHasMore(true);
+    isLoadingOlderRef.current = false;
   };
 
   return (
@@ -223,13 +233,13 @@ export default function MyInbox() {
                   } else {
                     setSelectedJobId(d.id);
                     setSelectedApplicantion(null);
+                    setRecipientId(null)
                   }
                 }}
-                className={`w-full p-4 text-left border-b transition-colors ${
-                  selectedJobId === d.id
-                    ? "bg-gray-50 border-r-4 border-r-gray-500"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`w-full p-4 text-left border-b transition-colors ${selectedJobId === d.id
+                  ? "bg-gray-50 border-r-4 border-r-gray-500"
+                  : "hover:bg-gray-100"
+                  }`}
               >
                 <p className="font-semibold text-gray-900">{d.title}</p>
                 <p className="text-xs text-gray-500 mt-1">
@@ -259,11 +269,10 @@ export default function MyInbox() {
                     <button
                       key={a.id}
                       onClick={() => handleClientApplicantSelect(a)}
-                      className={`w-full p-4 text-left border-b transition-colors ${
-                        selectedApplicantion?.id === a.id
-                          ? "bg-gray-100 border-r-4 border-r-gray-500"
-                          : "hover:bg-gray-50"
-                      }`}
+                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
+                        ? "bg-gray-100 border-r-4 border-r-gray-500"
+                        : "hover:bg-gray-50"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
@@ -292,9 +301,9 @@ export default function MyInbox() {
         )}
 
         {/* --- COLUMN 3: Chat Window (Dynamic Width) --- */}
-        <div  key={`${selectedJobId}-${recipientId}`} className="flex-grow flex flex-col bg-white">
+        <div key={`${selectedJobId}-${recipientId}`} className="flex-grow flex flex-col bg-white">
           {(userType === "helper" && selectedJobId) ||
-          (userType === "client" && selectedApplicantion) ? (
+            (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -325,28 +334,25 @@ export default function MyInbox() {
                 {messages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`flex ${
-                      msg.recipient_id === recipientId
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
+                    className={`flex ${msg.recipient_id === recipientId
+                      ? "justify-end"
+                      : "justify-start"
+                      }`}
                   >
                     <div className="max-w-[75%]">
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                          msg.recipient_id === recipientId
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-white border rounded-bl-sm"
-                        }`}
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
+                          ? "bg-primary text-white rounded-br-sm"
+                          : "bg-white border rounded-bl-sm"
+                          }`}
                       >
                         {msg.body}
                       </div>
                       <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${
-                          msg.recipient_id === recipientId
-                            ? "text-right"
-                            : "text-left"
-                        }`}
+                        className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
+                          ? "text-right"
+                          : "text-left"
+                          }`}
                       >
                         {formatTime(msg.created_at)}
                       </p>
