@@ -1,6 +1,7 @@
 import { MessageApiResponse, SendMessageData, SendMessageResponse } from "@/lib/types/message";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
-import { countMessageApi, getConversationApi, sendMessageApi } from "../api-handler/message";
+import { countMessageApi, getConversationApi, getMyInboxApi, sendMessageApi } from "../api-handler/message";
+import { Job } from "@/lib/types/job";
 
 export function useSendMessage() {
     const queryClient = useQueryClient();
@@ -44,3 +45,31 @@ export const useCountMessage = (
         ...options,
     });
 };
+
+export interface MyInboxItem {
+  job_id: string
+  job: Job
+  last_message_at: string
+}
+
+export interface MyInboxApiResponse {
+  status: boolean
+  data: MyInboxItem[]
+}
+
+export const myInbox = (
+  options?: Partial<UseQueryOptions<MyInboxApiResponse>>
+) => {
+  return useQuery<MyInboxApiResponse>({
+    queryKey: ["my-inbox"],
+    queryFn: () => getMyInboxApi(),
+    keepPreviousData: true,
+    enabled: options?.enabled ?? true,
+    ...options,
+  } as UseQueryOptions<
+    MyInboxApiResponse,
+    unknown,
+    MyInboxApiResponse,
+    readonly unknown[]
+  >)
+}
