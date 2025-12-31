@@ -221,7 +221,7 @@ export default function MyInbox() {
         {/* --- COLUMN 1: Job List (Both Roles) --- */}
         <div className="w-1/4 flex-shrink-0 border-r border-gray-100 bg-white">
           <div className="p-4 border-b font-medium text-sm text-black uppercase tracking-wider">
-            My Jobs
+          {t("inbox_header")}
           </div>
           <div className="overflow-y-auto h-full">
             {dataSource.map((d) => (
@@ -256,13 +256,13 @@ export default function MyInbox() {
         {userType === "client" && (
           <div className="w-1/4 flex-shrink-0 border-r border-gray-100">
             <div className="p-4 border-b font-medium text-sm text-black uppercase tracking-wider">
-              Applicants
+                {t("applications_header")}  
             </div>
             {selectedJobId ? (
               <div className="overflow-y-auto h-full">
                 {jobApplicants.length === 0 ? (
                   <div className="flex h-full items-center justify-center p-6 text-center text-gray-400 text-sm">
-                    No applicants yet for this job
+                    {t("empty_inbox.no_applicants.title")}
                   </div>
                 ) : (
                   jobApplicants?.map((a: Application, i) => (
@@ -294,7 +294,7 @@ export default function MyInbox() {
               </div>
             ) : (
               <div className="flex h-full items-center justify-center p-6 text-center text-gray-400 text-sm">
-                Select a job to view applicants
+                {t("select_job_message")}
               </div>
             )}
           </div>
@@ -368,7 +368,7 @@ export default function MyInbox() {
                   <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    placeholder={t('chat.message_placeholder')}
                     className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <button
@@ -397,8 +397,8 @@ export default function MyInbox() {
               </svg>
               <p>
                 {userType === "client"
-                  ? "Select an applicant to start chatting"
-                  : "Select a job to view your messages"}
+                  ? `${t("chat.select_applicant")}`
+                  : `${t("chat.select_job")}`}
               </p>
             </div>
           )}

@@ -96,7 +96,8 @@ export default function LocaleLayout({ children, params }: any) {
     "reset-password",
     "forgot-password",
     "changePassword",
-    "inbox"
+    "inbox",
+    "messages",
   ]; // add more as needed
 
   useEffect(() => {
@@ -127,7 +128,6 @@ export default function LocaleLayout({ children, params }: any) {
         <div className="min-h-screen">
           {/* Optional: use a skeleton that reserves header + sidebar space */}
           <div className="flex">
-        
             <div className="flex-1 flex items-center justify-center">
               <Loader />
             </div>

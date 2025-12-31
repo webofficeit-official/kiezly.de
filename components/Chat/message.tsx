@@ -7,6 +7,7 @@ import { Job } from "@/lib/types/job";
 import { User } from "../MyProfile";
 import { useGetConversation, useSendMessage } from "@/lib/react-query/queries/message";
 import socket from "@/lib/socket";
+import { useT } from "@/app/[locale]/layout";
 
 dayjs.extend(relativeTime);
 
@@ -33,6 +34,7 @@ type Message = {
 
 export default function Message({ isOpen, onClose, receiverId, jobId, title, subtitle }: MessageProps) {
     if (!isOpen) return null;
+    const t=useT('messages')
 
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
@@ -176,10 +178,10 @@ export default function Message({ isOpen, onClose, receiverId, jobId, title, sub
                                         </div>
                                         <div className="space-y-1">
                                             <h4 className="text-xs font-black uppercase text-black">
-                                                No Messages Yet
+                                                {t('chat.noMessages')}
                                             </h4>
                                             <p className="text-[10px] text-black/40 uppercase">
-                                                Send a message to start the conversation
+                                                {t('chat.startChatting')}
                                             </p>
                                         </div>
                                         {/* Decorative B&W line */}
@@ -223,7 +225,7 @@ export default function Message({ isOpen, onClose, receiverId, jobId, title, sub
                                 <input
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="Type a message..."
+                                    placeholder={t('chat.messagePlaceholder')}
                                     className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                                 <button
