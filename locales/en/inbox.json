@@ -1,3 +1,19 @@
 {
-    "title": "My Inbox"
+    "title": "My Inbox",
+    "inbox_header": "My Jobs",
+    "applications_header": "Applicants",
+    "select_job_message": "Select a job to view applicants",
+    "chat": {
+        "select_applicant": "Select an applicant to start chatting",
+        "select_job": "Select a job to view your messages",
+        "message_placeholder": "Type a message..."
+    },
+    "empty_inbox": {
+        "no_jobs": {
+            "title": "No Jobs yet"
+        },
+        "no_applicants": {
+            "title": "No applicants yet for this job"
+        }
+    }
 }

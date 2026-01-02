@@ -1,3 +1,19 @@
 {
-    "inbox": "My Inbox"
+    "title": "Posteingang",
+    "inbox_header": "Meine Jobs",
+    "applications_header": "Bewerber",
+    "select_job_message": "Wählen Sie einen Job aus, um Bewerber anzuzeigen",
+    "chat": {
+        "select_applicant": "Wählen Sie einen Bewerber aus, um zu chatten",
+        "select_job": "Wählen Sie einen Job aus, um Ihre Nachrichten anzuzeigen",
+        "message_placeholder": "Geben Sie eine Nachricht ein..."
+    },
+    "empty_inbox": {
+        "no_jobs": {
+            "title": "Noch keine Jobs"
+        },
+        "no_applicants": {
+            "title": "Noch keine Bewerber für diesen Job"
+        }
+    }
 }

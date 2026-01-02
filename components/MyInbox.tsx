@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/app/[locale]/layout";
 import { myJobs } from "@/lib/react-query/queries/useJob";
 import { Filters } from "./job/myJob";
@@ -15,6 +15,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import socket from "@/lib/socket";
 import { Send } from "lucide-react";
 import { useAuth } from "@/lib/context/auth-context";
+import { Job } from "@/lib/types/job";
 
 dayjs.extend(relativeTime);
 
@@ -41,6 +42,7 @@ export default function MyInbox() {
 
   // 2. Selection State
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const { data: applicants, isLoading } = useJobApplicants({
     jobId: selectedJobId?.toString(),
@@ -51,9 +53,9 @@ export default function MyInbox() {
     enabled: user?.role === "client", // <-- include here if your hook supports it
   });
   let jobApplicants = applicants?.applicants ?? [];
-  jobApplicants = jobApplicants.filter(a => {
-    return a.status === "shortlisted"
-  })
+  jobApplicants = jobApplicants.filter((a) => {
+    return a.status === "shortlisted";
+  });
 
   const [selectedApplicantion, setSelectedApplicantion] =
     useState<Application | null>(null);
@@ -72,11 +74,16 @@ export default function MyInbox() {
     selectedJobId,
     recipientId,
     filters,
-    { enabled: userType === "helper" ? (!!selectedJobId && !!recipientId) : (!!selectedJobId && !!recipientId && !!selectedApplicantion) }
+    {
+      enabled:
+        userType === "helper"
+          ? !!selectedJobId && !!recipientId
+          : !!selectedJobId && !!recipientId && !!selectedApplicantion,
+    }
   );
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  //   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const isLoadingOlderRef = useRef(false);
 
   useEffect(() => {
@@ -105,11 +112,19 @@ export default function MyInbox() {
     }
 
     // ✅ Initial load → scroll to bottom
-    if (currentPage === 1) {
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-      }, 0);
-    }
+    // if (currentPage === 1) {
+    //   setTimeout(() => {
+    //     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    //   }, 0);
+    // }
+    // if (currentPage === 1 && el) {
+    //   requestAnimationFrame(() => {
+    //     //  scroll ONLY if content actually overflows
+    //     if (el.scrollHeight > el.clientHeight) {
+    //       scrollToBottom("auto");
+    //     }
+    //   });
+    // }
   }, [data]);
 
   const handleScroll = () => {
@@ -121,6 +136,20 @@ export default function MyInbox() {
       setLoadingMore(true);
       setPage((p) => p + 1);
     }
+  };
+
+  /* =========================
+   ✅ SAFE SCROLL HELPER
+   (scrolls messages ONLY)
+========================= */
+  const scrollToBottom = (behavior: ScrollBehavior = "auto") => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior,
+    });
   };
 
   const sendMsg = useSendMessage();
@@ -150,15 +179,33 @@ export default function MyInbox() {
       const isNearBottom =
         el.scrollHeight - el.scrollTop - el.clientHeight < 150;
 
-      if (isNearBottom) {
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 0);
+      if (isNearBottom && el.scrollHeight > el.clientHeight) {
+        // setTimeout(() => {
+        //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        // }, 0);
+        scrollToBottom("smooth");
       }
     });
 
     return () => socket.off("message");
   }, [selectedJobId]);
+
+  useLayoutEffect(() => {
+    const el = scrollContainerRef.current;
+
+    // Only scroll on FIRST page load
+    if (!el || page !== 1) return;
+
+    // Wait for DOM paint
+    requestAnimationFrame(() => {
+      if (el.scrollHeight > el.clientHeight) {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: "auto",
+        });
+      }
+    });
+  }, [messages, page]);
 
   useEffect(() => {
     if (!selectedJobId || !selectedApplicantion) return;
@@ -194,6 +241,7 @@ export default function MyInbox() {
     setSelectedApplicantion(null);
     setSelectedJobId(job.id);
     setRecipientId(job.client_id);
+    setSelectedJob(job);
     setMessages([]);
     setPage(1);
     setHasMore(true);
@@ -204,6 +252,7 @@ export default function MyInbox() {
      CLIENT APPLICANT CLICK
   ========================== */
   const handleClientApplicantSelect = (app: Application) => {
+    setSelectedJob(null);
     setSelectedJobId(app.job_id);
     setSelectedApplicantion(app);
     setRecipientId(app.user.id);
@@ -221,7 +270,7 @@ export default function MyInbox() {
         {/* --- COLUMN 1: Job List (Both Roles) --- */}
         <div className="w-1/4 flex-shrink-0 border-r border-gray-100 bg-white">
           <div className="p-4 border-b font-medium text-sm text-black uppercase tracking-wider">
-            My Jobs
+            {t("inbox_header")}
           </div>
           <div className="overflow-y-auto h-full">
             {dataSource.map((d) => (
@@ -233,13 +282,14 @@ export default function MyInbox() {
                   } else {
                     setSelectedJobId(d.id);
                     setSelectedApplicantion(null);
-                    setRecipientId(null)
+                    setRecipientId(null);
                   }
                 }}
-                className={`w-full p-4 text-left border-b transition-colors ${selectedJobId === d.id
-                  ? "bg-gray-50 border-r-4 border-r-gray-500"
-                  : "hover:bg-gray-100"
-                  }`}
+                className={`w-full p-4 text-left border-b transition-colors ${
+                  selectedJobId === d.id
+                    ? "bg-gray-50 border-r-4 border-r-gray-500"
+                    : "hover:bg-gray-100"
+                }`}
               >
                 <p className="font-semibold text-gray-900">{d.title}</p>
                 <p className="text-xs text-gray-500 mt-1">
@@ -256,23 +306,24 @@ export default function MyInbox() {
         {userType === "client" && (
           <div className="w-1/4 flex-shrink-0 border-r border-gray-100">
             <div className="p-4 border-b font-medium text-sm text-black uppercase tracking-wider">
-              Applicants
+              {t("applications_header")}
             </div>
             {selectedJobId ? (
               <div className="overflow-y-auto h-full">
                 {jobApplicants.length === 0 ? (
                   <div className="flex h-full items-center justify-center p-6 text-center text-gray-400 text-sm">
-                    No applicants yet for this job
+                    {t("empty_inbox.no_applicants.title")}
                   </div>
                 ) : (
                   jobApplicants?.map((a: Application, i) => (
                     <button
                       key={a.id}
                       onClick={() => handleClientApplicantSelect(a)}
-                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
-                        ? "bg-gray-100 border-r-4 border-r-gray-500"
-                        : "hover:bg-gray-50"
-                        }`}
+                      className={`w-full p-4 text-left border-b transition-colors ${
+                        selectedApplicantion?.id === a.id
+                          ? "bg-gray-100 border-r-4 border-r-gray-500"
+                          : "hover:bg-gray-50"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
@@ -294,16 +345,20 @@ export default function MyInbox() {
               </div>
             ) : (
               <div className="flex h-full items-center justify-center p-6 text-center text-gray-400 text-sm">
-                Select a job to view applicants
+                {t("select_job_message")}
               </div>
             )}
           </div>
         )}
 
         {/* --- COLUMN 3: Chat Window (Dynamic Width) --- */}
-        <div key={`${selectedJobId}-${recipientId}`} className="flex-grow flex flex-col bg-white">
+        <div
+          key={`${selectedJobId}-${recipientId}`}
+          className="flex-grow flex flex-col bg-white"
+          style={{ height: "85%" }}
+        >
           {(userType === "helper" && selectedJobId) ||
-            (userType === "client" && selectedApplicantion) ? (
+          (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -311,6 +366,8 @@ export default function MyInbox() {
                   <h3 className="font-semibold">
                     {userType === "client"
                       ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
+                      : userType === "helper"
+                      ? selectedJob?.title
                       : "Client"}
                   </h3>
                   {userType === "client" && (
@@ -320,6 +377,17 @@ export default function MyInbox() {
                         __html: selectedApplicantion.cover_note,
                       }}
                     />
+                  )}
+                  {userType === "helper" && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {[
+                        selectedJob.city,
+                        selectedJob.state,
+                        selectedJob.countries?.name,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
                   )}
                 </div>
                 <span className="h-2 w-2 rounded-full bg-green-500"></span>
@@ -334,32 +402,35 @@ export default function MyInbox() {
                 {messages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`flex ${msg.recipient_id === recipientId
-                      ? "justify-end"
-                      : "justify-start"
-                      }`}
+                    className={`flex ${
+                      msg.recipient_id === recipientId
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
                   >
                     <div className="max-w-[75%]">
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
-                          ? "bg-primary text-white rounded-br-sm"
-                          : "bg-white border rounded-bl-sm"
-                          }`}
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                          msg.recipient_id === recipientId
+                            ? "bg-primary text-white rounded-br-sm"
+                            : "bg-white border rounded-bl-sm"
+                        }`}
                       >
                         {msg.body}
                       </div>
                       <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
-                          ? "text-right"
-                          : "text-left"
-                          }`}
+                        className={`mt-1 text-[10px] text-muted-foreground ${
+                          msg.recipient_id === recipientId
+                            ? "text-right"
+                            : "text-left"
+                        }`}
                       >
                         {formatTime(msg.created_at)}
                       </p>
                     </div>
                   </div>
                 ))}
-                <div ref={messagesEndRef} />
+                {/* <div ref={messagesEndRef} /> */}
               </div>
 
               {/* Chat Input */}
@@ -368,7 +439,7 @@ export default function MyInbox() {
                   <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    placeholder={t("chat.message_placeholder")}
                     className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <button
@@ -397,8 +468,8 @@ export default function MyInbox() {
               </svg>
               <p>
                 {userType === "client"
-                  ? "Select an applicant to start chatting"
-                  : "Select a job to view your messages"}
+                  ? `${t("chat.select_applicant")}`
+                  : `${t("chat.select_job")}`}
               </p>
             </div>
           )}
