@@ -167,6 +167,11 @@ export default function MyInbox() {
     return msgDate.format("DD MMM YYYY");
   };
 
+  const isJobExpired = (expires_at: string | null): boolean => {
+    if (!expires_at) return false
+    return new Date(expires_at).getTime() <= Date.now()
+  }
+
   useEffect(() => {
     if (!selectedJobId) return;
 
@@ -219,6 +224,7 @@ export default function MyInbox() {
   const sendMessage = (e) => {
     e.preventDefault();
 
+    if(isJobExpired(selectedJob?.expires_at)) return;
     if (!message.trim()) return;
     sendMsg.mutate(
       {
@@ -285,11 +291,10 @@ export default function MyInbox() {
                     setRecipientId(null);
                   }
                 }}
-                className={`w-full p-4 text-left border-b transition-colors ${
-                  selectedJobId === d.id
+                className={`w-full p-4 text-left border-b transition-colors ${selectedJobId === d.id
                     ? "bg-gray-50 border-r-4 border-r-gray-500"
                     : "hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <p className="font-semibold text-gray-900">{d.title}</p>
                 <p className="text-xs text-gray-500 mt-1">
@@ -319,11 +324,10 @@ export default function MyInbox() {
                     <button
                       key={a.id}
                       onClick={() => handleClientApplicantSelect(a)}
-                      className={`w-full p-4 text-left border-b transition-colors ${
-                        selectedApplicantion?.id === a.id
+                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
                           ? "bg-gray-100 border-r-4 border-r-gray-500"
                           : "hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
@@ -355,10 +359,10 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className="flex-grow flex flex-col bg-white"
-          style={{ height: "85%" }}
+        // style={{ height: "85%" }}
         >
           {(userType === "helper" && selectedJobId) ||
-          (userType === "client" && selectedApplicantion) ? (
+            (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -367,8 +371,8 @@ export default function MyInbox() {
                     {userType === "client"
                       ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
                       : userType === "helper"
-                      ? selectedJob?.title
-                      : "Client"}
+                        ? selectedJob?.title
+                        : "Client"}
                   </h3>
                   {userType === "client" && (
                     <div
@@ -402,28 +406,25 @@ export default function MyInbox() {
                 {messages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`flex ${
-                      msg.recipient_id === recipientId
+                    className={`flex ${msg.recipient_id === recipientId
                         ? "justify-end"
                         : "justify-start"
-                    }`}
+                      }`}
                   >
                     <div className="max-w-[75%]">
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                          msg.recipient_id === recipientId
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
                             ? "bg-primary text-white rounded-br-sm"
                             : "bg-white border rounded-bl-sm"
-                        }`}
+                          }`}
                       >
                         {msg.body}
                       </div>
                       <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${
-                          msg.recipient_id === recipientId
+                        className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
                             ? "text-right"
                             : "text-left"
-                        }`}
+                          }`}
                       >
                         {formatTime(msg.created_at)}
                       </p>
@@ -439,15 +440,19 @@ export default function MyInbox() {
                   <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder={t("chat.message_placeholder")}
+                    placeholder={isJobExpired(selectedJob?.expires_at) ? t("chat.job_expired") : t("chat.message_placeholder")}
                     className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    disabled={isJobExpired(selectedJob?.expires_at)}
                   />
-                  <button
-                    type="submit"
-                    className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
+                  {
+                    !isJobExpired(selectedJob?.expires_at) &&
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  }
                 </div>
               </form>
             </>

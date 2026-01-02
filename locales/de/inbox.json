@@ -6,7 +6,8 @@
     "chat": {
         "select_applicant": "Wählen Sie einen Bewerber aus, um zu chatten",
         "select_job": "Wählen Sie einen Job aus, um Ihre Nachrichten anzuzeigen",
-        "message_placeholder": "Geben Sie eine Nachricht ein..."
+        "message_placeholder": "Geben Sie eine Nachricht ein...",
+        "job_expired": "Die Stelle ist abgelaufen."
     },
     "empty_inbox": {
         "no_jobs": {
