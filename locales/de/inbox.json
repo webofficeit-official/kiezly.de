@@ -7,7 +7,9 @@
         "select_applicant": "Wählen Sie einen Bewerber aus, um zu chatten",
         "select_job": "Wählen Sie einen Job aus, um Ihre Nachrichten anzuzeigen",
         "message_placeholder": "Geben Sie eine Nachricht ein...",
-        "job_expired": "Die Stelle ist abgelaufen."
+        "job_expired": "Die Stelle ist abgelaufen.",
+        "loading_older": "Alte Nachrichten werden geladen",
+        "load_older": "Alte Nachricht laden"
     },
     "empty_inbox": {
         "no_jobs": {

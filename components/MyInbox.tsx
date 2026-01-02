@@ -25,7 +25,7 @@ type UserType = "client" | "helper";
 export default function MyInbox() {
   const t = useT("inbox");
   const { user } = useAuth();
-  // 1. Determine user type (In a real  app, get this from your Auth/Context)
+  // 1. Determine user type (In a real app, get this from your Auth/Context)
   const userType: UserType = user?.role; // from auth context
 
   const {
@@ -110,33 +110,9 @@ export default function MyInbox() {
         isLoadingOlderRef.current = false;
       });
     }
-
-    // ✅ Initial load → scroll to bottom
-    // if (currentPage === 1) {
-    //   setTimeout(() => {
-    //     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    //   }, 0);
-    // }
-    // if (currentPage === 1 && el) {
-    //   requestAnimationFrame(() => {
-    //     //  scroll ONLY if content actually overflows
-    //     if (el.scrollHeight > el.clientHeight) {
-    //       scrollToBottom("auto");
-    //     }
-    //   });
-    // }
   }, [data]);
 
-  const handleScroll = () => {
-    const el = scrollContainerRef.current;
-    if (!el || loadingMore || !hasMore) return;
-
-    if (el.scrollTop <= 5) {
-      isLoadingOlderRef.current = true; // 🔥 THIS WAS MISSING
-      setLoadingMore(true);
-      setPage((p) => p + 1);
-    }
-  };
+  // Remove the handleScroll function since we're not using auto-load anymore
 
   /* =========================
    ✅ SAFE SCROLL HELPER
@@ -185,9 +161,6 @@ export default function MyInbox() {
         el.scrollHeight - el.scrollTop - el.clientHeight < 150;
 
       if (isNearBottom && el.scrollHeight > el.clientHeight) {
-        // setTimeout(() => {
-        //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        // }, 0);
         scrollToBottom("smooth");
       }
     });
@@ -266,6 +239,17 @@ export default function MyInbox() {
     setPage(1);
     setHasMore(true);
     isLoadingOlderRef.current = false;
+  };
+
+  /* =========================
+     LOAD OLDER MESSAGES HANDLER
+  ========================== */
+  const handleLoadOlderMessages = () => {
+    if (loadingMore || !hasMore) return;
+    
+    isLoadingOlderRef.current = true;
+    setLoadingMore(true);
+    setPage((prevPage) => prevPage + 1);
   };
 
   return (
@@ -400,9 +384,23 @@ export default function MyInbox() {
               {/* Chat Messages */}
               <div
                 ref={scrollContainerRef}
-                onScroll={handleScroll}
                 className="flex-grow p-6 overflow-y-auto space-y-4 bg-gray-50/30"
+                // Removed onScroll handler since we're using button now
               >
+                {/* Load Older Messages Button */}
+                {hasMore && (
+                  <div className="flex justify-center mb-4">
+                    <button
+                      onClick={handleLoadOlderMessages}
+                      disabled={loadingMore}
+                      className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loadingMore ? t("chat.loading_older") : t("chat.load_older")}
+                    </button>
+                  </div>
+                )}
+
+                {/* Messages List */}
                 {messages.map((msg, i) => (
                   <div
                     key={i}
@@ -431,7 +429,6 @@ export default function MyInbox() {
                     </div>
                   </div>
                 ))}
-                {/* <div ref={messagesEndRef} /> */}
               </div>
 
               {/* Chat Input */}
