@@ -25,7 +25,7 @@ type UserType = "client" | "helper";
 export default function MyInbox() {
   const t = useT("inbox");
   const { user } = useAuth();
-  // 1. Determine user type (In a real  app, get this from your Auth/Context)
+  // 1. Determine user type (In a real app, get this from your Auth/Context)
   const userType: UserType = user?.role; // from auth context
 
   const {
@@ -110,33 +110,9 @@ export default function MyInbox() {
         isLoadingOlderRef.current = false;
       });
     }
-
-    // ✅ Initial load → scroll to bottom
-    // if (currentPage === 1) {
-    //   setTimeout(() => {
-    //     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    //   }, 0);
-    // }
-    // if (currentPage === 1 && el) {
-    //   requestAnimationFrame(() => {
-    //     //  scroll ONLY if content actually overflows
-    //     if (el.scrollHeight > el.clientHeight) {
-    //       scrollToBottom("auto");
-    //     }
-    //   });
-    // }
   }, [data]);
 
-  const handleScroll = () => {
-    const el = scrollContainerRef.current;
-    if (!el || loadingMore || !hasMore) return;
-
-    if (el.scrollTop <= 5) {
-      isLoadingOlderRef.current = true; // 🔥 THIS WAS MISSING
-      setLoadingMore(true);
-      setPage((p) => p + 1);
-    }
-  };
+  // Remove the handleScroll function since we're not using auto-load anymore
 
   /* =========================
    ✅ SAFE SCROLL HELPER
@@ -167,6 +143,11 @@ export default function MyInbox() {
     return msgDate.format("DD MMM YYYY");
   };
 
+  const isJobExpired = (expires_at: string | null): boolean => {
+    if (!expires_at) return false
+    return new Date(expires_at).getTime() <= Date.now()
+  }
+
   useEffect(() => {
     if (!selectedJobId) return;
 
@@ -180,9 +161,6 @@ export default function MyInbox() {
         el.scrollHeight - el.scrollTop - el.clientHeight < 150;
 
       if (isNearBottom && el.scrollHeight > el.clientHeight) {
-        // setTimeout(() => {
-        //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        // }, 0);
         scrollToBottom("smooth");
       }
     });
@@ -219,6 +197,7 @@ export default function MyInbox() {
   const sendMessage = (e) => {
     e.preventDefault();
 
+    if (isJobExpired(selectedJob?.expires_at)) return;
     if (!message.trim()) return;
     sendMsg.mutate(
       {
@@ -262,6 +241,17 @@ export default function MyInbox() {
     isLoadingOlderRef.current = false;
   };
 
+  /* =========================
+     LOAD OLDER MESSAGES HANDLER
+  ========================== */
+  const handleLoadOlderMessages = () => {
+    if (loadingMore || !hasMore) return;
+
+    isLoadingOlderRef.current = true;
+    setLoadingMore(true);
+    setPage((prevPage) => prevPage + 1);
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* <h1 className="text-3xl font-semibold tracking-tight mb-6">{t("title")}</h1> */}
@@ -277,19 +267,20 @@ export default function MyInbox() {
               <button
                 key={d.id}
                 onClick={() => {
-                  if (userType === "helper") {
-                    handleHelperJobSelect(d);
-                  } else {
-                    setSelectedJobId(d.id);
-                    setSelectedApplicantion(null);
-                    setRecipientId(null);
+                  if (selectedJobId !== d.id) {
+                    if (userType === "helper") {
+                      handleHelperJobSelect(d);
+                    } else {
+                      setSelectedJobId(d.id);
+                      setSelectedApplicantion(null);
+                      setRecipientId(null);
+                    }
                   }
                 }}
-                className={`w-full p-4 text-left border-b transition-colors ${
-                  selectedJobId === d.id
-                    ? "bg-gray-50 border-r-4 border-r-gray-500"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`w-full p-4 text-left border-b transition-colors ${selectedJobId === d.id
+                  ? "bg-gray-50 border-r-4 border-r-gray-500"
+                  : "hover:bg-gray-100"
+                  }`}
               >
                 <p className="font-semibold text-gray-900">{d.title}</p>
                 <p className="text-xs text-gray-500 mt-1">
@@ -318,12 +309,15 @@ export default function MyInbox() {
                   jobApplicants?.map((a: Application, i) => (
                     <button
                       key={a.id}
-                      onClick={() => handleClientApplicantSelect(a)}
-                      className={`w-full p-4 text-left border-b transition-colors ${
-                        selectedApplicantion?.id === a.id
-                          ? "bg-gray-100 border-r-4 border-r-gray-500"
-                          : "hover:bg-gray-50"
-                      }`}
+                      onClick={() => {
+                        if(a.id !== selectedApplicantion?.id) {
+                          handleClientApplicantSelect(a)
+                        }
+                      }}
+                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
+                        ? "bg-gray-100 border-r-4 border-r-gray-500"
+                        : "hover:bg-gray-50"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
@@ -355,10 +349,10 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className="flex-grow flex flex-col bg-white"
-          style={{ height: "85%" }}
+        // style={{ height: "85%" }}
         >
           {(userType === "helper" && selectedJobId) ||
-          (userType === "client" && selectedApplicantion) ? (
+            (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -367,8 +361,8 @@ export default function MyInbox() {
                     {userType === "client"
                       ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
                       : userType === "helper"
-                      ? selectedJob?.title
-                      : "Client"}
+                        ? selectedJob?.title
+                        : "Client"}
                   </h3>
                   {userType === "client" && (
                     <div
@@ -396,41 +390,51 @@ export default function MyInbox() {
               {/* Chat Messages */}
               <div
                 ref={scrollContainerRef}
-                onScroll={handleScroll}
                 className="flex-grow p-6 overflow-y-auto space-y-4 bg-gray-50/30"
+              // Removed onScroll handler since we're using button now
               >
+                {/* Load Older Messages Button */}
+                {hasMore && (
+                  <div className="flex justify-center mb-4">
+                    <button
+                      onClick={handleLoadOlderMessages}
+                      disabled={loadingMore}
+                      className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loadingMore ? t("chat.loading_older") : t("chat.load_older")}
+                    </button>
+                  </div>
+                )}
+
+                {/* Messages List */}
                 {messages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`flex ${
-                      msg.recipient_id === recipientId
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
+                    className={`flex ${msg.recipient_id === recipientId
+                      ? "justify-end"
+                      : "justify-start"
+                      }`}
                   >
                     <div className="max-w-[75%]">
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                          msg.recipient_id === recipientId
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-white border rounded-bl-sm"
-                        }`}
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
+                          ? "bg-primary text-white rounded-br-sm"
+                          : "bg-white border rounded-bl-sm"
+                          }`}
                       >
                         {msg.body}
                       </div>
                       <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${
-                          msg.recipient_id === recipientId
-                            ? "text-right"
-                            : "text-left"
-                        }`}
+                        className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
+                          ? "text-right"
+                          : "text-left"
+                          }`}
                       >
                         {formatTime(msg.created_at)}
                       </p>
                     </div>
                   </div>
                 ))}
-                {/* <div ref={messagesEndRef} /> */}
               </div>
 
               {/* Chat Input */}
@@ -439,15 +443,19 @@ export default function MyInbox() {
                   <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder={t("chat.message_placeholder")}
+                    placeholder={isJobExpired(selectedJob?.expires_at) ? t("chat.job_expired") : t("chat.message_placeholder")}
                     className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    disabled={isJobExpired(selectedJob?.expires_at)}
                   />
-                  <button
-                    type="submit"
-                    className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
+                  {
+                    !isJobExpired(selectedJob?.expires_at) &&
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  }
                 </div>
               </form>
             </>

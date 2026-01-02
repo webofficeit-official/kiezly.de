@@ -6,7 +6,10 @@
     "chat": {
         "select_applicant": "Select an applicant to start chatting",
         "select_job": "Select a job to view your messages",
-        "message_placeholder": "Type a message..."
+        "message_placeholder": "Type a message...",
+        "job_expired": "Job has been expired",
+        "loading_older": "Loading old messages",
+        "load_older": "Load old message"
     },
     "empty_inbox": {
         "no_jobs": {
