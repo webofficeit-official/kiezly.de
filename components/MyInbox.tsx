@@ -197,7 +197,7 @@ export default function MyInbox() {
   const sendMessage = (e) => {
     e.preventDefault();
 
-    if(isJobExpired(selectedJob?.expires_at)) return;
+    if (isJobExpired(selectedJob?.expires_at)) return;
     if (!message.trim()) return;
     sendMsg.mutate(
       {
@@ -246,7 +246,7 @@ export default function MyInbox() {
   ========================== */
   const handleLoadOlderMessages = () => {
     if (loadingMore || !hasMore) return;
-    
+
     isLoadingOlderRef.current = true;
     setLoadingMore(true);
     setPage((prevPage) => prevPage + 1);
@@ -267,17 +267,19 @@ export default function MyInbox() {
               <button
                 key={d.id}
                 onClick={() => {
-                  if (userType === "helper") {
-                    handleHelperJobSelect(d);
-                  } else {
-                    setSelectedJobId(d.id);
-                    setSelectedApplicantion(null);
-                    setRecipientId(null);
+                  if (selectedJobId !== d.id) {
+                    if (userType === "helper") {
+                      handleHelperJobSelect(d);
+                    } else {
+                      setSelectedJobId(d.id);
+                      setSelectedApplicantion(null);
+                      setRecipientId(null);
+                    }
                   }
                 }}
                 className={`w-full p-4 text-left border-b transition-colors ${selectedJobId === d.id
-                    ? "bg-gray-50 border-r-4 border-r-gray-500"
-                    : "hover:bg-gray-100"
+                  ? "bg-gray-50 border-r-4 border-r-gray-500"
+                  : "hover:bg-gray-100"
                   }`}
               >
                 <p className="font-semibold text-gray-900">{d.title}</p>
@@ -307,10 +309,14 @@ export default function MyInbox() {
                   jobApplicants?.map((a: Application, i) => (
                     <button
                       key={a.id}
-                      onClick={() => handleClientApplicantSelect(a)}
+                      onClick={() => {
+                        if(a.id !== selectedApplicantion?.id) {
+                          handleClientApplicantSelect(a)
+                        }
+                      }}
                       className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
-                          ? "bg-gray-100 border-r-4 border-r-gray-500"
-                          : "hover:bg-gray-50"
+                        ? "bg-gray-100 border-r-4 border-r-gray-500"
+                        : "hover:bg-gray-50"
                         }`}
                     >
                       <div className="flex items-center gap-3">
@@ -385,7 +391,7 @@ export default function MyInbox() {
               <div
                 ref={scrollContainerRef}
                 className="flex-grow p-6 overflow-y-auto space-y-4 bg-gray-50/30"
-                // Removed onScroll handler since we're using button now
+              // Removed onScroll handler since we're using button now
               >
                 {/* Load Older Messages Button */}
                 {hasMore && (
@@ -405,23 +411,23 @@ export default function MyInbox() {
                   <div
                     key={i}
                     className={`flex ${msg.recipient_id === recipientId
-                        ? "justify-end"
-                        : "justify-start"
+                      ? "justify-end"
+                      : "justify-start"
                       }`}
                   >
                     <div className="max-w-[75%]">
                       <div
                         className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-white border rounded-bl-sm"
+                          ? "bg-primary text-white rounded-br-sm"
+                          : "bg-white border rounded-bl-sm"
                           }`}
                       >
                         {msg.body}
                       </div>
                       <p
                         className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
-                            ? "text-right"
-                            : "text-left"
+                          ? "text-right"
+                          : "text-left"
                           }`}
                       >
                         {formatTime(msg.created_at)}
