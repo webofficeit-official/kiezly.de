@@ -179,7 +179,7 @@ export default function MyInbox() {
       const isNearBottom =
         el.scrollHeight - el.scrollTop - el.clientHeight < 150;
 
-      if (isNearBottom&& el.scrollHeight > el.clientHeight) {
+      if (isNearBottom && el.scrollHeight > el.clientHeight) {
         // setTimeout(() => {
         //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         // }, 0);
@@ -191,21 +191,21 @@ export default function MyInbox() {
   }, [selectedJobId]);
 
   useLayoutEffect(() => {
-  const el = scrollContainerRef.current;
+    const el = scrollContainerRef.current;
 
-  // Only scroll on FIRST page load
-  if (!el || page !== 1) return;
+    // Only scroll on FIRST page load
+    if (!el || page !== 1) return;
 
-  // Wait for DOM paint
-  requestAnimationFrame(() => {
-    if (el.scrollHeight > el.clientHeight) {
-      el.scrollTo({
-        top: el.scrollHeight,
-        behavior: "auto",
-      });
-    }
-  });
-}, [messages, page]);
+    // Wait for DOM paint
+    requestAnimationFrame(() => {
+      if (el.scrollHeight > el.clientHeight) {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: "auto",
+        });
+      }
+    });
+  }, [messages, page]);
 
   useEffect(() => {
     if (!selectedJobId || !selectedApplicantion) return;
@@ -355,6 +355,7 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className="flex-grow flex flex-col bg-white"
+          style={{ height: "85%" }}
         >
           {(userType === "helper" && selectedJobId) ||
           (userType === "client" && selectedApplicantion) ? (
