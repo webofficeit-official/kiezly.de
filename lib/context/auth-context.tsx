@@ -131,6 +131,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function logout() {
     const toastId = toast.loading("Logging out...");
     try {
+       if (socket.connected) {
+      socket.emit("force-logout"); // optional (safe)
+      socket.disconnect();
+    }
+
       await apiClient.post("/auth/logout");
       toast.success("Logged out successfully!", { id: toastId });
     } catch (err) {

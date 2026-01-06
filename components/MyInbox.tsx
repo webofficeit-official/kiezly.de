@@ -69,6 +69,7 @@ export default function MyInbox() {
 
   const filters = useMemo(() => ({ page, page_size: 10 }), [page]);
   const [recipientId, setRecipientId] = useState<string | null>(null);
+  const [isRecipientOnline, setIsRecipientOnline] = useState<boolean>(false);
 
   const { data, isLoading: messageLoading } = useGetConversation(
     selectedJobId,
@@ -85,6 +86,49 @@ export default function MyInbox() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   //   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const isLoadingOlderRef = useRef(false);
+
+  useEffect(() => {
+    if (!recipientId) return;
+
+    let mounted = true;
+
+    //  Always ask server for truth (fixes stale state)
+    socket.emit("check-user-online", recipientId, (online: boolean) => {
+      if (mounted) setIsRecipientOnline(online);
+    });
+
+    //  Live online event
+    const handleOnline = ({ userId }) => {
+      if (userId === recipientId) {
+        setIsRecipientOnline(true);
+      }
+    };
+
+    //  Live offline event
+    const handleOffline = ({ userId }) => {
+      if (userId === recipientId) {
+        setIsRecipientOnline(false);
+      }
+    };
+
+    //  Re-check after reconnect (VERY IMPORTANT)
+    const handleReconnect = () => {
+      socket.emit("check-user-online", recipientId, (online: boolean) => {
+        if (mounted) setIsRecipientOnline(online);
+      });
+    };
+
+    socket.on("user-online", handleOnline);
+    socket.on("user-offline", handleOffline);
+    socket.io.on("reconnect", handleReconnect);
+
+    return () => {
+      mounted = false;
+      socket.off("user-online", handleOnline);
+      socket.off("user-offline", handleOffline);
+      socket.io.off("reconnect", handleReconnect);
+    };
+  }, [recipientId]);
 
   useEffect(() => {
     if (!data?.data?.messages) return;
@@ -144,9 +188,9 @@ export default function MyInbox() {
   };
 
   const isJobExpired = (expires_at: string | null): boolean => {
-    if (!expires_at) return false
-    return new Date(expires_at).getTime() <= Date.now()
-  }
+    if (!expires_at) return false;
+    return new Date(expires_at).getTime() <= Date.now();
+  };
 
   useEffect(() => {
     if (!selectedJobId) return;
@@ -277,10 +321,11 @@ export default function MyInbox() {
                     }
                   }
                 }}
-                className={`w-full p-4 text-left border-b transition-colors ${selectedJobId === d.id
-                  ? "bg-gray-50 border-r-4 border-r-gray-500"
-                  : "hover:bg-gray-100"
-                  }`}
+                className={`w-full p-4 text-left border-b transition-colors ${
+                  selectedJobId === d.id
+                    ? "bg-gray-50 border-r-4 border-r-gray-500"
+                    : "hover:bg-gray-100"
+                }`}
               >
                 <p className="font-semibold text-gray-900">{d.title}</p>
                 <p className="text-xs text-gray-500 mt-1">
@@ -310,14 +355,15 @@ export default function MyInbox() {
                     <button
                       key={a.id}
                       onClick={() => {
-                        if(a.id !== selectedApplicantion?.id) {
-                          handleClientApplicantSelect(a)
+                        if (a.id !== selectedApplicantion?.id) {
+                          handleClientApplicantSelect(a);
                         }
                       }}
-                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
-                        ? "bg-gray-100 border-r-4 border-r-gray-500"
-                        : "hover:bg-gray-50"
-                        }`}
+                      className={`w-full p-4 text-left border-b transition-colors ${
+                        selectedApplicantion?.id === a.id
+                          ? "bg-gray-100 border-r-4 border-r-gray-500"
+                          : "hover:bg-gray-50"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
@@ -349,10 +395,10 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className="flex-grow flex flex-col bg-white"
-        // style={{ height: "85%" }}
+          // style={{ height: "85%" }}
         >
           {(userType === "helper" && selectedJobId) ||
-            (userType === "client" && selectedApplicantion) ? (
+          (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -361,8 +407,8 @@ export default function MyInbox() {
                     {userType === "client"
                       ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
                       : userType === "helper"
-                        ? selectedJob?.title
-                        : "Client"}
+                      ? selectedJob?.title
+                      : "Client"}
                   </h3>
                   {userType === "client" && (
                     <div
@@ -384,14 +430,24 @@ export default function MyInbox() {
                     </p>
                   )}
                 </div>
-                <span className="h-2 w-2 rounded-full bg-green-500"></span>
+
+                {recipientId && (
+                  <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        isRecipientOnline ? "bg-green-500" : "bg-gray-400"
+                      }`}
+                    />
+                    {isRecipientOnline ? "Online" : "Offline"}
+                  </div>
+                )}
               </div>
 
               {/* Chat Messages */}
               <div
                 ref={scrollContainerRef}
                 className="flex-grow p-6 overflow-y-auto space-y-4 bg-gray-50/30"
-              // Removed onScroll handler since we're using button now
+                // Removed onScroll handler since we're using button now
               >
                 {/* Load Older Messages Button */}
                 {hasMore && (
@@ -401,7 +457,9 @@ export default function MyInbox() {
                       disabled={loadingMore}
                       className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loadingMore ? t("chat.loading_older") : t("chat.load_older")}
+                      {loadingMore
+                        ? t("chat.loading_older")
+                        : t("chat.load_older")}
                     </button>
                   </div>
                 )}
@@ -410,25 +468,28 @@ export default function MyInbox() {
                 {messages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`flex ${msg.recipient_id === recipientId
-                      ? "justify-end"
-                      : "justify-start"
-                      }`}
+                    className={`flex ${
+                      msg.recipient_id === recipientId
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
                   >
                     <div className="max-w-[75%]">
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
-                          ? "bg-primary text-white rounded-br-sm"
-                          : "bg-white border rounded-bl-sm"
-                          }`}
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                          msg.recipient_id === recipientId
+                            ? "bg-primary text-white rounded-br-sm"
+                            : "bg-white border rounded-bl-sm"
+                        }`}
                       >
                         {msg.body}
                       </div>
                       <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
-                          ? "text-right"
-                          : "text-left"
-                          }`}
+                        className={`mt-1 text-[10px] text-muted-foreground ${
+                          msg.recipient_id === recipientId
+                            ? "text-right"
+                            : "text-left"
+                        }`}
                       >
                         {formatTime(msg.created_at)}
                       </p>
@@ -443,19 +504,22 @@ export default function MyInbox() {
                   <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder={isJobExpired(selectedJob?.expires_at) ? t("chat.job_expired") : t("chat.message_placeholder")}
+                    placeholder={
+                      isJobExpired(selectedJob?.expires_at)
+                        ? t("chat.job_expired")
+                        : t("chat.message_placeholder")
+                    }
                     className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     disabled={isJobExpired(selectedJob?.expires_at)}
                   />
-                  {
-                    !isJobExpired(selectedJob?.expires_at) &&
+                  {!isJobExpired(selectedJob?.expires_at) && (
                     <button
                       type="submit"
                       className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
                     >
                       <Send className="h-4 w-4" />
                     </button>
-                  }
+                  )}
                 </div>
               </form>
             </>
