@@ -4,10 +4,11 @@ import { useT } from "@/app/[locale]/layout";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { getErrorMessage } from "@/lib/utils/error";
+import { Eye, EyeClosed } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import * as React from "react";
 import toast from "react-hot-toast";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaEye, FaEyeSlash } from "react-icons/fa";
 
 // NOTE: Simple Link shim so this file runs in any React runtime (no Next.js dependency)
 function Link({ href = "#", className = "", children, ...props }) {
@@ -250,11 +251,11 @@ function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute inset-y-0 right-2 my-auto rounded-lg px-2 text-xs text-gray-600 hover:bg-gray-100"
+                  className="absolute inset-y-0 right-2 my-auto rounded-lg px-2 text-lg text-gray-600"
                 >
                   {showPassword
-                    ? t("form.password.hide")
-                    : t("form.password.show")}
+                    ? <FaEyeSlash />
+                    : <FaEye />}
                 </button>
               </div>
               {getFieldError("password") && (
