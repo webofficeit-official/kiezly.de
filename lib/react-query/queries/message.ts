@@ -23,7 +23,7 @@ export const useGetConversation = (
   filters: Record<string, any>,
   options?: any
 ) => {
-  console.log("Hook mounted", jobId, userId);
+  const queryClient = useQueryClient();
 
   return useQuery<MessageApiResponse>({
     queryKey: ["get-conversation", jobId, userId, filters],
@@ -32,6 +32,16 @@ export const useGetConversation = (
     gcTime: 0,
     ...options,
     enabled: options?.enabled ?? (!!jobId && !!userId), // ✅ FIX
+
+    onSuccess: (data) => {
+      // 🔥 invalidate inbox so unread counts update
+      queryClient.invalidateQueries({
+        queryKey: ["my-inbox"],
+      });
+
+      // allow caller to still use onSuccess
+      options?.onSuccess?.(data);
+    },
   });
 };
 
