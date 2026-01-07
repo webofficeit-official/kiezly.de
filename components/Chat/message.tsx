@@ -164,18 +164,40 @@ export default function Message({
   };
 
   useEffect(() => {
-    if (!jobId) return;
+  if (!jobId || !receiverId) return;
 
-    socket.on("message", (data) => {
-      setMessages((prev) => [...prev, data]);
+  const handleMessage = (msg) => {
+    /* =========================
+       1️ STRICT JOB FILTER
+    ========================= */
+    if (msg.job_id !== jobId) return;
 
-      requestAnimationFrame(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      });
+    /* =========================
+       2️ STRICT USER FILTER
+    ========================= */
+    const isSameUser =
+      msg.sender_id === receiverId ||
+      msg.recipient_id === receiverId;
+
+    if (!isSameUser) return;
+
+    /* =========================
+       3️ SAFE APPEND
+    ========================= */
+    setMessages((prev) => [...prev, msg]);
+
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     });
+  };
 
-    return () => socket.off("message");
-  }, [jobId]);
+  socket.on("message", handleMessage);
+
+  return () => {
+    socket.off("message", handleMessage);
+  };
+}, [jobId, receiverId]);
+
 
   const sendMessage = (e) => {
     e.preventDefault();

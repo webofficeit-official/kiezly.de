@@ -27,6 +27,7 @@ export default function MyInbox() {
   const { user } = useAuth();
   // 1. Determine user type (In a real app, get this from your Auth/Context)
   const userType: UserType = user?.role; // from auth context
+  const [inboxItems, setInboxItems] = useState<any[]>([]);
 
   const {
     data: jobs,
@@ -37,8 +38,15 @@ export default function MyInbox() {
 
   const { data: inbox } = myInbox({ enabled: userType === "helper" });
 
-  const dataSource =
-    userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
+  // const dataSource =
+  //   userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
+  useEffect(() => {
+    if (userType === "client") {
+      setInboxItems(jobs?.data?.items ?? []);
+    } else {
+      setInboxItems(inbox?.data ?? []);
+    }
+  }, [jobs, inbox, userType]);
 
   // 2. Selection State
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -192,25 +200,119 @@ export default function MyInbox() {
     return new Date(expires_at).getTime() <= Date.now();
   };
 
-  useEffect(() => {
-    if (!selectedJobId) return;
+  
+//   useEffect(() => {
+//   if (!selectedJobId) return;
 
-    socket.on("message", (data) => {
-      setMessages((prev) => [...prev, data]);
+//   const handleMessage = (msg) => {
+//     /* =========================
+//        1️ UPDATE OPEN CHAT
+//     ========================= */
+//     setMessages((prev) => [...prev, msg]);
 
-      const el = scrollContainerRef.current;
-      if (!el) return;
+//     /* =========================
+//        2️ UPDATE INBOX ORDER
+//        (latest job moves to top)
+//     ========================= */
+//     setInboxItems((prev) => {
+//       const index = prev.findIndex(
+//         (item) => item.id === msg.job_id
+//       );
 
-      const isNearBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+//       if (index === -1) return prev;
 
-      if (isNearBottom && el.scrollHeight > el.clientHeight) {
-        scrollToBottom("smooth");
-      }
+//       const updatedItem = {
+//         ...prev[index],
+//         last_message: msg.body,
+//         last_message_at: msg.created_at,
+//       };
+
+//       const newList = [...prev];
+//       newList.splice(index, 1); // remove old position
+//       return [updatedItem, ...newList]; // move to top
+//     });
+
+//     /* =========================
+//        3️ SCROLL SAFELY
+//     ========================= */
+//     const el = scrollContainerRef.current;
+//     if (!el) return;
+
+//     const isNearBottom =
+//       el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+
+//     if (isNearBottom && el.scrollHeight > el.clientHeight) {
+//       scrollToBottom("smooth");
+//     }
+//   };
+
+//   socket.on("message", handleMessage);
+
+//   return () => {
+//     socket.off("message", handleMessage);
+//   };
+// }, [selectedJobId]);
+
+useEffect(() => {
+  if (!selectedJobId || !recipientId) return;
+
+  const handleMessage = (msg) => {
+    /* =========================
+       1️⃣ ALWAYS UPDATE INBOX
+       (job moves to top)
+    ========================= */
+    setInboxItems((prev) => {
+      const index = prev.findIndex((item) => item.id === msg.job_id);
+      if (index === -1) return prev;
+
+      const updatedItem = {
+        ...prev[index],
+        last_message: msg.body,
+        last_message_at: msg.created_at,
+      };
+
+      const newList = [...prev];
+      newList.splice(index, 1);
+      return [updatedItem, ...newList];
     });
 
-    return () => socket.off("message");
-  }, [selectedJobId]);
+    /* =========================
+       2️⃣ ONLY UPDATE OPEN CHAT
+       (STRICT CHECK)
+    ========================= */
+    const isSameJob = msg.job_id === selectedJobId;
+
+    const isSameUser =
+      msg.sender_id === recipientId ||
+      msg.recipient_id === recipientId;
+
+    if (!isSameJob || !isSameUser) {
+      // ❌ Message belongs to another job/chat
+      return;
+    }
+
+    setMessages((prev) => [...prev, msg]);
+
+    /* =========================
+       3️⃣ SAFE SCROLL
+    ========================= */
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const isNearBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+
+    if (isNearBottom && el.scrollHeight > el.clientHeight) {
+      scrollToBottom("smooth");
+    }
+  };
+
+  socket.on("message", handleMessage);
+
+  return () => {
+    socket.off("message", handleMessage);
+  };
+}, [selectedJobId, recipientId]);
 
   useLayoutEffect(() => {
     const el = scrollContainerRef.current;
@@ -307,7 +409,7 @@ export default function MyInbox() {
             {t("inbox_header")}
           </div>
           <div className="overflow-y-auto h-full">
-            {dataSource.map((d) => (
+            {inboxItems.map((d) => (
               <button
                 key={d.id}
                 onClick={() => {
