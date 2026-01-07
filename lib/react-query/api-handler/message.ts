@@ -23,8 +23,6 @@ export const countMessageApi = async (jobId: string, userId: string) => {
   return response.data;
 };
 
-
-
 export const getMyInboxApi = async () => {
   const res = await apiClient.get("/message/inbox_helper");
   return res.data

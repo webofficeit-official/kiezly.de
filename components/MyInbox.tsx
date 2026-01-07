@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/app/[locale]/layout";
 import { myJobs } from "@/lib/react-query/queries/useJob";
 import { Filters } from "./job/myJob";
@@ -55,7 +55,7 @@ export default function MyInbox() {
   const { data: applicants, isLoading } = useJobApplicants({
     jobId: selectedJobId?.toString(),
     page: 1,
-    pageSize: 10,
+    pageSize: 25,
     status: "",
     sort: "asc",
     enabled: user?.role === "client", // <-- include here if your hook supports it
@@ -75,7 +75,7 @@ export default function MyInbox() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const filters = useMemo(() => ({ page, page_size: 10 }), [page]);
+  const filters = useMemo(() => ({ page, page_size: 25 }), [page]);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isRecipientOnline, setIsRecipientOnline] = useState<boolean>(false);
 
@@ -92,8 +92,27 @@ export default function MyInbox() {
   );
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const unreadDividerRef = useRef<HTMLDivElement | null>(null);
   //   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const isLoadingOlderRef = useRef(false);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      // Check if there are any unseen messages
+      const hasUnseenMessages = messages.some(msg => msg.seen === false);
+
+      if (hasUnseenMessages && unreadDividerRef.current) {
+        // Scroll to the unread divider with some offset
+        unreadDividerRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      } else {
+        // Scroll to bottom if no unseen messages
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (!recipientId) return;
@@ -200,119 +219,119 @@ export default function MyInbox() {
     return new Date(expires_at).getTime() <= Date.now();
   };
 
-  
-//   useEffect(() => {
-//   if (!selectedJobId) return;
 
-//   const handleMessage = (msg) => {
-//     /* =========================
-//        1️ UPDATE OPEN CHAT
-//     ========================= */
-//     setMessages((prev) => [...prev, msg]);
+  //   useEffect(() => {
+  //   if (!selectedJobId) return;
 
-//     /* =========================
-//        2️ UPDATE INBOX ORDER
-//        (latest job moves to top)
-//     ========================= */
-//     setInboxItems((prev) => {
-//       const index = prev.findIndex(
-//         (item) => item.id === msg.job_id
-//       );
+  //   const handleMessage = (msg) => {
+  //     /* =========================
+  //        1️ UPDATE OPEN CHAT
+  //     ========================= */
+  //     setMessages((prev) => [...prev, msg]);
 
-//       if (index === -1) return prev;
+  //     /* =========================
+  //        2️ UPDATE INBOX ORDER
+  //        (latest job moves to top)
+  //     ========================= */
+  //     setInboxItems((prev) => {
+  //       const index = prev.findIndex(
+  //         (item) => item.id === msg.job_id
+  //       );
 
-//       const updatedItem = {
-//         ...prev[index],
-//         last_message: msg.body,
-//         last_message_at: msg.created_at,
-//       };
+  //       if (index === -1) return prev;
 
-//       const newList = [...prev];
-//       newList.splice(index, 1); // remove old position
-//       return [updatedItem, ...newList]; // move to top
-//     });
+  //       const updatedItem = {
+  //         ...prev[index],
+  //         last_message: msg.body,
+  //         last_message_at: msg.created_at,
+  //       };
 
-//     /* =========================
-//        3️ SCROLL SAFELY
-//     ========================= */
-//     const el = scrollContainerRef.current;
-//     if (!el) return;
+  //       const newList = [...prev];
+  //       newList.splice(index, 1); // remove old position
+  //       return [updatedItem, ...newList]; // move to top
+  //     });
 
-//     const isNearBottom =
-//       el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+  //     /* =========================
+  //        3️ SCROLL SAFELY
+  //     ========================= */
+  //     const el = scrollContainerRef.current;
+  //     if (!el) return;
 
-//     if (isNearBottom && el.scrollHeight > el.clientHeight) {
-//       scrollToBottom("smooth");
-//     }
-//   };
+  //     const isNearBottom =
+  //       el.scrollHeight - el.scrollTop - el.clientHeight < 150;
 
-//   socket.on("message", handleMessage);
+  //     if (isNearBottom && el.scrollHeight > el.clientHeight) {
+  //       scrollToBottom("smooth");
+  //     }
+  //   };
 
-//   return () => {
-//     socket.off("message", handleMessage);
-//   };
-// }, [selectedJobId]);
+  //   socket.on("message", handleMessage);
 
-useEffect(() => {
-  if (!selectedJobId || !recipientId) return;
+  //   return () => {
+  //     socket.off("message", handleMessage);
+  //   };
+  // }, [selectedJobId]);
 
-  const handleMessage = (msg) => {
-    /* =========================
-       1️⃣ ALWAYS UPDATE INBOX
-       (job moves to top)
-    ========================= */
-    setInboxItems((prev) => {
-      const index = prev.findIndex((item) => item.id === msg.job_id);
-      if (index === -1) return prev;
+  useEffect(() => {
+    if (!selectedJobId || !recipientId) return;
 
-      const updatedItem = {
-        ...prev[index],
-        last_message: msg.body,
-        last_message_at: msg.created_at,
-      };
+    const handleMessage = (msg) => {
+      /* =========================
+         1️⃣ ALWAYS UPDATE INBOX
+         (job moves to top)
+      ========================= */
+      setInboxItems((prev) => {
+        const index = prev.findIndex((item) => item.id === msg.job_id);
+        if (index === -1) return prev;
 
-      const newList = [...prev];
-      newList.splice(index, 1);
-      return [updatedItem, ...newList];
-    });
+        const updatedItem = {
+          ...prev[index],
+          last_message: msg.body,
+          last_message_at: msg.created_at,
+        };
 
-    /* =========================
-       2️⃣ ONLY UPDATE OPEN CHAT
-       (STRICT CHECK)
-    ========================= */
-    const isSameJob = msg.job_id === selectedJobId;
+        const newList = [...prev];
+        newList.splice(index, 1);
+        return [updatedItem, ...newList];
+      });
 
-    const isSameUser =
-      msg.sender_id === recipientId ||
-      msg.recipient_id === recipientId;
+      /* =========================
+         2️⃣ ONLY UPDATE OPEN CHAT
+         (STRICT CHECK)
+      ========================= */
+      const isSameJob = msg.job_id === selectedJobId;
 
-    if (!isSameJob || !isSameUser) {
-      // ❌ Message belongs to another job/chat
-      return;
-    }
+      const isSameUser =
+        msg.sender_id === recipientId ||
+        msg.recipient_id === recipientId;
 
-    setMessages((prev) => [...prev, msg]);
+      if (!isSameJob || !isSameUser) {
+        // ❌ Message belongs to another job/chat
+        return;
+      }
 
-    /* =========================
-       3️⃣ SAFE SCROLL
-    ========================= */
-    const el = scrollContainerRef.current;
-    if (!el) return;
+      setMessages((prev) => [...prev, msg]);
 
-    const isNearBottom =
-      el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+      /* =========================
+         3️⃣ SAFE SCROLL
+      ========================= */
+      const el = scrollContainerRef.current;
+      if (!el) return;
 
-    if (isNearBottom && el.scrollHeight > el.clientHeight) {
-      scrollToBottom("smooth");
-    }
-  };
+      const isNearBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight < 150;
 
-  socket.on("message", handleMessage);
+      if (isNearBottom && el.scrollHeight > el.clientHeight) {
+        scrollToBottom("smooth");
+      }
+    };
 
-  return () => {
-    socket.off("message", handleMessage);
-  };
-}, [selectedJobId, recipientId]);
+    socket.on("message", handleMessage);
+
+    return () => {
+      socket.off("message", handleMessage);
+    };
+  }, [selectedJobId, recipientId]);
 
   useLayoutEffect(() => {
     const el = scrollContainerRef.current;
@@ -423,18 +442,24 @@ useEffect(() => {
                     }
                   }
                 }}
-                className={`w-full p-4 text-left border-b transition-colors ${
-                  selectedJobId === d.id
-                    ? "bg-gray-50 border-r-4 border-r-gray-500"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`w-full p-4 text-left border-b transition-colors flex justify-between ${selectedJobId === d.id
+                  ? "bg-gray-50 border-r-4 border-r-gray-500"
+                  : "hover:bg-gray-100"
+                  }`}
               >
-                <p className="font-semibold text-gray-900">{d.title}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {[d.city, d.state, d.countries?.name]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
+                <div>
+                  <p className="font-semibold text-gray-900">{d.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {[d.city, d.state, d.countries?.name]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
+                </div>
+                <div>
+                  {
+                    d.unread_count > 0 && <span className="bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 p-3 flex items-center justify-center">{d.unread_count}</span>
+                  }
+                </div>
               </button>
             ))}
           </div>
@@ -461,11 +486,10 @@ useEffect(() => {
                           handleClientApplicantSelect(a);
                         }
                       }}
-                      className={`w-full p-4 text-left border-b transition-colors ${
-                        selectedApplicantion?.id === a.id
-                          ? "bg-gray-100 border-r-4 border-r-gray-500"
-                          : "hover:bg-gray-50"
-                      }`}
+                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
+                        ? "bg-gray-100 border-r-4 border-r-gray-500"
+                        : "hover:bg-gray-50"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
@@ -497,10 +521,10 @@ useEffect(() => {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className="flex-grow flex flex-col bg-white"
-          // style={{ height: "85%" }}
+        // style={{ height: "85%" }}
         >
           {(userType === "helper" && selectedJobId) ||
-          (userType === "client" && selectedApplicantion) ? (
+            (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -509,8 +533,8 @@ useEffect(() => {
                     {userType === "client"
                       ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
                       : userType === "helper"
-                      ? selectedJob?.title
-                      : "Client"}
+                        ? selectedJob?.title
+                        : "Client"}
                   </h3>
                   {userType === "client" && (
                     <div
@@ -536,11 +560,9 @@ useEffect(() => {
                 {recipientId && (
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
                     <span
-                      className={`h-2 w-2 rounded-full ${
-                        isRecipientOnline ? "bg-green-500" : "bg-gray-400"
-                      }`}
+                      className={`h-2 w-2 rounded-full ${isRecipientOnline ? "bg-green-500" : "bg-gray-400"
+                        }`}
                     />
-                    {isRecipientOnline ? "Online" : "Offline"}
                   </div>
                 )}
               </div>
@@ -549,7 +571,7 @@ useEffect(() => {
               <div
                 ref={scrollContainerRef}
                 className="flex-grow p-6 overflow-y-auto space-y-4 bg-gray-50/30"
-                // Removed onScroll handler since we're using button now
+              // Removed onScroll handler since we're using button now
               >
                 {/* Load Older Messages Button */}
                 {hasMore && (
@@ -567,37 +589,51 @@ useEffect(() => {
                 )}
 
                 {/* Messages List */}
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${
-                      msg.recipient_id === recipientId
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    <div className="max-w-[75%]">
+                {messages.map((msg, i) => {
+                  const isFirstUnseen = msg.seen === false &&
+                    msg.recipient_id !== recipientId && // Message sent by other person (you are the recipient)
+                    !messages.slice(0, i).some(m => m.seen === false && m.recipient_id !== recipientId);
+
+                  return (
+                    <Fragment key={i}>
+                      {isFirstUnseen && (
+                        <div ref={unreadDividerRef} className="my-4 flex items-center gap-3">
+                          <div className="flex-1 h-px bg-border" />
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            Unread messages
+                          </span>
+                          <div className="flex-1 h-px bg-border" />
+                        </div>
+                      )}
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                          msg.recipient_id === recipientId
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-white border rounded-bl-sm"
-                        }`}
+                        key={i}
+                        className={`flex ${msg.recipient_id === recipientId
+                          ? "justify-end"
+                          : "justify-start"
+                          }`}
                       >
-                        {msg.body}
+                        <div className="max-w-[75%]">
+                          <div
+                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
+                              ? "bg-primary text-white rounded-br-sm"
+                              : "bg-white border rounded-bl-sm"
+                              }`}
+                          >
+                            {msg.body}
+                          </div>
+                          <p
+                            className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
+                              ? "text-right"
+                              : "text-left"
+                              }`}
+                          >
+                            {formatTime(msg.created_at)}
+                          </p>
+                        </div>
                       </div>
-                      <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${
-                          msg.recipient_id === recipientId
-                            ? "text-right"
-                            : "text-left"
-                        }`}
-                      >
-                        {formatTime(msg.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                    </Fragment>
+                  )
+                })}
               </div>
 
               {/* Chat Input */}
