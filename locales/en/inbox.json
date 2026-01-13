@@ -2,6 +2,7 @@
     "title": "My Inbox",
     "inbox_header": "My Jobs",
     "applications_header": "Applicants",
+    "expired": "This job has expired",
     "select_job_message": "Select a job to view applicants",
     "chat": {
         "select_applicant": "Select an applicant to start chatting",

@@ -58,7 +58,6 @@ export default function MyInbox() {
   const { data: clientInbox } = myInboxClient({
     enabled: userType === "client",
   });
-  console.log("Client Inbox:", clientInbox);
   const { data: inbox } = myInbox({ enabled: userType === "helper" });
 
   // const dataSource =
@@ -373,9 +372,16 @@ export default function MyInbox() {
             {t("inbox_header")}
           </div>
           <div className="overflow-y-auto h-full">
-            {inboxItems.map((d) => (
+            {inboxItems.map((d) => { 
+              const isExpired = d.ends_at
+                ? new Date(d.ends_at) < new Date()
+                : false;
+              
+              return (
               <button
                 key={d.id}
+                disabled={isExpired}
+                title={isExpired && t("expired")}
                 onClick={() => {
                   if (selectedJobId !== d.id) {
                     if (userType === "helper") {
@@ -389,9 +395,11 @@ export default function MyInbox() {
                   }
                 }}
                 className={`w-full p-4 text-left border-b transition-colors flex justify-between ${
-                  selectedJobId === d.id
+                  (isExpired || d.status == "closed" || d.status == "expired")
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : selectedJobId === d.id
                     ? "bg-gray-50 border-r-4 border-r-gray-500"
-                    : "hover:bg-gray-100"
+                    : "hover:bg-gray-100 cursor-pointer"
                 }`}
               >
                 <div>
@@ -410,7 +418,7 @@ export default function MyInbox() {
                   )}
                 </div>
               </button>
-            ))}
+            )})}
           </div>
         </div>
 

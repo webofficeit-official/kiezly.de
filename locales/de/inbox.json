@@ -2,6 +2,7 @@
     "title": "Posteingang",
     "inbox_header": "Meine Jobs",
     "applications_header": "Bewerber",
+    "expired": "Diese Stelle ist nicht mehr verfügbar.",
     "select_job_message": "Wählen Sie einen Job aus, um Bewerber anzuzeigen",
     "chat": {
         "select_applicant": "Wählen Sie einen Bewerber aus, um zu chatten",
