@@ -1,6 +1,6 @@
 import { MessageApiResponse, SendMessageData, SendMessageResponse } from "@/lib/types/message";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
-import { countMessageApi, getConversationApi, getMyInboxApi, sendMessageApi } from "../api-handler/message";
+import { countMessageApi, getConversationApi, getMyInboxApi, getMyInboxClientApi, sendMessageApi } from "../api-handler/message";
 import { Job } from "@/lib/types/job";
 
 export function useSendMessage() {
@@ -86,3 +86,63 @@ export const myInbox = (
     readonly unknown[]
   >)
 }
+
+export interface ClientInboxApplicant {
+  application_id: string;
+  proposed_rate: number | null;
+  last_message: string | null;
+  last_message_at: string | null;
+  unread_count: number;
+  user: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+}
+
+export interface ClientInboxJob {
+  job_id: string;
+  title: string;
+  city: string;
+  state: string;
+  category_name: string;
+  countries: {
+    id: number;
+    code: string;
+    name: string;
+    currency: string;
+  };
+  applicants: ClientInboxApplicant[];
+}
+
+export interface ClientInboxApiResponse {
+  status: boolean;
+  data: ClientInboxJob[];
+}
+
+
+
+export const myInboxClient = (
+  options?: Partial<UseQueryOptions<ClientInboxApiResponse, Error>>
+) => {
+  return useQuery<ClientInboxApiResponse, Error>({
+    queryKey: ["my-inbox-client"],
+    queryFn: getMyInboxClientApi,
+
+    select: (res) => ({
+      status: res.status,
+      data: res.data.map((job) => ({
+        ...job,
+        applicants: job.applicants ?? [], 
+      })),
+    }),
+
+    enabled: options?.enabled ?? true,
+    staleTime: 0,
+
+    ...options,
+  });
+};
+
+

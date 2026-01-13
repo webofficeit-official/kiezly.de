@@ -1,5 +1,12 @@
 "use client";
-import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useT } from "@/app/[locale]/layout";
 import { myJobs } from "@/lib/react-query/queries/useJob";
 import { Filters } from "./job/myJob";
@@ -7,6 +14,7 @@ import { useJobApplicants } from "@/lib/react-query/queries/apply-job";
 import { Application } from "@/lib/types/apply-job";
 import {
   myInbox,
+  myInboxClient,
   useGetConversation,
   useSendMessage,
 } from "@/lib/react-query/queries/message";
@@ -16,6 +24,7 @@ import socket from "@/lib/socket";
 import { Send } from "lucide-react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Job } from "@/lib/types/job";
+import { InboxJob } from "@/lib/types/inbox";
 
 dayjs.extend(relativeTime);
 
@@ -29,41 +38,10 @@ export default function MyInbox() {
   const userType: UserType = user?.role; // from auth context
   const [inboxItems, setInboxItems] = useState<any[]>([]);
 
-  const {
-    data: jobs,
-    isLoading: jobLoading,
-    error,
-    isFetching,
-  } = myJobs({}, { enabled: userType === "client" });
-
-  const { data: inbox } = myInbox({ enabled: userType === "helper" });
-
-  // const dataSource =
-  //   userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
-  useEffect(() => {
-    if (userType === "client") {
-      setInboxItems(jobs?.data?.items ?? []);
-    } else {
-      setInboxItems(inbox?.data ?? []);
-    }
-  }, [jobs, inbox, userType]);
-
   // 2. Selection State
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
-  const { data: applicants, isLoading } = useJobApplicants({
-    jobId: selectedJobId?.toString(),
-    page: 1,
-    pageSize: 25,
-    status: "",
-    sort: "asc",
-    enabled: user?.role === "client", // <-- include here if your hook supports it
-  });
-  let jobApplicants = applicants?.applicants ?? [];
-  jobApplicants = jobApplicants.filter((a) => {
-    return a.status === "shortlisted";
-  });
+  const [selectedJob, setSelectedJob] = useState<InboxJob | Job | null>(null);
 
   const [selectedApplicantion, setSelectedApplicantion] =
     useState<Application | null>(null);
@@ -74,10 +52,26 @@ export default function MyInbox() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-
-  const filters = useMemo(() => ({ page, page_size: 25 }), [page]);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isRecipientOnline, setIsRecipientOnline] = useState<boolean>(false);
+
+  const { data: clientInbox } = myInboxClient({
+    enabled: userType === "client",
+  });
+  console.log("Client Inbox:", clientInbox);
+  const { data: inbox } = myInbox({ enabled: userType === "helper" });
+
+  // const dataSource =
+  //   userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
+  useEffect(() => {
+    if (userType === "client") {
+      setInboxItems(clientInbox?.data ?? []);
+    } else {
+      setInboxItems(inbox?.data ?? []);
+    }
+  }, [clientInbox, inbox, userType]);
+
+  const filters = useMemo(() => ({ page, page_size: 25 }), [page]);
 
   const { data, isLoading: messageLoading } = useGetConversation(
     selectedJobId,
@@ -99,17 +93,18 @@ export default function MyInbox() {
   useEffect(() => {
     if (scrollContainerRef.current) {
       // Check if there are any unseen messages
-      const hasUnseenMessages = messages.some(msg => msg.seen === false);
+      const hasUnseenMessages = messages.some((msg) => msg.seen === false);
 
       if (hasUnseenMessages && unreadDividerRef.current) {
         // Scroll to the unread divider with some offset
         unreadDividerRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
+          behavior: "smooth",
+          block: "center",
         });
       } else {
         // Scroll to bottom if no unseen messages
-        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        scrollContainerRef.current.scrollTop =
+          scrollContainerRef.current.scrollHeight;
       }
     }
   }, [messages]);
@@ -219,65 +214,12 @@ export default function MyInbox() {
     return new Date(expires_at).getTime() <= Date.now();
   };
 
-
-  //   useEffect(() => {
-  //   if (!selectedJobId) return;
-
-  //   const handleMessage = (msg) => {
-  //     /* =========================
-  //        1️ UPDATE OPEN CHAT
-  //     ========================= */
-  //     setMessages((prev) => [...prev, msg]);
-
-  //     /* =========================
-  //        2️ UPDATE INBOX ORDER
-  //        (latest job moves to top)
-  //     ========================= */
-  //     setInboxItems((prev) => {
-  //       const index = prev.findIndex(
-  //         (item) => item.id === msg.job_id
-  //       );
-
-  //       if (index === -1) return prev;
-
-  //       const updatedItem = {
-  //         ...prev[index],
-  //         last_message: msg.body,
-  //         last_message_at: msg.created_at,
-  //       };
-
-  //       const newList = [...prev];
-  //       newList.splice(index, 1); // remove old position
-  //       return [updatedItem, ...newList]; // move to top
-  //     });
-
-  //     /* =========================
-  //        3️ SCROLL SAFELY
-  //     ========================= */
-  //     const el = scrollContainerRef.current;
-  //     if (!el) return;
-
-  //     const isNearBottom =
-  //       el.scrollHeight - el.scrollTop - el.clientHeight < 150;
-
-  //     if (isNearBottom && el.scrollHeight > el.clientHeight) {
-  //       scrollToBottom("smooth");
-  //     }
-  //   };
-
-  //   socket.on("message", handleMessage);
-
-  //   return () => {
-  //     socket.off("message", handleMessage);
-  //   };
-  // }, [selectedJobId]);
-
   useEffect(() => {
     if (!selectedJobId || !recipientId) return;
 
     const handleMessage = (msg) => {
       /* =========================
-         1️⃣ ALWAYS UPDATE INBOX
+         1️ALWAYS UPDATE INBOX
          (job moves to top)
       ========================= */
       setInboxItems((prev) => {
@@ -296,17 +238,16 @@ export default function MyInbox() {
       });
 
       /* =========================
-         2️⃣ ONLY UPDATE OPEN CHAT
+         2️ ONLY UPDATE OPEN CHAT
          (STRICT CHECK)
       ========================= */
       const isSameJob = msg.job_id === selectedJobId;
 
       const isSameUser =
-        msg.sender_id === recipientId ||
-        msg.recipient_id === recipientId;
+        msg.sender_id === recipientId || msg.recipient_id === recipientId;
 
       if (!isSameJob || !isSameUser) {
-        // ❌ Message belongs to another job/chat
+        //  Message belongs to another job/chat
         return;
       }
 
@@ -396,7 +337,7 @@ export default function MyInbox() {
      CLIENT APPLICANT CLICK
   ========================== */
   const handleClientApplicantSelect = (app: Application) => {
-    setSelectedJob(null);
+    // setSelectedJob(null); //why this need to empty
     setSelectedJobId(app.job_id);
     setSelectedApplicantion(app);
     setRecipientId(app.user.id);
@@ -416,6 +357,10 @@ export default function MyInbox() {
     setLoadingMore(true);
     setPage((prevPage) => prevPage + 1);
   };
+
+  function isClientInboxJob(job: InboxJob | Job | null): job is InboxJob {
+    return !!job && "applicants" in job;
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -437,15 +382,17 @@ export default function MyInbox() {
                       handleHelperJobSelect(d);
                     } else {
                       setSelectedJobId(d.id);
+                      setSelectedJob(d);
                       setSelectedApplicantion(null);
                       setRecipientId(null);
                     }
                   }
                 }}
-                className={`w-full p-4 text-left border-b transition-colors flex justify-between ${selectedJobId === d.id
-                  ? "bg-gray-50 border-r-4 border-r-gray-500"
-                  : "hover:bg-gray-100"
-                  }`}
+                className={`w-full p-4 text-left border-b transition-colors flex justify-between ${
+                  selectedJobId === d.id
+                    ? "bg-gray-50 border-r-4 border-r-gray-500"
+                    : "hover:bg-gray-100"
+                }`}
               >
                 <div>
                   <p className="font-semibold text-gray-900">{d.title}</p>
@@ -456,9 +403,11 @@ export default function MyInbox() {
                   </p>
                 </div>
                 <div>
-                  {
-                    d.unread_count > 0 && <span className="bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 p-3 flex items-center justify-center">{d.unread_count}</span>
-                  }
+                  {d.unread_count > 0 && (
+                    <span className="bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 p-3 flex items-center justify-center">
+                      {d.unread_count}
+                    </span>
+                  )}
                 </div>
               </button>
             ))}
@@ -473,12 +422,14 @@ export default function MyInbox() {
             </div>
             {selectedJobId ? (
               <div className="overflow-y-auto h-full">
-                {jobApplicants.length === 0 ? (
+                {isClientInboxJob(selectedJob) &&
+                selectedJob.applicants.length === 0 ? (
                   <div className="flex h-full items-center justify-center p-6 text-center text-gray-400 text-sm">
                     {t("empty_inbox.no_applicants.title")}
                   </div>
                 ) : (
-                  jobApplicants?.map((a: Application, i) => (
+                  isClientInboxJob(selectedJob) &&
+                  selectedJob?.applicants.map((a: Application, i) => (
                     <button
                       key={a.id}
                       onClick={() => {
@@ -486,24 +437,50 @@ export default function MyInbox() {
                           handleClientApplicantSelect(a);
                         }
                       }}
-                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
-                        ? "bg-gray-100 border-r-4 border-r-gray-500"
-                        : "hover:bg-gray-50"
-                        }`}
+                      className={`w-full p-4 text-left border-b transition-colors ${
+                        selectedApplicantion?.id === a.id
+                          ? "bg-gray-100 border-r-4 border-r-gray-500"
+                          : "hover:bg-gray-50"
+                      }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
-                          {a.user.first_name.charAt(0)}
-                          {a.user.last_name.charAt(0)}
+                      <div className="flex items-center justify-between">
+                        {/* 🔹 LEFT SIDE: avatar + name + email */}
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
+                            {a.user.first_name.charAt(0)}
+                            {a.user.last_name.charAt(0)}
+                          </div>
+
+                          <div>
+                            <p className="font-semibold text-gray-900">
+                              {a.user.first_name} {a.user.last_name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {a.user.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">
-                            {a.user.first_name} {a.user.last_name}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {a.user.email}
-                          </p>
-                        </div>
+                        {/* 🔹 RIGHT SIDE: unread count */}
+                        {a.unread_count > 0 && (
+                          <span
+                            className="
+           ml-3
+      bg-red-600
+      text-white
+      text-xs
+      font-bold
+      rounded-full      
+      w-5 h-5           
+      flex
+      items-center
+      justify-center
+      relative
+      -top-2.5
+        "
+                          >
+                            {a.unread_count}
+                          </span>
+                        )}
                       </div>
                     </button>
                   ))
@@ -521,10 +498,10 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className="flex-grow flex flex-col bg-white"
-        // style={{ height: "85%" }}
+          // style={{ height: "85%" }}
         >
           {(userType === "helper" && selectedJobId) ||
-            (userType === "client" && selectedApplicantion) ? (
+          (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -533,8 +510,8 @@ export default function MyInbox() {
                     {userType === "client"
                       ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
                       : userType === "helper"
-                        ? selectedJob?.title
-                        : "Client"}
+                      ? selectedJob?.title
+                      : "Client"}
                   </h3>
                   {userType === "client" && (
                     <div
@@ -560,8 +537,9 @@ export default function MyInbox() {
                 {recipientId && (
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
                     <span
-                      className={`h-2 w-2 rounded-full ${isRecipientOnline ? "bg-green-500" : "bg-gray-400"
-                        }`}
+                      className={`h-2 w-2 rounded-full ${
+                        isRecipientOnline ? "bg-green-500" : "bg-gray-400"
+                      }`}
                     />
                   </div>
                 )}
@@ -571,7 +549,7 @@ export default function MyInbox() {
               <div
                 ref={scrollContainerRef}
                 className="flex-grow p-6 overflow-y-auto space-y-4 bg-gray-50/30"
-              // Removed onScroll handler since we're using button now
+                // Removed onScroll handler since we're using button now
               >
                 {/* Load Older Messages Button */}
                 {hasMore && (
@@ -590,14 +568,23 @@ export default function MyInbox() {
 
                 {/* Messages List */}
                 {messages.map((msg, i) => {
-                  const isFirstUnseen = msg.seen === false &&
+                  const isFirstUnseen =
+                    msg.seen === false &&
                     msg.recipient_id !== recipientId && // Message sent by other person (you are the recipient)
-                    !messages.slice(0, i).some(m => m.seen === false && m.recipient_id !== recipientId);
+                    !messages
+                      .slice(0, i)
+                      .some(
+                        (m) =>
+                          m.seen === false && m.recipient_id !== recipientId
+                      );
 
                   return (
                     <Fragment key={i}>
                       {isFirstUnseen && (
-                        <div ref={unreadDividerRef} className="my-4 flex items-center gap-3">
+                        <div
+                          ref={unreadDividerRef}
+                          className="my-4 flex items-center gap-3"
+                        >
                           <div className="flex-1 h-px bg-border" />
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             Unread messages
@@ -607,32 +594,35 @@ export default function MyInbox() {
                       )}
                       <div
                         key={i}
-                        className={`flex ${msg.recipient_id === recipientId
-                          ? "justify-end"
-                          : "justify-start"
-                          }`}
+                        className={`flex ${
+                          msg.recipient_id === recipientId
+                            ? "justify-end"
+                            : "justify-start"
+                        }`}
                       >
                         <div className="max-w-[75%]">
                           <div
-                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
-                              ? "bg-primary text-white rounded-br-sm"
-                              : "bg-white border rounded-bl-sm"
-                              }`}
+                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                              msg.recipient_id === recipientId
+                                ? "bg-primary text-white rounded-br-sm"
+                                : "bg-white border rounded-bl-sm"
+                            }`}
                           >
                             {msg.body}
                           </div>
                           <p
-                            className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
-                              ? "text-right"
-                              : "text-left"
-                              }`}
+                            className={`mt-1 text-[10px] text-muted-foreground ${
+                              msg.recipient_id === recipientId
+                                ? "text-right"
+                                : "text-left"
+                            }`}
                           >
                             {formatTime(msg.created_at)}
                           </p>
                         </div>
                       </div>
                     </Fragment>
-                  )
+                  );
                 })}
               </div>
 

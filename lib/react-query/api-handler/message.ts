@@ -1,5 +1,6 @@
 import apiClient from "@/lib/config/axios-client";
 import { SendMessageData, SendMessageResponse } from "@/lib/types/message";
+import { ClientInboxApiResponse } from "../queries/message";
 
 export const sendMessageApi = async ({
   jobId,
@@ -13,8 +14,14 @@ export const sendMessageApi = async ({
   return data;
 };
 
-export const getConversationApi = async (jobId: string, userId: string, params: Record<string, any>) => {
-  const response = await apiClient.get(`/message/${jobId}/${userId}`, { params });
+export const getConversationApi = async (
+  jobId: string,
+  userId: string,
+  params: Record<string, any>
+) => {
+  const response = await apiClient.get(`/message/${jobId}/${userId}`, {
+    params,
+  });
   return response.data;
 };
 
@@ -25,5 +32,11 @@ export const countMessageApi = async (jobId: string, userId: string) => {
 
 export const getMyInboxApi = async () => {
   const res = await apiClient.get("/message/inbox_helper");
-  return res.data
-}
+  return res.data;
+};
+
+export const getMyInboxClientApi = async (): Promise<ClientInboxApiResponse> => {
+  const res = await apiClient.get("/message/client-inbox");
+  return res.data;
+};
+
