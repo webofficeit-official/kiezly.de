@@ -1,6 +1,7 @@
 "use client";
 import {
   Fragment,
+  use,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -8,13 +9,12 @@ import {
   useState,
 } from "react";
 import { useT } from "@/app/[locale]/layout";
-import { myJobs } from "@/lib/react-query/queries/useJob";
-import { Filters } from "./job/myJob";
-import { useJobApplicants } from "@/lib/react-query/queries/apply-job";
 import { Application } from "@/lib/types/apply-job";
 import {
+  ClientInboxJob,
   myInbox,
   myInboxClient,
+  MyInboxItem,
   useGetConversation,
   useSendMessage,
 } from "@/lib/react-query/queries/message";
@@ -25,11 +25,13 @@ import { Send } from "lucide-react";
 import { useAuth } from "@/lib/context/auth-context";
 import { Job } from "@/lib/types/job";
 import { InboxJob } from "@/lib/types/inbox";
+import { useQueryClient } from "@tanstack/react-query";
 
 dayjs.extend(relativeTime);
 
 // Mock Data Types
 type UserType = "client" | "helper";
+type InboxSourceJob = InboxJob | ClientInboxJob | MyInboxItem | Job;
 
 export default function MyInbox() {
   const t = useT("inbox");
@@ -41,7 +43,7 @@ export default function MyInbox() {
   // 2. Selection State
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
-  const [selectedJob, setSelectedJob] = useState<InboxJob | Job | null>(null);
+  const [selectedJob, setSelectedJob] = useState<InboxSourceJob | null>(null);
 
   const [selectedApplicantion, setSelectedApplicantion] =
     useState<Application | null>(null);
@@ -54,11 +56,15 @@ export default function MyInbox() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isRecipientOnline, setIsRecipientOnline] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   const { data: clientInbox } = myInboxClient({
     enabled: userType === "client",
   });
   const { data: inbox } = myInbox({ enabled: userType === "helper" });
+
+  console.log("CLIENT INBOX:", clientInbox);
+  console.log("HELPER INBOX:", inbox);
 
   // const dataSource =
   //   userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
@@ -90,6 +96,20 @@ export default function MyInbox() {
   const isLoadingOlderRef = useRef(false);
 
   useEffect(() => {
+    if (!selectedJobId) return;
+
+    const source = userType === "client" ? clientInbox?.data : inbox?.data;
+
+    if (!source) return;
+
+    const updatedJob = source.find((job) => job.id === selectedJobId);
+
+    if (updatedJob) {
+      setSelectedJob(updatedJob);
+    }
+  }, [clientInbox, inbox, selectedJobId, userType]);
+
+  useEffect(() => {
     if (scrollContainerRef.current) {
       // Check if there are any unseen messages
       const hasUnseenMessages = messages.some((msg) => msg.seen === false);
@@ -109,6 +129,46 @@ export default function MyInbox() {
   }, [messages]);
 
   useEffect(() => {
+    const handleInboxMessage = (msg) => {
+      // 1️ Always refetch inbox
+      if (userType === "client") {
+        queryClient.invalidateQueries({
+          queryKey: ["my-inbox-client"],
+          refetchType: "all",
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["my-inbox"],
+          refetchType: "all",
+        });
+      }
+
+      // // 2️ Optimistically update inbox list
+      // setInboxItems((prev) => {
+      //   const index = prev.findIndex((item) => item.id === msg.job_id);
+      //   if (index === -1) return prev;
+
+      //   const updatedItem = {
+      //     ...prev[index],
+      //     last_message: msg.body,
+      //     last_message_at: msg.created_at,
+      //     unread_count: (prev[index].unread_count || 0) + 1,
+      //   };
+
+      //   const newList = [...prev];
+      //   newList.splice(index, 1);
+      //   return [updatedItem, ...newList];
+      // });
+    };
+
+    socket.on("message", handleInboxMessage);
+
+    return () => {
+      socket.off("message", handleInboxMessage);
+    };
+  }, [userType, inbox, clientInbox]);
+
+  useEffect(() => {
     if (!recipientId) return;
 
     let mounted = true;
@@ -122,6 +182,17 @@ export default function MyInbox() {
     const handleOnline = ({ userId }) => {
       if (userId === recipientId) {
         setIsRecipientOnline(true);
+        if (userType === "client") {
+          queryClient.invalidateQueries({
+            queryKey: ["my-inbox-client"],
+            refetchType: "all",
+          });
+        } else {
+          queryClient.invalidateQueries({
+            queryKey: ["my-inbox"],
+            refetchType: "all",
+          });
+        }
       }
     };
 
@@ -129,6 +200,17 @@ export default function MyInbox() {
     const handleOffline = ({ userId }) => {
       if (userId === recipientId) {
         setIsRecipientOnline(false);
+        if (userType === "client") {
+          queryClient.invalidateQueries({
+            queryKey: ["my-inbox-client"],
+            refetchType: "all",
+          });
+        } else {
+          queryClient.invalidateQueries({
+            queryKey: ["my-inbox"],
+            refetchType: "all",
+          });
+        }
       }
     };
 
@@ -137,6 +219,17 @@ export default function MyInbox() {
       socket.emit("check-user-online", recipientId, (online: boolean) => {
         if (mounted) setIsRecipientOnline(online);
       });
+      if (userType === "client") {
+        queryClient.invalidateQueries({
+          queryKey: ["my-inbox-client"],
+          refetchType: "all",
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["my-inbox"],
+          refetchType: "all",
+        });
+      }
     };
 
     socket.on("user-online", handleOnline);
@@ -221,6 +314,17 @@ export default function MyInbox() {
          1️ALWAYS UPDATE INBOX
          (job moves to top)
       ========================= */
+      // if (userType === "client") {
+      //   queryClient.invalidateQueries({
+      //     queryKey: ["my-inbox-client"],
+      //     refetchType: "all",
+      //   });
+      // } else {
+      //   queryClient.invalidateQueries({
+      //     queryKey: ["my-inbox"],
+      //     refetchType: "all",
+      //   });
+      // }
       setInboxItems((prev) => {
         const index = prev.findIndex((item) => item.id === msg.job_id);
         if (index === -1) return prev;
@@ -313,6 +417,17 @@ export default function MyInbox() {
       {
         onSuccess: () => {
           setMessage("");
+          queryClient.invalidateQueries({
+            queryKey:
+              userType === "client" ? ["my-inbox-client"] : ["my-inbox"],
+            refetchType: "all",
+          });
+          if (userType === "client" && selectedJobId) {
+            queryClient.invalidateQueries({
+              queryKey: ["my-inbox-client", selectedJobId],
+              refetchType: "all",
+            });
+          }
         },
       }
     );
@@ -372,53 +487,54 @@ export default function MyInbox() {
             {t("inbox_header")}
           </div>
           <div className="overflow-y-auto h-full">
-            {inboxItems.map((d) => { 
+            {inboxItems.map((d) => {
               const isExpired = d.ends_at
                 ? new Date(d.ends_at) < new Date()
                 : false;
-              
+
               return (
-              <button
-                key={d.id}
-                disabled={isExpired}
-                title={isExpired && t("expired")}
-                onClick={() => {
-                  if (selectedJobId !== d.id) {
-                    if (userType === "helper") {
-                      handleHelperJobSelect(d);
-                    } else {
-                      setSelectedJobId(d.id);
-                      setSelectedJob(d);
-                      setSelectedApplicantion(null);
-                      setRecipientId(null);
+                <button
+                  key={d.id}
+                  disabled={isExpired}
+                  title={isExpired ? t("expired") : undefined}
+                  onClick={() => {
+                    if (selectedJobId !== d.id) {
+                      if (userType === "helper") {
+                        handleHelperJobSelect(d);
+                      } else {
+                        setSelectedJobId(d.id);
+                        setSelectedJob(d);
+                        setSelectedApplicantion(null);
+                        setRecipientId(null);
+                      }
                     }
-                  }
-                }}
-                className={`w-full p-4 text-left border-b transition-colors flex justify-between ${
-                  (isExpired || d.status == "closed" || d.status == "expired")
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : selectedJobId === d.id
-                    ? "bg-gray-50 border-r-4 border-r-gray-500"
-                    : "hover:bg-gray-100 cursor-pointer"
-                }`}
-              >
-                <div>
-                  <p className="font-semibold text-gray-900">{d.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {[d.city, d.state, d.countries?.name]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </p>
-                </div>
-                <div>
-                  {d.unread_count > 0 && (
-                    <span className="bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 p-3 flex items-center justify-center">
-                      {d.unread_count}
-                    </span>
-                  )}
-                </div>
-              </button>
-            )})}
+                  }}
+                  className={`w-full p-4 text-left border-b transition-colors flex justify-between ${
+                    isExpired || d.status == "closed" || d.status == "expired"
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : selectedJobId === d.id
+                      ? "bg-gray-50 border-r-4 border-r-gray-500"
+                      : "hover:bg-gray-100 cursor-pointer"
+                  }`}
+                >
+                  <div>
+                    <p className="font-semibold text-gray-900">{d.title}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {[d.city, d.state, d.countries?.name]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                  </div>
+                  <div>
+                    {d.unread_count > 0 && (
+                      <span className="bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 p-3 flex items-center justify-center">
+                         {d.unread_count > 9 ? "9+" : d.unread_count}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -431,7 +547,7 @@ export default function MyInbox() {
             {selectedJobId ? (
               <div className="overflow-y-auto h-full">
                 {isClientInboxJob(selectedJob) &&
-                selectedJob.applicants.length === 0 ? (
+                selectedJob?.applicants.length === 0 ? (
                   <div className="flex h-full items-center justify-center p-6 text-center text-gray-400 text-sm">
                     {t("empty_inbox.no_applicants.title")}
                   </div>
@@ -472,21 +588,23 @@ export default function MyInbox() {
                         {a.unread_count > 0 && (
                           <span
                             className="
-           ml-3
+      absolute
+      -top-1
+      -right-1
+      min-w-[1.25rem]
+      h-5
+      px-1
       bg-red-600
       text-white
-      text-xs
+      text-[10px]
       font-bold
-      rounded-full      
-      w-5 h-5           
+      rounded-full
       flex
       items-center
       justify-center
-      relative
-      -top-2.5
-        "
+    "
                           >
-                            {a.unread_count}
+                            {a.unread_count > 9 ? "9+" : a.unread_count}
                           </span>
                         )}
                       </div>

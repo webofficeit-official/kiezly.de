@@ -1,6 +1,7 @@
 import { Application } from "./apply-job";
 
 export interface InboxApplicant {
+  id: string;
   application_id: string;
   proposed_rate: number | null;
   last_message: string | null;
