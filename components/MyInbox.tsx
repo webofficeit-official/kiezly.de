@@ -643,22 +643,7 @@ export default function MyInbox() {
                         {/* 🔹 RIGHT SIDE: unread count */}
                         {a.unread_count > 0 && (
                           <span
-                            className="
-      absolute
-      -top-1
-      -right-1
-      min-w-[1.25rem]
-      h-5
-      px-1
-      bg-red-600
-      text-white
-      text-[10px]
-      font-bold
-      rounded-full
-      flex
-      items-center
-      justify-center
-    "
+                            className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
                           >
                             {a.unread_count > 9 ? "9+" : a.unread_count}
                           </span>
