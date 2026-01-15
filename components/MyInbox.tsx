@@ -33,6 +33,8 @@ dayjs.extend(relativeTime);
 type UserType = "client" | "helper";
 type InboxSourceJob = InboxJob | ClientInboxJob | MyInboxItem | Job;
 
+type MobileView = "jobs" | "applicants" | "chat";
+
 export default function MyInbox() {
   const t = useT("inbox");
   const { user } = useAuth();
@@ -56,6 +58,8 @@ export default function MyInbox() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isRecipientOnline, setIsRecipientOnline] = useState<boolean>(false);
+  const [mobileView, setMobileView] = useState<MobileView>("jobs");
+
   const queryClient = useQueryClient();
 
   const { data: clientInbox } = myInboxClient({
@@ -63,11 +67,6 @@ export default function MyInbox() {
   });
   const { data: inbox } = myInbox({ enabled: userType === "helper" });
 
-  console.log("CLIENT INBOX:", clientInbox);
-  console.log("HELPER INBOX:", inbox);
-
-  // const dataSource =
-  //   userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
   useEffect(() => {
     if (userType === "client") {
       setInboxItems(clientInbox?.data ?? []);
@@ -403,6 +402,17 @@ export default function MyInbox() {
     isLoadingOlderRef.current = false;
   }, [selectedJobId, selectedApplicantion, recipientId]);
 
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileView("jobs");
+      }
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const sendMessage = (e) => {
     e.preventDefault();
 
@@ -459,6 +469,7 @@ export default function MyInbox() {
     setPage(1);
     setHasMore(true);
     isLoadingOlderRef.current = false;
+    setMobileView("chat");
   };
 
   /* =========================
@@ -480,9 +491,13 @@ export default function MyInbox() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* <h1 className="text-3xl font-semibold tracking-tight mb-6">{t("title")}</h1> */}
 
-      <div className="flex h-[700px] w-full overflow-hidden bg-white shadow-sm">
+      <div className="flex h-[calc(100vh-120px)] md:h-[calc(100vh-160px)] w-full overflow-hidden bg-white shadow-sm">
         {/* --- COLUMN 1: Job List (Both Roles) --- */}
-        <div className="w-1/4 flex-shrink-0 border-r border-gray-100 bg-white">
+        <div
+          className={`w-full md:w-1/3 lg:w-1/4 border-r bg-white ${
+            mobileView !== "jobs" ? "hidden md:block" : "block"
+          }`}
+        >
           <div className="p-4 border-b font-medium text-sm text-black uppercase tracking-wider">
             {t("inbox_header")}
           </div>
@@ -501,11 +516,13 @@ export default function MyInbox() {
                     if (selectedJobId !== d.id) {
                       if (userType === "helper") {
                         handleHelperJobSelect(d);
+                        setMobileView("chat");
                       } else {
                         setSelectedJobId(d.id);
                         setSelectedJob(d);
                         setSelectedApplicantion(null);
                         setRecipientId(null);
+                        setMobileView("applicants");
                       }
                     }
                   }}
@@ -528,7 +545,7 @@ export default function MyInbox() {
                   <div>
                     {d.unread_count > 0 && (
                       <span className="bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 p-3 flex items-center justify-center">
-                         {d.unread_count > 9 ? "9+" : d.unread_count}
+                        {d.unread_count > 9 ? "9+" : d.unread_count}
                       </span>
                     )}
                   </div>
@@ -540,10 +557,28 @@ export default function MyInbox() {
 
         {/* --- COLUMN 2: Applicants (CLIENT ONLY) --- */}
         {userType === "client" && (
-          <div className="w-1/4 flex-shrink-0 border-r border-gray-100">
-            <div className="p-4 border-b font-medium text-sm text-black uppercase tracking-wider">
-              {t("applications_header")}
+          <div
+            className={`w-full md:w-1/3 lg:w-1/4 border-r ${
+              mobileView !== "applicants" ? "hidden md:block" : "block"
+            }`}
+          >
+            <div className="p-4 border-b font-medium text-sm uppercase tracking-wider flex items-center gap-2">
+              <button
+                className="md:hidden text-sm text-gray-500"
+                onClick={() => {
+                  setMobileView("jobs");
+                  setSelectedJobId(null);
+                  setSelectedJob(null);
+                  setSelectedApplicantion(null);
+                  setRecipientId(null);
+                }}
+              >
+                ← Back
+              </button>
+
+              <span>{t("applications_header")}</span>
             </div>
+
             {selectedJobId ? (
               <div className="overflow-y-auto h-full">
                 {isClientInboxJob(selectedJob) &&
@@ -556,11 +591,7 @@ export default function MyInbox() {
                   selectedJob?.applicants.map((a: Application, i) => (
                     <button
                       key={a.id}
-                      onClick={() => {
-                        if (a.id !== selectedApplicantion?.id) {
-                          handleClientApplicantSelect(a);
-                        }
-                      }}
+                      onClick={() => handleClientApplicantSelect(a)}
                       className={`w-full p-4 text-left border-b transition-colors ${
                         selectedApplicantion?.id === a.id
                           ? "bg-gray-100 border-r-4 border-r-gray-500"
@@ -623,8 +654,13 @@ export default function MyInbox() {
         {/* --- COLUMN 3: Chat Window (Dynamic Width) --- */}
         <div
           key={`${selectedJobId}-${recipientId}`}
-          className="flex-grow flex flex-col bg-white"
-          // style={{ height: "85%" }}
+          className={`
+    flex-grow
+    flex
+    flex-col
+    bg-white
+    ${mobileView !== "chat" ? "hidden md:flex" : "flex"}
+  `}
         >
           {(userType === "helper" && selectedJobId) ||
           (userType === "client" && selectedApplicantion) ? (
@@ -632,13 +668,25 @@ export default function MyInbox() {
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold">
-                    {userType === "client"
-                      ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
-                      : userType === "helper"
-                      ? selectedJob?.title
-                      : "Client"}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="md:hidden text-sm text-gray-500"
+                      onClick={() =>
+                        setMobileView(
+                          userType === "client" ? "applicants" : "jobs"
+                        )
+                      }
+                    >
+                      ← Back
+                    </button>
+                    <h3 className="font-semibold">
+                      {userType === "client"
+                        ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
+                        : userType === "helper"
+                        ? selectedJob?.title
+                        : "Client"}
+                    </h3>
+                  </div>
                   {userType === "client" && (
                     <div
                       className="font-medium text-xs text-gray-600"
