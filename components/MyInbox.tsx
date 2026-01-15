@@ -63,11 +63,7 @@ export default function MyInbox() {
   });
   const { data: inbox } = myInbox({ enabled: userType === "helper" });
 
-  console.log("CLIENT INBOX:", clientInbox);
-  console.log("HELPER INBOX:", inbox);
 
-  // const dataSource =
-  //   userType === "client" ? jobs?.data?.items ?? [] : inbox?.data ?? [];
   useEffect(() => {
     if (userType === "client") {
       setInboxItems(clientInbox?.data ?? []);
