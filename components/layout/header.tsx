@@ -18,6 +18,7 @@ import {
   Menu,
   ChevronDown,
   ChevronUp,
+  MessageCircle,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +30,8 @@ import LocalizedLink from "@/lib/localizedLink";
 import socket from "@/lib/socket";
 import { useJobWizard } from "@/lib/context/job-wizard-context";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCountTotalMessage } from "@/lib/react-query/queries/message";
+import { MessageApiResponse } from "@/lib/types/message";
 const LOCALES = ["en", "de"] as const;
 const DEFAULT = "de";
 
@@ -38,6 +41,7 @@ export default function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [latestThree, setLatestThree] = useState([]);
   const [notificationsCount, setNotificationsCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -84,11 +88,20 @@ export default function Header() {
     );
   }, [user]);
 
+  const queryClient = useQueryClient();
+
+  const { data: count, isLoading: isCountChecking } = useCountTotalMessage(
+    { enabled: true }
+  );
+
+  useEffect(() => {
+    if (count?.data?.count) {
+      setMessageCount(count.data.count)
+    }
+  }, [count]);
+
   useEffect(() => {
     if (!user) return;
-    socket.on("connect", () =>
-      console.log(`Connected to socket: ${socket.id}`)
-    );
 
     socket.on("notification", (data) => {
       setNotifications((prev) => {
@@ -102,6 +115,30 @@ export default function Header() {
     });
     return () => {
       socket.off("notification");
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    socket.on("message", (data) => {
+  queryClient.setQueryData<MessageApiResponse>(
+    ["count-total-conversation"],
+    (old) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        data: {
+          ...old.data,
+          count: old.data.count + 1,
+        },
+      };
+    }
+  );
+    });
+    return () => {
+      socket.off("message");
     };
   }, [user]);
 
@@ -281,7 +318,7 @@ export default function Header() {
                   {notificationOpen && (
                     <div
                       className="absolute right-0 top-full mt-2 w-72 rounded-lg border bg-white shadow-md z-50
-                max-h-[70vh] overflow-auto" // [UPDATED] allow scrolling on small screens
+                      max-h-[70vh] overflow-auto" // [UPDATED] allow scrolling on small screens
                     >
                       {latestThree.length === 0 ? (
                         <div className="px-4 py-3 text-sm text-gray-500">
@@ -336,6 +373,21 @@ export default function Header() {
                     </div>
                   )}
                 </div>
+                <div className="relative mr-2">
+                  <button
+                    onClick={() => push("/my-inbox")}
+                    className={`relative inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition`}
+                    aria-label="Notifications"
+                    aria-expanded={languageOpen}
+                  >
+                    <MessageCircle className="h-6 w-6 text-gray-900" />
+                    {messageCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {messageCount > 9 ? "9+" : messageCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
                 {/* Avatar button */}
                 {user?.role === "client" && (
                   <>
@@ -387,15 +439,6 @@ export default function Header() {
                       }}
                     >
                       {t("my-profile")}
-                    </button>
-                    <button
-                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        push("/my-inbox");
-                      }}
-                    >
-                      {t("my-inbox")}
                     </button>
                     <button
                       className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
@@ -657,18 +700,6 @@ export default function Header() {
                     onClick={() => {
                       setMobileHeaderDDOpen(false);
                       setMobileOpen(false);
-                      push("/my-inbox");
-                    }}
-                    role="menuitem"
-                  >
-                    {t("my-inbox")}
-                  </button>
-
-                  <button
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                    onClick={() => {
-                      setMobileHeaderDDOpen(false);
-                      setMobileOpen(false);
                       push("/change-password");
                     }}
                     role="menuitem"
@@ -864,13 +895,6 @@ export default function Header() {
                     onClick={() => setMobileOpen(false)}
                   >
                     {t("my-profile")}
-                  </LocalizedLink>
-                  <LocalizedLink
-                    href="/my-inbox"
-                    className="block rounded-lg px-3 py-2 hover:bg-gray-100"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {t("my-inbox")}
                   </LocalizedLink>
 
                   <LocalizedLink
