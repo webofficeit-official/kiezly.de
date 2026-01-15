@@ -26,6 +26,7 @@ import { useAuth } from "@/lib/context/auth-context";
 import { Job } from "@/lib/types/job";
 import { InboxJob } from "@/lib/types/inbox";
 import { useQueryClient } from "@tanstack/react-query";
+import Message from "./Chat/message";
 
 dayjs.extend(relativeTime);
 
@@ -59,6 +60,14 @@ export default function MyInbox() {
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isRecipientOnline, setIsRecipientOnline] = useState<boolean>(false);
   const [mobileView, setMobileView] = useState<MobileView>("jobs");
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const isMobile = () => window.innerWidth < 768;
+  const [helperChatMeta, setHelperChatMeta] = useState<{
+    jobId: string;
+    receiverId: string;
+    title: string;
+    subtitle: string;
+  } | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -469,7 +478,11 @@ export default function MyInbox() {
     setPage(1);
     setHasMore(true);
     isLoadingOlderRef.current = false;
-    setMobileView("chat");
+    if (isMobile()) {
+      setIsChatModalOpen(true);
+    } else {
+      setMobileView("chat");
+    }
   };
 
   /* =========================
@@ -516,7 +529,19 @@ export default function MyInbox() {
                     if (selectedJobId !== d.id) {
                       if (userType === "helper") {
                         handleHelperJobSelect(d);
-                        setMobileView("chat");
+                        if (isMobile()) {
+                          setHelperChatMeta({
+                            jobId: d.id,
+                            receiverId: d.client_id,
+                            title: d.title,
+                            subtitle: [d.city, d.state, d.countries?.name]
+                              .filter(Boolean)
+                              .join(", "),
+                          });
+                          setIsChatModalOpen(true);
+                        } else {
+                          setMobileView("chat");
+                        }
                       } else {
                         setSelectedJobId(d.id);
                         setSelectedJob(d);
@@ -655,11 +680,7 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className={`
-    flex-grow
-    flex
-    flex-col
-    bg-white
-    ${mobileView !== "chat" ? "hidden md:flex" : "flex"}
+    hidden md:flex flex-grow flex-col bg-white
   `}
         >
           {(userType === "helper" && selectedJobId) ||
@@ -669,16 +690,6 @@ export default function MyInbox() {
               <div className="p-4 border-b flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <button
-                      className="md:hidden text-sm text-gray-500"
-                      onClick={() =>
-                        setMobileView(
-                          userType === "client" ? "applicants" : "jobs"
-                        )
-                      }
-                    >
-                      ← Back
-                    </button>
                     <h3 className="font-semibold">
                       {userType === "client"
                         ? `${selectedApplicantion.user.first_name} ${selectedApplicantion.user.last_name} / ${selectedApplicantion.proposed_rate}`
@@ -849,6 +860,36 @@ export default function MyInbox() {
           )}
         </div>
       </div>
+
+      {isChatModalOpen && (
+        <Message
+          isOpen={isChatModalOpen}
+          onClose={() => {
+            setIsChatModalOpen(false);
+            setHelperChatMeta(null);
+          }}
+          receiverId={
+            userType === "client"
+              ? selectedApplicantion?.user.id!
+              : helperChatMeta?.receiverId!
+          }
+          jobId={
+            userType === "client"
+              ? selectedApplicantion?.job_id!
+              : helperChatMeta?.jobId!
+          }
+          title={
+            userType === "client"
+              ? `${selectedApplicantion?.user.first_name} ${selectedApplicantion?.user.last_name}`
+              : helperChatMeta?.title!
+          }
+          subtitle={
+            userType === "client"
+              ? selectedJob?.title ?? ""
+              : helperChatMeta?.subtitle!
+          }
+        />
+      )}
     </div>
   );
 }
