@@ -623,7 +623,7 @@ export default function MyInbox() {
                           : "hover:bg-gray-50"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="relative flex items-center justify-between">
                         {/* 🔹 LEFT SIDE: avatar + name + email */}
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
