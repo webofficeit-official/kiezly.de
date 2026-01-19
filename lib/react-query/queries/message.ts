@@ -10,6 +10,7 @@ export function useSendMessage() {
         mutationFn: sendMessageApi,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["get-conversation"] });
+            queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
         },
         onError: (err) => {
             console.error("Apply job failed:", err);
@@ -38,6 +39,7 @@ export const useGetConversation = (
       queryClient.invalidateQueries({
         queryKey: ["my-inbox"],
       });
+      queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
 
       // allow caller to still use onSuccess
       options?.onSuccess?.(data);
