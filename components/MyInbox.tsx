@@ -268,7 +268,7 @@ export default function MyInbox() {
 
     setLoadingMore(false);
 
-    // 🧠 Preserve scroll ONLY when loading older
+    //  Preserve scroll ONLY when loading older
     if (isLoadingOlderRef.current && el) {
       requestAnimationFrame(() => {
         const newHeight = el.scrollHeight;
@@ -365,7 +365,7 @@ export default function MyInbox() {
       setMessages((prev) => [...prev, msg]);
 
       /* =========================
-         3️⃣ SAFE SCROLL
+         3 SAFE SCROLL
       ========================= */
       const el = scrollContainerRef.current;
       if (!el) return;
