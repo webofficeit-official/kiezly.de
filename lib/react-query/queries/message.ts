@@ -32,10 +32,10 @@ export const useGetConversation = (
     staleTime: 0,
     gcTime: 0,
     ...options,
-    enabled: options?.enabled ?? (!!jobId && !!userId), // ✅ FIX
+    enabled: options?.enabled ?? (!!jobId && !!userId), //  FIX
 
     onSuccess: (data) => {
-      // 🔥 invalidate inbox so unread counts update
+      // invalidate inbox so unread counts update
       queryClient.invalidateQueries({
         queryKey: ["my-inbox"],
       });

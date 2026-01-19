@@ -281,7 +281,7 @@ export default function MyInbox() {
   // Remove the handleScroll function since we're not using auto-load anymore
 
   /* =========================
-   ✅ SAFE SCROLL HELPER
+    SAFE SCROLL HELPER
    (scrolls messages ONLY)
 ========================= */
   const scrollToBottom = (behavior: ScrollBehavior = "auto") => {
