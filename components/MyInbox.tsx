@@ -39,11 +39,11 @@ type MobileView = "jobs" | "applicants" | "chat";
 export default function MyInbox() {
   const t = useT("inbox");
   const { user } = useAuth();
-  // 1. Determine user type (In a real app, get this from your Auth/Context)
+  // Determine user type (In a real app, get this from your Auth/Context)
   const userType: UserType = user?.role; // from auth context
   const [inboxItems, setInboxItems] = useState<any[]>([]);
 
-  // 2. Selection State
+  //  Selection State
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   const [selectedJob, setSelectedJob] = useState<InboxSourceJob | null>(null);
@@ -117,24 +117,21 @@ export default function MyInbox() {
     }
   }, [clientInbox, inbox, selectedJobId, userType]);
 
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      // Check if there are any unseen messages
-      const hasUnseenMessages = messages.some((msg) => msg.seen === false);
+useEffect(() => {
+  const el = scrollContainerRef.current;
+  if (!el) return;
 
-      if (hasUnseenMessages && unreadDividerRef.current) {
-        // Scroll to the unread divider with some offset
-        unreadDividerRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      } else {
-        // Scroll to bottom if no unseen messages
-        scrollContainerRef.current.scrollTop =
-          scrollContainerRef.current.scrollHeight;
-      }
-    }
-  }, [messages]);
+  // Only auto scroll when user is near bottom
+  const isNearBottom =
+    el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+
+  if (!isLoadingOlderRef.current && isNearBottom) {
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  }
+}, [messages]);
+
 
   useEffect(() => {
     const handleInboxMessage = (msg) => {
@@ -150,23 +147,6 @@ export default function MyInbox() {
           refetchType: "all",
         });
       }
-
-      // // 2️ Optimistically update inbox list
-      // setInboxItems((prev) => {
-      //   const index = prev.findIndex((item) => item.id === msg.job_id);
-      //   if (index === -1) return prev;
-
-      //   const updatedItem = {
-      //     ...prev[index],
-      //     last_message: msg.body,
-      //     last_message_at: msg.created_at,
-      //     unread_count: (prev[index].unread_count || 0) + 1,
-      //   };
-
-      //   const newList = [...prev];
-      //   newList.splice(index, 1);
-      //   return [updatedItem, ...newList];
-      // });
     };
 
     socket.on("message", handleInboxMessage);
@@ -181,12 +161,10 @@ export default function MyInbox() {
 
     let mounted = true;
 
-    //  Always ask server for truth (fixes stale state)
     socket.emit("check-user-online", recipientId, (online: boolean) => {
       if (mounted) setIsRecipientOnline(online);
     });
 
-    //  Live online event
     const handleOnline = ({ userId }) => {
       if (userId === recipientId) {
         setIsRecipientOnline(true);
@@ -222,7 +200,7 @@ export default function MyInbox() {
       }
     };
 
-    //  Re-check after reconnect (VERY IMPORTANT)
+    //  Re-check after reconnect
     const handleReconnect = () => {
       socket.emit("check-user-online", recipientId, (online: boolean) => {
         if (mounted) setIsRecipientOnline(online);
@@ -268,7 +246,7 @@ export default function MyInbox() {
 
     setLoadingMore(false);
 
-    // 🧠 Preserve scroll ONLY when loading older
+    //  Preserve scroll ONLY when loading older
     if (isLoadingOlderRef.current && el) {
       requestAnimationFrame(() => {
         const newHeight = el.scrollHeight;
@@ -277,6 +255,17 @@ export default function MyInbox() {
       });
     }
   }, [data]);
+
+  useEffect(() => {
+    if (!data?.data?.messages || !recipientId) return;
+
+    queryClient.invalidateQueries({
+      queryKey: userType === "client" ? ["my-inbox-client"] : ["my-inbox"],
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
+    socket.emit("messages-seen", { recipientId });
+  }, [data, recipientId]);
 
   // Remove the handleScroll function since we're not using auto-load anymore
 
@@ -365,7 +354,7 @@ export default function MyInbox() {
       setMessages((prev) => [...prev, msg]);
 
       /* =========================
-         3️⃣ SAFE SCROLL
+         3 SAFE SCROLL
       ========================= */
       const el = scrollContainerRef.current;
       if (!el) return;
@@ -642,9 +631,7 @@ export default function MyInbox() {
                         </div>
                         {/* 🔹 RIGHT SIDE: unread count */}
                         {a.unread_count > 0 && (
-                          <span
-                            className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
-                          >
+                          <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                             {a.unread_count > 9 ? "9+" : a.unread_count}
                           </span>
                         )}

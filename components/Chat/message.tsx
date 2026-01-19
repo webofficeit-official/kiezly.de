@@ -120,7 +120,7 @@ export default function Message({
 
     setLoadingMore(false);
 
-    // 🧠 Preserve scroll ONLY when loading older
+    //  Preserve scroll ONLY when loading older
     if (isLoadingOlderRef.current && el) {
       requestAnimationFrame(() => {
         const newHeight = el.scrollHeight;

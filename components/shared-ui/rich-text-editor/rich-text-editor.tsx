@@ -1,4 +1,3 @@
-// components/shared-ui/rich-text-editor/rich-text-editor.tsx
 "use client";
 
 import dynamic from "next/dynamic";
