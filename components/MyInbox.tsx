@@ -259,13 +259,16 @@ export default function MyInbox() {
     }
   }, [data]);
 
-useEffect(() => {
-  if (!data?.data?.messages || !recipientId) return;
+  useEffect(() => {
+    if (!data?.data?.messages || !recipientId) return;
 
-  queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
-  socket.emit("messages-seen", { recipientId });
-}, [data, recipientId]);
+    queryClient.invalidateQueries({
+      queryKey: userType === "client" ? ["my-inbox-client"] : ["my-inbox"],
+    });
 
+    queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
+    socket.emit("messages-seen", { recipientId });
+  }, [data, recipientId]);
 
   // Remove the handleScroll function since we're not using auto-load anymore
 
