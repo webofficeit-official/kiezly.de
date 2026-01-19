@@ -14,7 +14,7 @@ interface JobWizardState {
   showErrors: boolean;
   loadingJob: boolean;
   errorJob?: string | null;
-  // ✅ NEW: bump this on reset to force remounts in pages/components
+  //  NEW: bump this on reset to force remounts in pages/components
   version: number;
 }
 
@@ -39,7 +39,7 @@ const initialState: JobWizardState = {
   showErrors: false,
   loadingJob: false,
   errorJob: null,
-  version: 0, // ✅ NEW
+  version: 0, //  NEW
 };
 
 function jobWizardReducer(
@@ -144,7 +144,7 @@ export const JobWizardProvider = ({ children }: { children: ReactNode }) => {
     updateForm: (data: Partial<Record<string, any>>) =>
       dispatch({ type: "UPDATE_FORM", payload: data }),
     replaceForm: (data: Record<string, any>) =>
-      dispatch({ type: "REPLACE_FORM", payload: data }), // ✅
+      dispatch({ type: "REPLACE_FORM", payload: data }), // 
     setErrors: (errors: Record<string, string>) =>
       dispatch({ type: "SET_ERRORS", payload: errors }),
     setShowErrors: (v: boolean) =>

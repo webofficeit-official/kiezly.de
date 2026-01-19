@@ -20,7 +20,7 @@ export function Select<
   options: T[];
   error?: string;
   required?: boolean;
-  searchable?: boolean;       // ✅ declare prop type
+  searchable?: boolean;       //  declare prop type
   placeholder?: string;
 }) {
   const [query, setQuery] = useState("");

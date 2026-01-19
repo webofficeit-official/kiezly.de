@@ -80,7 +80,7 @@ export const myJobs = (filters: Record<string, any>, options?: Partial<UseQueryO
     queryKey: ["jobs", filters],
     queryFn: () => getMyJobsApi(filters),
     keepPreviousData: true, // works here
-    enabled: options?.enabled ?? true, // ✅ defaults to same behavior
+    enabled: options?.enabled ?? true, //  defaults to same behavior
     ...options,
   } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
 };
@@ -106,7 +106,7 @@ export const useSavedJobsWhileLogin = (options?: UseSavedJobsOptions) => {
     queryKey: ["savedJobs"],
     queryFn: () => getSavedJobsListApi(),
     keepPreviousData: true,
-    enabled: options?.enabled ?? true, // ✅ only runs if true
+    enabled: options?.enabled ?? true, //  only runs if true
     // optional: prevent infinite retries on unauthorized errors
     retry: (failureCount, error: any) => {
       const status = error?.response?.status;

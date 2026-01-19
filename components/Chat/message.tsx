@@ -129,7 +129,7 @@ export default function Message({
       });
     }
 
-    // ✅ Initial load → scroll to bottom
+    //  Initial load → scroll to bottom
     if (currentPage === 1) {
       requestAnimationFrame(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
@@ -142,7 +142,7 @@ export default function Message({
     if (!el || loadingMore || !hasMore) return;
 
     if (el.scrollTop <= 5) {
-      isLoadingOlderRef.current = true; // 🔥 THIS WAS MISSING
+      isLoadingOlderRef.current = true; // THIS WAS MISSING
       setLoadingMore(true);
       setPage((p) => p + 1);
     }

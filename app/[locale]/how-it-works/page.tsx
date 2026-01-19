@@ -32,7 +32,7 @@ export default function HowItWorksPage() {
               <Card key={i} className="h-full">
                 <CardContent className="p-5">
                   <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white">
-                    <IconComponent className="h-4 w-4" /> {/* ✅ dynamic icon */}
+                    <IconComponent className="h-4 w-4" /> {/*  dynamic icon */}
                   </div>
                   <h3 className="font-medium">{i + 1}) {step.title}</h3>
                   <p className="mt-1 text-sm text-neutral-600">{step.description}</p>
