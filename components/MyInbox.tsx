@@ -117,24 +117,21 @@ export default function MyInbox() {
     }
   }, [clientInbox, inbox, selectedJobId, userType]);
 
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      // Check if there are any unseen messages
-      const hasUnseenMessages = messages.some((msg) => msg.seen === false);
+useEffect(() => {
+  const el = scrollContainerRef.current;
+  if (!el) return;
 
-      if (hasUnseenMessages && unreadDividerRef.current) {
-        // Scroll to the unread divider with some offset
-        unreadDividerRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      } else {
-        // Scroll to bottom if no unseen messages
-        scrollContainerRef.current.scrollTop =
-          scrollContainerRef.current.scrollHeight;
-      }
-    }
-  }, [messages]);
+  // Only auto scroll when user is near bottom
+  const isNearBottom =
+    el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+
+  if (!isLoadingOlderRef.current && isNearBottom) {
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  }
+}, [messages]);
+
 
   useEffect(() => {
     const handleInboxMessage = (msg) => {
