@@ -94,11 +94,11 @@ export default function Header() {
     { enabled: true }
   );
 
-  useEffect(() => {
-    if (count?.data?.count) {
-      setMessageCount(count.data.count)
-    }
-  }, [count]);
+ useEffect(() => {
+  if (count?.data?.count !== undefined) {
+    setMessageCount(count.data.count);
+  }
+}, [count]);
 
   useEffect(() => {
     if (!user) return;
@@ -118,29 +118,24 @@ export default function Header() {
     };
   }, [user]);
 
-  useEffect(() => {
-    if (!user) return;
+useEffect(() => {
+  if (!user) return;
 
-    socket.on("message", (data) => {
-  queryClient.setQueryData<MessageApiResponse>(
-    ["count-total-conversation"],
-    (old) => {
-      if (!old) return old;
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
+  };
 
-      return {
-        ...old,
-        data: {
-          ...old.data,
-          count: old.data.count + 1,
-        },
-      };
-    }
-  );
-    });
-    return () => {
-      socket.off("message");
-    };
-  }, [user]);
+  socket.on("message", refresh);
+  socket.on("messages-seen", refresh);
+
+  return () => {
+    socket.off("message", refresh);
+    socket.off("messages-seen", refresh);
+  };
+}, [user]);
+
+
+
 
   const updateNot = (id: string) => {
     uNot.mutate(id, {
