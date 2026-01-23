@@ -20,6 +20,8 @@ type MessageProps = {
   receiverId: string;
   jobId: string;
   isOpen: boolean;
+  expired: boolean;
+  expiredLabel: string;
   onClose: () => void;
 };
 
@@ -42,6 +44,8 @@ export default function Message({
   jobId,
   title,
   subtitle,
+  expired,
+  expiredLabel
 }: MessageProps) {
   if (!isOpen) return null;
   const t = useT("messages");
@@ -164,39 +168,39 @@ export default function Message({
   };
 
   useEffect(() => {
-  if (!jobId || !receiverId) return;
+    if (!jobId || !receiverId) return;
 
-  const handleMessage = (msg) => {
-    /* =========================
-       1️ STRICT JOB FILTER
-    ========================= */
-    if (msg.job_id !== jobId) return;
+    const handleMessage = (msg) => {
+      /* =========================
+         1️ STRICT JOB FILTER
+      ========================= */
+      if (msg.job_id !== jobId) return;
 
-    /* =========================
-       2️ STRICT USER FILTER
-    ========================= */
-    const isSameUser =
-      msg.sender_id === receiverId ||
-      msg.recipient_id === receiverId;
+      /* =========================
+         2️ STRICT USER FILTER
+      ========================= */
+      const isSameUser =
+        msg.sender_id === receiverId ||
+        msg.recipient_id === receiverId;
 
-    if (!isSameUser) return;
+      if (!isSameUser) return;
 
-    /* =========================
-       3️ SAFE APPEND
-    ========================= */
-    setMessages((prev) => [...prev, msg]);
+      /* =========================
+         3️ SAFE APPEND
+      ========================= */
+      setMessages((prev) => [...prev, msg]);
 
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    });
-  };
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      });
+    };
 
-  socket.on("message", handleMessage);
+    socket.on("message", handleMessage);
 
-  return () => {
-    socket.off("message", handleMessage);
-  };
-}, [jobId, receiverId]);
+    return () => {
+      socket.off("message", handleMessage);
+    };
+  }, [jobId, receiverId]);
 
 
   const sendMessage = (e) => {
@@ -231,9 +235,8 @@ export default function Message({
                 </span>
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <span
-                    className={`h-2 w-2 rounded-full ${
-                      isOnline ? "bg-green-500" : "bg-gray-400"
-                    }`}
+                    className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
+                      }`}
                   />
                   {isOnline ? "Online" : "Offline"}
                 </span>
@@ -271,28 +274,25 @@ export default function Message({
                 messages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`flex ${
-                      msg.recipient_id === receiverId
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
+                    className={`flex ${msg.recipient_id === receiverId
+                      ? "justify-end"
+                      : "justify-start"
+                      }`}
                   >
                     <div className="max-w-[75%]">
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                          msg.recipient_id === receiverId
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-white border rounded-bl-sm"
-                        }`}
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
+                          ? "bg-primary text-white rounded-br-sm"
+                          : "bg-white border rounded-bl-sm"
+                          }`}
                       >
                         {msg.body}
                       </div>
                       <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${
-                          msg.recipient_id === receiverId
-                            ? "text-right"
-                            : "text-left"
-                        }`}
+                        className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === receiverId
+                          ? "text-right"
+                          : "text-left"
+                          }`}
                       >
                         {formatTime(msg.created_at)}
                       </p>
@@ -305,19 +305,28 @@ export default function Message({
 
             {/* Input */}
             <form onSubmit={sendMessage}>
-              <div className="border-t p-3 flex gap-2">
-                <input
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={t("chat.messagePlaceholder")}
-                  className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <button
-                  type="submit"
-                  className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
-                >
-                  <Send className="h-4 w-4" />
-                </button>
+              <div className="border-t p-3">
+                {expired ? (
+                  <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
+                    <span>🔒</span>
+                    <span>{expiredLabel}</span>
+                  </div>
+                ) : (
+                  <div className="border-t p-3 flex gap-2">
+                    <input
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder={t("chat.messagePlaceholder")}
+                      className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </form>
           </div>
