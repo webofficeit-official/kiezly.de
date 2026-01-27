@@ -1,12 +1,14 @@
 {
-    "chat":{
+    "chat": {
         "chat": "Chat",
         "startNewChat": "Start new chat",
         "title": "Inbox",
         "noMessages": "No messages yet.",
         "loadMore": "Load more messages",
         "messagePlaceholder": "Type your message here...",
-        "startChatting":"Send a message to start the conversation",
-        "sendButton": "Send"
+        "startChatting": "Send a message to start the conversation",
+        "sendButton": "Send",
+        "empty-title": "No conversations yet",
+        "empty-description": "When you start a chat, it will appear here."
     }
 }
