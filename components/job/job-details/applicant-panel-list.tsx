@@ -13,9 +13,18 @@ import { Select } from "../job-filter-select/select-option";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 import { isJobExpired } from "@/lib/utils/isJobExpired";
+import Message from "@/components/Chat/message";
 interface ApplicantsPageProps {
   params: { slug: string };
 }
+type OpenChat = {
+  key: string;
+  jobId: string;
+  receiverId: string;
+  title: string;
+  subtitle: string;
+  minimized: boolean;
+};
 
 export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const { slug } = params;
@@ -30,6 +39,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(12);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const { push } = useLocalizedRouter();
   const t = useT("application");
 
@@ -42,10 +52,16 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const statusOptions = [
     { label: t("applicants-panel.status.options.all"), value: "" },
     { label: t("applicants-panel.status.options.applied"), value: "applied" },
-    { label: t("applicants-panel.status.options.shortlisted"), value: "shortlisted" },
+    {
+      label: t("applicants-panel.status.options.shortlisted"),
+      value: "shortlisted",
+    },
     { label: t("applicants-panel.status.options.accepted"), value: "accepted" },
     { label: t("applicants-panel.status.options.rejected"), value: "rejected" },
-    { label: t("applicants-panel.status.options.withdrawn"), value: "withdrawn" },
+    {
+      label: t("applicants-panel.status.options.withdrawn"),
+      value: "withdrawn",
+    },
   ];
 
   const openUserModal = (userId: string) => {
@@ -82,9 +98,6 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
     }
   }, [user, job]);
 
-
-
-
   const { data, isLoading: isLoadingApplicants } = useJobApplicants({
     jobId,
     status: statusFilter,
@@ -118,7 +131,6 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
     setPage(1); // reset to first page when sort changes
   };
 
-
   if (isLoading || isLoadingApplicants) {
     return (
       <div className="min-h-screen bg-gray-50 p-6 animate-pulse">
@@ -138,6 +150,30 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
     );
   }
 
+  const handleOpenChat = (applicant: any) => {
+    const key = `${applicant.job_id}-${applicant.helper_id}`;
+
+    setOpenChats((prev) => {
+      if (prev.some((c) => c.key === key)) {
+        return prev.map((c) =>
+          c.key === key ? { ...c, minimized: false } : c,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          key,
+          jobId: applicant.job_id,
+          receiverId: applicant.helper_id,
+          title: `${applicant.user.first_name} ${applicant.user.last_name}`,
+          subtitle: applicant.user.email,
+          minimized: false,
+        },
+      ];
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -147,7 +183,6 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             {t("applicants-panel.title", { title: jobDetails.title })}
           </h2>
         </div>
-
 
         <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 flex justify-between items-center flex-wrap gap-4">
           {/* Left group */}
@@ -167,10 +202,16 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             <Select
               label={t("applicants-panel.proposed-rate.label")}
               value={sort}
-              onChange={(v: string) => handleSortChange(v as 'asc' | 'desc')}
+              onChange={(v: string) => handleSortChange(v as "asc" | "desc")}
               options={[
-                { label: t("applicants-panel.proposed-rate.options.asc"), value: 'asc' },
-                { label: t("applicants-panel.proposed-rate.options.desc"), value: 'desc' },
+                {
+                  label: t("applicants-panel.proposed-rate.options.asc"),
+                  value: "asc",
+                },
+                {
+                  label: t("applicants-panel.proposed-rate.options.desc"),
+                  value: "desc",
+                },
               ]}
               width="w-32"
             />
@@ -184,7 +225,6 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
           </div>
         </div>
 
-
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {data && data?.applicants.length > 0 ? (
             data?.applicants?.map((applicant) => (
@@ -194,18 +234,24 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
                 openUserModal={openUserModal}
                 openUpdateModal={openUpdateModal}
                 isJobExpired={jobExpired}
+                onOpenChat={handleOpenChat}
               />
             ))
           ) : (
             <div className="md:col-span-2 lg:col-span-3">
               <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-base text-gray-600 shadow-md">
-                <p className="text-gray-500 text-sm italic py-2">{t("applicants-panel.no-applicants")}</p>
+                <p className="text-gray-500 text-sm italic py-2">
+                  {t("applicants-panel.no-applicants")}
+                </p>
               </div>
             </div>
           )}
         </div>
 
-        <nav className="flex items-center justify-between gap-2 mt-6" aria-label="Pagination">
+        <nav
+          className="flex items-center justify-between gap-2 mt-6"
+          aria-label="Pagination"
+        >
           <button
             className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50"
             onClick={() => setPage(page - 1)}
@@ -252,10 +298,33 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             userId={selectedUserId}
           />
         )}
-
       </main>
+      <div className="fixed bottom-4 right-4 z-50 flex gap-3">
+        {openChats.map((chat, index) => (
+          <Message
+            key={chat.key}
+            mode="dock"
+            jobId={chat.jobId}
+            receiverId={chat.receiverId}
+            title={chat.title}
+            subtitle={chat.subtitle}
+            expired={jobExpired}
+            expiredLabel={t("chat.job_expired")}
+            minimized={chat.minimized}
+            onMinimize={() =>
+              setOpenChats((prev) =>
+                prev.map((c) =>
+                  c.key === chat.key ? { ...c, minimized: !c.minimized } : c,
+                ),
+              )
+            }
+            onClose={() =>
+              setOpenChats((prev) => prev.filter((c) => c.key !== chat.key))
+            }
+            style={{ right: index * 360 }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
-
-
