@@ -19,10 +19,14 @@ type MessageProps = {
   subtitle: string;
   receiverId: string;
   jobId: string;
-  isOpen: boolean;
-  expired: boolean;
-  expiredLabel: string;
+  isOpen?: boolean;
+  expired?: boolean;
+  expiredLabel?: string;
   onClose: () => void;
+  mode?: "modal" | "dock";
+  minimized?: boolean;
+  onMinimize?: () => void;
+  style?: React.CSSProperties;
 };
 
 type Message = {
@@ -45,9 +49,14 @@ export default function Message({
   title,
   subtitle,
   expired,
-  expiredLabel
+  expiredLabel,
+  mode = "modal",
+  minimized = false,
+  onMinimize,
+  style,
 }: MessageProps) {
-  if (!isOpen) return null;
+ const isDock = mode === "dock";
+if (!isDock && !isOpen) return null;
   const t = useT("messages");
 
   const [message, setMessage] = useState("");
@@ -69,7 +78,7 @@ export default function Message({
   const isLoadingOlderRef = useRef(false);
 
   useEffect(() => {
-    if (!receiverId || !isOpen) return;
+    if (!receiverId) return;
 
     let mounted = true;
 
@@ -106,7 +115,7 @@ export default function Message({
       socket.off("user-offline", handleOffline);
       socket.io.off("reconnect", handleReconnect);
     };
-  }, [receiverId, isOpen]);
+  }, [receiverId]);
 
   useEffect(() => {
     if (!data?.data?.messages) return;
@@ -180,8 +189,7 @@ export default function Message({
          2️ STRICT USER FILTER
       ========================= */
       const isSameUser =
-        msg.sender_id === receiverId ||
-        msg.recipient_id === receiverId;
+        msg.sender_id === receiverId || msg.recipient_id === receiverId;
 
       if (!isSameUser) return;
 
@@ -202,7 +210,6 @@ export default function Message({
     };
   }, [jobId, receiverId]);
 
-
   const sendMessage = (e) => {
     e.preventDefault();
 
@@ -217,93 +224,182 @@ export default function Message({
         onSuccess: () => {
           setMessage("");
         },
-      }
+      },
     );
   };
 
   return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
-          <div className="flex h-[560px] w-full max-w-md flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b px-4 py-3">
-              <div className="flex flex-col">
-                <span className="font-semibold text-gray-800">{title}</span>
-                <span className="text-xs text-muted-foreground">
-                  {subtitle}
-                </span>
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <span
-                    className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
-                      }`}
-                  />
-                  {isOnline ? "Online" : "Offline"}
-                </span>
-              </div>
-              <button onClick={onClose}>
-                <X className="h-5 w-5 text-muted-foreground" />
-              </button>
+  <>
+    {/* ================= MODAL MODE ================= */}
+    {!isDock && isOpen && (
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
+        <div className="flex h-[560px] w-full max-w-md flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b px-4 py-3">
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-800">{title}</span>
+              <span className="text-xs text-muted-foreground">{subtitle}</span>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    isOnline ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                />
+                {isOnline ? "Online" : "Offline"}
+              </span>
             </div>
 
+            <button type="button" onClick={onClose}>
+              <X className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4"
+          >
+            {messages.map((msg, i) => (
+              <div
+                key={msg.id ?? i}
+                className={`flex ${
+                  msg.recipient_id === receiverId
+                    ? "justify-end"
+                    : "justify-start"
+                }`}
+              >
+                <div className="max-w-[75%]">
+                  <div
+                    className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                      msg.recipient_id === receiverId
+                        ? "bg-primary text-white rounded-br-sm"
+                        : "bg-white border rounded-bl-sm"
+                    }`}
+                  >
+                    {msg.body}
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    {formatTime(msg.created_at)}
+                  </p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input / Expired */}
+          <form onSubmit={sendMessage}>
+            <div className="border-t p-3">
+              {expired ? (
+                <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
+                  <span>🔒</span>
+                  <span>{expiredLabel}</span>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder={t("chat.messagePlaceholder")}
+                    className="flex-1 rounded-xl border px-4 py-2 text-sm"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-primary px-4 text-white"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+
+    {/* ================= DOCK MODE ================= */}
+    {isDock && (
+      <div
+        className={`fixed bottom-4 w-[340px] bg-white rounded-2xl shadow-2xl flex flex-col ${
+          minimized ? "h-12 overflow-hidden" : "h-[560px]"
+        }`}
+        style={style}
+      >
+        {/* Header */}
+        <div
+          className={`flex items-center justify-between border-b px-4 py-3 cursor-pointer ${
+            minimized ? "bg-gray-100" : ""
+          }`}
+          onClick={() => minimized && onMinimize?.()}
+        >
+          <div className="flex flex-col">
+            <span className="font-semibold text-gray-800">{title}</span>
+            <span className="text-xs text-muted-foreground">{subtitle}</span>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  isOnline ? "bg-green-500" : "bg-gray-400"
+                }`}
+              />
+              {isOnline ? "Online" : "Offline"}
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMinimize?.();
+              }}
+            >
+              {minimized ? "+" : "—"}
+            </button>
+
+            <button type="button" onClick={onClose}>
+              <X className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+
+        {!minimized && (
+          <>
             {/* Messages */}
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
               className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4"
             >
-              {messages.length === 0 ? (
-                <>
-                  <div className="flex h-full flex-col items-center justify-center text-center space-y-4">
-                    <div className="h-16 w-16 border-2 border-black rounded-full flex items-center justify-center bg-gray-50">
-                      <MessageCircle className="h-8 w-8 text-black" />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-black uppercase text-black">
-                        {t("chat.noMessages")}
-                      </h4>
-                      <p className="text-[10px] text-black/40 uppercase">
-                        {t("chat.startChatting")}
-                      </p>
-                    </div>
-                    {/* Decorative B&W line */}
-                    <div className="w-12 h-[1px] bg-black/20" />
-                  </div>
-                </>
-              ) : (
-                messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${msg.recipient_id === receiverId
+              {messages.map((msg, i) => (
+                <div
+                  key={msg.id ?? i}
+                  className={`flex ${
+                    msg.recipient_id === receiverId
                       ? "justify-end"
                       : "justify-start"
-                      }`}
-                  >
-                    <div className="max-w-[75%]">
-                      <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
+                  }`}
+                >
+                  <div className="max-w-[75%]">
+                    <div
+                      className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                        msg.recipient_id === receiverId
                           ? "bg-primary text-white rounded-br-sm"
                           : "bg-white border rounded-bl-sm"
-                          }`}
-                      >
-                        {msg.body}
-                      </div>
-                      <p
-                        className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === receiverId
-                          ? "text-right"
-                          : "text-left"
-                          }`}
-                      >
-                        {formatTime(msg.created_at)}
-                      </p>
+                      }`}
+                    >
+                      {msg.body}
                     </div>
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {formatTime(msg.created_at)}
+                    </p>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {/* Input / Expired */}
             <form onSubmit={sendMessage}>
               <div className="border-t p-3">
                 {expired ? (
@@ -312,16 +408,16 @@ export default function Message({
                     <span>{expiredLabel}</span>
                   </div>
                 ) : (
-                  <div className="border-t p-3 flex gap-2">
+                  <div className="flex gap-2">
                     <input
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={t("chat.messagePlaceholder")}
-                      className="flex-1 rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="flex-1 rounded-xl border px-4 py-2 text-sm"
                     />
                     <button
                       type="submit"
-                      className="rounded-xl bg-primary px-4 text-sm text-white hover:bg-primary/90"
+                      className="rounded-xl bg-primary px-4 text-white"
                     >
                       <Send className="h-4 w-4" />
                     </button>
@@ -329,9 +425,11 @@ export default function Message({
                 )}
               </div>
             </form>
-          </div>
-        </div>
-      )}
-    </>
-  );
+          </>
+        )}
+      </div>
+    )}
+  </>
+);
+
 }
