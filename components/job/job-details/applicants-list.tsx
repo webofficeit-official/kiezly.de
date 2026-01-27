@@ -13,6 +13,7 @@ import { ExternalLink, MessageCircle } from "lucide-react";
 import { Job } from "@/lib/types/job";
 import { useT } from "@/app/[locale]/layout";
 import Message from "@/components/Chat/message";
+import { isJobExpired } from "@/lib/utils/isJobExpired";
 
 interface ApplicantsPanelProps {
   job: Job;
@@ -37,6 +38,7 @@ const getStatusClasses = (status: string) => {
 
 export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
   if (!job) return null;
+  const jobExpired = isJobExpired(job);
   const { data, isLoading } = useJobApplicants({
     jobId: job.id.toString(),
     page: 1,
@@ -49,6 +51,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isMessageOpen, setIsMessageOpen] = useState(false);
   const t = useT("application");
+  const tE = useT("inbox");
 
   const openUpdateModal = (applicant: any) => {
     setSelectedApplicant(applicant);
@@ -105,7 +108,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
                     <div className="flex flex-col items-end gap-2">
                       <span
                         className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusClasses(
-                          app.status
+                          app.status,
                         )}`}
                       >
                         {app.status}
@@ -189,6 +192,8 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
         subtitle={selectedApplicant?.user?.email}
         jobId={selectedApplicant?.job_id}
         receiverId={selectedApplicant?.helper_id}
+        expired={jobExpired}
+        expiredLabel={tE("chat.job_expired")}
       />
     </aside>
   );

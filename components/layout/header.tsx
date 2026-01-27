@@ -82,7 +82,7 @@ export default function Header() {
           );
         },
         onError: (err) => {
-          console.log(err);
+          // console.log(err);
         },
       }
     );
@@ -145,7 +145,7 @@ useEffect(() => {
         setNotificationsCount(notificationsCount - 1);
       },
       onError: (err) => {
-        console.log(err);
+        // console.log(err);
       },
     });
   };
