@@ -4,8 +4,8 @@ import { useAuth } from "@/lib/context/auth-context";
 import {
   getNotifications,
   updateNotification,
+  clearNotifications
 } from "@/lib/react-query/queries/user/notifications";
-import { Notification } from "@/lib/types/notifications";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import {
@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
   MessageCircle,
+  BellOff,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -32,6 +33,7 @@ import { useJobWizard } from "@/lib/context/job-wizard-context";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCountTotalMessage } from "@/lib/react-query/queries/message";
 import { MessageApiResponse } from "@/lib/types/message";
+import { FaBroom } from "react-icons/fa";
 const LOCALES = ["en", "de"] as const;
 const DEFAULT = "de";
 
@@ -46,6 +48,7 @@ export default function Header() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [activeLanguag, setActiveLanguage] = useState("");
   const { reset, clearForm } = useJobWizard();
   const pathname = usePathname();
@@ -68,6 +71,7 @@ export default function Header() {
 
   const not = getNotifications();
   const uNot = updateNotification();
+  const cNot = clearNotifications();
 
   useEffect(() => {
     if (!user) return;
@@ -94,11 +98,11 @@ export default function Header() {
     { enabled: true }
   );
 
- useEffect(() => {
-  if (count?.data?.count !== undefined) {
-    setMessageCount(count.data.count);
-  }
-}, [count]);
+  useEffect(() => {
+    if (count?.data?.count !== undefined) {
+      setMessageCount(count.data.count);
+    }
+  }, [count]);
 
   useEffect(() => {
     if (!user) return;
@@ -118,24 +122,21 @@ export default function Header() {
     };
   }, [user]);
 
-useEffect(() => {
-  if (!user) return;
+  useEffect(() => {
+    if (!user) return;
 
-  const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
-  };
+    const refresh = () => {
+      queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
+    };
 
-  socket.on("message", refresh);
-  socket.on("messages-seen", refresh);
+    socket.on("message", refresh);
+    socket.on("messages-seen", refresh);
 
-  return () => {
-    socket.off("message", refresh);
-    socket.off("messages-seen", refresh);
-  };
-}, [user]);
-
-
-
+    return () => {
+      socket.off("message", refresh);
+      socket.off("messages-seen", refresh);
+    };
+  }, [user]);
 
   const updateNot = (id: string) => {
     uNot.mutate(id, {
@@ -149,6 +150,19 @@ useEffect(() => {
       },
     });
   };
+
+  const clearAllNotifications = () => {
+    cNot.mutate({}, {
+      onSuccess: (data) => {
+        setLatestThree([])
+        setNotifications([])
+        setNotificationsCount(0);
+      },
+      onError: (err) => {
+        // console.log(err);
+      },
+    });
+  }
 
   useEffect(() => {
     const seg = pathname.split("/").filter(Boolean)[0];
@@ -282,9 +296,8 @@ useEffect(() => {
                         setLanguageOpen(false);
                         handleChange(locale);
                       }}
-                      className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100 ${
-                        activeLanguag == locale && "bg-gray-200"
-                      }`}
+                      className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100 ${activeLanguag == locale && "bg-gray-200"
+                        }`}
                     >
                       {locale.toUpperCase()}
                     </button>
@@ -316,8 +329,16 @@ useEffect(() => {
                       max-h-[70vh] overflow-auto" // [UPDATED] allow scrolling on small screens
                     >
                       {latestThree.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-gray-500">
-                          {t("no-notifications")}
+                        <div className="px-6 py-10 flex flex-col items-center text-center gap-2 text-neutral-500">
+                          <BellOff className="h-8 w-8 text-neutral-400" />
+
+                          <h3 className="text-sm font-medium text-neutral-700">
+                            {t("notifications.empty-title")}
+                          </h3>
+
+                          <p className="text-xs text-neutral-500 max-w-xs">
+                            {t("notifications.empty-description")}
+                          </p>
                         </div>
                       ) : (
                         latestThree.map((n: any, i: number) => (
@@ -354,7 +375,7 @@ useEffect(() => {
                         ))
                       )}
 
-                      <button
+                      {notifications.length > 0 && <button
                         className="block w-full text-center px-4 py-2 text-sm hover:bg-gray-50"
                         onClick={() => {
                           setNotificationOpen(false);
@@ -362,9 +383,9 @@ useEffect(() => {
                         }}
                       >
                         <span className="text-sm font-semibold text-gray-800">
-                          {t("view-all-notifications")}
+                          {t("notifications.view-all")} ({notifications.length})
                         </span>
-                      </button>
+                      </button>}
                     </div>
                   )}
                 </div>
@@ -411,8 +432,8 @@ useEffect(() => {
                       <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
                         {(user?.avatar_url ||
                           "https://placehold.co/96x96")?.[0].toUpperCase() || (
-                          <User className="w-4 h-4" />
-                        )}
+                            <User className="w-4 h-4" />
+                          )}
                       </div>
                     </>
                   )}
@@ -536,24 +557,21 @@ useEffect(() => {
 
       {/* =================== MOBILE DRAWER  =================== */}
       <div
-        className={`fixed inset-0 z-[80] md:hidden ${
-          mobileOpen ? "" : "pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-[80] md:hidden ${mobileOpen ? "" : "pointer-events-none"
+          }`}
         aria-hidden={!mobileOpen}
       >
         {/* Backdrop */}
         <div
-          className={`absolute inset-0 bg-black/40 transition-opacity ${
-            mobileOpen ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 bg-black/40 transition-opacity ${mobileOpen ? "opacity-100" : "opacity-0"
+            }`}
           onClick={() => setMobileOpen(false)}
         />
         {/* Panel */}
         <aside
           ref={drawerPanelRef}
-          className={`absolute right-0 top-0 h-full w-80 max-w-[90vw] bg-white shadow-xl transition-transform ${
-            mobileOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`absolute right-0 top-0 h-full w-80 max-w-[90vw] bg-white shadow-xl transition-transform ${mobileOpen ? "translate-x-0" : "translate-x-full"
+            }`}
           role="dialog"
           aria-modal="true"
           aria-label="Mobile menu"
@@ -1095,7 +1113,7 @@ useEffect(() => {
                   className="text-lg leading-6 font-bold text-gray-900"
                   id="modal-title"
                 >
-                  {t("notifications")}
+                  {t("notifications.title")}
                 </h3>
                 <X
                   className="h-6 w-6 text-black-300 border border-gray-200 cursor-pointer rounded-lg"
@@ -1108,7 +1126,7 @@ useEffect(() => {
                 className="px-2 py-2 space-y-1 overflow-auto"
                 style={{ maxHeight: "500px" }}
               >
-                {notifications.map((n, i) => (
+                {notifications.length > 0 ? notifications.map((n, i) => (
                   <button
                     key={i}
                     className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100`}
@@ -1132,17 +1150,39 @@ useEffect(() => {
                       {dayjs(n?.created_at)?.fromNow()}
                     </div>
                   </button>
-                ))}
+                )) : (
+                  <div className="px-6 py-10 flex flex-col items-center text-center gap-2 text-neutral-500">
+                    <BellOff className="h-8 w-8 text-neutral-400" />
+
+                    <h3 className="text-sm font-medium text-neutral-700">
+                      {t("notifications.empty-title")}
+                    </h3>
+
+                    <p className="text-xs text-neutral-500 max-w-xs">
+                      {t("notifications.empty-description")}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Footer/Actions */}
               <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                {notifications.length > 0 && <Button
+                  type="button"
+                  variant="outline"
+                  className="border-amber-300 text-amber-700 hover:bg-amber-50 flex items-center gap-2"
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  <FaBroom className="h-4 w-4" />
+                  {t("notifications.clear-all")}
+                </Button>}
                 <Button
                   type="button"
                   variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                   onClick={() => setIsModalOpen(false)}
                 >
+                  <X className="h-4 w-4" />
                   {t("close")}
                 </Button>
               </div>
@@ -1150,6 +1190,40 @@ useEffect(() => {
           </div>
         </div>
       ) : null}
+
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6">
+            <h3 className="text-sm font-semibold text-gray-900">
+              {t("notifications.clear-confirm-title")}
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-600">
+              {t("notifications.clear-confirm-description")}
+            </p>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmOpen(false)}
+              >
+                {t("cancel")}
+              </Button>
+
+              <Button
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => {
+                  clearAllNotifications();
+                  setConfirmOpen(false);
+                }}
+              >
+                {t("confirm")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 }
