@@ -67,6 +67,9 @@ export default function Message({
   const [loadingMore, setLoadingMore] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(false);
 
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+
   const filters = useMemo(() => ({ page, page_size: 10 }), [page]);
 
   const { data, isLoading } = useGetConversation(jobId, receiverId, filters, {
@@ -228,6 +231,31 @@ export default function Message({
     );
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    dragRef.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!dragRef.current) return;
+
+    setPosition({
+      x: e.clientX - dragRef.current.x,
+      y: e.clientY - dragRef.current.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    dragRef.current = null;
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
   return (
     <>
       {/* ================= MODAL MODE ================= */}
@@ -318,14 +346,16 @@ export default function Message({
       {/* ================= DOCK MODE ================= */}
       {isDock && (
         <div
-          className={`fixed bottom-4 w-[340px] bg-white rounded-2xl shadow-2xl flex flex-col max-h-[560px]`}
-          style={style}
+          className={`fixed bottom-4 w-[340px] bg-white rounded-2xl shadow-2xl flex flex-col max-h-[560px] cursor-default`}
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            left: "50%",
+          }}
         >
           {/* Header */}
           <div
-            className={`flex items-center justify-between border-b px-4 py-3 cursor-pointer ${minimized ? "bg-gray-100" : ""
-              }`}
-            onClick={() => minimized && onMinimize?.()}
+            className="flex items-center justify-between border-b px-4 py-3 cursor-move select-none"
+            onMouseDown={handleMouseDown}
           >
             <div className="flex flex-col">
               <span className="font-semibold text-gray-800">{title}</span>
@@ -347,7 +377,7 @@ export default function Message({
                   onMinimize?.();
                 }}
               >
-                {minimized ? <Maximize2 className="h-5 w-5" /> : <Minimize2 className="h-5 w-5" /> }
+                {minimized ? <Maximize2 className="h-5 w-5" /> : <Minimize2 className="h-5 w-5" />}
               </button>
 
               <button type="button" onClick={onClose}>
@@ -362,7 +392,8 @@ export default function Message({
               <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4"
+                className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4 cursor-move"
+                onMouseDown={handleMouseDown}
               >
                 {messages.length > 0 ? (<>{messages.map((msg, i) => (
                   <div
@@ -406,7 +437,7 @@ export default function Message({
               </div>
 
               {/* Input / Expired */}
-              <form onSubmit={sendMessage}>
+              <form onSubmit={sendMessage} onMouseDown={handleMouseDown} className="cursor-move">
                 <div className="border-t p-3">
                   {expired ? (
                     <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
