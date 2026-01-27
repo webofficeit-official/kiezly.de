@@ -7,6 +7,8 @@
     "loadMore": "Weitere Nachrichten laden",
     "messagePlaceholder": "Geben Sie hier Ihre Nachricht ein...",
     "startChatting": "Senden Sie eine Nachricht, um das Gespräch zu beginnen",
-    "sendButton": "Senden"
+    "sendButton": "Senden",
+    "empty-title": "Noch keine Gespräche",
+    "empty-description": "Wenn Sie einen Chat starten, wird er hier angezeigt."
   }
 }
