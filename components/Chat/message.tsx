@@ -61,6 +61,7 @@ export default function Message({
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState(false);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -200,6 +201,7 @@ export default function Message({
          3️ SAFE APPEND
       ========================= */
       setMessages((prev) => [...prev, msg]);
+      setNewMessage(true)
 
       requestAnimationFrame(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -354,7 +356,9 @@ export default function Message({
         >
           {/* Header */}
           <div
-            className="flex items-center justify-between border-b px-4 py-3 cursor-move select-none"
+            className={`relative flex items-center justify-between border-b px-4 py-3 cursor-move select-none
+              ${newMessage && minimized && "animate-pulse ring-2 ring-red-500/40 bg-red-100"}
+            `}
             onMouseDown={handleMouseDown}
           >
             <div className="flex flex-col">
@@ -375,6 +379,7 @@ export default function Message({
                 onClick={(e) => {
                   e.stopPropagation();
                   onMinimize?.();
+                  setNewMessage(false)
                 }}
               >
                 {minimized ? <Maximize2 className="h-5 w-5" /> : <Minimize2 className="h-5 w-5" />}
