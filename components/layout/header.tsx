@@ -143,7 +143,9 @@ export default function Header() {
       onSuccess: (data) => {
         latestThree.find((l) => (l.id == id ? (l.status = true) : ""));
         notifications.find((l) => (l.id == id ? (l.status = true) : ""));
-        setNotificationsCount(notificationsCount - 1);
+        setNotificationsCount(
+          notifications?.filter((n) => !n.status).length
+        );
       },
       onError: (err) => {
         // console.log(err);
