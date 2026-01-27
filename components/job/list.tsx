@@ -73,7 +73,7 @@ export default function JobFilterPage({
   const [localPageSize, setLocalPageSize] = useState(pageSize);
   const [savedJobs, setSavedJobs] = useState([]);
   const [pendingCategorySlug, setPendingCategorySlug] = useState<string | null>(
-    null
+    null,
   );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState<Filters>(filters);
@@ -118,7 +118,7 @@ export default function JobFilterPage({
   const buildApiFilters = (
     filters: Filters,
     page: number,
-    pageSize: number
+    pageSize: number,
   ) => {
     const payload: Record<string, any> = { page, page_size: pageSize };
 
@@ -146,7 +146,7 @@ export default function JobFilterPage({
 
   const apiFilters = useMemo(
     () => buildApiFilters(debouncedFilters, page, localPageSize),
-    [debouncedFilters, page, localPageSize]
+    [debouncedFilters, page, localPageSize],
   );
 
   const { data: collections, isLoading: isCollectionsLoading } =
@@ -157,7 +157,7 @@ export default function JobFilterPage({
     if (!collections?.jobCategories?.length || !pendingCategorySlug) return;
 
     const matched = collections.jobCategories.find(
-      (c) => c.slug === pendingCategorySlug
+      (c) => c.slug === pendingCategorySlug,
     );
 
     if (matched) {
@@ -209,7 +209,9 @@ export default function JobFilterPage({
         .then((data) => {
           setSavedJobs(data.jobs);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          // console.log(err);
+        });
     } else {
       const localStoredJobs = localStorage.getItem("saved-jobs");
       if (localStoredJobs) {
@@ -248,7 +250,7 @@ export default function JobFilterPage({
           ...filters,
           radius_km: user?.lat && user?.lng ? filters.radius_km : undefined,
         },
-        collections
+        collections,
       );
       const url = `${window.location.pathname}${qs ? "?" + qs : ""}`;
       window.history.replaceState(window.history.state, "", url);
@@ -260,7 +262,7 @@ export default function JobFilterPage({
 
   function toggleInArray<T extends string | number>(
     key: keyof Filters,
-    val: T
+    val: T,
   ) {
     setFilters((f) => {
       const arr = new Set(f[key] as unknown as T[]);
@@ -275,7 +277,7 @@ export default function JobFilterPage({
 
   function toggleInArrayDraft<T extends string | number>(
     key: keyof Filters,
-    val: T
+    val: T,
   ) {
     setDraftFilters((f) => {
       const arr = new Set(f[key] as unknown as T[]);
@@ -341,7 +343,7 @@ export default function JobFilterPage({
         }
         localStorage.setItem(
           "saved-jobs",
-          JSON.stringify([...savedJobsLocal, { id: jobId }])
+          JSON.stringify([...savedJobsLocal, { id: jobId }]),
         );
       }
     } catch (error) {
@@ -363,7 +365,7 @@ export default function JobFilterPage({
         }
         localStorage.setItem(
           "saved-jobs",
-          JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId))
+          JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId)),
         );
       }
     } catch (error) {

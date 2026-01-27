@@ -8,7 +8,10 @@ import React, { useEffect, useState } from "react";
 import { useT } from "@/app/[locale]/layout";
 import { useAuth } from "@/lib/context/auth-context";
 import { getSavedJobs } from "@/lib/react-query/api-handler/job-save-api";
-import { useCheckApplied, useUpdateApplicantStatus } from "@/lib/react-query/queries/apply-job";
+import {
+  useCheckApplied,
+  useUpdateApplicantStatus,
+} from "@/lib/react-query/queries/apply-job";
 import { useJob } from "@/lib/react-query/queries/useJob";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -24,6 +27,7 @@ import JobHeader from "./job-details/job-header";
 import SimilarJobCard from "./job-details/similar-jobs";
 import Message from "../Chat/message";
 import { useCountMessage } from "@/lib/react-query/queries/message";
+import { isJobExpired } from "@/lib/utils/isJobExpired";
 
 const statusOptions = [
   { id: 1, name: "applied" },
@@ -51,7 +55,7 @@ export default function JobDetail() {
   const { data: count, isLoading: isCountChecking } = useCountMessage(
     jobId,
     clientId,
-    { enabled: !!jobId && !!clientId }
+    { enabled: !!jobId && !!clientId },
   );
 
   const updateStatusMutation = useUpdateApplicantStatus();
@@ -62,7 +66,9 @@ export default function JobDetail() {
         .then((data) => {
           setSavedJobs(data.jobs);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          // console.log(err);
+        });
     } else {
       const localStoredJobs = localStorage.getItem("saved-jobs");
       if (localStoredJobs) {
@@ -73,6 +79,7 @@ export default function JobDetail() {
 
   const t = useT("jobs");
   const tc = useT("messages");
+  const tE = useT("inbox");
 
   // EARLY RETURNS: Now safe, since all hooks are called above
   if (isLoading) return <Loader />;
@@ -84,8 +91,9 @@ export default function JobDetail() {
     );
 
   const jobDetails = data?.job;
-  if (!jobDetails) return <Loader />;
 
+  if (!jobDetails) return <Loader />;
+  const jobExpired = isJobExpired(jobDetails);
   // Rest of your component logic (handleApplySubmit, handleSaveJob, etc.) remains unchanged
 
   const handleStatusChange = (applicationId: string, status: string) => {
@@ -98,7 +106,7 @@ export default function JobDetail() {
         onError: (error: any) => {
           toast.error(error?.message || t("detail.application.failed"));
         },
-      }
+      },
     );
   };
 
@@ -164,22 +172,23 @@ export default function JobDetail() {
         )}
       </div>
 
-      {
-        count && count.data.count !== 0 && (
-          <>
-            <button
-              onClick={() => setIsMessageOpen(true)}
-              className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
-            >
-              <MessageCircle className="h-5 w-5" />
-              <span className="hidden sm:inline">{tc("chat.chat")}</span>
-            </button>
+      {count && count.data.count !== 0 && (
+        <>
+          <button
+            onClick={() => setIsMessageOpen(true)}
+            className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
+          >
+            <MessageCircle className="h-5 w-5" />
+            <span className="hidden sm:inline">{tc("chat.chat")}</span>
+          </button>
 
-            <Message
-              isOpen={isMessageOpen}
-              onClose={() => setIsMessageOpen(false)}
-              title={jobDetails.title}
-              subtitle={jobDetails.client.org_name ?? [
+          <Message
+            isOpen={isMessageOpen}
+            onClose={() => setIsMessageOpen(false)}
+            title={jobDetails.title}
+            subtitle={
+              jobDetails.client.org_name ??
+              [
                 jobDetails?.street,
                 jobDetails?.city,
                 jobDetails?.state,
@@ -187,13 +196,15 @@ export default function JobDetail() {
                 jobDetails?.country,
               ]
                 .filter(Boolean)
-                .join(", ")}
-              jobId={jobDetails.id}
-              receiverId={jobDetails.client_id}
-            />
-          </>
-        )
-      }
+                .join(", ")
+            }
+            jobId={jobDetails.id}
+            receiverId={jobDetails.client_id}
+            expired={jobExpired}
+            expiredLabel={tE("chat.job_expired")}
+          />
+        </>
+      )}
     </main>
   );
 }

@@ -12,6 +12,7 @@ import ApplicantCard from "./applicant-card/applicant-card";
 import { Select } from "../job-filter-select/select-option";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
+import { isJobExpired } from "@/lib/utils/isJobExpired";
 interface ApplicantsPageProps {
   params: { slug: string };
 }
@@ -70,6 +71,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const { data: job, isLoading, isError } = useJob(slug as string);
 
   const jobDetails = job?.job;
+  const jobExpired = isJobExpired(jobDetails);
 
   const jobId = jobDetails?.id;
   useEffect(() => {
@@ -191,6 +193,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
                 applicant={applicant}
                 openUserModal={openUserModal}
                 openUpdateModal={openUpdateModal}
+                isJobExpired={jobExpired}
               />
             ))
           ) : (
