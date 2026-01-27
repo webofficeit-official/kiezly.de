@@ -1,4 +1,4 @@
-import { MessageCircle, Send, X } from "lucide-react";
+import { BellOff, MessageCircle, MessageSquareOff, Send, X } from "lucide-react";
 import { Applicant } from "../job/job-details/applicant-card/applicant-card";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -55,8 +55,8 @@ export default function Message({
   onMinimize,
   style,
 }: MessageProps) {
- const isDock = mode === "dock";
-if (!isDock && !isOpen) return null;
+  const isDock = mode === "dock";
+  if (!isDock && !isOpen) return null;
   const t = useT("messages");
 
   const [message, setMessage] = useState("");
@@ -229,142 +229,30 @@ if (!isDock && !isOpen) return null;
   };
 
   return (
-  <>
-    {/* ================= MODAL MODE ================= */}
-    {!isDock && isOpen && (
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
-        <div className="flex h-[560px] w-full max-w-md flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b px-4 py-3">
-            <div className="flex flex-col">
-              <span className="font-semibold text-gray-800">{title}</span>
-              <span className="text-xs text-muted-foreground">{subtitle}</span>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    isOnline ? "bg-green-500" : "bg-gray-400"
-                  }`}
-                />
-                {isOnline ? "Online" : "Offline"}
-              </span>
-            </div>
-
-            <button type="button" onClick={onClose}>
-              <X className="h-5 w-5 text-muted-foreground" />
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4"
-          >
-            {messages.map((msg, i) => (
-              <div
-                key={msg.id ?? i}
-                className={`flex ${
-                  msg.recipient_id === receiverId
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
-              >
-                <div className="max-w-[75%]">
-                  <div
-                    className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                      msg.recipient_id === receiverId
-                        ? "bg-primary text-white rounded-br-sm"
-                        : "bg-white border rounded-bl-sm"
-                    }`}
-                  >
-                    {msg.body}
-                  </div>
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    {formatTime(msg.created_at)}
-                  </p>
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input / Expired */}
-          <form onSubmit={sendMessage}>
-            <div className="border-t p-3">
-              {expired ? (
-                <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
-                  <span>🔒</span>
-                  <span>{expiredLabel}</span>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <input
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder={t("chat.messagePlaceholder")}
-                    className="flex-1 rounded-xl border px-4 py-2 text-sm"
+    <>
+      {/* ================= MODAL MODE ================= */}
+      {!isDock && isOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
+          <div className="flex h-[560px] w-full max-w-md flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b px-4 py-3">
+              <div className="flex flex-col">
+                <span className="font-semibold text-gray-800">{title}</span>
+                <span className="text-xs text-muted-foreground">{subtitle}</span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <span
+                    className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
+                      }`}
                   />
-                  <button
-                    type="submit"
-                    className="rounded-xl bg-primary px-4 text-white"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
+                  {isOnline ? "Online" : "Offline"}
+                </span>
+              </div>
+
+              <button type="button" onClick={onClose}>
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
             </div>
-          </form>
-        </div>
-      </div>
-    )}
 
-    {/* ================= DOCK MODE ================= */}
-    {isDock && (
-      <div
-        className={`fixed bottom-4 w-[340px] bg-white rounded-2xl shadow-2xl flex flex-col ${
-          minimized ? "h-12 overflow-hidden" : "h-[560px]"
-        }`}
-        style={style}
-      >
-        {/* Header */}
-        <div
-          className={`flex items-center justify-between border-b px-4 py-3 cursor-pointer ${
-            minimized ? "bg-gray-100" : ""
-          }`}
-          onClick={() => minimized && onMinimize?.()}
-        >
-          <div className="flex flex-col">
-            <span className="font-semibold text-gray-800">{title}</span>
-            <span className="text-xs text-muted-foreground">{subtitle}</span>
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  isOnline ? "bg-green-500" : "bg-gray-400"
-                }`}
-              />
-              {isOnline ? "Online" : "Offline"}
-            </span>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMinimize?.();
-              }}
-            >
-              {minimized ? "+" : "—"}
-            </button>
-
-            <button type="button" onClick={onClose}>
-              <X className="h-5 w-5 text-muted-foreground" />
-            </button>
-          </div>
-        </div>
-
-        {!minimized && (
-          <>
             {/* Messages */}
             <div
               ref={scrollContainerRef}
@@ -374,19 +262,17 @@ if (!isDock && !isOpen) return null;
               {messages.map((msg, i) => (
                 <div
                   key={msg.id ?? i}
-                  className={`flex ${
-                    msg.recipient_id === receiverId
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
+                  className={`flex ${msg.recipient_id === receiverId
+                    ? "justify-end"
+                    : "justify-start"
+                    }`}
                 >
                   <div className="max-w-[75%]">
                     <div
-                      className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                        msg.recipient_id === receiverId
-                          ? "bg-primary text-white rounded-br-sm"
-                          : "bg-white border rounded-bl-sm"
-                      }`}
+                      className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
+                        ? "bg-primary text-white rounded-br-sm"
+                        : "bg-white border rounded-bl-sm"
+                        }`}
                     >
                       {msg.body}
                     </div>
@@ -425,11 +311,131 @@ if (!isDock && !isOpen) return null;
                 )}
               </div>
             </form>
-          </>
-        )}
-      </div>
-    )}
-  </>
-);
+          </div>
+        </div>
+      )}
+
+      {/* ================= DOCK MODE ================= */}
+      {isDock && (
+        <div
+          className={`fixed bottom-4 w-[340px] bg-white rounded-2xl shadow-2xl flex flex-col max-h-[560px]`}
+          style={style}
+        >
+          {/* Header */}
+          <div
+            className={`flex items-center justify-between border-b px-4 py-3 cursor-pointer ${minimized ? "bg-gray-100" : ""
+              }`}
+            onClick={() => minimized && onMinimize?.()}
+          >
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-800">{title}</span>
+              <span className="text-xs text-muted-foreground">{subtitle}</span>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span
+                  className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
+                    }`}
+                />
+                {isOnline ? "Online" : "Offline"}
+              </span>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMinimize?.();
+                }}
+              >
+                {minimized ? "+" : "—"}
+              </button>
+
+              <button type="button" onClick={onClose}>
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+          </div>
+
+          {!minimized && (
+            <>
+              {/* Messages */}
+              <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4"
+              >
+                {messages.length > 0 ? (<>{messages.map((msg, i) => (
+                  <div
+                    key={msg.id ?? i}
+                    className={`flex ${msg.recipient_id === receiverId
+                      ? "justify-end"
+                      : "justify-start"
+                      }`}
+                  >
+                    <div className="max-w-[75%]">
+                      <div
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
+                          ? "bg-primary text-white rounded-br-sm"
+                          : "bg-white border rounded-bl-sm"
+                          }`}
+                      >
+                        {msg.body}
+                      </div>
+                      <p className="mt-1 text-[10px] text-muted-foreground">
+                        {formatTime(msg.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                  <div ref={messagesEndRef} /></>) : (
+                  <>
+                    <div className="px-6 py-10 flex flex-col items-center text-center gap-2 text-neutral-500">
+                      <MessageSquareOff className="h-8 w-8 text-neutral-400" />
+
+                      <h3 className="text-sm font-medium text-neutral-700">
+                        {t("chats.empty_title")}
+                      </h3>
+
+                      <p className="text-xs text-neutral-500 max-w-xs">
+                        {t("chats.empty_description")}
+                      </p>
+                    </div>
+
+                  </>
+                )}
+              </div>
+
+              {/* Input / Expired */}
+              <form onSubmit={sendMessage}>
+                <div className="border-t p-3">
+                  {expired ? (
+                    <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
+                      <span>🔒</span>
+                      <span>{expiredLabel}</span>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder={t("chat.messagePlaceholder")}
+                        className="flex-1 rounded-xl border px-4 py-2 text-sm"
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-primary px-4 text-white"
+                      >
+                        <Send className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </form>
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
 
 }
