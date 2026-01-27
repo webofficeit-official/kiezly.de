@@ -1,4 +1,4 @@
-import { BellOff, MessageCircle, MessageSquareOff, Send, X } from "lucide-react";
+import { BellOff, Maximize, Maximize2, MessageCircle, MessageSquareOff, Minimize, Minimize2, Plus, Send, X } from "lucide-react";
 import { Applicant } from "../job/job-details/applicant-card/applicant-card";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -347,11 +347,11 @@ export default function Message({
                   onMinimize?.();
                 }}
               >
-                {minimized ? "+" : "—"}
+                {minimized ? <Maximize2 className="h-5 w-5" /> : <Minimize2 className="h-5 w-5" /> }
               </button>
 
               <button type="button" onClick={onClose}>
-                <X className="h-5 w-5 text-muted-foreground" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -393,11 +393,11 @@ export default function Message({
                       <MessageSquareOff className="h-8 w-8 text-neutral-400" />
 
                       <h3 className="text-sm font-medium text-neutral-700">
-                        {t("chats.empty_title")}
+                        {t("chat.empty-title")}
                       </h3>
 
                       <p className="text-xs text-neutral-500 max-w-xs">
-                        {t("chats.empty_description")}
+                        {t("chat.empty-description")}
                       </p>
                     </div>
 
