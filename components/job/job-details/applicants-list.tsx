@@ -20,6 +20,14 @@ interface ApplicantsPanelProps {
   user: any;
 }
 
+type OpenChat = {
+  key: string;
+  jobId: string;
+  receiverId: string;
+  title: string;
+  subtitle: string;
+  minimized: boolean;
+};
 const getStatusClasses = (status: string) => {
   switch (status.toLowerCase()) {
     case "accepted":
@@ -49,7 +57,8 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
-  const [isMessageOpen, setIsMessageOpen] = useState(false);
+  // const [isMessageOpen, setIsMessageOpen] = useState(false);
+  const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const t = useT("application");
   const tE = useT("inbox");
 
@@ -66,9 +75,30 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
   const router = useRouter();
 
   if (user?.role !== "client") return null;
-  const handleApplicantMessage = (applicant: any) => {
-    setSelectedApplicant(applicant);
-    setIsMessageOpen(true);
+  const handleApplicantMessage = (app: any) => {
+    const key = `${app.job_id}-${app.helper_id}`;
+
+    setOpenChats((prev) => {
+      // chat already open → restore
+      if (prev.some((c) => c.key === key)) {
+        return prev.map((c) =>
+          c.key === key ? { ...c, minimized: false } : c,
+        );
+      }
+
+      // open new chat
+      return [
+        ...prev,
+        {
+          key,
+          jobId: app.job_id,
+          receiverId: app.helper_id,
+          title: `${app.user.first_name} ${app.user.last_name}`,
+          subtitle: app.user.email,
+          minimized: false,
+        },
+      ];
+    });
   };
 
   return (
@@ -185,16 +215,34 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
         onClose={closeModal}
         applicant={selectedApplicant}
       />
-      <Message
-        isOpen={isMessageOpen}
-        onClose={() => setIsMessageOpen(false)}
-        title={`${selectedApplicant?.user?.first_name} ${selectedApplicant?.user?.last_name}`}
-        subtitle={selectedApplicant?.user?.email}
-        jobId={selectedApplicant?.job_id}
-        receiverId={selectedApplicant?.helper_id}
-        expired={jobExpired}
-        expiredLabel={tE("chat.job_expired")}
-      />
+      <div className="fixed bottom-4 right-4 z-50 flex gap-3">
+        {openChats.map((chat, index) => (
+          <Message
+            key={chat.key}
+            mode="dock"
+            jobId={chat.jobId}
+            receiverId={chat.receiverId}
+            title={chat.title}
+            subtitle={chat.subtitle}
+            minimized={chat.minimized}
+            expired={jobExpired}
+            expiredLabel={tE("chat.job_expired")}
+            onMinimize={() =>
+              setOpenChats((prev) =>
+                prev.map((c) =>
+                  c.key === chat.key
+                    ? { ...c, minimized: !c.minimized } // 🔥 toggle
+                    : c,
+                ),
+              )
+            }
+            onClose={() =>
+              setOpenChats((prev) => prev.filter((c) => c.key !== chat.key))
+            }
+            style={{ right: index * 360 }}
+          />
+        ))}
+      </div>
     </aside>
   );
 }

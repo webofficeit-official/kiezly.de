@@ -27,13 +27,15 @@ interface ApplicantCardProps {
   openUserModal: (userId: string) => void;
   openUpdateModal: (applicant: Applicant) => void;
   isJobExpired: boolean;
+  onOpenChat?: (applicant: Applicant) => void; // ✅ ADD THIS
 }
 
 export default function ApplicantCard({
   applicant,
   openUserModal,
   openUpdateModal,
-  isJobExpired
+  isJobExpired,
+  onOpenChat
 }: ApplicantCardProps) {
   const getStatusClasses = (status: string) => {
     switch (status.toLowerCase()) {
@@ -68,7 +70,7 @@ export default function ApplicantCard({
     },
   ];
 
-  const [isMessageOpen, setIsMessageOpen] = useState(false);
+  // const [isMessageOpen, setIsMessageOpen] = useState(false);
 
   return (
     <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md transition-all duration-150 flex flex-col">
@@ -88,7 +90,7 @@ export default function ApplicantCard({
             {statusOptions.find((s) => s.value == applicant.status)?.label}
           </span>
           <button
-            onClick={() => setIsMessageOpen(true)}
+            onClick={() => onOpenChat(applicant)}
             className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-white hover:bg-black/80 transition-colors"
           >
             <MessageCircle className="h-4 w-4" />
@@ -147,7 +149,7 @@ export default function ApplicantCard({
         </div>
       </div>
 
-      <Message
+      {/* <Message
         isOpen={isMessageOpen}
         onClose={() => setIsMessageOpen(false)}
         title={`${applicant.user.first_name} ${applicant.user.last_name}`}
@@ -156,7 +158,7 @@ export default function ApplicantCard({
         receiverId={applicant.helper_id}
         expired={isJobExpired}
         expiredLabel={tE("chat.job_expired")}
-      />
+      /> */}
     </div>
   );
 }
