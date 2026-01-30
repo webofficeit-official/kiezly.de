@@ -85,9 +85,7 @@ export default function Message({
   const [loadingMore, setLoadingMore] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(false);
 
- const [position, setPosition] = useState(
-  initialPosition ?? { x: 0, y: 0 }
-);
+  const [position, setPosition] = useState(initialPosition ?? { x: 0, y: 0 });
 
   const dragRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -406,9 +404,11 @@ export default function Message({
             <div className="flex gap-2">
               <button
                 type="button"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
-                   onFocus?.();
                   onMinimize?.();
                   setNewMessage(false);
                 }}
