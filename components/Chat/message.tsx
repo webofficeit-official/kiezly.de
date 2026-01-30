@@ -76,6 +76,7 @@ export default function Message({
   if (!isDock && !isOpen) return null;
   const t = useT("messages");
 
+  const isDraggingRef = useRef(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState(false);
@@ -252,6 +253,8 @@ export default function Message({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    isDraggingRef.current = false;
+
     dragRef.current = {
       x: e.clientX - position.x,
       y: e.clientY - position.y,
@@ -264,6 +267,8 @@ export default function Message({
   const handleMouseMove = (e: MouseEvent) => {
     if (!dragRef.current) return;
 
+    isDraggingRef.current = true;
+
     setPosition({
       x: e.clientX - dragRef.current.x,
       y: e.clientY - dragRef.current.y,
@@ -272,6 +277,7 @@ export default function Message({
 
   const handleMouseUp = () => {
     dragRef.current = null;
+
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
   };
@@ -299,7 +305,16 @@ export default function Message({
                 </span>
               </div>
 
-              <button type="button" onClick={onClose}>
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
+              >
                 <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
@@ -384,8 +399,13 @@ export default function Message({
               ${newMessage && minimized && "animate-pulse ring-2 ring-red-500/40 bg-red-100"}
             `}
             onMouseDown={(e) => {
-              onFocus?.();
+              // drag ONLY
               handleMouseDown(e);
+            }}
+            onClick={() => {
+              // focus ONLY on click
+               if (isDraggingRef.current) return;
+              onFocus?.();
             }}
           >
             <div className="flex flex-col">
@@ -434,8 +454,13 @@ export default function Message({
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4 cursor-move"
                 onMouseDown={(e) => {
-                  onFocus?.();
+                  e.stopPropagation();
                   handleMouseDown(e);
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFocus?.();
+                  setNewMessage(false);
                 }}
               >
                 {messages.length > 0 ? (
@@ -488,8 +513,12 @@ export default function Message({
               <form
                 onSubmit={sendMessage}
                 onMouseDown={(e) => {
-                  onFocus?.();
                   handleMouseDown(e);
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFocus?.();
+                  setNewMessage(false);
                 }}
                 className="cursor-move"
               >
