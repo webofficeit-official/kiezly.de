@@ -27,6 +27,8 @@ type OpenChat = {
   title: string;
   subtitle: string;
   minimized: boolean;
+  zIndex: number;
+  initialPosition?: { x: number; y: number };
 };
 const getStatusClasses = (status: string) => {
   switch (status.toLowerCase()) {
@@ -59,6 +61,8 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   // const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [openChats, setOpenChats] = useState<OpenChat[]>([]);
+  const [topZIndex, setTopZIndex] = useState(100);
+
   const t = useT("application");
   const tE = useT("inbox");
 
@@ -78,26 +82,46 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
   const handleApplicantMessage = (app: any) => {
     const key = `${app.job_id}-${app.helper_id}`;
 
-    setOpenChats((prev) => {
-      // chat already open → restore
-      if (prev.some((c) => c.key === key)) {
-        return prev.map((c) =>
-          c.key === key ? { ...c, minimized: false } : c,
-        );
-      }
+    const existing = openChats.find((c) => c.key === key);
+    if (existing) {
+      focusChat(key);
+      return;
+    }
 
-      // open new chat
-      return [
-        ...prev,
-        {
-          key,
-          jobId: app.job_id,
-          receiverId: app.helper_id,
-          title: `${app.user.first_name} ${app.user.last_name}`,
-          subtitle: app.user.email,
-          minimized: false,
+    const offset = openChats.length * 30;
+    const nextZ = topZIndex + 1;
+
+    setTopZIndex(nextZ);
+
+    setOpenChats((prev) => [
+      ...prev,
+      {
+        key,
+        jobId: app.job_id,
+        receiverId: app.helper_id,
+        title: `${app.user.first_name} ${app.user.last_name}`,
+        subtitle: app.user.email,
+        minimized: false,
+        zIndex: nextZ,
+        initialPosition: {
+          x: offset,
+          y: -offset,
         },
-      ];
+      },
+    ]);
+  };
+
+  const focusChat = (key: string) => {
+    setTopZIndex((z) => {
+      const nextZ = z + 1;
+
+      setOpenChats((prev) =>
+        prev.map((c) =>
+          c.key === key ? { ...c, zIndex: nextZ, minimized: false } : c,
+        ),
+      );
+
+      return nextZ;
     });
   };
 
@@ -215,8 +239,8 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
         onClose={closeModal}
         applicant={selectedApplicant}
       />
-      <div className="fixed bottom-4 right-4 z-50 flex gap-3">
-        {openChats.map((chat, index) => (
+      <div className="fixed bottom-4 right-4 z-50">
+        {openChats.map((chat) => (
           <Message
             key={chat.key}
             mode="dock"
@@ -227,19 +251,19 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
             minimized={chat.minimized}
             expired={jobExpired}
             expiredLabel={tE("chat.job_expired")}
+            zIndex={chat.zIndex}
+            initialPosition={chat.initialPosition}
+            onFocus={() => focusChat(chat.key)}
             onMinimize={() =>
               setOpenChats((prev) =>
                 prev.map((c) =>
-                  c.key === chat.key
-                    ? { ...c, minimized: !c.minimized } // 🔥 toggle
-                    : c,
+                  c.key === chat.key ? { ...c, minimized: !c.minimized } : c,
                 ),
               )
             }
             onClose={() =>
               setOpenChats((prev) => prev.filter((c) => c.key !== chat.key))
             }
-            style={{ right: index * 360 }}
           />
         ))}
       </div>

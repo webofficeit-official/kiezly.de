@@ -24,6 +24,8 @@ type OpenChat = {
   title: string;
   subtitle: string;
   minimized: boolean;
+  zIndex: number;
+  initialPosition?: { x: number; y: number };
 };
 
 export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
@@ -40,6 +42,8 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
   const [pageSize, setPageSize] = useState<number>(12);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [openChats, setOpenChats] = useState<OpenChat[]>([]);
+  const [topZIndex, setTopZIndex] = useState(100);
+
   const { push } = useLocalizedRouter();
   const t = useT("application");
 
@@ -150,29 +154,61 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
     );
   }
 
-  const handleOpenChat = (applicant: any) => {
-    const key = `${applicant.job_id}-${applicant.helper_id}`;
+ const handleOpenChat = (applicant: any) => {
+  const key = `${applicant.job_id}-${applicant.helper_id}`;
 
-    setOpenChats((prev) => {
-      if (prev.some((c) => c.key === key)) {
-        return prev.map((c) =>
-          c.key === key ? { ...c, minimized: false } : c,
-        );
-      }
+  // STEP 1: check existing chat
+  const existing = openChats.find((c) => c.key === key);
+  if (existing) {
+    focusChat(key);
+    return;
+  }
 
-      return [
-        ...prev,
-        {
-          key,
-          jobId: applicant.job_id,
-          receiverId: applicant.helper_id,
-          title: `${applicant.user.first_name} ${applicant.user.last_name}`,
-          subtitle: applicant.user.email,
-          minimized: false,
-        },
-      ];
-    });
-  };
+  // STEP 2: compute values
+  const offset = openChats.length * 30;
+  const nextZ = topZIndex + 1;
+
+  // STEP 3: update both states safely
+  setTopZIndex(nextZ);
+  setOpenChats((prev) => [
+    ...prev,
+    {
+      key,
+      jobId: applicant.job_id,
+      receiverId: applicant.helper_id,
+      title: `${applicant.user.first_name} ${applicant.user.last_name}`,
+      subtitle: applicant.user.email,
+      minimized: false,
+      zIndex: nextZ,
+      initialPosition: {
+        x: offset,
+        y: -offset,
+      },
+    },
+  ]);
+};
+
+
+
+
+
+  const focusChat = (key: string) => {
+  setTopZIndex((z) => {
+    const nextZ = z + 1;
+
+    setOpenChats((prev) =>
+      prev.map((c) =>
+        c.key === key
+          ? { ...c, zIndex: nextZ, minimized: false }
+          : c
+      )
+    );
+
+    return nextZ;
+  });
+};
+
+
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -300,7 +336,7 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
         )}
       </main>
       <div className="fixed bottom-4 right-4 z-50 flex gap-3">
-        {openChats.map((chat, index) => (
+        {openChats.map((chat) => (
           <Message
             key={chat.key}
             mode="dock"
@@ -311,6 +347,9 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             expired={jobExpired}
             expiredLabel={t("chat.job_expired")}
             minimized={chat.minimized}
+            zIndex={chat.zIndex}
+            initialPosition={chat.initialPosition}
+            onFocus={() => focusChat(chat.key)}
             onMinimize={() =>
               setOpenChats((prev) =>
                 prev.map((c) =>
@@ -321,7 +360,6 @@ export default function ApplicantsPanelList({ params }: ApplicantsPageProps) {
             onClose={() =>
               setOpenChats((prev) => prev.filter((c) => c.key !== chat.key))
             }
-            style={{ right: index * 360 }}
           />
         ))}
       </div>

@@ -1,4 +1,15 @@
-import { BellOff, Maximize, Maximize2, MessageCircle, MessageSquareOff, Minimize, Minimize2, Plus, Send, X } from "lucide-react";
+import {
+  BellOff,
+  Maximize,
+  Maximize2,
+  MessageCircle,
+  MessageSquareOff,
+  Minimize,
+  Minimize2,
+  Plus,
+  Send,
+  X,
+} from "lucide-react";
 import { Applicant } from "../job/job-details/applicant-card/applicant-card";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -27,6 +38,9 @@ type MessageProps = {
   minimized?: boolean;
   onMinimize?: () => void;
   style?: React.CSSProperties;
+  zIndex?: number;
+  onFocus?: () => void;
+  initialPosition?: { x: number; y: number };
 };
 
 type Message = {
@@ -54,6 +68,9 @@ export default function Message({
   minimized = false,
   onMinimize,
   style,
+  zIndex,
+  onFocus,
+  initialPosition = { x: 0, y: 0 },
 }: MessageProps) {
   const isDock = mode === "dock";
   if (!isDock && !isOpen) return null;
@@ -68,7 +85,10 @@ export default function Message({
   const [loadingMore, setLoadingMore] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(false);
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+ const [position, setPosition] = useState(
+  initialPosition ?? { x: 0, y: 0 }
+);
+
   const dragRef = useRef<{ x: number; y: number } | null>(null);
 
   const filters = useMemo(() => ({ page, page_size: 10 }), [page]);
@@ -201,7 +221,7 @@ export default function Message({
          3️ SAFE APPEND
       ========================= */
       setMessages((prev) => [...prev, msg]);
-      setNewMessage(true)
+      setNewMessage(true);
 
       requestAnimationFrame(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -268,11 +288,14 @@ export default function Message({
             <div className="flex items-center justify-between border-b px-4 py-3">
               <div className="flex flex-col">
                 <span className="font-semibold text-gray-800">{title}</span>
-                <span className="text-xs text-muted-foreground">{subtitle}</span>
+                <span className="text-xs text-muted-foreground">
+                  {subtitle}
+                </span>
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <span
-                    className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
-                      }`}
+                    className={`h-2 w-2 rounded-full ${
+                      isOnline ? "bg-green-500" : "bg-gray-400"
+                    }`}
                   />
                   {isOnline ? "Online" : "Offline"}
                 </span>
@@ -292,17 +315,19 @@ export default function Message({
               {messages.map((msg, i) => (
                 <div
                   key={msg.id ?? i}
-                  className={`flex ${msg.recipient_id === receiverId
-                    ? "justify-end"
-                    : "justify-start"
-                    }`}
+                  className={`flex ${
+                    msg.recipient_id === receiverId
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
                 >
                   <div className="max-w-[75%]">
                     <div
-                      className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
-                        ? "bg-primary text-white rounded-br-sm"
-                        : "bg-white border rounded-bl-sm"
-                        }`}
+                      className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                        msg.recipient_id === receiverId
+                          ? "bg-primary text-white rounded-br-sm"
+                          : "bg-white border rounded-bl-sm"
+                      }`}
                     >
                       {msg.body}
                     </div>
@@ -352,6 +377,7 @@ export default function Message({
           style={{
             transform: `translate(${position.x}px, ${position.y}px)`,
             left: "50%",
+            zIndex: zIndex ?? 1,
           }}
         >
           {/* Header */}
@@ -359,15 +385,19 @@ export default function Message({
             className={`relative flex items-center justify-between border-b px-4 py-3 cursor-move select-none
               ${newMessage && minimized && "animate-pulse ring-2 ring-red-500/40 bg-red-100"}
             `}
-            onMouseDown={handleMouseDown}
+            onMouseDown={(e) => {
+              onFocus?.();
+              handleMouseDown(e);
+            }}
           >
             <div className="flex flex-col">
               <span className="font-semibold text-gray-800">{title}</span>
               <span className="text-xs text-muted-foreground">{subtitle}</span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <span
-                  className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
-                    }`}
+                  className={`h-2 w-2 rounded-full ${
+                    isOnline ? "bg-green-500" : "bg-gray-400"
+                  }`}
                 />
                 {isOnline ? "Online" : "Offline"}
               </span>
@@ -378,11 +408,16 @@ export default function Message({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                   onFocus?.();
                   onMinimize?.();
-                  setNewMessage(false)
+                  setNewMessage(false);
                 }}
               >
-                {minimized ? <Maximize2 className="h-5 w-5" /> : <Minimize2 className="h-5 w-5" />}
+                {minimized ? (
+                  <Maximize2 className="h-5 w-5" />
+                ) : (
+                  <Minimize2 className="h-5 w-5" />
+                )}
               </button>
 
               <button type="button" onClick={onClose}>
@@ -398,32 +433,41 @@ export default function Message({
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto bg-muted/40 p-4 space-y-4 cursor-move"
-                onMouseDown={handleMouseDown}
+                onMouseDown={(e) => {
+                  onFocus?.();
+                  handleMouseDown(e);
+                }}
               >
-                {messages.length > 0 ? (<>{messages.map((msg, i) => (
-                  <div
-                    key={msg.id ?? i}
-                    className={`flex ${msg.recipient_id === receiverId
-                      ? "justify-end"
-                      : "justify-start"
-                      }`}
-                  >
-                    <div className="max-w-[75%]">
+                {messages.length > 0 ? (
+                  <>
+                    {messages.map((msg, i) => (
                       <div
-                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
-                          ? "bg-primary text-white rounded-br-sm"
-                          : "bg-white border rounded-bl-sm"
-                          }`}
+                        key={msg.id ?? i}
+                        className={`flex ${
+                          msg.recipient_id === receiverId
+                            ? "justify-end"
+                            : "justify-start"
+                        }`}
                       >
-                        {msg.body}
+                        <div className="max-w-[75%]">
+                          <div
+                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                              msg.recipient_id === receiverId
+                                ? "bg-primary text-white rounded-br-sm"
+                                : "bg-white border rounded-bl-sm"
+                            }`}
+                          >
+                            {msg.body}
+                          </div>
+                          <p className="mt-1 text-[10px] text-muted-foreground">
+                            {formatTime(msg.created_at)}
+                          </p>
+                        </div>
                       </div>
-                      <p className="mt-1 text-[10px] text-muted-foreground">
-                        {formatTime(msg.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                  <div ref={messagesEndRef} /></>) : (
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </>
+                ) : (
                   <>
                     <div className="px-6 py-10 flex flex-col items-center text-center gap-2 text-neutral-500">
                       <MessageSquareOff className="h-8 w-8 text-neutral-400" />
@@ -436,13 +480,19 @@ export default function Message({
                         {t("chat.empty-description")}
                       </p>
                     </div>
-
                   </>
                 )}
               </div>
 
               {/* Input / Expired */}
-              <form onSubmit={sendMessage} onMouseDown={handleMouseDown} className="cursor-move">
+              <form
+                onSubmit={sendMessage}
+                onMouseDown={(e) => {
+                  onFocus?.();
+                  handleMouseDown(e);
+                }}
+                className="cursor-move"
+              >
                 <div className="border-t p-3">
                   {expired ? (
                     <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
@@ -473,5 +523,4 @@ export default function Message({
       )}
     </>
   );
-
 }
