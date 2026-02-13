@@ -25,7 +25,7 @@ export default function ApplicationCard({
   const withdrawMutation = useWithdrawApplication();
   const router = useRouter();
   const { push } = useLocalizedRouter();
-
+  const status = application?.data?.application?.status;
   const t = useT("application");
 
   return (
@@ -63,43 +63,46 @@ export default function ApplicationCard({
               </span>
             </p>
           )}
-          <div className="flex gap-3">
-            {!withdraw && (
-              <Button
-                onClick={() =>
-                  logged ? setIsModalOpen(true) : push("/signup")
-                }
-                className="w-full rounded-xl"
-              >
-                {buttonLabel}
-              </Button>
-            )}
-            {applied && (
-              <AlertBox
-                trigger={
-                  <Button variant="destructive" className="w-full rounded-xl">
-                    {t("apply-panel.card.withdraw.trigger")}
-                  </Button>
-                }
-                title={t("apply-panel.card.withdraw.title")}
-                description={t("apply-panel.card.withdraw.description", {
-                  title: jobDetails?.title,
-                })}
-                confirmText={t("apply-panel.card.withdraw.confirm")}
-                cancelText={t("apply-panel.card.withdraw.cancel")}
-                onConfirm={() =>
-                  withdrawMutation.mutate(application.data.application.id, {
-                    onSuccess: () =>
-                      toast.success(t("apply-panel.card.withdraw.success")),
-                    onError: (err: any) =>
-                      toast.error(
-                        err?.message || t("apply-panel.card.withdraw.failed")
-                      ),
-                  })
-                }
-              />
-            )}
-          </div>
+          {status !== "shortlisted" && status !== "accepted" && (
+            <div className="flex gap-3">
+              {!withdraw && (
+                <Button
+                  onClick={() =>
+                    logged ? setIsModalOpen(true) : push("/signup")
+                  }
+                  className="w-full rounded-xl"
+                >
+                  {buttonLabel}
+                </Button>
+              )}
+              {applied && (
+                <AlertBox
+                  trigger={
+                    <Button variant="destructive" className="w-full rounded-xl">
+                      {t("apply-panel.card.withdraw.trigger")}
+                    </Button>
+                  }
+                  title={t("apply-panel.card.withdraw.title")}
+                  description={t("apply-panel.card.withdraw.description", {
+                    title: jobDetails?.title,
+                  })}
+                  confirmText={t("apply-panel.card.withdraw.confirm")}
+                  cancelText={t("apply-panel.card.withdraw.cancel")}
+                  onConfirm={() =>
+                    withdrawMutation.mutate(application.data.application.id, {
+                      onSuccess: () =>
+                        toast.success(t("apply-panel.card.withdraw.success")),
+                      onError: (err: any) =>
+                        toast.error(
+                          err?.message || t("apply-panel.card.withdraw.failed"),
+                        ),
+                    })
+                  }
+                />
+              )}
+            </div>
+          )}
+
           <ApplicationModel
             isModalOpen={isModalOpen}
             setIsModalOpen={setIsModalOpen}
