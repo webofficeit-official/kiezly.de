@@ -142,7 +142,7 @@ export default function Page() {
     if (slug && existingJob?.job) {
       setMode("edit");
       setJobId(existingJob.job.id);
-      replaceForm(mapJobToForm(existingJob.job)); // ✅ include ALL fields
+      replaceForm(mapJobToForm(existingJob.job)); //  include ALL fields
     } else if (!slug) {
       setMode("create");
     }

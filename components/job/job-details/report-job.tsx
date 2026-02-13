@@ -80,8 +80,8 @@ export default function ReportJob({ jobId, t }: ReportJobProps) {
         }
 
         try {
-            // Here you would typically make an API call to submit the report
-            console.log('Submitting report:', { jobId, reason, description });
+            // // Here you would typically make an API call to submit the report
+            // console.log('Submitting report:', { jobId, reason, description });
 
             useReport.mutate({
                 jobId,

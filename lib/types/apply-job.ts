@@ -40,6 +40,7 @@ export interface Application {
   created_at: string;
   updated_at: string;
   user: User;
+  unread_count?: number;
 }
 
 export interface MyApplications {

@@ -5,19 +5,29 @@
     "jobs": "Jobs",
     "become-helper": "Werden Sie Helfer",
     "post-mini-job": "Minijob veröffentlichen",
-    "view-all-notifications": "Alle Benachrichtigungen anzeigen",
     "my-profile": "Mein Profil",
+    "my-inbox": "Mein Posteingang",
     "change-password": "Kennwort ändern",
     "my-jobs": "Meine Jobs",
     "saved-jobs": "Gespeicherte Jobs",
     "applied-jobs": "Angewandte Jobs",
     "reported-jobs": "Gemeldete Jobs",
     "logout": "Abmelden",
-    "notifications": "Benachrichtigungen",
     "close": "Schließen",
     "impressum": "Impressum",
     "privacy": "Datenschutz",
     "terms": "Geschäftsbedingungen",
     "signin":"Einloggen",
-    "signup":"Melden Sie sich an"
+    "signup":"Melden Sie sich an",
+    "notifications": {
+        "title": "Benachrichtigungen",
+        "empty-title": "Keine Benachrichtigungen",
+        "empty-description": "Sie sind auf dem neuesten Stand. Wir benachrichtigen Sie, sobald etwas Neues eintrifft.",
+        "clear-all": "Alle Benachrichtigungen löschen",
+        "view-all": "Alle Benachrichtigungen anzeigen",
+        "clear-confirm-title": "Alle Benachrichtigungen löschen?",
+        "clear-confirm-description": "Dadurch werden alle Benachrichtigungen entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "confirm": "Bestätigen",
+    "cancel": "Stornieren"
 }
