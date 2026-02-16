@@ -76,6 +76,20 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
     setSelectedApplicant(null);
   };
 
+  const statusOptions = [
+    { label: t("applicants-panel.status.options.applied"), value: "applied" },
+    {
+      label: t("applicants-panel.status.options.shortlisted"),
+      value: "shortlisted",
+    },
+    { label: t("applicants-panel.status.options.accepted"), value: "accepted" },
+    { label: t("applicants-panel.status.options.rejected"), value: "rejected" },
+    {
+      label: t("applicants-panel.status.options.withdrawn"),
+      value: "withdrawn",
+    },
+  ];
+
   const router = useRouter();
 
   if (user?.role !== "client") return null;
@@ -165,17 +179,20 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
                           app.status,
                         )}`}
                       >
-                        {app.status}
+                        {statusOptions.find((s) => s.value == app.status)?.label}
                       </span>
+                      {
+                        (app.status === 'shortlisted' || app.status === 'accepted') && 
                       <button
                         onClick={() => handleApplicantMessage(app)}
                         className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-white hover:bg-black/80 transition-colors"
                       >
                         <MessageCircle className="h-4 w-4" />
                         <span className="text-xs font-bold uppercase tracking-wide">
-                          Chat
+                          {t("applicants.chat")}
                         </span>
                       </button>
+                      }
                     </div>
                   </div>
 

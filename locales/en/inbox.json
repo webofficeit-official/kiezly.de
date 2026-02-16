@@ -19,5 +19,16 @@
         "no_applicants": {
             "title": "No applicants yet for this job"
         }
+    },
+    "reviews": {
+        "rating": {
+            "title": "Rating",
+            "empty": "Tap to rate"
+        },
+        "review": {
+            "description": "Describe your experience..."
+        },
+        "description": "Please select a star rating to enable sending.",
+        "success": "Review submitted successfully!"
     }
 }

@@ -89,15 +89,18 @@ export default function ApplicantCard({
           <span className="text-[10px] font-black px-2 py-0.5 rounded border border-black uppercase tracking-tighter bg-white text-black">
             {statusOptions.find((s) => s.value == applicant.status)?.label}
           </span>
-          <button
-            onClick={() => onOpenChat(applicant)}
-            className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-white hover:bg-black/80 transition-colors"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-xs font-bold uppercase tracking-wide">
-              Chat
-            </span>
-          </button>
+          {
+            (applicant.status === 'shortlisted' || applicant.status === 'accepted') &&
+            <button
+              onClick={() => onOpenChat(applicant)}
+              className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-white hover:bg-black/80 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-wide">
+                {t("applicants.chat")}
+              </span>
+            </button>
+          }
         </div>
       </div>
 

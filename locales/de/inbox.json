@@ -19,5 +19,16 @@
         "no_applicants": {
             "title": "Noch keine Bewerber für diesen Job"
         }
+    },
+    "reviews": {
+        "rating": {
+            "title": "Bewertung",
+            "empty": "Zum Bewerten tippen"
+        },
+        "review": {
+            "description": "Beschreiben Sie Ihre Erfahrung..."
+        },
+        "description": "Bitte wählen Sie eine Sternebewertung, um die Sendung zu aktivieren.",
+        "success": "Bewertung erfolgreich eingereicht!"
     }
 }

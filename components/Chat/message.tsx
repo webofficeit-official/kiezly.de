@@ -22,6 +22,7 @@ import {
 } from "@/lib/react-query/queries/message";
 import socket from "@/lib/socket";
 import { useT } from "@/app/[locale]/layout";
+import RatingBox from "./RatingBox";
 
 dayjs.extend(relativeTime);
 
@@ -297,9 +298,8 @@ export default function Message({
                 </span>
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <span
-                    className={`h-2 w-2 rounded-full ${
-                      isOnline ? "bg-green-500" : "bg-gray-400"
-                    }`}
+                    className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
+                      }`}
                   />
                   {isOnline ? "Online" : "Offline"}
                 </span>
@@ -328,19 +328,17 @@ export default function Message({
               {messages.map((msg, i) => (
                 <div
                   key={msg.id ?? i}
-                  className={`flex ${
-                    msg.recipient_id === receiverId
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
+                  className={`flex ${msg.recipient_id === receiverId
+                    ? "justify-end"
+                    : "justify-start"
+                    }`}
                 >
                   <div className="max-w-[75%]">
                     <div
-                      className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                        msg.recipient_id === receiverId
-                          ? "bg-primary text-white rounded-br-sm"
-                          : "bg-white border rounded-bl-sm"
-                      }`}
+                      className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
+                        ? "bg-primary text-white rounded-br-sm"
+                        : "bg-white border rounded-bl-sm"
+                        }`}
                     >
                       {msg.body}
                     </div>
@@ -354,14 +352,16 @@ export default function Message({
             </div>
 
             {/* Input / Expired */}
-            <form onSubmit={sendMessage}>
+            {expired ? (
               <div className="border-t p-3">
-                {expired ? (
-                  <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
-                    <span>🔒</span>
-                    <span>{expiredLabel}</span>
-                  </div>
-                ) : (
+                <RatingBox
+                  jobId={jobId}
+                  revieweeId={receiverId}
+                />
+              </div>
+            ) : (
+              <form onSubmit={sendMessage}>
+                <div className="border-t p-3">
                   <div className="flex gap-2">
                     <input
                       value={message}
@@ -376,9 +376,9 @@ export default function Message({
                       <Send className="h-4 w-4" />
                     </button>
                   </div>
-                )}
-              </div>
-            </form>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -404,7 +404,7 @@ export default function Message({
             }}
             onClick={() => {
               // focus ONLY on click
-               if (isDraggingRef.current) return;
+              if (isDraggingRef.current) return;
               onFocus?.();
             }}
           >
@@ -413,9 +413,8 @@ export default function Message({
               <span className="text-xs text-muted-foreground">{subtitle}</span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <span
-                  className={`h-2 w-2 rounded-full ${
-                    isOnline ? "bg-green-500" : "bg-gray-400"
-                  }`}
+                  className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"
+                    }`}
                 />
                 {isOnline ? "Online" : "Offline"}
               </span>
@@ -468,19 +467,17 @@ export default function Message({
                     {messages.map((msg, i) => (
                       <div
                         key={msg.id ?? i}
-                        className={`flex ${
-                          msg.recipient_id === receiverId
-                            ? "justify-end"
-                            : "justify-start"
-                        }`}
+                        className={`flex ${msg.recipient_id === receiverId
+                          ? "justify-end"
+                          : "justify-start"
+                          }`}
                       >
                         <div className="max-w-[75%]">
                           <div
-                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                              msg.recipient_id === receiverId
-                                ? "bg-primary text-white rounded-br-sm"
-                                : "bg-white border rounded-bl-sm"
-                            }`}
+                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === receiverId
+                              ? "bg-primary text-white rounded-br-sm"
+                              : "bg-white border rounded-bl-sm"
+                              }`}
                           >
                             {msg.body}
                           </div>
@@ -524,9 +521,11 @@ export default function Message({
               >
                 <div className="border-t p-3">
                   {expired ? (
-                    <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
-                      <span>🔒</span>
-                      <span>{expiredLabel}</span>
+                    <div className="border-t p-3">
+                      <RatingBox
+                        jobId={jobId}
+                        revieweeId={receiverId}
+                      />
                     </div>
                   ) : (
                     <div className="flex gap-2">

@@ -27,6 +27,7 @@ import { Job } from "@/lib/types/job";
 import { InboxJob } from "@/lib/types/inbox";
 import { useQueryClient } from "@tanstack/react-query";
 import Message from "./Chat/message";
+import RatingBox from "./Chat/RatingBox";
 
 dayjs.extend(relativeTime);
 
@@ -543,10 +544,10 @@ export default function MyInbox() {
                     }
                   }}
                   className={`w-full p-4 text-left border-b transition-colors flex justify-between ${isExpired || d.status == "closed" || d.status == "expired"
-                      ? "bg-gray-100 text-gray-400 cursor-pointer"
-                      : selectedJobId === d.id
-                        ? "bg-gray-50 border-r-4 border-r-gray-500"
-                        : "hover:bg-gray-100 cursor-pointer"
+                    ? "bg-gray-100 text-gray-400 cursor-pointer"
+                    : selectedJobId === d.id
+                      ? "bg-gray-50 border-r-4 border-r-gray-500"
+                      : "hover:bg-gray-100 cursor-pointer"
                     }`}
                 >
                   <div>
@@ -608,8 +609,8 @@ export default function MyInbox() {
                       key={a.id}
                       onClick={() => handleClientApplicantSelect(a)}
                       className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
-                          ? "bg-gray-100 border-r-4 border-r-gray-500"
-                          : "hover:bg-gray-50"
+                        ? "bg-gray-100 border-r-4 border-r-gray-500"
+                        : "hover:bg-gray-50"
                         }`}
                     >
                       <div className="relative flex items-center justify-between">
@@ -652,8 +653,8 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className={`
-    hidden md:flex flex-grow flex-col bg-white
-  `}
+            hidden md:flex flex-grow flex-col bg-white
+          `}
         >
           {(userType === "helper" && selectedJobId) ||
             (userType === "client" && selectedApplicantion) ? (
@@ -751,23 +752,23 @@ export default function MyInbox() {
                       <div
                         key={i}
                         className={`flex ${msg.recipient_id === recipientId
-                            ? "justify-end"
-                            : "justify-start"
+                          ? "justify-end"
+                          : "justify-start"
                           }`}
                       >
                         <div className="max-w-[75%]">
                           <div
                             className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
-                                ? "bg-primary text-white rounded-br-sm"
-                                : "bg-white border rounded-bl-sm"
+                              ? "bg-primary text-white rounded-br-sm"
+                              : "bg-white border rounded-bl-sm"
                               }`}
                           >
                             {msg.body}
                           </div>
                           <p
                             className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
-                                ? "text-right"
-                                : "text-left"
+                              ? "text-right"
+                              : "text-left"
                               }`}
                           >
                             {formatTime(msg.created_at)}
@@ -780,14 +781,16 @@ export default function MyInbox() {
               </div>
 
               {/* Chat Input */}
-              <form onSubmit={sendMessage}>
+              {selectedJobExpired ? (
                 <div className="border-t p-3">
-                  {selectedJobExpired ? (
-                    <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
-                      <span>🔒</span>
-                      <span>{t("chat.job_expired")}</span>
-                    </div>
-                  ) : (
+                  <RatingBox 
+                    revieweeId={userType === "client" ? selectedApplicantion?.user?.id : selectedJob?.client_id}
+                    jobId={selectedJobId}
+                  />
+                </div>
+              ) : (
+                <form onSubmit={sendMessage}>
+                  <div className="border-t p-3">
                     <div className="flex gap-2">
                       <input
                         value={message}
@@ -802,10 +805,9 @@ export default function MyInbox() {
                         <Send className="h-4 w-4" />
                       </button>
                     </div>
-                  )}
-                </div>
-
-              </form>
+                  </div>
+                </form>
+              )}
             </>
           ) : (
             <div className="flex h-full flex-col items-center justify-center text-gray-400">
