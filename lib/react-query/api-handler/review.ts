@@ -23,3 +23,13 @@ export const getReviewApi = async (
   });
   return response.data;
 };
+
+export const getUserReviewApi = async (
+  userId: string,
+  params: Record<string, any>
+) => {
+  const response = await apiClient.get(`/reviews/${userId}`, {
+    params
+  });
+  return response.data;
+};

@@ -13,13 +13,13 @@ interface UserProfileProps {
   application?: any;
   onClose?: any;
   onOpenReviews?: any
+  reviewsCount?: number
+  rating?: number
 }
 
-export default function UserProfile({ user, onClose, onOpenReviews }: UserProfileProps) {
+export default function UserProfile({ user, onClose, onOpenReviews, reviewsCount, rating }: UserProfileProps) {
   if (!user) return null;
   const t = useT("application")
-
-  const [rating, setRating] = useState(2.5)
 
   return (
     <>
@@ -91,28 +91,32 @@ export default function UserProfile({ user, onClose, onOpenReviews }: UserProfil
                   {user.first_name} {user.last_name}
                 </h2>
 
-                {/* Interactive Rating Section */}
-                <div
-                  className="group relative flex items-center gap-3 cursor-pointer rounded-lg -ml-2 p-2 transition-all hover:bg-zinc-100 active:scale-95"
-                  onClick={() => onOpenReviews(true)}
-                  title="Click to view all reviews"
-                >
-                  <div className="flex items-center gap-1">
-                    <StarRating rating={rating} size={4} />
-                  </div>
+                {
+                  reviewsCount > 0 && <>
+                    {/* Interactive Rating Section */}
+                    <div
+                      className="group relative flex items-center gap-3 cursor-pointer rounded-lg -ml-2 p-2 transition-all hover:bg-zinc-100 active:scale-95"
+                      onClick={() => onOpenReviews(true)}
+                      title="Click to view all reviews"
+                    >
+                      <div className="flex items-center gap-1">
+                        <StarRating rating={rating} size={4} />
+                      </div>
 
-                  <div className="flex items-center gap-2 border-l border-zinc-300 pl-3">
-                    <span className="text-sm font-bold text-zinc-900">{rating}</span>
-                    <span className="text-xs font-medium text-zinc-500 underline underline-offset-4 decoration-zinc-300 group-hover:text-black group-hover:decoration-black">
-                      (10 reviews)
-                    </span>
-                  </div>
+                      <div className="flex items-center gap-2 border-l border-zinc-300 pl-3">
+                        <span className="text-sm font-bold text-zinc-900">{rating}</span>
+                        <span className="text-xs font-medium text-zinc-500 underline underline-offset-4 decoration-zinc-300 group-hover:text-black group-hover:decoration-black">
+                          ({reviewsCount} reviews)
+                        </span>
+                      </div>
 
-                  {/* Modern Tooltip - Appears on Hover */}
-                  <div className="absolute -bottom-8 left-0 scale-0 rounded bg-zinc-900 px-2 py-1 text-[10px] font-medium text-white transition-all group-hover:scale-100 z-10 whitespace-nowrap">
-                    Click to open reviews
-                  </div>
-                </div>
+                      {/* Modern Tooltip - Appears on Hover */}
+                      <div className="absolute -bottom-8 left-0 scale-0 rounded bg-zinc-900 px-2 py-1 text-[10px] font-medium text-white transition-all group-hover:scale-100 z-10 whitespace-nowrap">
+                        Click to open reviews
+                      </div>
+                    </div>
+                  </>
+                }
               </div>
 
               {/* Close Button with enhanced hover */}

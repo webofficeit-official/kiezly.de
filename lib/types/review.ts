@@ -1,3 +1,6 @@
+import { UserProfile } from "@/components/MyProfile";
+import { Job } from "./job";
+
 export interface Review {
   id: number;
   job_id: string;
@@ -7,6 +10,9 @@ export interface Review {
   comment: string;
   visibility: boolean;
   created_at: Date;
+  reviewee: UserProfile;
+  reviewer: UserProfile;
+  job: Job;
 }
 
 export interface SubmitReviewData {
@@ -27,5 +33,18 @@ export type ReviewApiResponse = {
     message: string;
     data: {
         review?: Review
+    };
+};
+
+export type UserReviewApiResponse = {
+    status: boolean;
+    message: string;
+    data: {
+        items?: Review[]
+        rating?: number
+        page?: number
+        page_size?: number
+        total_items?: number
+        total_pages?: number
     };
 };
