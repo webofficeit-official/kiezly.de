@@ -14,8 +14,8 @@ interface ApplicantDetailModalProps {
     userId: string | null;
 }
 
-type Filters = {
-  page: number; // 0..50
+export type ReviewFilters = {
+  page: number;
   page_size: number;
   sort_by?: string;
   sort_order?: string;
@@ -30,8 +30,9 @@ export default function ApplicantDetailModal({ isOpen, onClose, userId }: Applic
     const [userRatings, setUserRatings] = useState([])
     const [rating, setRating] = useState(0)
     const [totalRatings, setTotalRatings] = useState(0)
+    const [totalPages, setTotalPages] = useState(1);
 
-    const [filters, setFilters] = useState<Filters>({ page: 1, page_size: 2 });
+    const [filters, setFilters] = useState<ReviewFilters>({ page: 1, page_size: 5, sort_order: "DESC", sort_by: 'created_at' });
 
     const { data: ratings, isLoading: ratingsLoading } = useGetUserReviews(userId, filters, {
         enabled: !!userId,
@@ -43,7 +44,9 @@ export default function ApplicantDetailModal({ isOpen, onClose, userId }: Applic
         setUserRatings(ratings.data.items)
         setTotalRatings(ratings.data.total_items)
         setRating(ratings?.data.rating)
+        setTotalPages(ratings?.data.total_pages);
         setFilters({
+            ...filters,
             page: ratings?.data.page,
             page_size: ratings?.data.page_size
         })
@@ -90,7 +93,15 @@ export default function ApplicantDetailModal({ isOpen, onClose, userId }: Applic
                             <div className="fixed inset-0 z-[60] flex items-center justify-center md:justify-end md:pointer-events-none">
                                 {/* Mobile Background (White) or Desktop Transparent */}
                                 <div className="w-full h-full md:h-auto md:w-[450px] md:mr-8 md:mt-12 bg-white md:rounded-2xl shadow-2xl border-l border-zinc-100 pointer-events-auto animate-in slide-in-from-right-5">
-                                    <ReviewSidePanel onClose={() => setShowReviews(false)} userId={user.id} userRatings={userRatings} />
+                                    <ReviewSidePanel 
+                                        onClose={() => setShowReviews(false)} 
+                                        userId={user.id} 
+                                        userRatings={userRatings} 
+                                        filters={filters} 
+                                        setFilters={setFilters}
+                                        totalItems={ratings?.data?.total_items}
+                                        totalPages={ratings?.data?.total_pages}
+                                    />
                                 </div>
                             </div>
                         )}
