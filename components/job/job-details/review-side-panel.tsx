@@ -64,7 +64,7 @@ export function ReviewSidePanel({
         if (sort_by === "created_at" && sort_order === "DESC") return "latest"
         else if (sort_by === "created_at" && sort_order === "ASC") return "oldest"
         else if (sort_by === "rating" && sort_order === "DESC") return "positive"
-        else return "latest"
+        else return "negative"
     }
 
     return (
