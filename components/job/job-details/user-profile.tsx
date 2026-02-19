@@ -20,6 +20,7 @@ interface UserProfileProps {
 export default function UserProfile({ user, onClose, onOpenReviews, reviewsCount, rating }: UserProfileProps) {
   if (!user) return null;
   const t = useT("application")
+  const r = useT("reviews")
 
   return (
     <>
@@ -97,7 +98,7 @@ export default function UserProfile({ user, onClose, onOpenReviews, reviewsCount
                     <div
                       className="group relative flex items-center gap-3 cursor-pointer rounded-lg -ml-2 p-2 transition-all hover:bg-zinc-100 active:scale-95"
                       onClick={() => onOpenReviews(true)}
-                      title="Click to view all reviews"
+                      title={r("user.title")}
                     >
                       <div className="flex items-center gap-1">
                         <StarRating rating={rating} size={4} />
@@ -106,13 +107,13 @@ export default function UserProfile({ user, onClose, onOpenReviews, reviewsCount
                       <div className="flex items-center gap-2 border-l border-zinc-300 pl-3">
                         <span className="text-sm font-bold text-zinc-900">{rating}</span>
                         <span className="text-xs font-medium text-zinc-500 underline underline-offset-4 decoration-zinc-300 group-hover:text-black group-hover:decoration-black">
-                          ({reviewsCount} reviews)
+                          {r("user.total", { count: reviewsCount })}
                         </span>
                       </div>
 
                       {/* Modern Tooltip - Appears on Hover */}
                       <div className="absolute -bottom-8 left-0 scale-0 rounded bg-zinc-900 px-2 py-1 text-[10px] font-medium text-white transition-all group-hover:scale-100 z-10 whitespace-nowrap">
-                        Click to open reviews
+                        {r("user.label")}
                       </div>
                     </div>
                   </>

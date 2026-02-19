@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Review } from "@/lib/types/review";
 import { ReviewFilters } from "@/components/ui/ApplicantDetailModal";
 import { Select } from "../job-filter-select/select-option";
+import { useT } from "@/app/[locale]/layout";
 
 export function ReviewSidePanel({
     onClose, userId, userRatings, filters, setFilters, totalPages, totalItems
@@ -18,21 +19,23 @@ export function ReviewSidePanel({
     totalPages: number;
     totalItems: number;
 }) {
+    const t = useT("reviews")
+
     const filterOptions = [
         {
-            label: "Latest",
+            label: t("filter.latest"),
             value: "latest"
         },
         {
-            label: "Oldest",
+            label: t("filter.oldest"),
             value: "oldest"
         },
         {
-            label: "Top Rated",
+            label: t("filter.positive"),
             value: "positive"
         },
         {
-            label: "Negative",
+            label: t("filter.negative"),
             value: "negative"
         }
     ]
@@ -74,13 +77,13 @@ export function ReviewSidePanel({
 
                 <div className="flex items-center justify-between ">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-xl font-bold text-zinc-900">Reviews</h2>
+                        <h2 className="text-xl font-bold text-zinc-900">{t("title")}</h2>
 
                         <Badge
                             variant="outline"
                             className="rounded-full px-3 py-1 text-zinc-500 border-zinc-200"
                         >
-                            {userRatings.length} Total
+                            {t("total", { total: userRatings.length })}
                         </Badge>
                     </div>
 
@@ -163,7 +166,7 @@ export function ReviewSidePanel({
                     </button>
 
                     <span className="text-sm text-zinc-600">
-                        Page {filters.page} of {totalPages}
+                        {t("pagination", { page: filters.page, total: totalPages})}
                     </span>
 
                     <button
@@ -185,13 +188,13 @@ export function ReviewSidePanel({
             <div className="md:hidden fixed inset-0 bg-white z-[60] p-6 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-xl font-bold text-zinc-900">Reviews</h2>
+                        <h2 className="text-xl font-bold text-zinc-900">{t("title")}</h2>
 
                         <Badge
                             variant="outline"
                             className="rounded-full px-3 py-1 text-zinc-500 border-zinc-200"
                         >
-                            {userRatings.length} Total
+                            {t("total", { total: userRatings.length })}
                         </Badge>
                     </div>
 
@@ -200,16 +203,29 @@ export function ReviewSidePanel({
                     </div>
                 </div>
 
-                <div className=" overflow-y-auto pr-2 custom-scrollbar">
+                <div className="flex items-end justify-end mb-4">
+                    {/* Sort By */}
+                    <div className="flex flex-col">
+                        <Select
+                            label={``}
+                            value={getSortValue(filters.sort_by, filters.sort_order)}
+                            onChange={(e) => handleSortBy(e)}
+                            options={filterOptions}
+                            width="w-64"
+                        />
+                    </div>
+                </div>
+
+                <div className="overflow-y-auto pr-2 custom-scrollbar">
                     <div className="flex flex-col gap-6">
                         {userRatings?.map((ur, i) => (
-                            <div key={i} className="group flex gap-4 border-b border-zinc-100 pb-6 last:border-0">
+                            <div key={i} className="group flex gap-3 border-b border-zinc-100 pb-4 last:border-0">
                                 {/* Avatar - Smaller and cleaner */}
                                 <div className="relative h-12 w-12 flex-shrink-0">
                                     <img
                                         src={ur.reviewer.avatar_url}
                                         alt={ur.reviewer.org_name}
-                                        className="h-12 w-12 rounded-full object-cover grayscale transition group-hover:grayscale-0"
+                                        className="h-12 w-12 rounded-full object-contain transition group-hover:grayscale border"
                                     />
                                     <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white border border-zinc-200 shadow-sm">
                                         <span className="text-[10px] font-bold text-black">{ur.rating}</span>
@@ -218,9 +234,21 @@ export function ReviewSidePanel({
 
                                 {/* Content */}
                                 <div className="flex flex-1 flex-col gap-1">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-sm font-bold text-zinc-900">{ur.reviewer.org_name}</h3>
-                                        <StarRating rating={ur.rating} size={3} />
+                                    <div className="flex  justify-between">
+                                        <div className="text-left">
+                                            <h3 className="text-sm font-bold text-zinc-900">{ur.reviewer.org_name}</h3>
+                                            <h3 className="text-xs font-medium text-zinc-900">{ur.job.title}</h3>
+                                        </div>
+                                        <div className="justify-end text-right">
+                                            <StarRating rating={ur.rating} size={3} />
+                                            <span className="text-[10px] font-medium text-zinc-400 tabular-nums">
+                                                {new Date(ur.created_at).toLocaleDateString(undefined, {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div className="relative">
@@ -232,6 +260,38 @@ export function ReviewSidePanel({
                             </div>
                         ))}
                     </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-200">
+                    <button
+                        className="px-3 py-1 text-sm border rounded-lg disabled:opacity-40"
+                        disabled={filters.page <= 1}
+                        onClick={() =>
+                            setFilters((prev) => ({
+                                ...prev,
+                                page: prev.page - 1,
+                            }))
+                        }
+                    >
+                        <ChevronLeft />
+                    </button>
+
+                    <span className="text-sm text-zinc-600">
+                        {t("pagination", { page: filters.page, total: totalPages})}
+                    </span>
+
+                    <button
+                        className="px-3 py-1 text-sm border rounded-lg disabled:opacity-40"
+                        disabled={filters.page >= totalPages}
+                        onClick={() =>
+                            setFilters((prev) => ({
+                                ...prev,
+                                page: prev.page + 1,
+                            }))
+                        }
+                    >
+                        <ChevronRight />
+                    </button>
                 </div>
             </div>
         </>
