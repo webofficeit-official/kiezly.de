@@ -28,6 +28,7 @@ import { InboxJob } from "@/lib/types/inbox";
 import { useQueryClient } from "@tanstack/react-query";
 import Message from "./Chat/message";
 import RatingBox from "./Chat/RatingBox";
+import { isJobExpired } from "@/lib/utils/isJobExpired";
 
 dayjs.extend(relativeTime);
 
@@ -300,10 +301,10 @@ export default function MyInbox() {
     return msgDate.format("DD MMM YYYY");
   };
 
-  const isJobExpired = (expires_at: string | null): boolean => {
-    if (!expires_at) return false;
-    return new Date(expires_at).getTime() <= Date.now();
-  };
+  // const isJobExpired = (expires_at: string | null): boolean => {
+  //   if (!expires_at) return false;
+  //   return new Date(expires_at).getTime() <= Date.now();
+  // };
 
   useEffect(() => {
     if (!selectedJobId || !recipientId) return;
@@ -416,7 +417,7 @@ export default function MyInbox() {
   const sendMessage = (e) => {
     e.preventDefault();
 
-    if (isJobExpired(selectedJob?.expires_at)) return;
+    if (isJobExpired(selectedJob)) return;
     if (!message.trim()) return;
     sendMsg.mutate(
       {
@@ -507,9 +508,7 @@ export default function MyInbox() {
           </div>
           <div className="overflow-y-auto h-full">
             {inboxItems.map((d) => {
-              const isExpired = d.ends_at
-                ? new Date(d.ends_at) < new Date()
-                : false;
+              const isExpired = isJobExpired(d);
 
               return (
                 <button
@@ -614,7 +613,7 @@ export default function MyInbox() {
                         }`}
                     >
                       <div className="relative flex items-center justify-between">
-                        {/* 🔹 LEFT SIDE: avatar + name + email */}
+                        {/*  LEFT SIDE: avatar + name + email */}
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
                             {a.user.first_name.charAt(0)}
@@ -630,7 +629,7 @@ export default function MyInbox() {
                             </p>
                           </div>
                         </div>
-                        {/* 🔹 RIGHT SIDE: unread count */}
+                        {/*  RIGHT SIDE: unread count */}
                         {a.unread_count > 0 && (
                           <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                             {a.unread_count > 9 ? "9+" : a.unread_count}
