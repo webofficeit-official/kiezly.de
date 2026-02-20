@@ -170,6 +170,7 @@ export default function CompanyInfoCard({ job, role = "helper" }: { job: any, ro
                                         setFilters={setFilters}
                                         totalItems={ratings?.data?.total_items}
                                         totalPages={ratings?.data?.total_pages}
+                                        role="helper"
                                     />
                                 </div>
                             </div>

@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, MoveLeft, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, MoveLeft, User, X } from "lucide-react";
 import { StarRating } from "./star-rating";
 import { useGetUserReviews } from "@/lib/react-query/queries/review";
 import { useEffect, useState } from "react";
@@ -9,7 +9,7 @@ import { Select } from "../job-filter-select/select-option";
 import { useT } from "@/app/[locale]/layout";
 
 export function ReviewSidePanel({
-    onClose, userId, userRatings, filters, setFilters, totalPages, totalItems
+    onClose, userId, userRatings, filters, setFilters, totalPages, totalItems, role
 }: {
     onClose: () => void;
     userId: string;
@@ -18,6 +18,7 @@ export function ReviewSidePanel({
     setFilters: React.Dispatch<React.SetStateAction<ReviewFilters>>;
     totalPages: number;
     totalItems: number;
+    role: string
 }) {
     const t = useT("reviews")
 
@@ -70,6 +71,16 @@ export function ReviewSidePanel({
         else return "negative"
     }
 
+    const getName = (role, reviewer) => {
+        if (role == "client" && reviewer.org_name !== null && reviewer.org_name !== "") {
+            return reviewer.org_name
+        } else if (role == "helper" && reviewer.display_name !== null && reviewer.display_name !== "") {
+            return reviewer.display_name
+        } else {
+            return `${reviewer.first_name} ${reviewer.last_name}`
+        }
+    }
+
     return (
         <>
             {/* Desktop Right Panel */}
@@ -111,11 +122,21 @@ export function ReviewSidePanel({
                             <div key={i} className="group flex gap-3 border-b border-zinc-100 pb-4 last:border-0">
                                 {/* Avatar - Smaller and cleaner */}
                                 <div className="relative h-12 w-12 flex-shrink-0">
-                                    <img
-                                        src={ur.reviewer.avatar_url}
-                                        alt={ur.reviewer.org_name}
-                                        className="h-12 w-12 rounded-full object-contain transition group-hover:grayscale border"
-                                    />
+                                    {ur.reviewer?.avatar_url ? (
+                                        <>
+                                            <img
+                                                src={ur.reviewer?.avatar_url || "https://placehold.co/96x96"}
+                                                alt={getName(role, ur.reviewer)}
+                                                className="h-12 w-12 rounded-full object-cover transition group-hover:grayscale border"
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="h-12 w-12 rounded-full bg-black flex items-center justify-center text-white font-bold">
+                                                {(ur.reviewer.first_name)?.[0].toUpperCase()}{(ur.reviewer.last_name)?.[0].toUpperCase()}
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white border border-zinc-200 shadow-sm">
                                         <span className="text-[10px] font-bold text-black">{ur.rating}</span>
                                     </div>
@@ -125,7 +146,7 @@ export function ReviewSidePanel({
                                 <div className="flex flex-1 flex-col gap-1">
                                     <div className="flex  justify-between">
                                         <div className="text-left">
-                                            <h3 className="text-sm font-bold text-zinc-900">{ur.reviewer.org_name}</h3>
+                                            <h3 className="text-sm font-bold text-zinc-900">{getName(role, ur.reviewer)}</h3>
                                             <h3 className="text-xs font-medium text-zinc-900">{ur.job.title}</h3>
                                         </div>
                                         <div className="justify-end text-right">
@@ -166,7 +187,7 @@ export function ReviewSidePanel({
                     </button>
 
                     <span className="text-sm text-zinc-600">
-                        {t("pagination", { page: filters.page, total: totalPages})}
+                        {t("pagination", { page: filters.page, total: totalPages })}
                     </span>
 
                     <button
@@ -224,7 +245,7 @@ export function ReviewSidePanel({
                                 <div className="relative h-12 w-12 flex-shrink-0">
                                     <img
                                         src={ur.reviewer.avatar_url}
-                                        alt={ur.reviewer.org_name}
+                                        alt={getName(role, ur.reviewer)}
                                         className="h-12 w-12 rounded-full object-contain transition group-hover:grayscale border"
                                     />
                                     <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white border border-zinc-200 shadow-sm">
@@ -236,7 +257,7 @@ export function ReviewSidePanel({
                                 <div className="flex flex-1 flex-col gap-1">
                                     <div className="flex  justify-between">
                                         <div className="text-left">
-                                            <h3 className="text-sm font-bold text-zinc-900">{ur.reviewer.org_name}</h3>
+                                            <h3 className="text-sm font-bold text-zinc-900">{getName(role, ur.reviewer)}</h3>
                                             <h3 className="text-xs font-medium text-zinc-900">{ur.job.title}</h3>
                                         </div>
                                         <div className="justify-end text-right">
@@ -277,7 +298,7 @@ export function ReviewSidePanel({
                     </button>
 
                     <span className="text-sm text-zinc-600">
-                        {t("pagination", { page: filters.page, total: totalPages})}
+                        {t("pagination", { page: filters.page, total: totalPages })}
                     </span>
 
                     <button

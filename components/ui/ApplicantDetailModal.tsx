@@ -101,6 +101,7 @@ export default function ApplicantDetailModal({ isOpen, onClose, userId }: Applic
                                         setFilters={setFilters}
                                         totalItems={ratings?.data?.total_items}
                                         totalPages={ratings?.data?.total_pages}
+                                        role="client"
                                     />
                                 </div>
                             </div>
