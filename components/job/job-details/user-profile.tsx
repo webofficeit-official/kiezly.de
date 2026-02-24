@@ -1,27 +1,32 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { Briefcase, BriefcaseMedical, CalendarClock, CalendarMinus2, CircleSlash, Euro, Eye, Facebook, Globe, GraduationCap, Hourglass, IceCream, Instagram, Linkedin, Scale, View, X } from "lucide-react";
+import { AlignLeft, Briefcase, BriefcaseMedical, CalendarClock, CalendarMinus2, CircleSlash, Euro, Eye, Facebook, Globe, GraduationCap, Hourglass, IceCream, Instagram, Linkedin, MoveLeft, Scale, View, X } from "lucide-react";
 import { useT } from "@/app/[locale]/layout";
+import { StarRating } from "./star-rating";
 
 interface UserProfileProps {
   user: any;
   application?: any;
   onClose?: any;
+  onOpenReviews?: any
+  reviewsCount?: number
+  rating?: number
 }
 
-export default function UserProfile({ user, onClose }: UserProfileProps) {
+export default function UserProfile({ user, onClose, onOpenReviews, reviewsCount, rating }: UserProfileProps) {
   if (!user) return null;
   const t = useT("application")
+  const r = useT("reviews")
 
   return (
     <>
       <Card className="space-y-6">
-        <div className="grid grid-cols-12">
-          <div className="col-span-5 bg-gray-100 p-6">
+        <div className="grid grid-cols-1 md:grid-cols-12">
+          <div className="md:col-span-5 bg-gray-100 p-6">
             {user.avatar_url ? (
               <>
                 <img src={user?.avatar_url || "https://placehold.co/96x96"} alt={user?.display_name} className="h-100 w-full rounded-lg object-cover" />
@@ -34,10 +39,10 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
             )}
             <div className="mt-10">
               {user.rate ? (
-                <LeftType label={t("user.salary-expectation.label")} value={t("user.salary-expectation.value", { rate: user.rate})} Icon={<Euro />} />
+                <LeftType label={t("user.salary-expectation.label")} value={t("user.salary-expectation.value", { rate: user.rate })} Icon={<Euro />} />
               ) : ""}
               {user.experience ? (
-                <LeftType label={t("user.work-experience.label")} value={t("user.work-experience.value", { years: user.experience})} Icon={<Briefcase />} />
+                <LeftType label={t("user.work-experience.label")} value={t("user.work-experience.value", { years: user.experience })} Icon={<Briefcase />} />
               ) : ""}
               {user.min_hours ? (
                 <LeftType label={t("user.min-hours.label")} value={t("user.min-hours.value", { hours: user.min_hours })} Icon={<Hourglass />} />
@@ -80,13 +85,48 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
               </div>
             ) : ""}
           </div>
-          <div className="col-span-7 p-6">
-            {/* --- Header --- */}
-            <div className="flex justify-between">
-              <h2 className="text-xl font-bold text-gray-900">
-                {user.first_name} {user.last_name}
-              </h2>
-              <X className="h-6 w-6 text-black-300 border border-gray-200 cursor-pointer rounded-lg" onClick={onClose} />
+          <div className="md:col-span-7 p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-extrabold tracking-tight text-zinc-900 mb-1">
+                  {user.first_name} {user.last_name}
+                </h2>
+
+                {
+                  reviewsCount > 0 && <>
+                    {/* Interactive Rating Section */}
+                    <div
+                      className="group relative flex items-center gap-3 cursor-pointer rounded-lg -ml-2 p-2 transition-all hover:bg-zinc-100 active:scale-95"
+                      onClick={() => onOpenReviews(true)}
+                      title={r("user.title")}
+                    >
+                      <div className="flex items-center gap-1">
+                        <StarRating rating={rating} size={4} />
+                      </div>
+
+                      <div className="flex items-center gap-2 border-l border-zinc-300 pl-3">
+                        <span className="text-sm font-bold text-zinc-900">{rating}</span>
+                        <span className="text-xs font-medium text-zinc-500 underline underline-offset-4 decoration-zinc-300 group-hover:text-black group-hover:decoration-black">
+                          {r("user.total", { count: reviewsCount })}
+                        </span>
+                      </div>
+
+                      {/* Modern Tooltip - Appears on Hover */}
+                      <div className="absolute -bottom-8 left-0 scale-0 rounded bg-zinc-900 px-2 py-1 text-[10px] font-medium text-white transition-all group-hover:scale-100 z-10 whitespace-nowrap">
+                        {r("user.label")}
+                      </div>
+                    </div>
+                  </>
+                }
+              </div>
+
+              {/* Close Button with enhanced hover */}
+              <button
+                onClick={onClose}
+                className="group p-1.5 rounded-xl border border-zinc-200 bg-white shadow-sm transition-all hover:bg-zinc-50 hover:border-zinc-300 active:bg-zinc-100"
+              >
+                <X className="h-5 w-5 text-zinc-500 transition-colors group-hover:text-black" />
+              </button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {user.street} . {user.postal_code}
@@ -101,7 +141,7 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
             {/* --- Bio --- */}
             {user.bio && user.bio.trim() && (
               <div className="mt-4">
-                <div className="text-sm text-gray-500 leading-relaxed" dangerouslySetInnerHTML={{  __html: user.bio }} />
+                <div className="text-sm text-gray-500 leading-relaxed" dangerouslySetInnerHTML={{ __html: user.bio }} />
               </div>
             )}
             <hr className="mt-4" />
@@ -158,7 +198,6 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
                 ) : ''}
               </div>
             </div>
-
           </div>
         </div>
       </Card>

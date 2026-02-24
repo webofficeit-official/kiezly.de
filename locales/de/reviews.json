@@ -1,0 +1,16 @@
+{
+    "title": "Rezensionen",
+    "total": "{total} Gesamt",
+    "pagination": "Seite {page} von {total}",
+    "filter": {
+        "latest": "Letzte",
+        "oldest": "Älteste",
+        "positive": "Bestbewertet",
+        "negative": "Negativ"
+    },
+    "user": {
+        "title": "Klicken Sie hier, um alle Bewertungen anzuzeigen.",
+        "label": "Klicken Sie hier, um Bewertungen zu öffnen",
+        "total": "({count} Bewertungen)"
+    }
+}

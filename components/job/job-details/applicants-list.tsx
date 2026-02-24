@@ -14,6 +14,8 @@ import { Job } from "@/lib/types/job";
 import { useT } from "@/app/[locale]/layout";
 import Message from "@/components/Chat/message";
 import { isJobExpired } from "@/lib/utils/isJobExpired";
+import ApplicantCard from "./applicant-card/applicant-card";
+import ApplicantDetailModal from "@/components/ui/ApplicantDetailModal";
 
 interface ApplicantsPanelProps {
   job: Job;
@@ -62,6 +64,8 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
   // const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const [topZIndex, setTopZIndex] = useState(100);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const t = useT("application");
   const tE = useT("inbox");
@@ -75,6 +79,20 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
     setIsModalOpen(false);
     setSelectedApplicant(null);
   };
+
+  const statusOptions = [
+    { label: t("applicants-panel.status.options.applied"), value: "applied" },
+    {
+      label: t("applicants-panel.status.options.shortlisted"),
+      value: "shortlisted",
+    },
+    { label: t("applicants-panel.status.options.accepted"), value: "accepted" },
+    { label: t("applicants-panel.status.options.rejected"), value: "rejected" },
+    {
+      label: t("applicants-panel.status.options.withdrawn"),
+      value: "withdrawn",
+    },
+  ];
 
   const router = useRouter();
 
@@ -125,7 +143,18 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
     });
   };
 
+   const openUserModal = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsUserModalOpen(true);
+  };
+
+  const closeUserModal = () => {
+    setIsUserModalOpen(false);
+    setSelectedUserId(null);
+  };
+
   return (
+    <>
     <aside className="lg:sticky lg:top-6">
       <Card className="shadow-lg border-gray-100 bg-white">
         <CardHeader className="border-b border-gray-100 p-4 sm:p-5">
@@ -140,85 +169,15 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Map over your actual similarJobs array here */}
             {data &&
-              data?.applicants?.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex flex-col rounded-xl cursor-pointer border border-gray-200 p-4 transition-all duration-200 
-                                       hover:border-gray-400 hover:shadow-md bg-white min-h-[160px]"
-                >
-                  <div className="flex items-start justify-between">
-                    {/* Header: Category & Title */}
-                    <div className="flex flex-col mb-2 flex-1">
-                      {/* Job Title */}
-                      <h4 className="text-lg font-semibold text-gray-900 line-clamp-2 leading-snug">
-                        {app.user.first_name} {app.user.last_name}
-                      </h4>
-                      {/* Category/Pill */}
-                      <span className="text-xs text-gray-600 tracking-wider mb-1">
-                        {app.user.email}
-                      </span>
-                    </div>
-                    {/* Current Status Badge */}
-                    <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusClasses(
-                          app.status,
-                        )}`}
-                      >
-                        {app.status}
-                      </span>
-                      <button
-                        onClick={() => handleApplicantMessage(app)}
-                        className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-white hover:bg-black/80 transition-colors"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        <span className="text-xs font-bold uppercase tracking-wide">
-                          Chat
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Description/Snippet (Moved below title for better hierarchy) */}
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-gray-800">
-                      {t("applicants.rate")}{" "}
-                      <span className="font-bold text-gray-900">
-                        {app.proposed_rate} €
-                      </span>
-                    </div>
-                  </div>
-                  {app.cover_note && (
-                    <div className="rounded-lg text-gray-700">
-                      <span className="font-semibold text-gray-800 block mb-1">
-                        {t("applicants.cover-note")}
-                      </span>
-                      <div
-                        className="text-sm line-clamp-3"
-                        dangerouslySetInnerHTML={{
-                          __html: app.cover_note || "",
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Footer: Rate (Highlighted) */}
-                  <div className="flex justify-between items-center pt-1">
-                    <div className="text-xs text-gray-500">
-                      {t("applicants.applied")}{" "}
-                      {new Date(app.created_at).toLocaleDateString()}
-                    </div>
-
-                    {/* Status Update Button */}
-                    <Button
-                      variant="outline"
-                      className="text-sm font-medium text-gray-800 border-gray-300 hover:bg-gray-100 px-4 py-2 h-auto"
-                      onClick={() => openUpdateModal(app)}
-                    >
-                      {t("applicants.update")}
-                    </Button>
-                  </div>
-                </div>
+              data?.applicants?.map((applicant) => (
+                <ApplicantCard
+                  key={applicant.id}
+                  applicant={applicant}
+                  openUserModal={openUserModal}
+                  openUpdateModal={openUpdateModal}
+                  isJobExpired={jobExpired}
+                  onOpenChat={handleApplicantMessage}
+                />
               ))}
           </div>
 
@@ -234,11 +193,7 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
           </div>
         </CardContent>
       </Card>
-      <UpdateStatusModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        applicant={selectedApplicant}
-      />
+     
       <div className="fixed bottom-4 right-4 z-50">
         {openChats.map((chat) => (
           <Message
@@ -267,6 +222,23 @@ export default function ApplicantsPanel({ job, user }: ApplicantsPanelProps) {
           />
         ))}
       </div>
+    
     </aside>
+     {isModalOpen && (
+        <UpdateStatusModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          applicant={selectedApplicant}
+        />
+      )}
+
+      {isUserModalOpen && (
+        <ApplicantDetailModal
+          isOpen={isUserModalOpen}
+          onClose={closeUserModal}
+          userId={selectedUserId}
+        />
+      )}
+    </>
   );
 }

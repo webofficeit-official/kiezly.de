@@ -27,6 +27,9 @@ import { Job } from "@/lib/types/job";
 import { InboxJob } from "@/lib/types/inbox";
 import { useQueryClient } from "@tanstack/react-query";
 import Message from "./Chat/message";
+import RatingBox from "./Chat/RatingBox";
+import { isJobExpired } from "@/lib/utils/isJobExpired";
+import { useSearchParams } from "next/navigation";
 
 dayjs.extend(relativeTime);
 
@@ -45,7 +48,9 @@ export default function MyInbox() {
 
   //  Selection State
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [selectedJobExpired, setSelectedJobExpired] = useState<boolean | null>(false);
+  const [selectedJobExpired, setSelectedJobExpired] = useState<boolean | null>(
+    false,
+  );
 
   const [selectedJob, setSelectedJob] = useState<InboxSourceJob | null>(null);
 
@@ -71,11 +76,68 @@ export default function MyInbox() {
   } | null>(null);
 
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
 
   const { data: clientInbox } = myInboxClient({
     enabled: userType === "client",
   });
   const { data: inbox } = myInbox({ enabled: userType === "helper" });
+
+  useEffect(() => {
+    const jobId = searchParams.get("jobId");
+    const helperId = searchParams.get("helperId");
+    // const recipientIdParam = searchParams.get("recipientId");
+
+    if (!jobId) return;
+
+    // Wait until inbox items are loaded
+    if (!inboxItems.length) return;
+
+    const job = inboxItems.find((j) => j.id === jobId);
+    if (!job) return;
+
+    const isExpired = isJobExpired(job);
+
+    if (userType === "helper") {
+      // helper always chats with client
+      setSelectedJobId(jobId);
+      setSelectedJob(job);
+      setSelectedJobExpired(isExpired);
+      setRecipientId(job.client_id);
+
+      if (isMobile()) {
+        setHelperChatMeta({
+          jobId: job.id,
+          receiverId: job.client_id,
+          title: job.title,
+          subtitle: [job.city, job.state, job.countries?.name]
+            .filter(Boolean)
+            .join(", "),
+        });
+        setIsChatModalOpen(true);
+      } else {
+        setMobileView("chat");
+      }
+    }
+
+    if (userType === "client" && helperId) {
+      const applicant = job.applicants?.find((a) => a.user.id === helperId);
+
+      if (!applicant) return;
+
+      setSelectedJobId(jobId);
+      setSelectedApplicantion(applicant);
+      setRecipientId(helperId);
+      setSelectedJob(job);
+      setSelectedJobExpired(isExpired);
+
+      if (isMobile()) {
+        setIsChatModalOpen(true);
+      } else {
+        setMobileView("chat");
+      }
+    }
+  }, [searchParams, inboxItems, userType]);
 
   useEffect(() => {
     if (userType === "client") {
@@ -96,7 +158,7 @@ export default function MyInbox() {
         userType === "helper"
           ? !!selectedJobId && !!recipientId
           : !!selectedJobId && !!recipientId && !!selectedApplicantion,
-    }
+    },
   );
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -123,8 +185,7 @@ export default function MyInbox() {
     if (!el) return;
 
     // Only auto scroll when user is near bottom
-    const isNearBottom =
-      el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
 
     if (!isLoadingOlderRef.current && isNearBottom) {
       requestAnimationFrame(() => {
@@ -132,7 +193,6 @@ export default function MyInbox() {
       });
     }
   }, [messages]);
-
 
   useEffect(() => {
     const handleInboxMessage = (msg) => {
@@ -299,10 +359,10 @@ export default function MyInbox() {
     return msgDate.format("DD MMM YYYY");
   };
 
-  const isJobExpired = (expires_at: string | null): boolean => {
-    if (!expires_at) return false;
-    return new Date(expires_at).getTime() <= Date.now();
-  };
+  // const isJobExpired = (expires_at: string | null): boolean => {
+  //   if (!expires_at) return false;
+  //   return new Date(expires_at).getTime() <= Date.now();
+  // };
 
   useEffect(() => {
     if (!selectedJobId || !recipientId) return;
@@ -415,7 +475,7 @@ export default function MyInbox() {
   const sendMessage = (e) => {
     e.preventDefault();
 
-    if (isJobExpired(selectedJob?.expires_at)) return;
+    if (isJobExpired(selectedJob)) return;
     if (!message.trim()) return;
     sendMsg.mutate(
       {
@@ -438,7 +498,7 @@ export default function MyInbox() {
             });
           }
         },
-      }
+      },
     );
   };
 
@@ -448,7 +508,7 @@ export default function MyInbox() {
   const handleHelperJobSelect = (job, isExpired) => {
     setSelectedApplicantion(null);
     setSelectedJobId(job.id);
-    setSelectedJobExpired(isExpired)
+    setSelectedJobExpired(isExpired);
     setRecipientId(job.client_id);
     setSelectedJob(job);
     setMessages([]);
@@ -498,17 +558,16 @@ export default function MyInbox() {
       <div className="flex h-[calc(100vh-120px)] md:h-[calc(100vh-160px)] w-full overflow-hidden bg-white shadow-sm">
         {/* --- COLUMN 1: Job List (Both Roles) --- */}
         <div
-          className={`w-full md:w-1/3 lg:w-1/4 border-r bg-white ${mobileView !== "jobs" ? "hidden md:block" : "block"
-            }`}
+          className={`w-full md:w-1/3 lg:w-1/4 border-r bg-white ${
+            mobileView !== "jobs" ? "hidden md:block" : "block"
+          }`}
         >
           <div className="p-4 border-b font-medium text-sm text-black uppercase tracking-wider">
             {t("inbox_header")}
           </div>
           <div className="overflow-y-auto h-full">
             {inboxItems.map((d) => {
-              const isExpired = d.ends_at
-                ? new Date(d.ends_at) < new Date()
-                : false;
+              const isExpired = isJobExpired(d);
 
               return (
                 <button
@@ -533,7 +592,7 @@ export default function MyInbox() {
                           setMobileView("chat");
                         }
                       } else {
-                        setSelectedJobExpired(isExpired)
+                        setSelectedJobExpired(isExpired);
                         setSelectedJobId(d.id);
                         setSelectedJob(d);
                         setSelectedApplicantion(null);
@@ -542,12 +601,13 @@ export default function MyInbox() {
                       }
                     }
                   }}
-                  className={`w-full p-4 text-left border-b transition-colors flex justify-between ${isExpired || d.status == "closed" || d.status == "expired"
+                  className={`w-full p-4 text-left border-b transition-colors flex justify-between ${
+                    isExpired || d.status == "closed" || d.status == "expired"
                       ? "bg-gray-100 text-gray-400 cursor-pointer"
                       : selectedJobId === d.id
                         ? "bg-gray-50 border-r-4 border-r-gray-500"
                         : "hover:bg-gray-100 cursor-pointer"
-                    }`}
+                  }`}
                 >
                   <div>
                     <p className="font-semibold text-gray-900">{d.title}</p>
@@ -573,8 +633,9 @@ export default function MyInbox() {
         {/* --- COLUMN 2: Applicants (CLIENT ONLY) --- */}
         {userType === "client" && (
           <div
-            className={`w-full md:w-1/3 lg:w-1/4 border-r ${mobileView !== "applicants" ? "hidden md:block" : "block"
-              }`}
+            className={`w-full md:w-1/3 lg:w-1/4 border-r ${
+              mobileView !== "applicants" ? "hidden md:block" : "block"
+            }`}
           >
             <div className="p-4 border-b font-medium text-sm uppercase tracking-wider flex items-center gap-2">
               <button
@@ -597,7 +658,7 @@ export default function MyInbox() {
             {selectedJobId ? (
               <div className="overflow-y-auto h-full">
                 {isClientInboxJob(selectedJob) &&
-                  selectedJob?.applicants.length === 0 ? (
+                selectedJob?.applicants.length === 0 ? (
                   <div className="flex h-full items-center justify-center p-6 text-center text-gray-400 text-sm">
                     {t("empty_inbox.no_applicants.title")}
                   </div>
@@ -607,13 +668,14 @@ export default function MyInbox() {
                     <button
                       key={a.id}
                       onClick={() => handleClientApplicantSelect(a)}
-                      className={`w-full p-4 text-left border-b transition-colors ${selectedApplicantion?.id === a.id
+                      className={`w-full p-4 text-left border-b transition-colors ${
+                        selectedApplicantion?.id === a.id
                           ? "bg-gray-100 border-r-4 border-r-gray-500"
                           : "hover:bg-gray-50"
-                        }`}
+                      }`}
                     >
                       <div className="relative flex items-center justify-between">
-                        {/* 🔹 LEFT SIDE: avatar + name + email */}
+                        {/*  LEFT SIDE: avatar + name + email */}
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">
                             {a.user.first_name.charAt(0)}
@@ -629,7 +691,7 @@ export default function MyInbox() {
                             </p>
                           </div>
                         </div>
-                        {/* 🔹 RIGHT SIDE: unread count */}
+                        {/*  RIGHT SIDE: unread count */}
                         {a.unread_count > 0 && (
                           <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                             {a.unread_count > 9 ? "9+" : a.unread_count}
@@ -652,11 +714,11 @@ export default function MyInbox() {
         <div
           key={`${selectedJobId}-${recipientId}`}
           className={`
-    hidden md:flex flex-grow flex-col bg-white
-  `}
+            hidden md:flex flex-grow flex-col bg-white
+          `}
         >
           {(userType === "helper" && selectedJobId) ||
-            (userType === "client" && selectedApplicantion) ? (
+          (userType === "client" && selectedApplicantion) ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
@@ -694,8 +756,9 @@ export default function MyInbox() {
                 {recipientId && (
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
                     <span
-                      className={`h-2 w-2 rounded-full ${isRecipientOnline ? "bg-green-500" : "bg-gray-400"
-                        }`}
+                      className={`h-2 w-2 rounded-full ${
+                        isRecipientOnline ? "bg-green-500" : "bg-gray-400"
+                      }`}
                     />
                   </div>
                 )}
@@ -705,7 +768,7 @@ export default function MyInbox() {
               <div
                 ref={scrollContainerRef}
                 className="flex-grow p-6 overflow-y-auto space-y-4 bg-gray-50/30"
-              // Removed onScroll handler since we're using button now
+                // Removed onScroll handler since we're using button now
               >
                 {/* Load Older Messages Button */}
                 {hasMore && (
@@ -731,7 +794,7 @@ export default function MyInbox() {
                       .slice(0, i)
                       .some(
                         (m) =>
-                          m.seen === false && m.recipient_id !== recipientId
+                          m.seen === false && m.recipient_id !== recipientId,
                       );
 
                   return (
@@ -750,25 +813,28 @@ export default function MyInbox() {
                       )}
                       <div
                         key={i}
-                        className={`flex ${msg.recipient_id === recipientId
+                        className={`flex ${
+                          msg.recipient_id === recipientId
                             ? "justify-end"
                             : "justify-start"
-                          }`}
+                        }`}
                       >
                         <div className="max-w-[75%]">
                           <div
-                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.recipient_id === recipientId
+                            className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                              msg.recipient_id === recipientId
                                 ? "bg-primary text-white rounded-br-sm"
                                 : "bg-white border rounded-bl-sm"
-                              }`}
+                            }`}
                           >
                             {msg.body}
                           </div>
                           <p
-                            className={`mt-1 text-[10px] text-muted-foreground ${msg.recipient_id === recipientId
+                            className={`mt-1 text-[10px] text-muted-foreground ${
+                              msg.recipient_id === recipientId
                                 ? "text-right"
                                 : "text-left"
-                              }`}
+                            }`}
                           >
                             {formatTime(msg.created_at)}
                           </p>
@@ -780,14 +846,20 @@ export default function MyInbox() {
               </div>
 
               {/* Chat Input */}
-              <form onSubmit={sendMessage}>
+              {selectedJobExpired ? (
                 <div className="border-t p-3">
-                  {selectedJobExpired ? (
-                    <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-600 text-sm py-3">
-                      <span>🔒</span>
-                      <span>{t("chat.job_expired")}</span>
-                    </div>
-                  ) : (
+                  <RatingBox
+                    revieweeId={
+                      userType === "client"
+                        ? selectedApplicantion?.user?.id
+                        : selectedJob?.client_id
+                    }
+                    jobId={selectedJobId}
+                  />
+                </div>
+              ) : (
+                <form onSubmit={sendMessage}>
+                  <div className="border-t p-3">
                     <div className="flex gap-2">
                       <input
                         value={message}
@@ -802,10 +874,9 @@ export default function MyInbox() {
                         <Send className="h-4 w-4" />
                       </button>
                     </div>
-                  )}
-                </div>
-
-              </form>
+                  </div>
+                </form>
+              )}
             </>
           ) : (
             <div className="flex h-full flex-col items-center justify-center text-gray-400">
@@ -856,7 +927,7 @@ export default function MyInbox() {
           }
           subtitle={
             userType === "client"
-              ? selectedJob?.title ?? ""
+              ? (selectedJob?.title ?? "")
               : helperChatMeta?.subtitle!
           }
           expired={selectedJobExpired}

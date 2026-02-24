@@ -1,0 +1,16 @@
+{
+    "title": "Reviews",
+    "total": "{total} Total",
+    "pagination": "Page {page} of {total}",
+    "filter": {
+        "latest": "Latest",
+        "oldest": "Oldest",
+        "positive": "Top Rated",
+        "negative": "Negative"
+    },
+    "user": {
+        "title": "Click to view all reviews",
+        "label": "Click to open reviews",
+        "total": "({count} reviews)"
+    }
+}

@@ -97,6 +97,7 @@ export default function LocaleLayout({ children, params }: any) {
     "forgot-password",
     "changePassword",
     "inbox",
+    "reviews",
     "messages",
   ]; // add more as needed
 
