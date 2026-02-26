@@ -713,9 +713,7 @@ export default function MyInbox() {
         {/* --- COLUMN 3: Chat Window (Dynamic Width) --- */}
         <div
           key={`${selectedJobId}-${recipientId}`}
-          className={`
-            hidden md:flex flex-grow flex-col bg-white
-          `}
+          className="hidden md:flex flex-1 flex-col bg-white min-w-0"
         >
           {(userType === "helper" && selectedJobId) ||
           (userType === "client" && selectedApplicantion) ? (
@@ -733,12 +731,14 @@ export default function MyInbox() {
                     </h3>
                   </div>
                   {userType === "client" && (
-                    <div
-                      className="font-medium text-xs text-gray-600"
-                      dangerouslySetInnerHTML={{
-                        __html: selectedApplicantion.cover_note,
-                      }}
-                    />
+                    <div className="text-xs text-gray-600 mt-1 break-words min-w-0">
+                      <div
+                        className="[&_*]:max-w-full [&_*]:break-words"
+                        dangerouslySetInnerHTML={{
+                          __html: selectedApplicantion.cover_note,
+                        }}
+                      />
+                    </div>
                   )}
                   {userType === "helper" && (
                     <p className="text-xs text-gray-500 mt-1">
