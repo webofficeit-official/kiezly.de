@@ -4,12 +4,21 @@ module.exports = {
     content: ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
   theme: {
   	extend: {
+  		fontFamily: {
+  			display: ['"Plus Jakarta Sans"', 'sans-serif'],
+  			body:    ['Inter', 'sans-serif'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			'kz-accent':  '#e8622a',
+  			'kz-green':   '#1a9e5f',
+  			'kz-text':    '#111110',
+  			'kz-bg2':     '#f7f7f5',
+  			'kz-bg3':     '#efefec',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
