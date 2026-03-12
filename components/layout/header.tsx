@@ -10,8 +10,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import {
   Bell,
-  Languages,
-  LanguagesIcon,
   ShieldCheck,
   User,
   X,
@@ -24,7 +22,6 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 import LocalizedLink from "@/lib/localizedLink";
@@ -297,32 +294,51 @@ export default function Header() {
           {/* Right side actions */}
           <div className="flex items-center gap-2 relative">
             {/* Language switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setLanguageOpen(!languageOpen)}
-                className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-[#f7f7f5] transition"
-                aria-label="Language"
-                aria-expanded={languageOpen}
-              >
-                <LanguagesIcon className="h-5 w-5 text-[rgba(17,17,16,.6)]" />
-                <span className="absolute -top-1.5 -right-1.5 bg-[#111110] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {(LOCALES.includes(activeLanguag as any) ? activeLanguag : DEFAULT).toUpperCase()}
-                </span>
-              </button>
-              {languageOpen && (
-                <div className="absolute right-0 top-full mt-2 w-12 rounded-lg border bg-white shadow-md z-50" style={{ borderColor: 'rgba(0,0,0,.07)' }}>
-                  {LOCALES.map((locale) => (
-                    <button
-                      key={locale}
-                      onClick={() => { setLanguageOpen(false); handleChange(locale); }}
-                      className={`block px-4 py-2 text-sm hover:bg-[#f7f7f5] w-full text-left border-b border-[rgba(0,0,0,.07)] last:border-b-0 ${activeLanguag === locale ? "bg-[#efefec]" : ""}`}
-                    >
-                      {locale.toUpperCase()}
-                    </button>
-                  ))}
+            {(() => {
+              const LANG_OPTIONS = [
+                { code: "de", label: "Deutsch", flag: "🇩🇪" },
+                { code: "en", label: "English", flag: "🇬🇧" },
+              ];
+              const activeLang = LOCALES.includes(activeLanguag as any) ? activeLanguag : DEFAULT;
+              const current = LANG_OPTIONS.find(l => l.code === activeLang) ?? LANG_OPTIONS[0];
+              return (
+                <div className="relative">
+                  <button
+                    onClick={() => setLanguageOpen(!languageOpen)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(17,17,16,.12)] bg-white px-3 py-1.5 text-[13px] font-medium text-[#111110] transition-all hover:border-[rgba(17,17,16,.25)] hover:bg-[#f7f7f5]"
+                    aria-haspopup="listbox"
+                    aria-expanded={languageOpen}
+                  >
+                    <span className="text-base leading-none">{current.flag}</span>
+                    <span className="tracking-wide">{current.code.toUpperCase()}</span>
+                    <ChevronDown
+                      className="h-3.5 w-3.5 transition-transform duration-200"
+                      style={{ transform: languageOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                    />
+                  </button>
+                  {languageOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-[#efefec] bg-white py-1.5 shadow-xl z-[300]">
+                      {LANG_OPTIONS.map(lang => (
+                        <button
+                          key={lang.code}
+                          onClick={() => { setLanguageOpen(false); handleChange(lang.code as "en" | "de"); }}
+                          className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#f7f7f5]"
+                        >
+                          <span className="text-xl leading-none">{lang.flag}</span>
+                          <div className="flex-1">
+                            <p className="text-[13px] font-semibold text-[#111110]">{lang.label}</p>
+                            <p className="text-[11px]" style={{ color: "rgba(17,17,16,.4)" }}>{lang.code.toUpperCase()}</p>
+                          </div>
+                          {activeLang === lang.code && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-kz-accent flex-shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })()}
 
             {user ? (
               <>
