@@ -244,62 +244,78 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5" />
-            <LocalizedLink href="/" className="font-semibold hover:opacity-80">
-              Kiezly.de
-            </LocalizedLink>
-          </div>
-          <nav className="hidden items-center gap-6 text-sm md:flex">
-            <LocalizedLink href="/how-it-works" className="hover:opacity-80">
+      <header
+        className="fixed top-0 left-0 right-0 z-[200]"
+        style={{
+          height: '68px',
+          background: 'rgba(255,255,255,.97)',
+          backdropFilter: 'blur(24px)',
+          borderBottom: '1px solid rgba(0,0,0,.10)',
+          boxShadow: '0 2px 20px rgba(0,0,0,.07)',
+        }}
+      >
+        <div className="flex h-full items-center justify-between px-6 md:px-12">
+          {/* Logo */}
+          <LocalizedLink
+            href="/"
+            className="font-display font-bold text-[36px] text-[#111110] no-underline hover:opacity-80 transition-opacity"
+            style={{ letterSpacing: '-.8px' }}
+          >
+            kiezly<span className="text-[#e8622a]">.</span>
+          </LocalizedLink>
+
+          {/* Centered nav links (desktop) */}
+          <nav
+            className="hidden md:flex items-center gap-9 absolute left-1/2 -translate-x-1/2"
+          >
+            <LocalizedLink
+              href="/how-it-works"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("how-it-works")}
             </LocalizedLink>
-            <LocalizedLink href="/#categories" className="hover:opacity-80">
+            <LocalizedLink
+              href="/#categories"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("categories")}
             </LocalizedLink>
-            <LocalizedLink href="/#trust" className="hover:opacity-80">
+            <LocalizedLink
+              href="/#trust"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("trust-safety")}
             </LocalizedLink>
-            <LocalizedLink href={"/jobs"} className="hover:opacity-80">
+            <LocalizedLink
+              href="/jobs"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("jobs")}
             </LocalizedLink>
-            {!user && (
-              <LocalizedLink href="/signin" className="hover:opacity-80">
-                {t("signin")}
-              </LocalizedLink>
-            )}
           </nav>
 
+          {/* Right side actions */}
           <div className="flex items-center gap-2 relative">
-            <div className="relative mr-2">
+            {/* Language switcher */}
+            <div className="relative">
               <button
                 onClick={() => setLanguageOpen(!languageOpen)}
-                className={`relative inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition`}
-                aria-label="Notifications"
+                className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-[#f7f7f5] transition"
+                aria-label="Language"
                 aria-expanded={languageOpen}
               >
-                <LanguagesIcon className="h-6 w-6 text-gray-700" />
-                <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                  {(LOCALES.includes(activeLanguag as any)
-                    ? activeLanguag
-                    : DEFAULT
-                  ).toUpperCase()}
+                <LanguagesIcon className="h-5 w-5 text-[rgba(17,17,16,.6)]" />
+                <span className="absolute -top-1.5 -right-1.5 bg-[#111110] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {(LOCALES.includes(activeLanguag as any) ? activeLanguag : DEFAULT).toUpperCase()}
                 </span>
               </button>
-              {/* Dropdown */}
               {languageOpen && (
-                <div className="absolute right-0 top-full mt-2 w-12 rounded-lg border bg-white shadow-md z-50">
+                <div className="absolute right-0 top-full mt-2 w-12 rounded-lg border bg-white shadow-md z-50" style={{ borderColor: 'rgba(0,0,0,.07)' }}>
                   {LOCALES.map((locale) => (
                     <button
                       key={locale}
-                      onClick={() => {
-                        setLanguageOpen(false);
-                        handleChange(locale);
-                      }}
-                      className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100 ${activeLanguag == locale && "bg-gray-200"
-                        }`}
+                      onClick={() => { setLanguageOpen(false); handleChange(locale); }}
+                      className={`block px-4 py-2 text-sm hover:bg-[#f7f7f5] w-full text-left border-b border-[rgba(0,0,0,.07)] last:border-b-0 ${activeLanguag === locale ? "bg-[#efefec]" : ""}`}
                     >
                       {locale.toUpperCase()}
                     </button>
@@ -307,16 +323,18 @@ export default function Header() {
                 </div>
               )}
             </div>
+
             {user ? (
               <>
-                <div className="relative mr-2">
+                {/* Notifications */}
+                <div className="relative">
                   <button
                     onClick={() => setNotificationOpen(!notificationOpen)}
-                    className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition"
+                    className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-[#f7f7f5] transition"
                     aria-label="Notifications"
                     aria-expanded={notificationOpen}
                   >
-                    <Bell className="h-6 w-6 text-gray-700" />
+                    <Bell className="h-5 w-5 text-[rgba(17,17,16,.6)]" />
                     {notificationsCount > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {notificationsCount > 9 ? "9+" : notificationsCount}
@@ -391,130 +409,82 @@ export default function Header() {
                     </div>
                   )}
                 </div>
-                <div className="relative mr-2">
+                {/* Messages */}
+                <div className="relative">
                   <button
                     onClick={() => push("/my-inbox")}
-                    className={`relative inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition`}
-                    aria-label="Notifications"
-                    aria-expanded={languageOpen}
+                    className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-[#f7f7f5] transition"
+                    aria-label="Messages"
                   >
-                    <MessageCircle className="h-6 w-6 text-gray-900" />
+                    <MessageCircle className="h-5 w-5 text-[rgba(17,17,16,.6)]" />
                     {messageCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {messageCount > 9 ? "9+" : messageCount}
                       </span>
                     )}
                   </button>
                 </div>
-                {/* Avatar button */}
+
+                {/* Post job CTA (client only) */}
                 {user?.role === "client" && (
-                  <>
-                    <button
-                      onClick={handleStartNew}
-                      className="hidden md:inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
-                    >
-                      {t("post-mini-job")}
-                    </button>
-                  </>
+                  <button
+                    onClick={handleStartNew}
+                    className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-semibold bg-[#e8622a] text-white hover:bg-[#d4561f] transition-colors border-0"
+                  >
+                    {t("post-mini-job")}
+                  </button>
                 )}
+
+                {/* User avatar + dropdown */}
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="hidden md:flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm font-medium hover:bg-gray-100"
+                  className="hidden md:flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium hover:bg-[#f7f7f5] transition-colors"
+                  style={{ borderColor: 'rgba(0,0,0,.13)' }}
                 >
                   {user?.avatar_url ? (
-                    <>
-                      <img
-                        src={user?.avatar_url || "https://placehold.co/96x96"}
-                        alt={user?.display_name}
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                    </>
+                    <img
+                      src={user.avatar_url}
+                      alt={user.display_name}
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
                   ) : (
-                    <>
-                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
-                        {(user?.avatar_url ||
-                          "https://placehold.co/96x96")?.[0].toUpperCase() || (
-                            <User className="w-4 h-4" />
-                          )}
-                      </div>
-                    </>
+                    <div className="w-7 h-7 rounded-full bg-[#efefec] flex items-center justify-center text-[#111110] text-xs font-semibold">
+                      {(user?.display_name || user?.first_name || "U")[0].toUpperCase()}
+                    </div>
                   )}
-
-                  <span>
-                    {user?.display_name ||
-                      `${user?.first_name} ${user?.last_name}`}
+                  <span className="text-[13px] text-[#111110]">
+                    {user?.display_name || `${user?.first_name} ${user?.last_name}`}
                   </span>
                 </button>
 
                 {/* Dropdown */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-40 rounded-lg border bg-white shadow-md z-50 hidden md:block">
-                    <button
-                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        push("/my-profile");
-                      }}
-                    >
-                      {t("my-profile")}
-                    </button>
-                    <button
-                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        push("/change-password");
-                      }}
-                    >
-                      {t("change-password")}
-                    </button>
-                    {user && user?.role === "client" ? (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-44 rounded-[10px] bg-white shadow-lg z-50 hidden md:block overflow-hidden"
+                    style={{ border: '1px solid rgba(0,0,0,.07)' }}
+                  >
+                    {[
+                      { label: t("my-profile"), path: "/my-profile" },
+                      { label: t("change-password"), path: "/change-password" },
+                      ...(user?.role === "client"
+                        ? [{ label: t("my-jobs"), path: "/my-jobs" }]
+                        : [
+                            { label: t("saved-jobs"), path: "/saved-job" },
+                            { label: t("applied-jobs"), path: "/applied-jobs" },
+                            { label: t("reported-jobs"), path: "/reported-jobs" },
+                          ]),
+                    ].map(({ label, path }) => (
                       <button
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                        onClick={() => {
-                          setDropdownOpen(false);
-                          push("/my-jobs");
-                        }}
+                        key={path}
+                        className="block px-4 py-2.5 text-[13px] text-[rgba(17,17,16,.7)] hover:bg-[#f7f7f5] hover:text-[#111110] w-full text-left transition-colors border-b border-[rgba(0,0,0,.05)] last:border-b-0"
+                        onClick={() => { setDropdownOpen(false); push(path); }}
                       >
-                        {t("my-jobs")}
+                        {label}
                       </button>
-                    ) : (
-                      <>
-                        <button
-                          className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            push("/saved-job");
-                          }}
-                        >
-                          {t("saved-jobs")}
-                        </button>
-                        <button
-                          className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            push("/applied-jobs");
-                          }}
-                        >
-                          {t("applied-jobs")}
-                        </button>
-                        <button
-                          className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            push("/reported-jobs");
-                          }}
-                        >
-                          {t("reported-jobs")}
-                        </button>
-                      </>
-                    )}
-
+                    ))}
                     <button
-                      onClick={() => {
-                        logout();
-                        setDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => { logout(); setDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-2.5 text-[13px] text-[rgba(17,17,16,.7)] hover:bg-[#f7f7f5] hover:text-[#111110] transition-colors"
                     >
                       {t("logout")}
                     </button>
@@ -523,36 +493,32 @@ export default function Header() {
               </>
             ) : (
               <>
+                {/* Guest CTAs */}
                 <LocalizedLink
                   href="/signup?role=helper"
-                  className="hidden md:inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
+                  className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-medium text-[rgba(17,17,16,.55)] hover:text-[#111110] transition-colors no-underline"
+                  style={{ border: '1px solid rgba(0,0,0,.13)', background: 'transparent' }}
                 >
                   {t("become-helper")}
                 </LocalizedLink>
                 <LocalizedLink
                   href="/signup?role=client"
-                  className="hidden md:inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
+                  className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-semibold bg-[#e8622a] text-white hover:bg-[#d4561f] transition-colors no-underline border-0"
                 >
                   {t("post-mini-job")}
                 </LocalizedLink>
               </>
             )}
 
-            {/* =================== HAMBURGER =================== */}
+            {/* Hamburger */}
             <button
-              className="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-gray-100"
+              className="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-[#f7f7f5] transition"
               aria-label="Open menu"
               aria-expanded={mobileOpen}
-              onClick={() => {
-                setMobileOpen(true);
-                setLanguageOpen(false);
-                setNotificationOpen(false);
-                setDropdownOpen(false);
-              }}
+              onClick={() => { setMobileOpen(true); setLanguageOpen(false); setNotificationOpen(false); setDropdownOpen(false); }}
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5 text-[#111110]" />
             </button>
-            {/* ====================================================== */}
           </div>
         </div>
       </header>

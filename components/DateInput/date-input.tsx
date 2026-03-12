@@ -41,53 +41,77 @@ export function DateInput({
 
   return (
     <div className="block text-sm">
-      <span className="mb-1 block text-gray-700">
-        {label}
-        {required && <span className="text-red-600">*</span>}
-      </span>
+      {label && (
+        <span className="mb-1.5 block text-[11px] font-semibold tracking-[.06em] uppercase" style={{ color: 'rgba(17,17,16,.4)' }}>
+          {label}{required && <span style={{ color: '#e8622a' }}>*</span>}
+        </span>
+      )}
 
       <Popover className="relative">
-        <Popover.Button className="flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-3 py-2 text-left shadow-sm focus:border-black">
-          {value ? format(new Date(value), "yyyy-MM-dd") : "Select date"}
-          <div className="flex items-center gap-1">
-            {value && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation(); // prevent opening the calendar
-                  onChange("");
-                }}
-                className="text-gray-400 hover:text-red-500 text-xs px-1"
-              >
-                ✕
-              </button>
-            )}
-            <CalendarIcon className="h-4 w-4 text-gray-400" />
+        <Popover.Button
+          className="flex w-full items-center justify-between gap-2 text-left outline-none transition-all"
+          style={{
+            borderRadius: '8px',
+            border: value ? '1px solid rgba(232,98,42,.35)' : '1px solid rgba(0,0,0,.1)',
+            background: value ? 'rgba(232,98,42,.04)' : '#f7f7f5',
+            padding: '8px 10px',
+          }}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <CalendarIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: value ? '#e8622a' : 'rgba(17,17,16,.35)' }} />
+            <span className="text-[12px] font-medium truncate" style={{ color: value ? '#111110' : 'rgba(17,17,16,.35)' }}>
+              {value ? format(new Date(value), "dd.MM.yyyy") : "TT.MM.JJJJ"}
+            </span>
           </div>
+          {value && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onChange(""); }}
+              className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-colors"
+              style={{ background: 'rgba(17,17,16,.12)', color: 'rgba(17,17,16,.6)' }}
+            >
+              <svg width="7" height="7" viewBox="0 0 8 8" fill="none">
+                <line x1="1" y1="1" x2="7" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="7" y1="1" x2="1" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          )}
         </Popover.Button>
 
-        <Popover.Panel className="absolute z-10 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
-          <div className="mb-2 flex items-center justify-between">
+        <Popover.Panel
+          className="absolute z-50 mt-2 w-[240px] p-3"
+          style={{
+            borderRadius: '12px',
+            border: '1px solid rgba(0,0,0,.09)',
+            background: '#fff',
+            boxShadow: '0 8px 32px rgba(0,0,0,.12)',
+          }}
+        >
+          {/* Month navigation */}
+          <div className="flex items-center justify-between mb-3">
             <button
               type="button"
               onClick={() => setMonth(subMonths(month, 1))}
-              className="rounded p-1 hover:bg-gray-100"
+              className="w-7 h-7 flex items-center justify-center rounded-[6px] transition-colors"
+              style={{ border: '1px solid rgba(0,0,0,.08)', background: '#f7f7f5' }}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5" style={{ color: 'rgba(17,17,16,.6)' }} />
             </button>
-            <span className="font-medium">{format(month, "MMMM yyyy")}</span>
+            <span className="text-[13px] font-semibold text-[#111110]">{format(month, "MMMM yyyy")}</span>
             <button
               type="button"
               onClick={() => setMonth(addMonths(month, 1))}
-              className="rounded p-1 hover:bg-gray-100"
+              className="w-7 h-7 flex items-center justify-center rounded-[6px] transition-colors"
+              style={{ border: '1px solid rgba(0,0,0,.08)', background: '#f7f7f5' }}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" style={{ color: 'rgba(17,17,16,.6)' }} />
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-xs">
-            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-              <div key={d} className="font-medium text-gray-500">
+          {/* Day grid */}
+          <div className="grid grid-cols-7 gap-0.5 text-center">
+            {["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"].map((d) => (
+              <div key={d} className="text-[10px] font-semibold py-1" style={{ color: 'rgba(17,17,16,.3)' }}>
                 {d}
               </div>
             ))}
@@ -95,26 +119,25 @@ export function DateInput({
               const dayDate = dayjs(day).startOf("day");
               const min = minDate ? dayjs(minDate).startOf("day") : null;
               const max = maxDate ? dayjs(maxDate).startOf("day") : null;
-
               const isDisabled =
                 (min ? dayDate.isBefore(min, "day") : false) ||
                 (max ? dayDate.isAfter(max, "day") : false);
+              const isSelected = value && isSameDay(new Date(value), day);
 
               return (
                 <button
                   type="button"
                   key={day.toISOString()}
-                  onClick={() =>
-                    !isDisabled && onChange(format(day, "yyyy-MM-dd"))
-                  }
+                  onClick={() => !isDisabled && onChange(format(day, "yyyy-MM-dd"))}
                   disabled={isDisabled}
-                  className={`rounded-lg px-2 py-1 text-sm ${
-                    isDisabled
-                      ? "text-gray-300 cursor-not-allowed"
-                      : value && isSameDay(new Date(value), day)
-                      ? "bg-black text-white"
-                      : "text-gray-700"
-                  } hover:bg-gray-100`}
+                  className="w-full aspect-square flex items-center justify-center rounded-[6px] text-[12px] font-medium transition-colors"
+                  style={{
+                    background: isSelected ? '#e8622a' : 'transparent',
+                    color: isDisabled ? 'rgba(17,17,16,.2)' : isSelected ? '#fff' : '#111110',
+                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                  }}
+                  onMouseOver={e => { if (!isDisabled && !isSelected) (e.currentTarget as HTMLButtonElement).style.background = '#f7f7f5'; }}
+                  onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                 >
                   {format(day, "d")}
                 </button>
@@ -123,7 +146,7 @@ export function DateInput({
           </div>
         </Popover.Panel>
       </Popover>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-[11px]" style={{ color: '#e8622a' }}>{error}</p>}
     </div>
   );
 }

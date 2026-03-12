@@ -1,7 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -119,64 +117,65 @@ export default function JobDetail() {
       user.role === "client");
 
   return (
-    <main className="flex-1 min-h-screen mx-auto max-w-6xl px-4 py-8">
-      {/* Success banner after submit */}
-      {submitted && (
-        <div className="mb-6 rounded-2xl border bg-green-50 p-4 text-sm text-green-900">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5" />
+    <main className="min-h-screen bg-[#f7f7f5] pt-16">
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        {/* Success banner after submit */}
+        {submitted && (
+          <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-kz-green" />
             <span>{t("detail.application.submitted")}</span>
           </div>
-        </div>
-      )}
-
-      {/* Top section */}
-      <section className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
-        {/* Left: main content */}
-        <div>
-          <Card className="shadow-sm">
-            <CardHeader className="pb-4">
-              <JobHeader
-                key={jobDetails.id}
-                job={jobDetails}
-                savedJobs={savedJobs}
-                setSavedJobs={setSavedJobs}
-                user={user}
-              />
-            </CardHeader>
-
-            <Separator />
-
-            <CardContent className="prose prose-sm max-w-none py-6">
-              <JobDescription key={jobDetails.id} job={jobDetails} />
-            </CardContent>
-          </Card>
-        </div>
-        <div>
-          {/* Right: sticky apply panel */}
-          {user?.role != "client" && user?.id !== jobDetails?.client_id && (
-            <ApplyPanel user={user} jobDetails={jobDetails} />
-          )}
-          {user?.role === "client" && user.id === jobDetails?.client_id ? (
-            <JobCountCard job={jobDetails} />
-          ) : (
-            <CompanyInfoCard job={jobDetails} role="client" />
-          )}
-        </div>
-      </section>
-
-      <div className="mt-6">
-        {user?.role === "helper" && <SimilarJobCard job={jobDetails} />}
-        {user?.role === "client" && user.id === jobDetails?.client_id && (
-          <ApplicantListCard job={jobDetails} user={user} />
         )}
+
+        {/* Top section */}
+        <section className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
+          {/* Left: main content */}
+          <div>
+            <div className="rounded-2xl bg-white border border-[#efefec] shadow-sm overflow-hidden">
+              <div className="px-6 pt-6 pb-4">
+                <JobHeader
+                  key={jobDetails.id}
+                  job={jobDetails}
+                  savedJobs={savedJobs}
+                  setSavedJobs={setSavedJobs}
+                  user={user}
+                />
+              </div>
+
+              <div className="border-t border-[#efefec]" />
+
+              <div className="px-6 py-6">
+                <JobDescription key={jobDetails.id} job={jobDetails} />
+              </div>
+            </div>
+          </div>
+
+          {/* Right: sticky panel */}
+          <div className="space-y-4">
+            {user?.role != "client" && user?.id !== jobDetails?.client_id && (
+              <ApplyPanel user={user} jobDetails={jobDetails} />
+            )}
+            {user?.role === "client" && user.id === jobDetails?.client_id ? (
+              <JobCountCard job={jobDetails} />
+            ) : (
+              <CompanyInfoCard job={jobDetails} role="client" />
+            )}
+          </div>
+        </section>
+
+        <div className="mt-6">
+          {user?.role === "helper" && <SimilarJobCard job={jobDetails} />}
+          {user?.role === "client" && user.id === jobDetails?.client_id && (
+            <ApplicantListCard job={jobDetails} user={user} />
+          )}
+        </div>
       </div>
 
       {count && count.data.count !== 0 && (
         <>
           <button
             onClick={() => setIsMessageOpen(true)}
-            className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-white shadow-xl hover:bg-primary/90"
+            className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-[#111110] px-5 py-3 text-white shadow-xl hover:bg-kz-accent transition-all"
           >
             <MessageCircle className="h-5 w-5" />
             <span className="hidden sm:inline">{tc("chat.chat")}</span>

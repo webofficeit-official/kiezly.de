@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="8" fill="#e8622a"/>
+  <!-- k stem -->
+  <rect x="9" y="7" width="3" height="18" rx="1.5" fill="#fff"/>
+  <!-- k upper arm -->
+  <path d="M12 16 L20 8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <!-- k lower arm -->
+  <path d="M12 16 L20 24" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <!-- orange dot -->
+  <circle cx="22" cy="24" r="2.5" fill="#fff" opacity="0.9"/>
+</svg>
