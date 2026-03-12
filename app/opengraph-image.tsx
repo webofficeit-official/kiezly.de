@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
 
-// edge runtime removed — use default Node.js runtime for broader hosting compatibility
 export const alt = "Kiezly – Mini-Jobs & Helfer in deiner Nähe";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -13,6 +12,7 @@ export default function OGImage() {
           width: "100%",
           height: "100%",
           display: "flex",
+          flexDirection: "column",
           background: "#111110",
           fontFamily: "sans-serif",
           position: "relative",
@@ -28,6 +28,7 @@ export default function OGImage() {
             right: 0,
             height: "6px",
             background: "#e8622a",
+            display: "flex",
           }}
         />
 
@@ -40,18 +41,20 @@ export default function OGImage() {
             width: "520px",
             height: "520px",
             borderRadius: "50%",
-            background: "rgba(232,98,42,0.07)",
+            background: "rgba(232,98,42,0.08)",
+            display: "flex",
           }}
         />
         <div
           style={{
             position: "absolute",
-            right: "60px",
-            bottom: "60px",
-            width: "320px",
-            height: "320px",
+            right: "80px",
+            bottom: "80px",
+            width: "300px",
+            height: "300px",
             borderRadius: "50%",
-            background: "rgba(232,98,42,0.06)",
+            background: "rgba(232,98,42,0.05)",
+            display: "flex",
           }}
         />
 
@@ -62,65 +65,102 @@ export default function OGImage() {
             flexDirection: "column",
             justifyContent: "space-between",
             padding: "72px 80px",
-            width: "100%",
+            flex: 1,
           }}
         >
           {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "2px" }}>
             <span
               style={{
-                fontSize: "42px",
+                fontSize: "40px",
                 fontWeight: 800,
                 color: "#ffffff",
                 letterSpacing: "-1.5px",
+                lineHeight: 1,
               }}
             >
               kiezly
             </span>
-            <span style={{ fontSize: "42px", fontWeight: 800, color: "#e8622a" }}>.</span>
+            <span
+              style={{
+                fontSize: "40px",
+                fontWeight: 800,
+                color: "#e8622a",
+                lineHeight: 1,
+              }}
+            >
+              .
+            </span>
           </div>
 
-          {/* Headline */}
+          {/* Headline block */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div
+            <span
               style={{
                 fontSize: "13px",
                 fontWeight: 600,
-                color: "rgba(232,98,42,0.9)",
+                color: "#e8622a",
                 letterSpacing: "3px",
                 textTransform: "uppercase",
               }}
             >
               Deine Nachbarschafts-Plattform
+            </span>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0px" }}>
+              <span
+                style={{
+                  fontSize: "76px",
+                  fontWeight: 800,
+                  color: "#ffffff",
+                  lineHeight: 1.05,
+                  letterSpacing: "-3px",
+                }}
+              >
+                Mini-Jobs &amp;
+              </span>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "16px" }}>
+                <span
+                  style={{
+                    fontSize: "76px",
+                    fontWeight: 800,
+                    color: "#e8622a",
+                    lineHeight: 1.05,
+                    letterSpacing: "-3px",
+                  }}
+                >
+                  Helfer
+                </span>
+                <span
+                  style={{
+                    fontSize: "76px",
+                    fontWeight: 800,
+                    color: "#ffffff",
+                    lineHeight: 1.05,
+                    letterSpacing: "-3px",
+                  }}
+                >
+                  finden.
+                </span>
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: "72px",
-                fontWeight: 800,
-                color: "#ffffff",
-                lineHeight: 1.05,
-                letterSpacing: "-2.5px",
-              }}
-            >
-              Mini-Jobs &{"\n"}
-              <span style={{ color: "#e8622a" }}>Helfer</span> finden.
-            </div>
-            <div
+
+            <span
               style={{
                 fontSize: "22px",
                 color: "rgba(255,255,255,0.5)",
                 fontWeight: 400,
                 lineHeight: 1.5,
-                maxWidth: "600px",
+                maxWidth: "620px",
               }}
             >
-              Babysitting, Umzug, Gartenarbeit, Putzen & mehr — schnell, sicher und lokal in Deutschland.
-            </div>
+              Babysitting, Umzug, Gartenarbeit, Putzen &amp; mehr — schnell, sicher und lokal.
+            </span>
           </div>
 
-          {/* Category pills row */}
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            {["🛒 Einkaufen", "🐕 Tiersitter", "🔨 Handwerk", "🌿 Garten", "🧹 Putzen", "👶 Kinderbetreuung"].map(
+          {/* Category pills */}
+          <div style={{ display: "flex", gap: "10px" }}>
+            {["🛒 Einkaufen", "🐕 Tiersitter", "🔨 Handwerk", "🌿 Garten", "🧹 Putzen", "👶 Kinder"].map(
               (label) => (
                 <div
                   key={label}
@@ -129,10 +169,10 @@ export default function OGImage() {
                     alignItems: "center",
                     padding: "8px 18px",
                     borderRadius: "999px",
-                    background: "rgba(255,255,255,0.07)",
+                    background: "rgba(255,255,255,0.08)",
                     border: "1px solid rgba(255,255,255,0.12)",
                     fontSize: "15px",
-                    color: "rgba(255,255,255,0.7)",
+                    color: "rgba(255,255,255,0.75)",
                     fontWeight: 500,
                   }}
                 >
