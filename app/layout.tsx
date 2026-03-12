@@ -9,72 +9,18 @@ export const metadata = {
     template: "%s | Kiezly",
   },
 
-  description:
-    "Kiezly verbindet Menschen mit geprüften Helfern in ihrer Nachbarschaft. Mini-Jobs für Babysitting, Umzug, Gartenarbeit, Putzen & mehr – schnell, sicher und lokal in Deutschland.",
-
-  keywords: [
-    "Mini-Jobs Deutschland",
-    "Helfer finden Nachbarschaft",
-    "Babysitter gesucht",
-    "Umzugshilfe",
-    "Haushaltshilfe",
-    "Gartenarbeit",
-    "Putzhilfe",
-    "Einkaufshilfe",
-    "Kinderbetreuung",
-    "Seniorenbetreuung",
-    "Handwerker",
-    "Nachhilfe",
-    "Minijob",
-    "Braunschweig",
-    "Kiezly",
-    "lokale Jobs",
-    "geprüfte Helfer",
-  ],
-
   applicationName: "Kiezly",
   authors: [{ name: "Kiezly", url: "https://kiezly.de" }],
   creator: "Kiezly",
   publisher: "Kiezly",
   referrer: "origin-when-cross-origin",
 
-  alternates: {
-    canonical: "https://kiezly.de",
-    languages: {
-      "de": "https://kiezly.de/de",
-      "en": "https://kiezly.de/en",
-    },
-  },
-
-  openGraph: {
-    type: "website",
-    url: "https://kiezly.de/",
-    siteName: "Kiezly",
-    locale: "de_DE",
-    alternateLocale: ["en_US"],
-    title: "Kiezly – Mini-Jobs & Helfer in deiner Nähe",
-    description:
-      "Finde geprüfte Helfer für Babysitting, Umzug, Gartenarbeit & mehr – oder biete selbst Mini-Jobs in deiner Nachbarschaft an.",
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: "Kiezly – Mini-Jobs & Helfer in deiner Nachbarschaft",
-        type: "image/png",
-      },
-    ],
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    site: "@kiezly",
-    creator: "@kiezly",
-    title: "Kiezly – Mini-Jobs & Helfer in deiner Nähe",
-    description:
-      "Finde geprüfte Helfer für Babysitting, Umzug, Gartenarbeit & mehr – oder biete selbst Mini-Jobs an.",
-    images: ["/opengraph-image"],
-  },
+  keywords: [
+    "Mini-Jobs Deutschland", "Helfer finden Nachbarschaft", "Babysitter gesucht",
+    "Umzugshilfe", "Haushaltshilfe", "Gartenarbeit", "Putzhilfe", "Einkaufshilfe",
+    "Kinderbetreuung", "Seniorenbetreuung", "Handwerker", "Nachhilfe", "Minijob",
+    "Braunschweig", "Kiezly", "lokale Jobs", "geprüfte Helfer",
+  ],
 
   robots: {
     index: true,
