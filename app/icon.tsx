@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// edge runtime removed — use default Node.js runtime
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
