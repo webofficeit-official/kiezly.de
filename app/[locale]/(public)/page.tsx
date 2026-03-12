@@ -191,8 +191,35 @@ export default function Page() {
     card.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg) translateZ(0px)';
   }, []);
 
+  const homeJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Mini-Job Kategorien – Kiezly",
+    description: "Geprüfte Helfer für alle Mini-Job Kategorien in deiner Nachbarschaft.",
+    url: "https://kiezly.de/de/jobs",
+    numberOfItems: 11,
+    itemListElement: [
+      { "@type": "ListItem", position: 1,  name: "Einkaufshilfe",      url: "https://kiezly.de/de/jobs?category=einkaufen" },
+      { "@type": "ListItem", position: 2,  name: "Tiersitter",          url: "https://kiezly.de/de/jobs?category=tiersitter" },
+      { "@type": "ListItem", position: 3,  name: "Handwerk & Montage",  url: "https://kiezly.de/de/jobs?category=handwerk" },
+      { "@type": "ListItem", position: 4,  name: "Gartenarbeit",        url: "https://kiezly.de/de/jobs?category=garten" },
+      { "@type": "ListItem", position: 5,  name: "Umzugshilfe",         url: "https://kiezly.de/de/jobs?category=umzug" },
+      { "@type": "ListItem", position: 6,  name: "Putzen & Reinigung",  url: "https://kiezly.de/de/jobs?category=putzen" },
+      { "@type": "ListItem", position: 7,  name: "Kinderbetreuung",     url: "https://kiezly.de/de/jobs?category=kinderbetreuung" },
+      { "@type": "ListItem", position: 8,  name: "Nachhilfe",           url: "https://kiezly.de/de/jobs?category=nachhilfe" },
+      { "@type": "ListItem", position: 9,  name: "Seniorenbetreuung",   url: "https://kiezly.de/de/jobs?category=seniorenbetreuung" },
+      { "@type": "ListItem", position: 10, name: "Haushalt",            url: "https://kiezly.de/de/jobs?category=haushalt" },
+      { "@type": "ListItem", position: 11, name: "Event-Hilfe",         url: "https://kiezly.de/de/jobs?category=event" },
+    ],
+  };
+
   return (
     <main className="bg-white text-[#111110]" style={{ paddingTop: '64px' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
+        suppressHydrationWarning
+      />
 
       {/* ══════════════════════════════════════════════════
           HERO

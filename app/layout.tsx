@@ -34,6 +34,17 @@ export const metadata = {
     },
   },
 
+  icons: {
+    icon: [
+      { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/icons/icon-32.png",
+  },
+
+  manifest: "/manifest.webmanifest",
+
   category: "marketplace",
 } as const;
 

@@ -35,29 +35,48 @@ export function useT(fileName?: string) {
   };
 }
 
-function CategoriesSeoJsonLd() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Browse kiezly Categories",
-    description:
-      "Finde geprüfte Helfer für Babysitting, Umzug, Garten, Haustiere, Seniorenbetreuung, Besorgungen und Events in deiner Nähe.",
-    url: "https://www.kiezly.de/jobs",
-    isPartOf: {
+function SiteJsonLd() {
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
       "@type": "WebSite",
       name: "Kiezly",
       url: "https://kiezly.de",
+      description:
+        "Kiezly verbindet Menschen mit geprüften Helfern in ihrer Nachbarschaft. Mini-Jobs für Babysitting, Umzug, Gartenarbeit, Putzen & mehr.",
+      inLanguage: ["de-DE", "en-US"],
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: "https://kiezly.de/de/jobs?q={search_term_string}",
+        },
+        "query-input": "required name=search_term_string",
+      },
     },
-    about: [
-      { "@type": "Thing", name: "Childcare" },
-      { "@type": "Thing", name: "Cleaning" },
-      { "@type": "Thing", name: "Pet care" },
-      { "@type": "Thing", name: "Senior support" },
-      { "@type": "Thing", name: "Errands" },
-      { "@type": "Thing", name: "Garden" },
-      { "@type": "Thing", name: "Events" },
-    ],
-  } as const;
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Kiezly",
+      url: "https://kiezly.de",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://kiezly.de/icons/icon-512.png",
+        width: 512,
+        height: 512,
+      },
+      sameAs: [],
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        availableLanguage: ["German", "English"],
+      },
+      areaServed: {
+        "@type": "Country",
+        name: "Germany",
+      },
+    },
+  ];
 
   return (
     <script
@@ -115,7 +134,7 @@ export default function LocaleLayout({ children, params }: any) {
   return (
     <TranslationContext.Provider value={{ locale, messages }}>
       <ClientLayout>
-        {isReady && <CategoriesSeoJsonLd />}
+        {isReady && <SiteJsonLd />}
         {children}
         <Toaster
           position="top-right"
