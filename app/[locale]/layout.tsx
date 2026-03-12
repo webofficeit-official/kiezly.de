@@ -1,73 +1,131 @@
-import type { Metadata } from "next";
-import React from "react";
-import LocaleClientLayout from "./locale-client-layout";
+"use client";
 
-const META = {
-  de: {
-    title: "Kiezly – Mini-Jobs & Helfer in deiner Nähe",
-    description:
-      "Kiezly verbindet Menschen mit geprüften Helfern in ihrer Nachbarschaft. Mini-Jobs für Babysitting, Umzug, Gartenarbeit, Putzen & mehr – schnell, sicher und lokal in Deutschland.",
-    ogTitle: "Kiezly – Mini-Jobs & Helfer in deiner Nähe",
-    ogDesc:
-      "Finde geprüfte Helfer für Babysitting, Umzug, Gartenarbeit & mehr – oder biete selbst Mini-Jobs in deiner Nachbarschaft an.",
-    locale: "de_DE",
-    url: "https://kiezly.de/de",
-  },
-  en: {
-    title: "Kiezly – Mini-Jobs & Helpers Near You",
-    description:
-      "Kiezly connects people with verified helpers in their neighbourhood. Mini-jobs for babysitting, moving, gardening, cleaning & more – fast, safe and local across Germany.",
-    ogTitle: "Kiezly – Mini-Jobs & Helpers Near You",
-    ogDesc:
-      "Find verified helpers for babysitting, moving, gardening & more – or post your own mini-jobs in your neighbourhood.",
-    locale: "en_US",
-    url: "https://kiezly.de/en",
-  },
-};
+import React, { createContext, useContext, useEffect, useState } from "react";
+import ClientLayout from "./client-layout/client-layout";
+import { Toaster } from "react-hot-toast";
+import { Loader } from "@/components/ui/loader";
 
-export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
-  const locale = params.locale === "en" ? "en" : "de";
-  const m = META[locale];
+export const TranslationContext = createContext({
+  locale: "en",
+  messages: {} as Record<string, any>,
+});
 
-  return {
-    title: m.title,
-    description: m.description,
-    alternates: {
-      canonical: m.url,
-      languages: {
-        de: "https://kiezly.de/de",
-        en: "https://kiezly.de/en",
-      },
-    },
-    openGraph: {
-      type: "website",
-      url: m.url,
-      siteName: "Kiezly",
-      locale: m.locale,
-      alternateLocale: locale === "de" ? ["en_US"] : ["de_DE"],
-      title: m.ogTitle,
-      description: m.ogDesc,
-      images: [
-        {
-          url: "/opengraph-image",
-          width: 1200,
-          height: 630,
-          alt: m.ogTitle,
-          type: "image/png",
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      site: "@kiezly",
-      creator: "@kiezly",
-      title: m.ogTitle,
-      description: m.ogDesc,
-      images: ["/opengraph-image"],
-    },
+export function useT(fileName?: string) {
+  const context = useContext(TranslationContext);
+  if (!context) throw new Error("useT must be used within TranslationProvider");
+
+  return (key: string, vars: Record<string, any> = {}) => {
+    const base = fileName ? context.messages[fileName] : context.messages;
+
+    const keys = key.split(".");
+    let value: any = base;
+    for (const k of keys) value = value?.[k];
+
+    if (value === undefined) return key;
+
+    if (Array.isArray(value)) return value;
+
+    if (typeof value === "object" && value !== null) return value;
+
+    if (typeof value === "string") {
+      return value.replace(/\{(\w+)\}/g, (_, v) => vars[v] ?? `{${v}}`);
+    }
+
+    return value;
   };
 }
 
-export default function Layout({ children, params }: { children: React.ReactNode; params: any }) {
-  return <LocaleClientLayout params={params}>{children}</LocaleClientLayout>;
+function CategoriesSeoJsonLd() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Browse kiezly Categories",
+    description:
+      "Finde geprüfte Helfer für Babysitting, Umzug, Garten, Haustiere, Seniorenbetreuung, Besorgungen und Events in deiner Nähe.",
+    url: "https://www.kiezly.de/jobs",
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Kiezly",
+      url: "https://kiezly.de",
+    },
+    about: [
+      { "@type": "Thing", name: "Childcare" },
+      { "@type": "Thing", name: "Cleaning" },
+      { "@type": "Thing", name: "Pet care" },
+      { "@type": "Thing", name: "Senior support" },
+      { "@type": "Thing", name: "Errands" },
+      { "@type": "Thing", name: "Garden" },
+      { "@type": "Thing", name: "Events" },
+    ],
+  } as const;
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      suppressHydrationWarning
+    />
+  );
+}
+
+export default function LocaleLayout({ children, params }: any) {
+  const { locale } = params;
+  const [messages, setMessages] = useState<any>({});
+
+  const files = [
+    "header", "footer", "home", "signup", "signin", "howItWorks",
+    "impressum", "terms", "privacy", "404", "jobs", "application",
+    "profile", "company", "my-jobs", "post-job", "reset-password",
+    "forgot-password", "changePassword", "inbox", "reviews", "messages",
+  ];
+
+  useEffect(() => {
+    async function loadMessages() {
+      const merged: Record<string, any> = {};
+      for (const file of files) {
+        try {
+          const mod = await import(`../../locales/${locale}/${file}.json`);
+          merged[file] = mod.default;
+        } catch {
+          console.warn(`Translation file not found: ${locale}/${file}.json. Falling back to English.`);
+          const fallback = await import(`../../locales/en/${file}.json`);
+          merged[file] = fallback.default;
+        }
+      }
+      setMessages(merged);
+    }
+    loadMessages();
+  }, [locale]);
+
+  if (Object.keys(messages).length === 0)
+    return (
+      <ClientLayout>
+        <div className="min-h-screen">
+          <div className="flex">
+            <div className="flex-1 flex items-center justify-center">
+              <Loader />
+            </div>
+          </div>
+        </div>
+      </ClientLayout>
+    );
+
+  const isReady = Object.keys(messages).length > 0;
+
+  return (
+    <TranslationContext.Provider value={{ locale, messages }}>
+      <ClientLayout>
+        {isReady && <CategoriesSeoJsonLd />}
+        {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: "rounded-xl shadow-md",
+            success: { style: { background: "#10B981", color: "white" } },
+            error: { style: { background: "#EF4444", color: "white" } },
+          }}
+        />
+      </ClientLayout>
+    </TranslationContext.Provider>
+  );
 }
