@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ApplicationModel from "./application-model";
 import { useState } from "react";
 import AlertBox from "@/components/shared-ui/delete-alert-box/delet-alert-box";
@@ -29,95 +27,89 @@ export default function ApplicationCard({
   const t = useT("application");
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-base flex justify-between">
-          <span>{title}</span>
-          {application?.data?.application?.status && (
-            <button className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium transition-colors rounded-full bg-gray-50 text-gray-600 border border-gray-200">
-              {application?.data?.application?.status}
-            </button>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-1">
-        <div className="space-y-2">
-          {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
-          )}
-
-          {coverNote && (
-            <div className="text-gray-700 text-sm leading-relaxed">
-              {t("apply-panel.card.cover-note")} <br />
-              <div
-                className="text-gray-700 text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: coverNote || "" }}
+    <div className="rounded-2xl bg-white border border-[#efefec] shadow-sm overflow-hidden">
+      <div className="px-5 py-4 border-b border-[#efefec] flex items-center justify-between gap-3">
+        <h3 className="font-display font-semibold text-[#111110] text-[15px]">{title}</h3>
+        {application?.data?.application?.status && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(232,98,42,.1)] px-2.5 py-0.5 text-[11px] font-semibold text-kz-accent capitalize">
+            {application?.data?.application?.status}
+          </span>
+        )}
+      </div>
+      <div className="px-5 py-4 space-y-3">
+        {description && (
+          <p className="text-[13px]" style={{ color: "rgba(17,17,16,.5)" }}>{description}</p>
+        )}
+        {coverNote && (
+          <div>
+            <p className="text-[12px] font-medium text-[#374151] mb-1">{t("apply-panel.card.cover-note")}</p>
+            <div
+              className="text-[13px] leading-relaxed"
+              style={{ color: "rgba(17,17,16,.7)" }}
+              dangerouslySetInnerHTML={{ __html: coverNote || "" }}
+            />
+          </div>
+        )}
+        {proposedRate && (
+          <p className="text-[13px]" style={{ color: "rgba(17,17,16,.7)" }}>
+            {t("apply-panel.card.proposed-rate")}{" "}
+            <span className="font-semibold text-[#111110]">
+              {proposedRate} {jobDetails?.currency}
+            </span>
+          </p>
+        )}
+        {status !== "shortlisted" && status !== "accepted" && (
+          <div className="flex gap-2 pt-1">
+            {!withdraw && (
+              <button
+                onClick={() => logged ? setIsModalOpen(true) : push("/signup")}
+                className="flex-1 h-[42px] rounded-lg bg-kz-accent text-white font-semibold text-[13px] tracking-wide transition-all hover:bg-[#d4561f] active:scale-[.99]"
+              >
+                {buttonLabel}
+              </button>
+            )}
+            {applied && (
+              <AlertBox
+                trigger={
+                  <button className="flex-1 h-[42px] rounded-lg border border-red-300 bg-red-50 text-red-600 font-semibold text-[13px] hover:bg-red-100 transition-all">
+                    {t("apply-panel.card.withdraw.trigger")}
+                  </button>
+                }
+                title={t("apply-panel.card.withdraw.title")}
+                description={t("apply-panel.card.withdraw.description", {
+                  title: jobDetails?.title,
+                })}
+                confirmText={t("apply-panel.card.withdraw.confirm")}
+                cancelText={t("apply-panel.card.withdraw.cancel")}
+                onConfirm={() =>
+                  withdrawMutation.mutate(application.data.application.id, {
+                    onSuccess: () =>
+                      toast.success(t("apply-panel.card.withdraw.success")),
+                    onError: (err: any) =>
+                      toast.error(
+                        err?.message || t("apply-panel.card.withdraw.failed"),
+                      ),
+                  })
+                }
               />
-            </div>
-          )}
-          {proposedRate && (
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {t("apply-panel.card.proposed-rate")}{" "}
-              <span className="font-semibold">
-                {proposedRate} {jobDetails?.currency}
-              </span>
-            </p>
-          )}
-          {status !== "shortlisted" && status !== "accepted" && (
-            <div className="flex gap-3">
-              {!withdraw && (
-                <Button
-                  onClick={() =>
-                    logged ? setIsModalOpen(true) : push("/signup")
-                  }
-                  className="w-full rounded-xl"
-                >
-                  {buttonLabel}
-                </Button>
-              )}
-              {applied && (
-                <AlertBox
-                  trigger={
-                    <Button variant="destructive" className="w-full rounded-xl">
-                      {t("apply-panel.card.withdraw.trigger")}
-                    </Button>
-                  }
-                  title={t("apply-panel.card.withdraw.title")}
-                  description={t("apply-panel.card.withdraw.description", {
-                    title: jobDetails?.title,
-                  })}
-                  confirmText={t("apply-panel.card.withdraw.confirm")}
-                  cancelText={t("apply-panel.card.withdraw.cancel")}
-                  onConfirm={() =>
-                    withdrawMutation.mutate(application.data.application.id, {
-                      onSuccess: () =>
-                        toast.success(t("apply-panel.card.withdraw.success")),
-                      onError: (err: any) =>
-                        toast.error(
-                          err?.message || t("apply-panel.card.withdraw.failed"),
-                        ),
-                    })
-                  }
-                />
-              )}
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          <ApplicationModel
-            isModalOpen={isModalOpen}
-            setIsModalOpen={setIsModalOpen}
-            header={applied ? t("apply-panel.card.model.header") : title}
-            application={application}
-            jobDetails={jobDetails}
-            buttonLabel={
-              applied
-                ? t("apply-panel.card.model.button.update")
-                : t("apply-panel.card.model.button.apply")
-            }
-            update={applied ? true : false}
-          />
-        </div>
-      </CardContent>
-    </Card>
+        <ApplicationModel
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          header={applied ? t("apply-panel.card.model.header") : title}
+          application={application}
+          jobDetails={jobDetails}
+          buttonLabel={
+            applied
+              ? t("apply-panel.card.model.button.update")
+              : t("apply-panel.card.model.button.apply")
+          }
+          update={applied ? true : false}
+        />
+      </div>
+    </div>
   );
 }
