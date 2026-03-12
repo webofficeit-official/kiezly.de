@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// edge runtime removed — use default Node.js runtime for broader hosting compatibility
 export const alt = "Kiezly – Mini-Jobs & Helfer in deiner Nähe";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
