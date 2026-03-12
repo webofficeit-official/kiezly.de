@@ -511,6 +511,12 @@ export default function Header() {
               <>
                 {/* Guest CTAs */}
                 <LocalizedLink
+                  href="/signin"
+                  className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-medium text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline"
+                >
+                  {t("signin")}
+                </LocalizedLink>
+                <LocalizedLink
                   href="/signup?role=helper"
                   className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-medium text-[rgba(17,17,16,.55)] hover:text-[#111110] transition-colors no-underline"
                   style={{ border: '1px solid rgba(0,0,0,.13)', background: 'transparent' }}
