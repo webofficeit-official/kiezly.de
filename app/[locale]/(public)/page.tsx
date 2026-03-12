@@ -67,6 +67,8 @@ export default function Page() {
   const { push } = useLocalizedRouter();
   const t = useT("home");
   const howItWorksSteps = t("how-it-works.steps") || [];
+  const trustStats = t("trust-safety.stats") || [];
+  const featureItems = t("features.items") || [];
 
   React.useEffect(() => {
     setIsLoading(true);
@@ -146,7 +148,7 @@ export default function Page() {
         {/* ── LEFT: Hero content ── */}
         <div className="relative z-[1]">
           <div className="kz-hero-label kz-fade-up kz-d1">
-            Mini-Jobs · Nachbarschaft · Deutschland
+            {t("hero.label") || "Mini-Jobs · Nachbarschaft · Deutschland"}
           </div>
 
           <h1
@@ -159,8 +161,8 @@ export default function Page() {
             }}
           >
             {t("heading") || "Mini-Jobs."}<br />
-            <span style={{ color: '#e8622a' }}>{t("heading-underline") || "Echte"}</span> Helfer.<br />
-            <span style={{ color: 'rgba(17,17,16,.25)' }}>Dein Kiez.</span>
+            <span style={{ color: '#e8622a' }}>{t("heading-underline") || "Echte"}</span> {t("hero.heading-suffix") || "Helfer."}<br />
+            <span style={{ color: 'rgba(17,17,16,.25)' }}>{t("hero.heading-faded") || "Dein Kiez."}</span>
           </h1>
 
           <p
@@ -254,21 +256,21 @@ export default function Page() {
                     <div className="text-[11px]" style={{ color: 'rgba(17,17,16,.4)' }}>Mitte · vor 5 Min.</div>
                   </div>
                 </div>
-                <span className="kz-tag-green">Offen</span>
+                <span className="kz-tag-green">{t("hero.card.open") || "Offen"}</span>
               </div>
 
               {/* Price bar */}
               <div className="flex items-center justify-between rounded-[10px] px-4 py-3 mb-4" style={{ background: '#f7f7f5' }}>
                 <div>
-                  <div className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(17,17,16,.35)' }}>Bezahlung</div>
+                  <div className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(17,17,16,.35)' }}>{t("hero.card.payment") || "Bezahlung"}</div>
                   <div className="text-[20px] font-display font-extrabold text-[#111110]" style={{ letterSpacing: '-0.5px' }}>15 <span style={{ color: '#1a9e5f' }}>€</span></div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(17,17,16,.35)' }}>Bewerber</div>
+                  <div className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(17,17,16,.35)' }}>{t("hero.card.applicants") || "Bewerber"}</div>
                   <div className="text-[20px] font-display font-extrabold text-[#111110]">3</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(17,17,16,.35)' }}>Ø Bewert.</div>
+                  <div className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(17,17,16,.35)' }}>{t("hero.card.rating") || "Ø Bewert."}</div>
                   <div className="text-[20px] font-display font-extrabold text-[#111110]">4.9<span style={{ color: '#e8622a', fontSize: '14px' }}>★</span></div>
                 </div>
               </div>
@@ -293,7 +295,7 @@ export default function Page() {
                     className="text-[11px] font-semibold px-3 py-1 rounded-[6px] text-white flex-shrink-0"
                     style={{ background: i === 0 ? '#e8622a' : 'rgba(0,0,0,.08)', color: i === 0 ? '#fff' : 'rgba(17,17,16,.5)' }}
                   >
-                    {i === 0 ? 'Auswählen' : 'Profil'}
+                    {i === 0 ? (t("hero.card.select") || "Auswählen") : (t("hero.card.profile") || "Profil")}
                   </button>
                 </div>
               ))}
@@ -314,7 +316,7 @@ export default function Page() {
               }}
             >
               <span className="kz-live-dot" style={{ background: '#1a9e5f' }} />
-              Job erledigt · 15 €
+              {t("hero.card.badge-done") || "Job erledigt · 15 €"}
             </div>
 
             {/* Floating badge 2 – bottom left */}
@@ -332,7 +334,7 @@ export default function Page() {
                 transform: 'translateZ(20px)',
               }}
             >
-              ⚡ Match in 8 Min.
+              {t("hero.card.badge-match") || "⚡ Match in 8 Min."}
             </div>
 
             {/* Floating badge 3 – mid right */}
@@ -352,7 +354,7 @@ export default function Page() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
-              Verifiziert
+              {t("hero.card.badge-verified") || "Verifiziert"}
             </div>
           </div>
         </div>
@@ -363,7 +365,7 @@ export default function Page() {
           style={{ color: 'rgba(17,17,16,.25)' }}
         >
           <span style={{ display: 'inline-block', width: '36px', height: '1px', background: 'rgba(17,17,16,.25)' }} />
-          scroll
+          {t("hero.scroll") || "scroll"}
         </div>
       </section>
 
@@ -373,7 +375,7 @@ export default function Page() {
           HOW IT WORKS
       ══════════════════════════════════════════════════ */}
       <section id="how" style={{ padding: '100px 48px' }}>
-        <div className="kz-section-label">So funktioniert's</div>
+        <div className="kz-section-label">{t("how-it-works.label") || "So funktioniert's"}</div>
         <h2
           className="font-display font-extrabold text-[#111110]"
           style={{ fontSize: 'clamp(28px,4vw,48px)', lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: '16px' }}
@@ -463,7 +465,7 @@ export default function Page() {
               className="font-semibold tracking-[.1em] uppercase mb-[18px]"
               style={{ fontSize: '11px', color: 'rgba(17,17,16,.45)' }}
             >
-              Live Jobs — Deutschland
+              {t("how-it-works.live-label") || "Live Jobs — Deutschland"}
             </div>
             {[
               {
@@ -519,9 +521,9 @@ export default function Page() {
                 </div>
                 <div className="text-right ml-auto flex-shrink-0 flex flex-col items-end gap-1">
                   {item.price && <div className="text-[13px] font-semibold" style={{ color: '#1a9e5f' }}>{item.price}</div>}
-                  {item.tag === "open"   && <span className="kz-tag-green">Offen</span>}
-                  {item.tag === "select" && <span className="kz-tag-green">Auswählen</span>}
-                  {item.tag === "paid"   && <span className="kz-tag-orange">Bezahlt</span>}
+                  {item.tag === "open"   && <span className="kz-tag-green">{t("how-it-works.tag-open") || "Offen"}</span>}
+                  {item.tag === "select" && <span className="kz-tag-green">{t("how-it-works.tag-select") || "Auswählen"}</span>}
+                  {item.tag === "paid"   && <span className="kz-tag-orange">{t("how-it-works.tag-paid") || "Bezahlt"}</span>}
                 </div>
               </div>
             ))}
@@ -538,7 +540,7 @@ export default function Page() {
         id="categories"
         style={{ padding: '100px 48px', background: '#f7f7f5' }}
       >
-        <div className="kz-section-label">Kategorien</div>
+        <div className="kz-section-label">{t("categories.label") || "Kategorien"}</div>
         <h2
           className="font-display font-extrabold text-[#111110]"
           style={{ fontSize: 'clamp(28px,4vw,48px)', lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: '16px' }}
@@ -606,7 +608,7 @@ export default function Page() {
           TRUST / STATS
       ══════════════════════════════════════════════════ */}
       <section id="trust" style={{ padding: '100px 48px' }}>
-        <div className="kz-section-label">Vertrauen &amp; Sicherheit</div>
+        <div className="kz-section-label">{t("trust-safety.label") || "Vertrauen & Sicherheit"}</div>
         <h2
           className="font-display font-extrabold text-[#111110]"
           style={{ fontSize: 'clamp(28px,4vw,48px)', lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: '16px' }}
@@ -629,7 +631,7 @@ export default function Page() {
             marginTop: '56px',
           }}
         >
-          {TRUST_STATS.map((stat, i) => (
+          {(Array.isArray(trustStats) && trustStats.length > 0 ? trustStats : TRUST_STATS).map((stat, i) => (
             <div
               key={i}
               className="transition-colors"
@@ -663,22 +665,22 @@ export default function Page() {
           FEATURES
       ══════════════════════════════════════════════════ */}
       <section style={{ padding: '100px 48px' }}>
-        <div className="kz-section-label">Warum Kiezly</div>
+        <div className="kz-section-label">{t("features.label") || "Warum Kiezly"}</div>
         <h2
           className="font-display font-extrabold text-[#111110]"
           style={{ fontSize: 'clamp(28px,4vw,48px)', lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: '16px' }}
         >
-          Sicherheit ist <span style={{ color: '#e8622a' }}>kein Zufall</span>
+          {t("features.title") || <>Sicherheit ist <span style={{ color: '#e8622a' }}>kein Zufall</span></>}
         </h2>
         <p className="text-[15px] leading-[1.7] max-w-[480px]" style={{ color: 'rgba(17,17,16,.45)' }}>
-          Jeder Schritt ist darauf ausgelegt, dass du dich auf den Job konzentrieren kannst.
+          {t("features.description") || "Jeder Schritt ist darauf ausgelegt, dass du dich auf den Job konzentrieren kannst."}
         </p>
 
         <div
           className="grid gap-5"
           style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginTop: '56px' }}
         >
-          {FEATURES.map((f, i) => (
+          {(Array.isArray(featureItems) && featureItems.length > 0 ? featureItems : FEATURES).map((f: any, i: number) => (
             <div
               key={i}
               className="transition-all"
@@ -750,7 +752,7 @@ export default function Page() {
             style={{ fontSize: '11px', color: 'rgba(255,255,255,.35)' }}
           >
             <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'rgba(255,255,255,.2)' }} />
-            Jetzt loslegen
+            {t("help.label") || "Jetzt loslegen"}
           </div>
           <h2
             className="font-display font-extrabold text-white"
