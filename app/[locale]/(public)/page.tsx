@@ -50,12 +50,90 @@ const CAT_EMOJI: Record<string, string> = {
   "event": "🎉", "events": "🎉",
 };
 
+const CAT_DESC: Record<string, string> = {
+  "einkaufen": "Supermarkt, Apotheke & mehr",   "shopping": "Groceries, pharmacy & more",
+  "tiersitter": "Gassi gehen, Pflege & Betreuung", "pet": "Walking, grooming & care", "pets": "Walking, grooming & care",
+  "handwerk": "Reparaturen, Montage & Renovierung", "craft": "Repairs, assembly & renovation",
+  "garten": "Mähen, Pflanzen & Gartenarbeit",   "garden": "Mowing, planting & yard work",
+  "umzug": "Tragen, Packen & Transport",         "moving": "Packing, lifting & transport",
+  "putzen": "Wohnung, Büro & Grundreinigung",    "cleaning": "Home, office & deep cleaning",
+  "kinderbetreuung": "Babysitting & Nachmittagsbetreuung", "childcare": "Babysitting & afterschool",
+  "nachhilfe": "Schule, Studium & Sprachen",     "tutoring": "School, university & languages",
+  "seniorenbetreuung": "Begleitung & Alltagshilfe", "senior": "Companionship & daily support",
+  "haushalt": "Kochen, Waschen & Haushaltsservice", "household": "Cooking, laundry & home tasks",
+  "event": "Aufbau, Service & Abbau",            "events": "Setup, service & breakdown",
+};
+
+const CAT_COLOR: Record<string, { grad: string; text: string }> = {
+  "einkaufen": { grad: "linear-gradient(135deg,#f59e0b,#d97706)", text: "#ffffff" },
+  "shopping":  { grad: "linear-gradient(135deg,#f59e0b,#d97706)", text: "#ffffff" },
+  "tiersitter":{ grad: "linear-gradient(135deg,#10b981,#059669)", text: "#ffffff" },
+  "pet":       { grad: "linear-gradient(135deg,#10b981,#059669)", text: "#ffffff" },
+  "pets":      { grad: "linear-gradient(135deg,#10b981,#059669)", text: "#ffffff" },
+  "handwerk":  { grad: "linear-gradient(135deg,#7c3aed,#6d28d9)", text: "#ffffff" },
+  "craft":     { grad: "linear-gradient(135deg,#7c3aed,#6d28d9)", text: "#ffffff" },
+  "garten":    { grad: "linear-gradient(135deg,#16a34a,#15803d)", text: "#ffffff" },
+  "garden":    { grad: "linear-gradient(135deg,#16a34a,#15803d)", text: "#ffffff" },
+  "umzug":     { grad: "linear-gradient(135deg,#334155,#1e293b)", text: "#ffffff" },
+  "moving":    { grad: "linear-gradient(135deg,#334155,#1e293b)", text: "#ffffff" },
+  "putzen":    { grad: "linear-gradient(135deg,#2563eb,#1d4ed8)", text: "#ffffff" },
+  "cleaning":  { grad: "linear-gradient(135deg,#2563eb,#1d4ed8)", text: "#ffffff" },
+  "kinderbetreuung": { grad: "linear-gradient(135deg,#e11d48,#be123c)", text: "#ffffff" },
+  "childcare": { grad: "linear-gradient(135deg,#e11d48,#be123c)", text: "#ffffff" },
+  "nachhilfe": { grad: "linear-gradient(135deg,#eab308,#ca8a04)", text: "#ffffff" },
+  "tutoring":  { grad: "linear-gradient(135deg,#eab308,#ca8a04)", text: "#ffffff" },
+  "seniorenbetreuung": { grad: "linear-gradient(135deg,#9333ea,#7e22ce)", text: "#ffffff" },
+  "senior":    { grad: "linear-gradient(135deg,#9333ea,#7e22ce)", text: "#ffffff" },
+  "haushalt":  { grad: "linear-gradient(135deg,#ea580c,#c2410c)", text: "#ffffff" },
+  "household": { grad: "linear-gradient(135deg,#ea580c,#c2410c)", text: "#ffffff" },
+  "event":     { grad: "linear-gradient(135deg,#db2777,#be185d)", text: "#ffffff" },
+  "events":    { grad: "linear-gradient(135deg,#db2777,#be185d)", text: "#ffffff" },
+};
+
+function getCatColor(slug: string) {
+  const lower = slug.toLowerCase();
+  for (const [key, val] of Object.entries(CAT_COLOR)) {
+    if (lower.includes(key)) return val;
+  }
+  return { grad: "linear-gradient(135deg,#475569,#334155)", text: "#ffffff" };
+}
+
+const CAT_COUNT: Record<string, string> = {
+  "einkaufen": "38+", "shopping": "38+",
+  "tiersitter": "24+", "pet": "24+", "pets": "24+",
+  "handwerk": "51+", "craft": "51+",
+  "garten": "19+", "garden": "19+",
+  "umzug": "15+", "moving": "15+",
+  "putzen": "42+", "cleaning": "42+",
+  "kinderbetreuung": "11+", "childcare": "11+",
+  "nachhilfe": "27+", "tutoring": "27+",
+  "seniorenbetreuung": "9+", "senior": "9+",
+  "haushalt": "33+", "household": "33+",
+  "event": "7+", "events": "7+",
+};
+
 function getCatEmoji(slug: string): string {
   const lower = slug.toLowerCase();
   for (const [key, emoji] of Object.entries(CAT_EMOJI)) {
     if (lower.includes(key)) return emoji;
   }
   return "✨";
+}
+
+function getCatDesc(slug: string): string {
+  const lower = slug.toLowerCase();
+  for (const [key, desc] of Object.entries(CAT_DESC)) {
+    if (lower.includes(key)) return desc;
+  }
+  return "Jobs in deiner Nähe";
+}
+
+function getCatCount(slug: string): string {
+  const lower = slug.toLowerCase();
+  for (const [key, count] of Object.entries(CAT_COUNT)) {
+    if (lower.includes(key)) return count;
+  }
+  return "10+";
 }
 
 export default function Page() {
@@ -76,7 +154,8 @@ export default function Page() {
       {},
       {
         onSuccess: (data: any) => {
-          setCategories(data.data.jobCategories);
+          const cats = data.data.jobCategories;
+          setCategories(cats);
           setIsLoading(false);
         },
         onError: () => setIsLoading(false),
@@ -531,78 +610,91 @@ export default function Page() {
         </div>
       </section>
 
-      <div className="kz-divider mx-12" />
-
       {/* ══════════════════════════════════════════════════
           CATEGORIES
       ══════════════════════════════════════════════════ */}
-      <section
-        id="categories"
-        style={{ padding: '100px 48px', background: '#f7f7f5' }}
-      >
-        <div className="kz-section-label">{t("categories.label") || "Kategorien"}</div>
-        <h2
-          className="font-display font-extrabold text-[#111110]"
-          style={{ fontSize: 'clamp(28px,4vw,48px)', lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: '16px' }}
-        >
-          {t("categories.title") || <>Was brauchst du <span style={{ color: '#e8622a' }}>heute</span>?</>}
-        </h2>
-        <p className="text-[15px] leading-[1.7] max-w-[480px]" style={{ color: 'rgba(17,17,16,.45)' }}>
-          {t("categories.description") || "Von Alltagshilfen bis Handwerk – echte Menschen aus deinem Kiez helfen dir weiter."}
-        </p>
+      <section id="categories" style={{ padding: '100px 48px', background: '#e8622a' }}>
 
-        <div
-          className="overflow-hidden"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '1px',
-            background: 'rgba(0,0,0,.07)',
-            border: '1px solid rgba(0,0,0,.07)',
-            borderRadius: '12px',
-            marginTop: '56px',
-          }}
-        >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '52px', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <div className="kz-section-label" style={{ color: 'rgba(255,255,255,.5)' }}>{t("categories.label") || "Kategorien"}</div>
+            <h2 className="font-display font-extrabold"
+              style={{ fontSize: 'clamp(28px,4vw,48px)', lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: '12px', color: '#fff' }}>
+              {t("categories.title") || <>Was brauchst du <span style={{ color: '#111110' }}>heute</span>?</>}
+            </h2>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,.65)', lineHeight: 1.7, maxWidth: '460px', margin: 0 }}>
+              {t("categories.description") || "Von Alltagshilfen bis Handwerk – echte Menschen aus deinem Kiez helfen dir weiter."}
+            </p>
+          </div>
+          <button onClick={() => push('/jobs')}
+            style={{ height: '40px', padding: '0 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,.3)', background: 'rgba(255,255,255,.12)', color: '#fff', fontSize: '13px', fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+            onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,.22)'; }}
+            onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,.12)'; }}>
+            {t("categories.view_all") || "Alle anzeigen"} →
+          </button>
+        </div>
+
+        {/* Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
           {isLoading
             ? Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{ background: '#f7f7f5', padding: '28px 24px' }}
-                  className="flex flex-col gap-3"
-                >
-                  <div className="h-7 w-7 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                  <div className="h-4 w-24 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                  <div className="h-3 w-20 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                </div>
+                <div key={i} style={{ borderRadius: '16px', height: '180px', background: 'linear-gradient(135deg,#f7f7f5,#efefec)' }}
+                  className="animate-[shimmer_1.5s_infinite] bg-[length:200%_100%]" />
               ))
-            : categories.map(({ id, name, slug }) => (
-                <div
-                  key={id}
-                  className="flex flex-col gap-3 cursor-pointer group transition-colors"
-                  style={{ background: '#f7f7f5', padding: '28px 24px' }}
-                  onClick={() => handleCategoryClick(slug)}
-                  onMouseOver={e => (e.currentTarget as HTMLDivElement).style.background = '#efefec'}
-                  onMouseOut={e => (e.currentTarget as HTMLDivElement).style.background = '#f7f7f5'}
-                >
-                  <div className="text-[26px]">{getCatEmoji(slug)}</div>
-                  <div className="font-display font-semibold text-[#111110]" style={{ fontSize: '15px' }}>{name}</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(17,17,16,.45)' }}>
-                    {t("categories.subtitle") || "Jobs verfügbar"}
-                  </div>
+            : categories.map(({ id, name, slug }) => {
+                const clr = getCatColor(slug);
+                return (
                   <div
-                    className="mt-auto text-[16px] transition-all"
-                    style={{ color: 'rgba(17,17,16,.25)' }}
-                    onMouseOver={e => { (e.currentTarget as HTMLDivElement).style.color = '#e8622a'; (e.currentTarget as HTMLDivElement).style.transform = 'translate(3px,-3px)'; }}
-                    onMouseOut={e => { (e.currentTarget as HTMLDivElement).style.color = 'rgba(17,17,16,.25)'; (e.currentTarget as HTMLDivElement).style.transform = 'none'; }}
+                    key={id}
+                    onClick={() => handleCategoryClick(slug)}
+                    className="cat-item"
+                    style={{
+                      borderRadius: '16px',
+                      padding: '24px',
+                      background: clr.grad,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0',
+                      minHeight: '180px',
+                      transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                    onMouseOver={e => {
+                      (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = `0 16px 40px -8px ${clr.text}30`;
+                    }}
+                    onMouseOut={e => {
+                      (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                    }}
                   >
-                    ↗
+                    {/* Count badge top-right */}
+                    <div style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 600, color: clr.text, opacity: 0.6 }}>
+                      {getCatCount(slug)} Jobs
+                    </div>
+
+                    {/* Emoji */}
+                    <div style={{ fontSize: '36px', lineHeight: 1, marginBottom: 'auto', paddingBottom: '20px' }}>
+                      {getCatEmoji(slug)}
+                    </div>
+
+                    {/* Name */}
+                    <div>
+                      <div className="font-display font-bold" style={{ fontSize: '15px', color: clr.text, marginBottom: '4px', letterSpacing: '-0.2px' }}>
+                        {name}
+                      </div>
+                      <div style={{ fontSize: '12px', color: clr.text, opacity: 0.55, lineHeight: 1.4 }}>
+                        {getCatDesc(slug)}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
         </div>
       </section>
-
-      <div className="kz-divider mx-12" />
 
       {/* ══════════════════════════════════════════════════
           TRUST / STATS
