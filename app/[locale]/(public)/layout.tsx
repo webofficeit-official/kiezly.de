@@ -38,8 +38,9 @@ export async function generateMetadata({
     alternates: {
       canonical: m.url,
       languages: {
-        de: "https://kiezly.de/de",
-        en: "https://kiezly.de/en",
+        "de": "https://kiezly.de/de",
+        "en": "https://kiezly.de/en",
+        "x-default": "https://kiezly.de/de",
       },
     },
     openGraph: {
