@@ -1,39 +1,81 @@
 {
-    "header": "Datenschutzerklärung",
-    "description": "Stand: 16. Oktober 2025",
-    "lists": [
-        {
-            "title": "Verantwortlicher",
-            "description": "<p>Sivaprasad Sisupalan<br />Speckenkamp 12, 38162 Sülfeld, Deutschland<br />E-Mail: <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a>, <a href=\"mailto:sabeel@weboffice.com\">sabeel@weboffice.com</a></p>"
-        },
-        {
-            "title": "Zweck & Rechtsgrundlagen",
-            "description": "<p>Diese Website ist ein privates, nicht-kommerzielles Projekt. Datenverarbeitungen erfolgen nur, soweit dies zur <strong>Bereitstellung der Website</strong> erforderlich ist (Art. 6 Abs. 1 lit. f DSGVO – berechtigtes Interesse an einer sicheren, stabilen Auslieferung).</p>"
-        },
-        {
-            "title": "Server-Protokolle",
-            "description": "<p>Beim Aufruf können technische Informationen verarbeitet werden (z B. IP-Adresse in gekürzter Form, Datum/Uhrzeit, angeforderte Ressourcen, User-Agent). Diese Daten dienen ausschließlich der technischen Bereitstellung, Fehlersuche und Sicherheit und werden nur so lange gespeichert, wie es zur Erreichung dieser Zwecke erforderlich ist.</p>"
-        },
-        {
-            "title": "Cookies & Tracking",
-            "description": "<p><strong>Es werden keine Cookies zu Analyse-/Tracking-Zwecken gesetzt.</strong> Es werden keine externen Analytics-Dienste (z. B. Google Analytics) eingesetzt.</p>"
-        },
-        {
-            "title": "Empfänger & Drittlandtransfer",
-            "description": "<p>Sofern ein Hosting-Dienstleister eingesetzt wird, erfolgt eine Verarbeitung beim Hosting-Provider ausschließlich zur Auslieferung dieser Website. Eine Übermittlung in Drittländer findet nicht statt, es sei denn, sie ist zur Auslieferung technisch erforderlich (z. B. Content-Delivery).</p>"
-        },
-        {
-            "title": "Ihre Rechte",
-            "description": "<ul><li>Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch (Art. 15–21 DSGVO)</li><li>Beschwerderecht bei einer Datenschutzaufsichtsbehörde</li></ul><p>Zur Ausübung Ihrer Rechte genügt eine formlose E-Mail an: <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a>, <a href=\"mailto:sabeel@weboffice.com\">sabeel@weboffice.com</a>.</p>"
-        },
-        {
-            "title": "Externe Links",
-            "description": "<p>Für Inhalte verlinkter externer Seiten wird keine Verantwortung übernommen.</p>"
-        },
-        {
-            "title": "Änderungen",
-            "description": "<p>Diese Hinweise können angepasst werden, um technischen oder rechtlichen Änderungen Rechnung zu tragen.</p>"
-        }
-    ],
-    "go-back": "Zurück nach Hause"
+  "header": "Datenschutzerklärung",
+  "description": "Stand: März 2026",
+  "subtitle": "Wir nehmen den Schutz Ihrer persönlichen Daten ernst. Diese Datenschutzerklärung informiert Sie gemäß Art. 13 und 14 DSGVO über die Verarbeitung personenbezogener Daten im Rahmen der Nutzung der Plattform kiezly.de.",
+  "lists": [
+    {
+      "title": "Verantwortlicher",
+      "description": "<p>Verantwortlicher im Sinne der DSGVO ist:</p><p><strong>Sivaprasad Sisupalan</strong><br />Speckenkamp 12<br />38162 Sülfeld, Deutschland<br /><br />E-Mail: <a href=\"mailto:datenschutz@kiezly.de\">datenschutz@kiezly.de</a><br />Alternativ: <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a></p><p>Für datenschutzrelevante Anfragen wenden Sie sich bitte an die oben genannte E-Mail-Adresse.</p>"
+    },
+    {
+      "title": "Welche personenbezogenen Daten wir verarbeiten",
+      "description": "<p>Je nach Art Ihrer Nutzung verarbeiten wir folgende Kategorien personenbezogener Daten:</p><p><strong>Bei der Registrierung:</strong></p><ul><li>Vorname, Nachname</li><li>E-Mail-Adresse</li><li>Telefonnummer (optional)</li><li>Passwort (verschlüsselt gespeichert, niemals im Klartext)</li><li>Gewählte Rolle (Auftraggeber oder Helfer)</li><li>Datum der Registrierung</li></ul><p><strong>Im Nutzerprofil (freiwillige Angaben):</strong></p><ul><li>Profilbild (Avatar)</li><li>Anzeigename</li><li>Beschreibungstext / Bio</li><li>Standortinformationen (Stadtteil, PLZ)</li></ul><p><strong>Bei der Identitätsverifizierung:</strong></p><ul><li>Ausweisdokument (z. B. Personalausweis, Reisepass) – nur zur Verifizierung, nicht dauerhaft gespeichert</li><li>Bestätigungsstatus der Verifizierung</li></ul><p><strong>Bei der Plattformnutzung:</strong></p><ul><li>Job-Beschreibungen, Kategorien, Standortangaben, Vergütung</li><li>Bewerbungsdaten und -nachrichten</li><li>Bewertungen und Kommentare nach Auftragsabschluss</li><li>Nachrichten zwischen Nutzern (Inbox)</li></ul><p><strong>Technische Daten (automatisch erhoben):</strong></p><ul><li>IP-Adresse (ggf. gekürzt)</li><li>Datum und Uhrzeit des Zugriffs</li><li>Browser-Typ und -Version</li><li>Betriebssystem</li><li>Aufgerufene Seiten und Ressourcen (Server-Logs)</li><li>JWT-Authentifizierungstoken (im LocalStorage/SessionStorage)</li></ul>"
+    },
+    {
+      "title": "Zwecke und Rechtsgrundlagen der Verarbeitung",
+      "description": "<p>Wir verarbeiten Ihre Daten auf der Grundlage folgender Rechtsgrundlagen der DSGVO:</p><table style=\"width:100%;border-collapse:collapse;font-size:13px\"><thead><tr style=\"background:#f7f7f5\"><th style=\"padding:8px 12px;text-align:left;border-bottom:1px solid rgba(0,0,0,.08)\">Zweck</th><th style=\"padding:8px 12px;text-align:left;border-bottom:1px solid rgba(0,0,0,.08)\">Rechtsgrundlage</th></tr></thead><tbody><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Bereitstellung des Plattformbetriebs, Account-Verwaltung</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Identitätsverifizierung zur Sicherheit der Plattform</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Sicherheit, Missbrauchsprävention, Fehlerbehebung</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Bewertungssystem und Reputationsaufbau</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">E-Mail-Benachrichtigungen zu Bewerbungen/Jobs</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)</td></tr><tr><td style=\"padding:8px 12px\">Einhaltung gesetzlicher Pflichten</td><td style=\"padding:8px 12px\">Art. 6 Abs. 1 lit. c DSGVO (rechtliche Verpflichtung)</td></tr></tbody></table>"
+    },
+    {
+      "title": "Registrierung und Account-Verwaltung",
+      "description": "<p>Um die Funktionen von Kiezly nutzen zu können (Job einstellen, sich bewerben, Nachrichten senden, Bewertungen abgeben), ist eine Registrierung erforderlich. Die dabei angegebenen Daten (Name, E-Mail, Passwort, Rolle) werden zur Vertragserfüllung gemäß Art. 6 Abs. 1 lit. b DSGVO verarbeitet.</p><p>Passwörter werden ausschließlich in verschlüsselter Form (Hashing) gespeichert. Wir haben zu keinem Zeitpunkt Zugriff auf Ihr Passwort im Klartext.</p><p>Die Authentifizierung erfolgt über signierte JWT-Token (JSON Web Tokens), die clientseitig gespeichert werden und eine automatische Verlängerung der Sitzung ermöglichen (Refresh-Token-Mechanismus).</p>"
+    },
+    {
+      "title": "Veröffentlichung von Jobs und Bewerbungen",
+      "description": "<p>Inhalte, die Sie als Auftraggeber im Rahmen eines Job-Inserats einstellen (Beschreibung, Kategorie, Standort, Vergütung), sind für registrierte Nutzer der Plattform sichtbar. Als Helfer abgegebene Bewerbungen sind ausschließlich für den jeweiligen Auftraggeber und für Sie selbst sichtbar.</p><p>Mit dem Einstellen eines Jobs willigen Sie ein, dass die öffentlichen Bestandteile des Inserats (Beschreibung, Kategorie, Standort auf PLZ-Ebene, Vergütungsrahmen) innerhalb der Plattform angezeigt werden. Genaue Adressdaten werden erst nach gegenseitiger Bestätigung zwischen Helfer und Auftraggeber freigegeben.</p>"
+    },
+    {
+      "title": "Nachrichten und Postfach",
+      "description": "<p>Die Plattform stellt eine direkte Kommunikationsmöglichkeit zwischen Auftraggebern und Helfern bereit (Inbox). Nachrichten werden auf unseren Servern gespeichert, um die Kommunikation zwischen den Parteien zu ermöglichen.</p><p>Nachrichten werden in Echtzeit über eine Socket.IO-Verbindung übertragen. Wir speichern Nachrichten, um die Kontinuität der Kommunikation zu gewährleisten und als Dokumentation im Streitfall.</p><p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung). Nachrichten werden nach Ablauf von 24 Monaten nach der letzten Aktivität des jeweiligen Jobs automatisch gelöscht.</p>"
+    },
+    {
+      "title": "Bewertungssystem",
+      "description": "<p>Nach Abschluss eines Jobs können sich Auftraggeber und Helfer gegenseitig bewerten. Bewertungen (Sterne, Kommentar) sind auf dem öffentlich sichtbaren Profil des bewerteten Nutzers dauerhaft sichtbar, solange der Account aktiv ist.</p><p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO. Sie haben das Recht, eine von Ihnen abgegebene Bewertung korrigieren oder löschen zu lassen, sofern sachlich falsche Angaben enthalten sind.</p>"
+    },
+    {
+      "title": "Identitätsverifizierung",
+      "description": "<p>Helfer können optional eine Identitätsverifizierung durchlaufen, um das Vertrauen von Auftraggebern zu stärken. Dabei werden Ausweis-Dokumente (Personalausweis oder Reisepass) zur Überprüfung übermittelt.</p><p>Die eingereichten Dokumente werden <strong>ausschließlich zur Verifizierung verwendet</strong> und nach erfolgreicher Prüfung nicht dauerhaft gespeichert. Es wird lediglich der Verifizierungsstatus (verifiziert/nicht verifiziert) im Profil gespeichert.</p><p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse: Sicherheit der Plattform und Schutz der Nutzer).</p>"
+    },
+    {
+      "title": "Technische Infrastruktur und Hosting",
+      "description": "<p>Kiezly.de wird auf Servern eines professionellen Hosting-Anbieters betrieben. Der Hosting-Anbieter verarbeitet personenbezogene Daten als Auftragsverarbeiter gemäß Art. 28 DSGVO ausschließlich nach unseren Weisungen.</p><p>Bei jedem Seitenaufruf werden automatisch technische Zugriffsdaten (Server-Logs) erfasst, darunter:</p><ul><li>IP-Adresse (in der Regel in gekürzter Form)</li><li>Datum und Uhrzeit des Zugriffs</li><li>Aufgerufene URL</li><li>HTTP-Statuscode</li><li>Übertragene Datenmenge</li><li>Referrer-URL</li><li>User-Agent (Browser und Betriebssystem)</li></ul><p>Diese Daten werden ausschließlich zur technischen Bereitstellung, Fehleranalyse und Sicherheit verwendet. Die Löschung erfolgt nach spätestens 30 Tagen, sofern keine Sicherheitsvorfälle eine längere Aufbewahrung erfordern.</p><p>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).</p>"
+    },
+    {
+      "title": "Cookies, LocalStorage und Sitzungsverwaltung",
+      "description": "<p><strong>Technisch notwendige Speicherung:</strong> Zur Aufrechterhaltung Ihrer Anmeldesitzung werden Authentifizierungstoken (JWT) im LocalStorage Ihres Browsers gespeichert. Diese sind technisch notwendig für den Betrieb der Plattform und können nicht deaktiviert werden.</p><p><strong>Keine Tracking-Cookies:</strong> Wir setzen <em>keine</em> Analyse-, Werbe- oder Tracking-Cookies. Dienste wie Google Analytics, Facebook Pixel oder ähnliche sind nicht eingebunden.</p><p><strong>Keine Third-Party-Cookies:</strong> Es werden keine Cookies von Drittanbietern gesetzt.</p><p>Rechtsgrundlage für technisch notwendige Speicherung: Art. 6 Abs. 1 lit. b und lit. f DSGVO.</p>"
+    },
+    {
+      "title": "Empfänger und Auftragsverarbeiter",
+      "description": "<p>Wir geben Ihre Daten nicht an Dritte weiter, außer in den folgenden Fällen:</p><ul><li><strong>Hosting-Provider:</strong> Technischer Betrieb der Infrastruktur (Auftragsverarbeitung gemäß Art. 28 DSGVO)</li><li><strong>E-Mail-Dienst:</strong> Versand von Benachrichtigungen zu Bewerbungen und Jobs (Transaktions-E-Mails)</li><li><strong>Andere Nutzer:</strong> Informationen aus Ihrem öffentlichen Profil und Ihren Job-Inseraten sind für andere registrierte Nutzer der Plattform sichtbar (im Rahmen der Vertragserfüllung)</li><li><strong>Gesetzliche Behörden:</strong> Wenn gesetzlich vorgeschrieben oder zur Strafverfolgung notwendig</li></ul><p>Eine Weitergabe zu Werbe- oder Marketingzwecken an Dritte findet nicht statt.</p>"
+    },
+    {
+      "title": "Drittlandtransfer",
+      "description": "<p>Eine Übermittlung Ihrer personenbezogenen Daten in Drittländer (außerhalb der EU/des EWR) findet grundsätzlich nicht statt. Sofern Dienste eingesetzt werden, deren Anbieter in Drittländern ansässig sind (z. B. globale CDN-Anbieter), erfolgt dies nur auf Grundlage geeigneter Garantien gemäß Art. 46 DSGVO (z. B. EU-Standardvertragsklauseln) oder wenn Sie explizit eingewilligt haben.</p>"
+    },
+    {
+      "title": "Speicherdauer und Löschfristen",
+      "description": "<p>Wir speichern Ihre Daten nur so lange, wie es für den jeweiligen Zweck erforderlich ist oder gesetzliche Aufbewahrungspflichten bestehen:</p><ul><li><strong>Account-Daten:</strong> Für die Dauer der Mitgliedschaft; nach Konto-Löschung innerhalb von 30 Tagen gelöscht (außer es bestehen gesetzliche Aufbewahrungspflichten)</li><li><strong>Job-Inserate:</strong> 12 Monate nach Abschluss oder Archivierung des Jobs</li><li><strong>Nachrichten:</strong> 24 Monate nach letzter Aktivität im zugehörigen Job</li><li><strong>Bewertungen:</strong> Solange der Account besteht; nach Account-Löschung anonymisiert</li><li><strong>Server-Logs:</strong> Maximal 30 Tage, außer bei Sicherheitsvorfällen</li><li><strong>Dokumente zur Identitätsverifizierung:</strong> Unmittelbar nach abgeschlossener Verifizierung</li></ul><p>Nach Ablauf der Fristen werden die Daten gelöscht oder so anonymisiert, dass kein Rückschluss auf Ihre Person mehr möglich ist.</p>"
+    },
+    {
+      "title": "Ihre Rechte als betroffene Person",
+      "description": "<p>Sie haben nach der DSGVO folgende Rechte gegenüber uns als Verantwortlichem:</p><ul><li><strong>Auskunftsrecht (Art. 15 DSGVO):</strong> Sie können Auskunft über die von uns über Sie gespeicherten personenbezogenen Daten verlangen.</li><li><strong>Berichtigungsrecht (Art. 16 DSGVO):</strong> Sie können die Berichtigung unrichtiger oder unvollständiger Daten verlangen.</li><li><strong>Recht auf Löschung (Art. 17 DSGVO):</strong> Sie können unter bestimmten Voraussetzungen die Löschung Ihrer Daten verlangen (\"Recht auf Vergessenwerden\").</li><li><strong>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO):</strong> Sie können verlangen, dass die Verarbeitung Ihrer Daten eingeschränkt wird.</li><li><strong>Recht auf Datenübertragbarkeit (Art. 20 DSGVO):</strong> Sie können Ihre Daten in einem maschinenlesbaren Format erhalten oder an einen anderen Anbieter übertragen lassen.</li><li><strong>Widerspruchsrecht (Art. 21 DSGVO):</strong> Sie können der Verarbeitung Ihrer Daten auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse) widersprechen.</li><li><strong>Widerrufsrecht:</strong> Soweit eine Verarbeitung auf Ihrer Einwilligung beruht (Art. 6 Abs. 1 lit. a DSGVO), können Sie diese jederzeit mit Wirkung für die Zukunft widerrufen, ohne dass die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung berührt wird.</li></ul><p>Zur Ausübung Ihrer Rechte wenden Sie sich bitte per E-Mail an: <a href=\"mailto:datenschutz@kiezly.de\">datenschutz@kiezly.de</a></p><p>Wir bearbeiten Anfragen in der Regel innerhalb von 30 Tagen. Bei komplexen oder zahlreichen Anfragen kann diese Frist um bis zu zwei weitere Monate verlängert werden.</p>"
+    },
+    {
+      "title": "Beschwerderecht bei einer Aufsichtsbehörde",
+      "description": "<p>Unbeschadet anderweitiger verwaltungsrechtlicher oder gerichtlicher Rechtsbehelfe steht Ihnen das Recht zu, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren, wenn Sie der Ansicht sind, dass die Verarbeitung der Sie betreffenden personenbezogenen Daten gegen die DSGVO verstößt (Art. 77 DSGVO).</p><p>Die für uns zuständige Aufsichtsbehörde in Niedersachsen ist:</p><p><strong>Die Landesbeauftragte für den Datenschutz Niedersachsen</strong><br />Prinzenstraße 5<br />30159 Hannover<br />Telefon: +49 511 120-4500<br />E-Mail: <a href=\"mailto:poststelle@lfd.niedersachsen.de\">poststelle@lfd.niedersachsen.de</a><br />Website: <a href=\"https://www.lfd.niedersachsen.de\" target=\"_blank\" rel=\"noopener noreferrer\">www.lfd.niedersachsen.de</a></p>"
+    },
+    {
+      "title": "Datensicherheit",
+      "description": "<p>Wir setzen technische und organisatorische Maßnahmen ein, um Ihre personenbezogenen Daten gegen zufällige oder vorsätzliche Manipulation, Verlust, Zerstörung oder unbefugten Zugriff zu schützen:</p><ul><li><strong>Verschlüsselung:</strong> Die Übertragung erfolgt ausschließlich über HTTPS (TLS-Verschlüsselung).</li><li><strong>Passwort-Hashing:</strong> Passwörter werden niemals im Klartext gespeichert.</li><li><strong>JWT-Authentifizierung:</strong> Sitzungen werden über signierte Tokens verwaltet mit automatischem Ablauf.</li><li><strong>Zugriffsbeschränkungen:</strong> Zugriff auf personenbezogene Daten ist auf das notwendige Minimum beschränkt.</li><li><strong>Regelmäßige Überprüfung:</strong> Unsere Sicherheitsmaßnahmen werden regelmäßig überprüft und aktualisiert.</li></ul>"
+    },
+    {
+      "title": "Links zu externen Websites",
+      "description": "<p>Unsere Plattform kann Links zu externen Websites enthalten. Diese Datenschutzerklärung gilt ausschließlich für kiezly.de. Für die Datenschutzpraktiken verlinkter Websites übernehmen wir keine Verantwortung. Bitte lesen Sie die jeweiligen Datenschutzerklärungen der externen Anbieter.</p>"
+    },
+    {
+      "title": "Änderungen dieser Datenschutzerklärung",
+      "description": "<p>Diese Datenschutzerklärung kann angepasst werden, um technischen, rechtlichen oder betrieblichen Änderungen Rechnung zu tragen. Die jeweils aktuelle Fassung mit dem Datum der letzten Aktualisierung ist stets auf dieser Seite abrufbar.</p><p>Bei wesentlichen Änderungen, die Ihre Rechte betreffen, werden wir Sie per E-Mail informieren, sofern Sie ein registriertes Konto bei uns haben.</p><p><strong>Letzte Aktualisierung:</strong> März 2026</p>"
+    }
+  ],
+  "go-back": "Zurück zur Startseite",
+  "toc-title": "Inhaltsübersicht"
 }
