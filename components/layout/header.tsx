@@ -255,10 +255,23 @@ export default function Header() {
           {/* Logo */}
           <LocalizedLink
             href="/"
-            className="font-display font-bold text-[36px] text-[#111110] no-underline hover:opacity-80 transition-opacity"
-            style={{ letterSpacing: '-.8px' }}
+            className="no-underline hover:opacity-80 transition-opacity flex items-center gap-2.5"
           >
-            kiezly<span className="text-[#e8622a]">.</span>
+            {/* Icon mark */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="28" height="28" rx="7" fill="#e8622a"/>
+              {/* Stylised "K": vertical bar + two diagonal arms */}
+              <line x1="9" y1="7" x2="9" y2="21" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="9" y1="14" x2="19" y2="7.5" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="9" y1="14" x2="19" y2="20.5" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+            </svg>
+            {/* Wordmark */}
+            <span
+              className="font-display font-bold text-[#111110]"
+              style={{ fontSize: '20px', letterSpacing: '-0.6px', lineHeight: 1 }}
+            >
+              kiezly
+            </span>
           </LocalizedLink>
 
           {/* Centered nav links (desktop) */}
