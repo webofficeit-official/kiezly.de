@@ -20,12 +20,65 @@ const STRIP_JOBS = [
 
 // ── Static feature cards ─────────────────────────────────────────────
 const FEATURES = [
-  { icon: "🪪", title: "Verifizierte Profile",  desc: "Jeder Helfer durchläuft eine Identitätsprüfung. Du weißt immer, wer vor deiner Tür steht." },
-  { icon: "🔒", title: "Sichere Zahlung",        desc: "Geld wird erst freigegeben, wenn der Job erledigt ist. Vollständiger Käuferschutz inklusive." },
-  { icon: "⭐", title: "Echte Bewertungen",      desc: "Transparentes System nach jedem Job. Nur wirkliche Nutzer können bewerten." },
-  { icon: "📍", title: "Hyper-lokal",            desc: "Kiezly zeigt dir nur Helfer und Jobs in deiner direkten Nachbarschaft." },
-  { icon: "⚡", title: "Schnelle Matches",       desc: "Durchschnittlich findest du in unter 30 Minuten einen passenden Helfer." },
-  { icon: "💬", title: "Direkter Chat",          desc: "Kommuniziere direkt mit deinem Helfer – sicher, einfach, ohne Umwege." },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111110" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="14" rx="2"/>
+        <circle cx="9" cy="10" r="2"/>
+        <path d="M5 18c0-2 1.8-3 4-3s4 1 4 3"/>
+        <line x1="15" y1="9" x2="19" y2="9"/><line x1="15" y1="13" x2="17" y2="13"/>
+      </svg>
+    ),
+    title: "Verifizierte Profile",
+    desc: "Jeder Helfer durchläuft eine Identitätsprüfung. Du weißt immer, wer vor deiner Tür steht.",
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111110" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    ),
+    title: "Sichere Zahlung",
+    desc: "Geld wird erst freigegeben, wenn der Job erledigt ist. Vollständiger Käuferschutz inklusive.",
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111110" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    ),
+    title: "Echte Bewertungen",
+    desc: "Transparentes System nach jedem Job. Nur wirkliche Nutzer können bewerten.",
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111110" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+    ),
+    title: "Hyper-lokal",
+    desc: "Kiezly zeigt dir nur Helfer und Jobs in deiner direkten Nachbarschaft.",
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111110" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+    ),
+    title: "Schnelle Matches",
+    desc: "Durchschnittlich findest du in unter 30 Minuten einen passenden Helfer.",
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111110" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    ),
+    title: "Direkter Chat",
+    desc: "Kommuniziere direkt mit deinem Helfer – sicher, einfach, ohne Umwege.",
+  },
 ];
 
 // ── Static trust stats ───────────────────────────────────────────────
