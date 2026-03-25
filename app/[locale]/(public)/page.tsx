@@ -35,20 +35,171 @@ const TRUST_STATS = [
   { num: "98",accent: "%",   label: "Zufriedenheit",  desc: "Unsere Nutzer empfehlen Kiezly weiter – für zuverlässige Mini-Jobs ohne Stress." },
 ];
 
-// ── Category emoji mapping ───────────────────────────────────────────
-const CAT_EMOJI: Record<string, string> = {
-  "einkaufen": "🛒", "shopping": "🛒",
-  "tiersitter": "🐕", "pet": "🐕", "pets": "🐕",
-  "handwerk": "🔨", "craft": "🔨",
-  "garten": "🌿", "garden": "🌿",
-  "umzug": "📦", "moving": "📦",
-  "putzen": "🧹", "cleaning": "🧹",
-  "kinderbetreuung": "👶", "childcare": "👶",
-  "nachhilfe": "💡", "tutoring": "💡",
-  "seniorenbetreuung": "🧓", "senior": "🧓",
-  "haushalt": "🏠", "household": "🏠",
-  "event": "🎉", "events": "🎉",
+// ── Category SVG icon mapping ─────────────────────────────────────────
+const CAT_SVG: Record<string, React.ReactNode> = {
+  childcare: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="5" r="2.5"/>
+      <path d="M8 21v-5H6l2-6h8l2 6h-2v5"/>
+      <path d="M9 21h6"/>
+    </svg>
+  ),
+  kinderbetreuung: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="5" r="2.5"/>
+      <path d="M8 21v-5H6l2-6h8l2 6h-2v5"/>
+      <path d="M9 21h6"/>
+    </svg>
+  ),
+  cleaning: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 21h18M5 21V10l7-7 7 7v11"/>
+      <path d="M9 21v-6h6v6"/>
+      <path d="M12 3v4"/>
+    </svg>
+  ),
+  putzen: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 21h18M5 21V10l7-7 7 7v11"/>
+      <path d="M9 21v-6h6v6"/>
+    </svg>
+  ),
+  pet: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 5.5C10 4.12 9.1 3 8 3s-2 1.12-2 2.5S6.9 8 8 8s2-1.12 2-2.5z"/>
+      <path d="M18 5.5C18 4.12 17.1 3 16 3s-2 1.12-2 2.5S14.9 8 16 8s2-1.12 2-2.5z"/>
+      <path d="M6.5 12.5C5.67 11.67 4 10.5 4 9c0-1.1.9-2 2-2 .74 0 1.38.4 1.72 1"/>
+      <path d="M17.5 12.5C18.33 11.67 20 10.5 20 9c0-1.1-.9-2-2-2-.74 0-1.38.4-1.72 1"/>
+      <path d="M12 22c-3.87 0-7-2.69-7-6 0-1.7.9-3.22 2.28-4.22L8 11h8l.72.78C18.1 12.78 19 14.3 19 16c0 3.31-3.13 6-7 6z"/>
+    </svg>
+  ),
+  tiersitter: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 5.5C10 4.12 9.1 3 8 3s-2 1.12-2 2.5S6.9 8 8 8s2-1.12 2-2.5z"/>
+      <path d="M18 5.5C18 4.12 17.1 3 16 3s-2 1.12-2 2.5S14.9 8 16 8s2-1.12 2-2.5z"/>
+      <path d="M12 22c-3.87 0-7-2.69-7-6 0-1.7.9-3.22 2.28-4.22L8 11h8l.72.78C18.1 12.78 19 14.3 19 16c0 3.31-3.13 6-7 6z"/>
+    </svg>
+  ),
+  garden: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22V12"/>
+      <path d="M12 12C12 12 7 10 7 5a5 5 0 0 1 10 0c0 5-5 7-5 7z"/>
+      <path d="M12 12c0 0-3 1-5 5h10c-2-4-5-5-5-5z"/>
+    </svg>
+  ),
+  garten: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22V12"/>
+      <path d="M12 12C12 12 7 10 7 5a5 5 0 0 1 10 0c0 5-5 7-5 7z"/>
+      <path d="M12 12c0 0-3 1-5 5h10c-2-4-5-5-5-5z"/>
+    </svg>
+  ),
+  moving: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="15" height="13" rx="1"/>
+      <path d="M16 8h4l3 5v3h-7V8z"/>
+      <circle cx="5.5" cy="18.5" r="2.5"/>
+      <circle cx="18.5" cy="18.5" r="2.5"/>
+    </svg>
+  ),
+  umzug: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="15" height="13" rx="1"/>
+      <path d="M16 8h4l3 5v3h-7V8z"/>
+      <circle cx="5.5" cy="18.5" r="2.5"/>
+      <circle cx="18.5" cy="18.5" r="2.5"/>
+    </svg>
+  ),
+  tutoring: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+  ),
+  nachhilfe: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+  ),
+  delivery: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12H3l3-9h10l3 9h-2"/>
+      <circle cx="7.5" cy="16.5" r="2.5"/>
+      <circle cx="16.5" cy="16.5" r="2.5"/>
+      <path d="M5 12h14"/>
+    </svg>
+  ),
+  einkaufen: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  ),
+  shopping: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  ),
+  repair: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+    </svg>
+  ),
+  handwerk: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+    </svg>
+  ),
+  senior: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+  ),
+  seniorenbetreuung: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+  ),
+  event: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+    </svg>
+  ),
+  events: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+    </svg>
+  ),
+  haushalt: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  ),
+  household: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  ),
 };
+
+// Fallback SVG icon
+const DEFAULT_SVG = (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="8" x2="12" y2="12"/>
+    <line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+);
 
 const CAT_DESC: Record<string, string> = {
   "einkaufen": "Supermarkt, Apotheke & mehr",   "shopping": "Groceries, pharmacy & more",
@@ -112,12 +263,12 @@ const CAT_COUNT: Record<string, string> = {
   "event": "7+", "events": "7+",
 };
 
-function getCatEmoji(slug: string): string {
+function getCatSvg(slug: string): React.ReactNode {
   const lower = slug.toLowerCase();
-  for (const [key, emoji] of Object.entries(CAT_EMOJI)) {
-    if (lower.includes(key)) return emoji;
+  for (const [key, svg] of Object.entries(CAT_SVG)) {
+    if (lower.includes(key)) return svg;
   }
-  return "✨";
+  return DEFAULT_SVG;
 }
 
 function getCatDesc(slug: string): string {
@@ -703,9 +854,9 @@ export default function Page() {
                       {getCatCount(slug)} Jobs
                     </div>
 
-                    {/* Emoji */}
-                    <div style={{ fontSize: '36px', lineHeight: 1, marginBottom: 'auto', paddingBottom: '20px' }}>
-                      {getCatEmoji(slug)}
+                    {/* Icon */}
+                    <div style={{ marginBottom: 'auto', paddingBottom: '20px', color: clr.text, opacity: 0.9 }}>
+                      {getCatSvg(slug)}
                     </div>
 
                     {/* Name */}
