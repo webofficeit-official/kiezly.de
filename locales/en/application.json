@@ -74,6 +74,7 @@
         "applied": "Applied on:",
         "update": "Update Status",
         "view-all": "View all Applicants",
+        "chat": "Chat",
         "update-model": {
             "update": {
                 "success": "Application status changed successfully!",
@@ -92,7 +93,8 @@
             "rate": "Rate:",
             "button": {
                 "cancel": "Cancel",
-                "update": "Confirm Update"
+                "update": "Confirm Update",
+                "updating":"Updating"
             }
         }
     },
@@ -154,5 +156,13 @@
         "skills": "Skills",
         "first-aid": "First Aid",
         "police-certificate": "Police certificate"
+    },
+    "chat": {
+        "select_applicant": "Select an applicant to start chatting",
+        "select_job": "Select a job to view your messages",
+        "message_placeholder": "Type a message...",
+        "job_expired": "Job has been expired",
+        "loading_older": "Loading old messages",
+        "load_older": "Load old message"
     }
 }

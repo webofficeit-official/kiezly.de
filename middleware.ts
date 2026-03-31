@@ -14,11 +14,15 @@ const COOKIE_OPTS = {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Skip assets/API/files
+  // Skip assets/API/files and Next.js special image generation routes
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
-    /\.[a-zA-Z0-9]+$/.test(pathname)
+    /\.[a-zA-Z0-9]+$/.test(pathname) ||
+    pathname === '/opengraph-image' ||
+    pathname === '/twitter-image' ||
+    pathname === '/icon' ||
+    pathname === '/apple-icon'
   ) {
     return NextResponse.next();
   }

@@ -1,0 +1,34 @@
+{
+    "title": "Posteingang",
+    "inbox_header": "Meine Jobs",
+    "applications_header": "Bewerber",
+    "expired": "Diese Stelle ist nicht mehr verfügbar.",
+    "select_job_message": "Wählen Sie einen Job aus, um Bewerber anzuzeigen",
+    "chat": {
+        "select_applicant": "Wählen Sie einen Bewerber aus, um zu chatten",
+        "select_job": "Wählen Sie einen Job aus, um Ihre Nachrichten anzuzeigen",
+        "message_placeholder": "Geben Sie eine Nachricht ein...",
+        "job_expired": "Die Stelle ist abgelaufen.",
+        "loading_older": "Alte Nachrichten werden geladen",
+        "load_older": "Alte Nachricht laden"
+    },
+    "empty_inbox": {
+        "no_jobs": {
+            "title": "Noch keine Jobs"
+        },
+        "no_applicants": {
+            "title": "Noch keine Bewerber für diesen Job"
+        }
+    },
+    "reviews": {
+        "rating": {
+            "title": "Bewertung",
+            "empty": "Zum Bewerten tippen"
+        },
+        "review": {
+            "description": "Beschreiben Sie Ihre Erfahrung..."
+        },
+        "description": "Bitte wählen Sie eine Sternebewertung, um die Sendung zu aktivieren.",
+        "success": "Bewertung erfolgreich eingereicht!"
+    }
+}

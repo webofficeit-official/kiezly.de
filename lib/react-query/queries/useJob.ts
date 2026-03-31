@@ -9,8 +9,7 @@ export function useCreateJob() {
 
   return useMutation<CreateJobResponse, Error, Partial<CreateJobData>>({
     mutationFn: createJobApi,
-    onSuccess: (data) => {
-      console.log(" Job created:", data);
+    onSuccess: (data) => {    
       const newJob = data?.data;
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       if (newJob?.slug) queryClient.invalidateQueries({ queryKey: ["job", newJob.slug] });
@@ -43,7 +42,6 @@ export function useGenerateSlug() {
   return useMutation<{ slug: string }, Error, string>({
     mutationFn: (title) => generateSlugApi(title),
     onSuccess: (data) => {
-      console.log("Generated slug:", data.slug);
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
     },
     onError: (err) => console.error("Slug generation failed:", err),
@@ -82,7 +80,7 @@ export const myJobs = (filters: Record<string, any>, options?: Partial<UseQueryO
     queryKey: ["jobs", filters],
     queryFn: () => getMyJobsApi(filters),
     keepPreviousData: true, // works here
-    enabled: options?.enabled ?? true, // ✅ defaults to same behavior
+    enabled: options?.enabled ?? true, //  defaults to same behavior
     ...options,
   } as UseQueryOptions<JobApiResponse, unknown, JobApiResponse, readonly unknown[]>);
 };
@@ -108,7 +106,7 @@ export const useSavedJobsWhileLogin = (options?: UseSavedJobsOptions) => {
     queryKey: ["savedJobs"],
     queryFn: () => getSavedJobsListApi(),
     keepPreviousData: true,
-    enabled: options?.enabled ?? true, // ✅ only runs if true
+    enabled: options?.enabled ?? true, //  only runs if true
     // optional: prevent infinite retries on unauthorized errors
     retry: (failureCount, error: any) => {
       const status = error?.response?.status;

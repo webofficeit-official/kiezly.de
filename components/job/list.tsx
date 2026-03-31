@@ -73,7 +73,7 @@ export default function JobFilterPage({
   const [localPageSize, setLocalPageSize] = useState(pageSize);
   const [savedJobs, setSavedJobs] = useState([]);
   const [pendingCategorySlug, setPendingCategorySlug] = useState<string | null>(
-    null
+    null,
   );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState<Filters>(filters);
@@ -118,7 +118,7 @@ export default function JobFilterPage({
   const buildApiFilters = (
     filters: Filters,
     page: number,
-    pageSize: number
+    pageSize: number,
   ) => {
     const payload: Record<string, any> = { page, page_size: pageSize };
 
@@ -146,7 +146,7 @@ export default function JobFilterPage({
 
   const apiFilters = useMemo(
     () => buildApiFilters(debouncedFilters, page, localPageSize),
-    [debouncedFilters, page, localPageSize]
+    [debouncedFilters, page, localPageSize],
   );
 
   const { data: collections, isLoading: isCollectionsLoading } =
@@ -157,7 +157,7 @@ export default function JobFilterPage({
     if (!collections?.jobCategories?.length || !pendingCategorySlug) return;
 
     const matched = collections.jobCategories.find(
-      (c) => c.slug === pendingCategorySlug
+      (c) => c.slug === pendingCategorySlug,
     );
 
     if (matched) {
@@ -181,12 +181,17 @@ export default function JobFilterPage({
 
   useEffect(() => {
     if (user?.lat && user?.lng) {
-      setFilters((f) => ({
-        ...f,
-        lat: user.lat,
-        lng: user.lng,
-        radius_km: f.radius_km || DEFAULT_FILTERS.radius_km,
-      }));
+      setFilters((f) => {
+        // If radius already explicitly set (including >0), keep it.
+        if (typeof f.radius_km !== "undefined") return f;
+        return { ...f, radius_km: 0 }; // radius 0 = no geo filter
+      });
+    } else {
+      // if no user, make sure radius isn't present
+      setFilters((f) => {
+        if (typeof f.radius_km === "undefined") return f;
+        return { ...f, radius_km: undefined };
+      });
     }
   }, [user?.lat, user?.lng]);
 
@@ -204,7 +209,9 @@ export default function JobFilterPage({
         .then((data) => {
           setSavedJobs(data.jobs);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          // console.log(err);
+        });
     } else {
       const localStoredJobs = localStorage.getItem("saved-jobs");
       if (localStoredJobs) {
@@ -243,7 +250,7 @@ export default function JobFilterPage({
           ...filters,
           radius_km: user?.lat && user?.lng ? filters.radius_km : undefined,
         },
-        collections
+        collections,
       );
       const url = `${window.location.pathname}${qs ? "?" + qs : ""}`;
       window.history.replaceState(window.history.state, "", url);
@@ -255,7 +262,7 @@ export default function JobFilterPage({
 
   function toggleInArray<T extends string | number>(
     key: keyof Filters,
-    val: T
+    val: T,
   ) {
     setFilters((f) => {
       const arr = new Set(f[key] as unknown as T[]);
@@ -270,7 +277,7 @@ export default function JobFilterPage({
 
   function toggleInArrayDraft<T extends string | number>(
     key: keyof Filters,
-    val: T
+    val: T,
   ) {
     setDraftFilters((f) => {
       const arr = new Set(f[key] as unknown as T[]);
@@ -280,10 +287,14 @@ export default function JobFilterPage({
   }
 
   // Optional: clear only the draft (while sheet is open)
-  const resetDraft = () => setDraftFilters(DEFAULT_FILTERS);
+  const resetDraft = () => {
+    const base = { ...DEFAULT_FILTERS, radius_km: 0 } as Partial<Filters>;
+    setDraftFilters(base as Filters);
+  };
 
   const resetAll = () => {
-    setFilters(DEFAULT_FILTERS);
+    const base = { ...DEFAULT_FILTERS, radius_km: 0 } as Partial<Filters>;
+    setFilters(base as Filters);
     setPage(1);
     setLocalPageSize(pageSize);
   };
@@ -312,7 +323,9 @@ export default function JobFilterPage({
     if (job_tags.length) c++;
     if (min_price || max_price) c++;
     if (posted !== "any") c++;
-    if (radius_km !== DEFAULT_FILTERS.radius_km) c++;
+    const currentRadius =
+      typeof radius_km === "number" ? radius_km : DEFAULT_FILTERS.radius_km;
+    if (currentRadius !== DEFAULT_FILTERS.radius_km) c++;
     if (sort !== "new") c++;
     return c;
   }, [filters]);
@@ -330,7 +343,7 @@ export default function JobFilterPage({
         }
         localStorage.setItem(
           "saved-jobs",
-          JSON.stringify([...savedJobsLocal, { id: jobId }])
+          JSON.stringify([...savedJobsLocal, { id: jobId }]),
         );
       }
     } catch (error) {
@@ -352,7 +365,7 @@ export default function JobFilterPage({
         }
         localStorage.setItem(
           "saved-jobs",
-          JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId))
+          JSON.stringify(savedJobsLocal.filter((j) => j.id !== jobId)),
         );
       }
     } catch (error) {
@@ -368,22 +381,21 @@ export default function JobFilterPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-white text-[#111110]" style={{ paddingTop: '64px' }}>
       {/* Mobile sheet for filters */}
       <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-        <SheetContent side="left" className="p-0 w-full sm:max-w-md">
-          <SheetHeader className="p-4 border-b flex items-center gap-2">
-            <SheetTitle className="flex items-center gap-2">
+        <SheetContent side="left" className="p-0 w-full sm:max-w-md bg-white">
+          <SheetHeader className="p-5 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(0,0,0,.07)' }}>
+            <SheetTitle className="font-display font-bold text-[16px] text-[#111110] flex items-center gap-2">
               {t("filter.title", { default: "Filters" })}
               {activeCount > 0 && (
-                <CheckCircle
-                  className="h-5 w-5 text-black"
-                  aria-label="Filters active"
-                />
+                <span className="inline-flex items-center justify-center rounded-full text-white text-[10px] font-bold w-5 h-5" style={{ background: '#e8622a' }}>
+                  {activeCount}
+                </span>
               )}
             </SheetTitle>
           </SheetHeader>
-          <div className="p-4 overflow-auto h-[calc(100vh-8rem)]">
+          <div className="p-5 overflow-y-auto overflow-x-visible h-[calc(100vh-8rem)]">
             {isCollectionsLoading && !collections ? (
               <FilterSidebarSkeleton />
             ) : (
@@ -399,33 +411,54 @@ export default function JobFilterPage({
               />
             )}
           </div>
-
-             <div className="p-4 border-t flex items-center justify-end gap-3">
+          <div className="p-4 flex items-center justify-end gap-3" style={{ borderTop: '1px solid rgba(0,0,0,.07)' }}>
             <button
               type="button"
               onClick={resetDraft}
-              className="rounded-xl border px-4 py-2 text-sm"
+              className="h-[38px] px-4 rounded-[8px] text-[13px] font-medium text-[rgba(17,17,16,.6)] hover:text-[#111110] transition-colors"
+              style={{ border: '1px solid rgba(0,0,0,.13)', background: 'transparent' }}
             >
               {t("mobile.clear", { default: "Clear" })}
             </button>
             <button
               type="button"
               onClick={() => {
-                setFilters({ ...draftFilters }); 
-                setPage(1);                      
-                setIsFilterOpen(false);           
+                const applied = { ...draftFilters } as Partial<Filters>;
+                if (applied.radius_km && applied.radius_km > 0) {
+                  applied.lat = applied.lat ?? user?.lat ?? undefined;
+                  applied.lng = applied.lng ?? user?.lng ?? undefined;
+                } else {
+                  applied.radius_km = 0;
+                  applied.lat = undefined;
+                  applied.lng = undefined;
+                }
+                setFilters(applied as Filters);
+                setPage(1);
+                setIsFilterOpen(false);
               }}
-              className="rounded-xl bg-black text-white px-4 py-2 text-sm"
+              className="h-[38px] px-4 rounded-[8px] text-[13px] font-semibold text-white transition-colors"
+              style={{ background: '#e8622a', border: 'none' }}
             >
               {t("mobile.apply", { default: "Apply" })}
             </button>
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Page header */}
+      <div style={{ borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff' }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-12 py-8">
+          <div className="kz-section-label">Jobs</div>
+          <h1 className="font-display font-extrabold text-[#111110]" style={{ fontSize: 'clamp(28px,4vw,42px)', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
+            Mini-Jobs in <span style={{ color: '#e8622a' }}>deiner Nähe</span>
+          </h1>
+        </div>
+      </div>
+
       {/* Content */}
-      <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="max-w-6xl mx-auto px-6 md:px-12 py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
         {/* Left: Filters */}
-        <section className="lg:col-span-1 hidden lg:block">
+        <aside className="hidden lg:block">
           {isCollectionsLoading && !collections ? (
             <FilterSidebarSkeleton />
           ) : (
@@ -440,16 +473,11 @@ export default function JobFilterPage({
               onChange={onChange}
             />
           )}
-        </section>
+        </aside>
 
-        {/* Right: Job list + debug preview */}
-        <section
-          className={`lg:col-span-2 space-y-4  ${
-            delayedFetching ? "opacity-60" : "opacity-100"
-          }`}
-        >
+        {/* Right: Job list */}
+        <section className={`space-y-4 ${delayedFetching ? "opacity-60" : "opacity-100"} transition-opacity`}>
           {delayedFetching && !isInitialLoad && <JobSkeleton count={4} />}
-
           {isInitialLoad ? (
             <JobSkeleton count={5} />
           ) : (
@@ -468,30 +496,30 @@ export default function JobFilterPage({
           )}
         </section>
       </main>
-      {/* Sticky mobile apply */}
-     <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
-        <div className="bg-white shadow-xl rounded-2xl p-3 flex items-center gap-3">
-          {/* Filters button */}
+
+      {/* Sticky mobile filter bar */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3">
+        <div className="flex items-center gap-3 p-3 rounded-[12px]" style={{ background: '#fff', boxShadow: '0 -4px 24px rgba(0,0,0,.1)', border: '1px solid rgba(0,0,0,.07)' }}>
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm"
+            className="flex-1 inline-flex items-center justify-center gap-2 h-[40px] rounded-[8px] text-[13px] font-medium text-[#111110] transition-colors"
+            style={{ border: '1px solid rgba(0,0,0,.13)', background: '#f7f7f5' }}
           >
             <SlidersHorizontal className="h-4 w-4" />
             {t("mobile.filters", { default: "Filters" })}
             {activeCount > 0 && (
-              <span className="inline-flex items-center justify-center rounded-full bg-black text-white text-[10px] px-1.5 py-0.5">
+              <span className="inline-flex items-center justify-center rounded-full text-white text-[10px] font-bold w-5 h-5" style={{ background: '#e8622a' }}>
                 {activeCount}
               </span>
             )}
           </button>
-
-          {/* Clear applied filters (only visible if any active) */}
           {activeCount > 0 && (
             <button
               type="button"
               onClick={resetAll}
-              className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm border"
+              className="h-[40px] px-4 rounded-[8px] text-[13px] font-medium text-[rgba(17,17,16,.6)] hover:text-[#111110] transition-colors"
+              style={{ border: '1px solid rgba(0,0,0,.13)', background: 'transparent' }}
             >
               {t("mobile.clear", { default: "Clear" })}
             </button>

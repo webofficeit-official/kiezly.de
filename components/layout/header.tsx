@@ -4,29 +4,33 @@ import { useAuth } from "@/lib/context/auth-context";
 import {
   getNotifications,
   updateNotification,
+  clearNotifications
 } from "@/lib/react-query/queries/user/notifications";
-import { Notification } from "@/lib/types/notifications";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import {
   Bell,
-  Languages,
-  LanguagesIcon,
   ShieldCheck,
   User,
   X,
   Menu,
   ChevronDown,
   ChevronUp,
+  MessageCircle,
+  BellOff,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 import LocalizedLink from "@/lib/localizedLink";
 import socket from "@/lib/socket";
+import { useJobWizard } from "@/lib/context/job-wizard-context";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCountTotalMessage } from "@/lib/react-query/queries/message";
+import { MessageApiResponse } from "@/lib/types/message";
+import { FaBroom } from "react-icons/fa";
 const LOCALES = ["en", "de"] as const;
 const DEFAULT = "de";
 
@@ -36,12 +40,16 @@ export default function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [latestThree, setLatestThree] = useState([]);
   const [notificationsCount, setNotificationsCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [activeLanguag, setActiveLanguage] = useState("");
+  const { reset, clearForm } = useJobWizard();
   const pathname = usePathname();
+  const qc = useQueryClient();
 
   // ====================== MOBILE DRAWER STATE (NEW) ======================
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -60,8 +68,10 @@ export default function Header() {
 
   const not = getNotifications();
   const uNot = updateNotification();
+  const cNot = clearNotifications();
 
   useEffect(() => {
+    if (!user) return;
     not.mutate(
       {},
       {
@@ -73,19 +83,28 @@ export default function Header() {
           );
         },
         onError: (err) => {
-          console.log(err);
+          // console.log(err);
         },
       }
     );
-  }, []);
+  }, [user]);
+
+  const queryClient = useQueryClient();
+
+  const { data: count, isLoading: isCountChecking } = useCountTotalMessage(
+    { enabled: true }
+  );
 
   useEffect(() => {
-    socket.on("connect", () =>
-      console.log(`Connected to socket: ${socket.id}`)
-    );
+    if (count?.data?.count !== undefined) {
+      setMessageCount(count.data.count);
+    }
+  }, [count]);
+
+  useEffect(() => {
+    if (!user) return;
 
     socket.on("notification", (data) => {
-      console.log(data);
       setNotifications((prev) => {
         const updated = [data, ...prev];
         // 2. Update latest three (most recent 3)
@@ -98,20 +117,51 @@ export default function Header() {
     return () => {
       socket.off("notification");
     };
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const refresh = () => {
+      queryClient.invalidateQueries({ queryKey: ["count-total-conversation"] });
+    };
+
+    socket.on("message", refresh);
+    socket.on("messages-seen", refresh);
+
+    return () => {
+      socket.off("message", refresh);
+      socket.off("messages-seen", refresh);
+    };
+  }, [user]);
 
   const updateNot = (id: string) => {
     uNot.mutate(id, {
       onSuccess: (data) => {
         latestThree.find((l) => (l.id == id ? (l.status = true) : ""));
         notifications.find((l) => (l.id == id ? (l.status = true) : ""));
-        setNotificationsCount(notificationsCount - 1);
+        setNotificationsCount(
+          notifications?.filter((n) => !n.status).length
+        );
       },
       onError: (err) => {
-        console.log(err);
+        // console.log(err);
       },
     });
   };
+
+  const clearAllNotifications = () => {
+    cNot.mutate({}, {
+      onSuccess: (data) => {
+        setLatestThree([])
+        setNotifications([])
+        setNotificationsCount(0);
+      },
+      onError: (err) => {
+        // console.log(err);
+      },
+    });
+  }
 
   useEffect(() => {
     const seg = pathname.split("/").filter(Boolean)[0];
@@ -182,84 +232,138 @@ export default function Header() {
     setMobileHeaderDDOpen(false);
   }, [pathname]);
 
+  const handleStartNew = () => {
+    reset();
+
+    qc.removeQueries({ queryKey: ["job"] });
+    push("/post-job/basic-details");
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5" />
-            <LocalizedLink href="/" className="font-semibold hover:opacity-80">
-              Kiezly.de
-            </LocalizedLink>
-          </div>
-          <nav className="hidden items-center gap-6 text-sm md:flex">
-            <LocalizedLink href="/how-it-works" className="hover:opacity-80">
+      <header
+        className="fixed top-0 left-0 right-0 z-[200]"
+        style={{
+          height: '68px',
+          background: 'rgba(255,255,255,.97)',
+          backdropFilter: 'blur(24px)',
+          borderBottom: '1px solid rgba(0,0,0,.10)',
+          boxShadow: '0 2px 20px rgba(0,0,0,.07)',
+        }}
+      >
+        <div className="flex h-full items-center justify-between px-6 md:px-12">
+          {/* Logo */}
+          <LocalizedLink
+            href="/"
+            className="no-underline hover:opacity-80 transition-opacity flex items-center gap-2.5"
+          >
+            {/* Icon mark */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="28" height="28" rx="7" fill="#e8622a"/>
+              {/* Stylised "K": vertical bar + two diagonal arms */}
+              <line x1="9" y1="7" x2="9" y2="21" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="9" y1="14" x2="19" y2="7.5" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="9" y1="14" x2="19" y2="20.5" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+            </svg>
+            {/* Wordmark */}
+            <span
+              className="font-display font-bold text-[#111110]"
+              style={{ fontSize: '20px', letterSpacing: '-0.6px', lineHeight: 1 }}
+            >
+              kiezly
+            </span>
+          </LocalizedLink>
+
+          {/* Centered nav links (desktop) */}
+          <nav
+            className="hidden md:flex items-center gap-9 absolute left-1/2 -translate-x-1/2"
+          >
+            <LocalizedLink
+              href="/how-it-works"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("how-it-works")}
             </LocalizedLink>
-            <LocalizedLink href="/#categories" className="hover:opacity-80">
+            <LocalizedLink
+              href="/#categories"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("categories")}
             </LocalizedLink>
-            <LocalizedLink href="/#trust" className="hover:opacity-80">
+            <LocalizedLink
+              href="/#trust"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("trust-safety")}
             </LocalizedLink>
-            <LocalizedLink href={"/jobs"} className="hover:opacity-80">
+            <LocalizedLink
+              href="/jobs"
+              className="text-[14.5px] font-500 text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline font-medium"
+            >
               {t("jobs")}
             </LocalizedLink>
-            {!user&&(
-               <LocalizedLink href="/signin" className="hover:opacity-80">
-                {t("signin")}
-              </LocalizedLink>
-            )}
-            
           </nav>
 
-         
+          {/* Right side actions */}
           <div className="flex items-center gap-2 relative">
-            <div className="relative mr-2">
-              <button
-                onClick={() => setLanguageOpen(!languageOpen)}
-                className={`relative inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition`}
-                aria-label="Notifications"
-                aria-expanded={languageOpen}
-              >
-                <LanguagesIcon className="h-6 w-6 text-gray-700" />
-                <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                  {(LOCALES.includes(activeLanguag as any)
-                    ? activeLanguag
-                    : DEFAULT
-                  ).toUpperCase()}
-                </span>
-              </button>
-              {/* Dropdown */}
-              {languageOpen && (
-                <div className="absolute right-0 top-full mt-2 w-12 rounded-lg border bg-white shadow-md z-50">
-                  {LOCALES.map((locale) => (
-                    <button
-                      key={locale}
-                      onClick={() => {
-                        setLanguageOpen(false);
-                        handleChange(locale);
-                      }}
-                      className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100 ${
-                        activeLanguag == locale && "bg-gray-200"
-                      }`}
-                    >
-                      {locale.toUpperCase()}
-                    </button>
-                  ))}
+            {/* Language switcher */}
+            {(() => {
+              const LANG_OPTIONS = [
+                { code: "de", label: "Deutsch", flag: "🇩🇪" },
+                { code: "en", label: "English", flag: "🇬🇧" },
+              ];
+              const activeLang = LOCALES.includes(activeLanguag as any) ? activeLanguag : DEFAULT;
+              const current = LANG_OPTIONS.find(l => l.code === activeLang) ?? LANG_OPTIONS[0];
+              return (
+                <div className="relative">
+                  <button
+                    onClick={() => setLanguageOpen(!languageOpen)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(17,17,16,.12)] bg-white px-3 py-1.5 text-[13px] font-medium text-[#111110] transition-all hover:border-[rgba(17,17,16,.25)] hover:bg-[#f7f7f5]"
+                    aria-haspopup="listbox"
+                    aria-expanded={languageOpen}
+                  >
+                    <span className="text-base leading-none">{current.flag}</span>
+                    <span className="tracking-wide">{current.code.toUpperCase()}</span>
+                    <ChevronDown
+                      className="h-3.5 w-3.5 transition-transform duration-200"
+                      style={{ transform: languageOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                    />
+                  </button>
+                  {languageOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-[#efefec] bg-white py-1.5 shadow-xl z-[300]">
+                      {LANG_OPTIONS.map(lang => (
+                        <button
+                          key={lang.code}
+                          onClick={() => { setLanguageOpen(false); handleChange(lang.code as "en" | "de"); }}
+                          className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#f7f7f5]"
+                        >
+                          <span className="text-xl leading-none">{lang.flag}</span>
+                          <div className="flex-1">
+                            <p className="text-[13px] font-semibold text-[#111110]">{lang.label}</p>
+                            <p className="text-[11px]" style={{ color: "rgba(17,17,16,.4)" }}>{lang.code.toUpperCase()}</p>
+                          </div>
+                          {activeLang === lang.code && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-kz-accent flex-shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })()}
+
             {user ? (
               <>
-                <div className="relative mr-2">
+                {/* Notifications */}
+                <div className="relative">
                   <button
                     onClick={() => setNotificationOpen(!notificationOpen)}
-                    className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition"
+                    className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-[#f7f7f5] transition"
                     aria-label="Notifications"
                     aria-expanded={notificationOpen}
                   >
-                    <Bell className="h-6 w-6 text-gray-700" />
+                    <Bell className="h-5 w-5 text-[rgba(17,17,16,.6)]" />
                     {notificationsCount > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {notificationsCount > 9 ? "9+" : notificationsCount}
@@ -271,11 +375,19 @@ export default function Header() {
                   {notificationOpen && (
                     <div
                       className="absolute right-0 top-full mt-2 w-72 rounded-lg border bg-white shadow-md z-50
-                max-h-[70vh] overflow-auto" // [UPDATED] allow scrolling on small screens
+                      max-h-[70vh] overflow-auto" // [UPDATED] allow scrolling on small screens
                     >
                       {latestThree.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-gray-500">
-                          {t("no-notifications")}
+                        <div className="px-6 py-10 flex flex-col items-center text-center gap-2 text-neutral-500">
+                          <BellOff className="h-8 w-8 text-neutral-400" />
+
+                          <h3 className="text-sm font-medium text-neutral-700">
+                            {t("notifications.empty-title")}
+                          </h3>
+
+                          <p className="text-xs text-neutral-500 max-w-xs">
+                            {t("notifications.empty-description")}
+                          </p>
                         </div>
                       ) : (
                         latestThree.map((n: any, i: number) => (
@@ -312,7 +424,7 @@ export default function Header() {
                         ))
                       )}
 
-                      <button
+                      {notifications.length > 0 && <button
                         className="block w-full text-center px-4 py-2 text-sm hover:bg-gray-50"
                         onClick={() => {
                           setNotificationOpen(false);
@@ -320,112 +432,88 @@ export default function Header() {
                         }}
                       >
                         <span className="text-sm font-semibold text-gray-800">
-                          {t("view-all-notifications")}
+                          {t("notifications.view-all")} ({notifications.length})
                         </span>
-                      </button>
+                      </button>}
                     </div>
                   )}
                 </div>
-                {/* Avatar button */}
+                {/* Messages */}
+                <div className="relative">
+                  <button
+                    onClick={() => push("/my-inbox")}
+                    className="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-[#f7f7f5] transition"
+                    aria-label="Messages"
+                  >
+                    <MessageCircle className="h-5 w-5 text-[rgba(17,17,16,.6)]" />
+                    {messageCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {messageCount > 9 ? "9+" : messageCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                {/* Post job CTA (client only) */}
                 {user?.role === "client" && (
-                  <>
-                    <LocalizedLink
-                      href="/post-job/basic-details"
-                      className="hidden md:inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
-                    >
-                      {t("post-mini-job")}
-                    </LocalizedLink>
-                  </>
+                  <button
+                    onClick={handleStartNew}
+                    className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-semibold bg-[#e8622a] text-white hover:bg-[#d4561f] transition-colors border-0"
+                  >
+                    {t("post-mini-job")}
+                  </button>
                 )}
+
+                {/* User avatar + dropdown */}
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="hidden md:flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm font-medium hover:bg-gray-100"
+                  className="hidden md:flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium hover:bg-[#f7f7f5] transition-colors"
+                  style={{ borderColor: 'rgba(0,0,0,.13)' }}
                 >
                   {user?.avatar_url ? (
-                    <>
-                      <img
-                        src={user?.avatar_url || "https://placehold.co/96x96"}
-                        alt={user?.display_name}
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                    </>
+                    <img
+                      src={user.avatar_url}
+                      alt={user.display_name}
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
                   ) : (
-                    <>
-                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white">
-                        {(user?.avatar_url ||
-                          "https://placehold.co/96x96")?.[0].toUpperCase() || (
-                          <User className="w-4 h-4" />
-                        )}
-                      </div>
-                    </>
+                    <div className="w-7 h-7 rounded-full bg-[#efefec] flex items-center justify-center text-[#111110] text-xs font-semibold">
+                      {(user?.display_name || user?.first_name || "U")[0].toUpperCase()}
+                    </div>
                   )}
-
-                  <span>
-                    {user?.display_name ||
-                      `${user?.first_name} ${user?.last_name}`}
+                  <span className="text-[13px] text-[#111110]">
+                    {user?.display_name || `${user?.first_name} ${user?.last_name}`}
                   </span>
                 </button>
 
                 {/* Dropdown */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-40 rounded-lg border bg-white shadow-md z-50 hidden md:block">
-                    <button
-                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        push("/my-profile");
-                      }}
-                    >
-                      {t("my-profile")}
-                    </button>
-                    <button
-                      className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        push("/change-password");
-                      }}
-                    >
-                      {t("change-password")}
-                    </button>
-                    {user && user?.role === "client" ? (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-44 rounded-[10px] bg-white shadow-lg z-50 hidden md:block overflow-hidden"
+                    style={{ border: '1px solid rgba(0,0,0,.07)' }}
+                  >
+                    {[
+                      { label: t("my-profile"), path: "/my-profile" },
+                      { label: t("change-password"), path: "/change-password" },
+                      ...(user?.role === "client"
+                        ? [{ label: t("my-jobs"), path: "/my-jobs" }]
+                        : [
+                            { label: t("saved-jobs"), path: "/saved-job" },
+                            { label: t("applied-jobs"), path: "/applied-jobs" },
+                            { label: t("reported-jobs"), path: "/reported-jobs" },
+                          ]),
+                    ].map(({ label, path }) => (
                       <button
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                        onClick={() => {
-                          setDropdownOpen(false);
-                          push("/my-jobs");
-                        }}
+                        key={path}
+                        className="block px-4 py-2.5 text-[13px] text-[rgba(17,17,16,.7)] hover:bg-[#f7f7f5] hover:text-[#111110] w-full text-left transition-colors border-b border-[rgba(0,0,0,.05)] last:border-b-0"
+                        onClick={() => { setDropdownOpen(false); push(path); }}
                       >
-                        {t("my-jobs")}
+                        {label}
                       </button>
-                    ) : (
-                      <>
-                        <button
-                          className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            push("/saved-job");
-                          }}
-                        >
-                          {t("saved-jobs")}
-                        </button>
-                        <button
-                          className="block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            push("/applied-jobs");
-                          }}
-                        >
-                          {t("applied-jobs")}
-                        </button>
-                      </>
-                    )}
-
+                    ))}
                     <button
-                      onClick={() => {
-                        logout();
-                        setDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => { logout(); setDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-2.5 text-[13px] text-[rgba(17,17,16,.7)] hover:bg-[#f7f7f5] hover:text-[#111110] transition-colors"
                     >
                       {t("logout")}
                     </button>
@@ -434,60 +522,59 @@ export default function Header() {
               </>
             ) : (
               <>
+                {/* Guest CTAs */}
+                <LocalizedLink
+                  href="/signin"
+                  className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-medium text-[rgba(17,17,16,.75)] hover:text-[#111110] transition-colors no-underline"
+                >
+                  {t("signin")}
+                </LocalizedLink>
                 <LocalizedLink
                   href="/signup?role=helper"
-                  className="hidden md:inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-50"
+                  className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-medium text-[rgba(17,17,16,.55)] hover:text-[#111110] transition-colors no-underline"
+                  style={{ border: '1px solid rgba(0,0,0,.13)', background: 'transparent' }}
                 >
                   {t("become-helper")}
                 </LocalizedLink>
                 <LocalizedLink
                   href="/signup?role=client"
-                  className="hidden md:inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
+                  className="hidden md:inline-flex items-center justify-center h-[34px] px-4 rounded-[6px] text-[13px] font-semibold bg-[#e8622a] text-white hover:bg-[#d4561f] transition-colors no-underline border-0"
                 >
                   {t("post-mini-job")}
                 </LocalizedLink>
               </>
             )}
 
-            {/* =================== HAMBURGER =================== */}
+            {/* Hamburger */}
             <button
-              className="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-gray-100"
+              className="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-[#f7f7f5] transition"
               aria-label="Open menu"
               aria-expanded={mobileOpen}
-              onClick={() => {
-                setMobileOpen(true);
-                setLanguageOpen(false);
-                setNotificationOpen(false);
-                setDropdownOpen(false);
-              }}
+              onClick={() => { setMobileOpen(true); setLanguageOpen(false); setNotificationOpen(false); setDropdownOpen(false); }}
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5 text-[#111110]" />
             </button>
-            {/* ====================================================== */}
           </div>
         </div>
       </header>
 
       {/* =================== MOBILE DRAWER  =================== */}
       <div
-        className={`fixed inset-0 z-[80] md:hidden ${
-          mobileOpen ? "" : "pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-[80] md:hidden ${mobileOpen ? "" : "pointer-events-none"
+          }`}
         aria-hidden={!mobileOpen}
       >
         {/* Backdrop */}
         <div
-          className={`absolute inset-0 bg-black/40 transition-opacity ${
-            mobileOpen ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 bg-black/40 transition-opacity ${mobileOpen ? "opacity-100" : "opacity-0"
+            }`}
           onClick={() => setMobileOpen(false)}
         />
         {/* Panel */}
         <aside
           ref={drawerPanelRef}
-          className={`absolute right-0 top-0 h-full w-80 max-w-[90vw] bg-white shadow-xl transition-transform ${
-            mobileOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`absolute right-0 top-0 h-full w-80 max-w-[90vw] bg-white shadow-xl transition-transform ${mobileOpen ? "translate-x-0" : "translate-x-full"
+            }`}
           role="dialog"
           aria-modal="true"
           aria-label="Mobile menu"
@@ -672,6 +759,17 @@ export default function Header() {
                       >
                         {t("applied-jobs")}
                       </button>
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onClick={() => {
+                          setMobileHeaderDDOpen(false);
+                          setMobileOpen(false);
+                          push("/reported-jobs");
+                        }}
+                        role="menuitem"
+                      >
+                        {t("reported-jobs")}
+                      </button>
                     </>
                   )}
 
@@ -778,6 +876,15 @@ export default function Header() {
                           >
                             {t("applied-jobs")}
                           </button>
+                          <button
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                            onClick={() => {
+                              push("/reported-jobs");
+                              setMobileOpen(false);
+                            }}
+                          >
+                            {t("reported-jobs")}
+                          </button>
                         </>
                       )}
 
@@ -845,6 +952,15 @@ export default function Header() {
                         }}
                       >
                         {t("applied-jobs")}
+                      </LocalizedLink>
+                      <LocalizedLink
+                        href="/reported-jobs"
+                        className="block rounded-lg px-3 py-1 hover:bg-gray-100"
+                        onClick={() => {
+                          setMobileOpen(false);
+                        }}
+                      >
+                        {t("reported-jobs")}
                       </LocalizedLink>
                     </>
                   )}
@@ -927,12 +1043,12 @@ export default function Header() {
                   <div className="flex-1 border-t border-gray-200"></div>
                 </div>
                 <div className="grid grid-cols-1 gap-2">
-                  <LocalizedLink
-                    href="/post-job/basic-details"
+                  <button
+                    onClick={handleStartNew}
                     className="inline-flex items-center rounded-xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90"
                   >
                     {t("post-mini-job")}
-                  </LocalizedLink>
+                  </button>
                 </div>
               </>
             )}
@@ -1000,7 +1116,7 @@ export default function Header() {
                   className="text-lg leading-6 font-bold text-gray-900"
                   id="modal-title"
                 >
-                  {t("notifications")}
+                  {t("notifications.title")}
                 </h3>
                 <X
                   className="h-6 w-6 text-black-300 border border-gray-200 cursor-pointer rounded-lg"
@@ -1013,7 +1129,7 @@ export default function Header() {
                 className="px-2 py-2 space-y-1 overflow-auto"
                 style={{ maxHeight: "500px" }}
               >
-                {notifications.map((n, i) => (
+                {notifications.length > 0 ? notifications.map((n, i) => (
                   <button
                     key={i}
                     className={`block px-4 py-2 text-sm hover:bg-gray-100 w-full text-left border-b border-gray-100`}
@@ -1037,17 +1153,39 @@ export default function Header() {
                       {dayjs(n?.created_at)?.fromNow()}
                     </div>
                   </button>
-                ))}
+                )) : (
+                  <div className="px-6 py-10 flex flex-col items-center text-center gap-2 text-neutral-500">
+                    <BellOff className="h-8 w-8 text-neutral-400" />
+
+                    <h3 className="text-sm font-medium text-neutral-700">
+                      {t("notifications.empty-title")}
+                    </h3>
+
+                    <p className="text-xs text-neutral-500 max-w-xs">
+                      {t("notifications.empty-description")}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Footer/Actions */}
               <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                {notifications.length > 0 && <Button
+                  type="button"
+                  variant="outline"
+                  className="border-amber-300 text-amber-700 hover:bg-amber-50 flex items-center gap-2"
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  <FaBroom className="h-4 w-4" />
+                  {t("notifications.clear-all")}
+                </Button>}
                 <Button
                   type="button"
                   variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                   onClick={() => setIsModalOpen(false)}
                 >
+                  <X className="h-4 w-4" />
                   {t("close")}
                 </Button>
               </div>
@@ -1055,6 +1193,40 @@ export default function Header() {
           </div>
         </div>
       ) : null}
+
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6">
+            <h3 className="text-sm font-semibold text-gray-900">
+              {t("notifications.clear-confirm-title")}
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-600">
+              {t("notifications.clear-confirm-description")}
+            </p>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmOpen(false)}
+              >
+                {t("cancel")}
+              </Button>
+
+              <Button
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => {
+                  clearAllNotifications();
+                  setConfirmOpen(false);
+                }}
+              >
+                {t("confirm")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 }

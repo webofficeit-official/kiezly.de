@@ -1,26 +1,53 @@
 {
     "header": "Impressum",
-    "description": "Stand: 16. Oktober 2025",
-    "lists": [
+    "description": "Stand: Oktober 2025",
+    "sections": [
         {
             "title": "Angaben gemäß § 5 TMG",
-            "description": [
-                "Sivaprasad Sisupalan<br /> Speckenkamp 12<br /> 38162 Sülfeld, Deutschland",
-                "Telefon: <a href=\"tel:+4915779151890\">+49 1577 9151890</a><br /> E-Mail: <a href=\"mailto:siva@webofficeit.com\">siva@webofficeit.com</a>, <a href=\"mailto:sabeel@webofficeit.com\">sabeel@webofficeit.com</a><br />Webseite: <a href=\"https://kiezly.de\">https://kiezly.de</a>"
+            "items": [
+                "Sivaprasad Sisupalan<br />Speckenkamp 12<br />38162 Sülfeld, Deutschland"
+            ]
+        },
+        {
+            "title": "Kontakt",
+            "items": [
+                "Telefon: <a href=\"tel:+4915779151890\">+49 1577 9151890</a>",
+                "E-Mail: <a href=\"mailto:siva@webofficeit.com\">siva@webofficeit.com</a>",
+                "Webseite: <a href=\"https://kiezly.de\">https://kiezly.de</a>"
             ]
         },
         {
             "title": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV",
-            "description": [
-                "Sivaprasad Sisupalan (Anschrift wie oben)"
+            "items": [
+                "Sivaprasad Sisupalan<br />Speckenkamp 12<br />38162 Sülfeld, Deutschland"
             ]
         },
         {
-            "title": "Hinweis zum Status",
-            "description": [
-                "Diese Website ist ein <strong>privates, nicht-kommerzielle­s Projekt</strong> und befindet sich in der Entwicklung."
+            "title": "Haftungsausschluss",
+            "items": [
+                "<strong>Haftung für Inhalte:</strong> Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.",
+                "<strong>Haftung für Links:</strong> Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich."
+            ]
+        },
+        {
+            "title": "Urheberrecht",
+            "items": [
+                "Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers."
+            ]
+        },
+        {
+            "title": "Streitschlichtung",
+            "items": [
+                "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href=\"https://ec.europa.eu/consumers/odr\" target=\"_blank\" rel=\"noopener noreferrer\">https://ec.europa.eu/consumers/odr</a>.",
+                "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
+            ]
+        },
+        {
+            "title": "Hinweis zum Projektstatus",
+            "items": [
+                "Diese Website ist ein <strong>privates, nicht-kommerzielles Projekt</strong> und befindet sich derzeit in der Entwicklungsphase. Alle Inhalte dienen ausschließlich zu Testzwecken."
             ]
         }
     ],
-    "go-back": "Zurück nach Hause"
+    "go-back": "Zurück zur Startseite"
 }

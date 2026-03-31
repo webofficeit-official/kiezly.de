@@ -21,10 +21,32 @@
     },
     "popular": "Popular right now near you",
     "popular-rate": "from €15/h",
+    "hero": {
+        "label": "Mini-Jobs · Neighbourhood · Germany",
+        "heading-suffix": "Helpers.",
+        "heading-faded": "Your Kiez.",
+        "scroll": "scroll",
+        "card": {
+            "payment": "Payment",
+            "applicants": "Applicants",
+            "rating": "Avg. rating",
+            "select": "Select",
+            "profile": "Profile",
+            "open": "Open",
+            "badge-done": "Job done · €15",
+            "badge-match": "⚡ Match in 8 min.",
+            "badge-verified": "Verified"
+        }
+    },
     "how-it-works": {
+        "label": "How it works",
         "title": "How it works",
         "description": "Simple, fast, and built for mini‑jobs in Germany.",
         "button": "Learn more",
+        "live-label": "Live Jobs — Germany",
+        "tag-open": "Open",
+        "tag-select": "Select",
+        "tag-paid": "Paid",
         "steps": [
             {
                 "icon": "FileText",
@@ -44,6 +66,7 @@
         ]
     },
     "categories": {
+        "label": "Categories",
         "title": "Browse categories",
         "description": "From quick chores to recurring help.",
         "subtitle": "Typical tasks · from €15/h",
@@ -51,8 +74,14 @@
         "find-job": "Find {name} jobs"
     },
     "trust-safety": {
-        "title": "Trust & Safety",
-        "description": "Verification and guidance tailored to German mini‑jobs.",
+        "label": "Trust & Safety",
+        "title": "Numbers that speak",
+        "description": "Kiezly is built on real trust – verified profiles, secure payments, genuine reviews.",
+        "stats": [
+            { "num": "4",  "accent": ".8★", "label": "Avg. rating",       "desc": "Based on thousands of completed jobs across the neighbourhood." },
+            { "num": "2",  "accent": "k+",  "label": "Active helpers",    "desc": "Verified helpers in your area, ready for your next job." },
+            { "num": "98", "accent": "%",   "label": "Satisfaction rate",  "desc": "Our users recommend Kiezly – reliable mini-jobs, zero stress." }
+        ],
         "steps": [
             {
                 "icon": "CheckCircle2",
@@ -66,12 +95,26 @@
             },
             {
                 "icon": "ShieldCheck",
-                "title": "In‑app checklist for Haushaltsscheck registration, minimum wage, and monthly cap reminders",
-                "description": "After hiring, follow the household mini‑job checklist & stay within the monthly cap."
+                "title": "Mini-job guidance",
+                "description": "In-app checklist for Haushaltscheck registration, minimum wage, and monthly cap reminders."
             }
         ]
     },
+    "features": {
+        "label": "Why Kiezly",
+        "title": "Safety is no accident",
+        "description": "Every step is designed so you can focus on the job.",
+        "items": [
+            { "icon": "🪪", "title": "Verified profiles",  "desc": "Every helper goes through identity verification. You always know who's at your door." },
+            { "icon": "🔒", "title": "Secure payment",     "desc": "Money is only released once the job is done. Full buyer protection included." },
+            { "icon": "⭐", "title": "Real reviews",        "desc": "Transparent system after every job. Only actual users can leave reviews." },
+            { "icon": "📍", "title": "Hyper-local",        "desc": "Kiezly shows you only helpers and jobs in your immediate neighbourhood." },
+            { "icon": "⚡", "title": "Fast matches",        "desc": "On average you'll find a suitable helper in under 30 minutes." },
+            { "icon": "💬", "title": "Direct chat",         "desc": "Communicate directly with your helper – secure, simple, no detours." }
+        ]
+    },
     "help": {
+        "label": "Get started now",
         "title": "Ready to find help?",
         "description": "Post your mini‑job for free — start getting applications today.",
         "mini‑job": "Post a mini‑job",

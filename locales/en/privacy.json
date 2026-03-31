@@ -1,39 +1,81 @@
 {
-    "header": "Terms of Use (English)",
-    "description": "English translation for convenience. German version above is legally authoritative.",
-    "lists": [
-        {
-            "title": "Controller",
-            "description": "<p>Sivaprasad Sisupalan – Speckenkamp 12, 38162 Sülfeld, Germany<br /> Email: <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a>, <a href=\"mailto:sabeel@weboffice.com\">sabeel@weboffice.com</a>.</p>"
-        },
-        {
-            "title": "Purpose & Legal Basis",
-            "description": "<p>Private, non-commercial site. Processing only as needed to operate the website securely and reliably (Art. 6(1)(f) GDPR – legitimate interest).</p>"
-        },
-        {
-            "title": "Server Logs",
-            "description": "<p>Technical data (e.g., truncated IP, timestamp, requested resource, user agent) may be processed for delivery, troubleshooting, and security, and retained only as long as necessary.</p>"
-        },
-        {
-            "title": "Cookies & Tracking",
-            "description": "<p><strong>No analytics or tracking cookies are used.</strong> No external analytics services are integrated. </p>"
-        },
-        {
-            "title": "Recipients & Transfers",
-            "description": "<p>If a hosting provider is used, processing occurs solely to deliver this site. No third-country transfers occur except if technically necessary (e.g., CDN delivery).</p>"
-        },
-        {
-            "title": "Your Rights",
-            "description": "<p>Access, rectification, deletion, restriction, objection, and complaint to a supervisory authority. Email requests to <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a>, <a href=\"mailto:sabeel@weboffice.com\">sabeel@weboffice.com</a>.</p>"
-        },
-        {
-            "title": "External Links",
-            "description": "<p>No responsibility is assumed for third-party content.</p>"
-        },
-        {
-            "title": "Changes",
-            "description": "<p>This notice may be updated to reflect technical or legal changes.</p>"
-        }
-    ],
-    "go-back": "Back to home"
+  "header": "Privacy Policy",
+  "description": "Last updated: March 2026",
+  "subtitle": "We take the protection of your personal data seriously. This Privacy Policy informs you in accordance with Art. 13 and 14 GDPR about how we process personal data when you use the kiezly.de platform.",
+  "lists": [
+    {
+      "title": "Controller",
+      "description": "<p>The controller within the meaning of the GDPR is:</p><p><strong>Sivaprasad Sisupalan</strong><br />Speckenkamp 12<br />38162 Sülfeld, Germany<br /><br />Email: <a href=\"mailto:datenschutz@kiezly.de\">datenschutz@kiezly.de</a><br />Alternative: <a href=\"mailto:siva@weboffice.com\">siva@weboffice.com</a></p><p>For all data protection enquiries, please contact us at the email address above.</p>"
+    },
+    {
+      "title": "What personal data we process",
+      "description": "<p>Depending on how you use our platform, we may process the following categories of personal data:</p><p><strong>Upon registration:</strong></p><ul><li>First name, last name</li><li>Email address</li><li>Phone number (optional)</li><li>Password (stored in encrypted form only – never in plain text)</li><li>Chosen role (client or helper)</li><li>Date of registration</li></ul><p><strong>In the user profile (voluntary information):</strong></p><ul><li>Profile photo (avatar)</li><li>Display name</li><li>Biography / description</li><li>Location information (neighbourhood, postal code)</li></ul><p><strong>For identity verification:</strong></p><ul><li>Identity document (e.g. national ID or passport) – used only for verification, not stored permanently</li><li>Verification status</li></ul><p><strong>During platform use:</strong></p><ul><li>Job descriptions, categories, location data, compensation amounts</li><li>Application data and messages</li><li>Ratings and comments after job completion</li><li>Messages between users (inbox)</li></ul><p><strong>Technical data (collected automatically):</strong></p><ul><li>IP address (possibly truncated)</li><li>Date and time of access</li><li>Browser type and version</li><li>Operating system</li><li>Pages and resources accessed (server logs)</li><li>JWT authentication tokens (stored in LocalStorage/SessionStorage)</li></ul>"
+    },
+    {
+      "title": "Purposes and legal bases of processing",
+      "description": "<p>We process your data on the following legal bases under the GDPR:</p><table style=\"width:100%;border-collapse:collapse;font-size:13px\"><thead><tr style=\"background:#f7f7f5\"><th style=\"padding:8px 12px;text-align:left;border-bottom:1px solid rgba(0,0,0,.08)\">Purpose</th><th style=\"padding:8px 12px;text-align:left;border-bottom:1px solid rgba(0,0,0,.08)\">Legal basis</th></tr></thead><tbody><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Platform operation, account management</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6(1)(b) GDPR (performance of contract)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Identity verification for platform safety</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6(1)(f) GDPR (legitimate interest)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Security, fraud prevention, error analysis</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6(1)(f) GDPR (legitimate interest)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Rating system and reputation building</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6(1)(b) GDPR (performance of contract)</td></tr><tr><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Email notifications for applications/jobs</td><td style=\"padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05)\">Art. 6(1)(b) GDPR (performance of contract)</td></tr><tr><td style=\"padding:8px 12px\">Compliance with legal obligations</td><td style=\"padding:8px 12px\">Art. 6(1)(c) GDPR (legal obligation)</td></tr></tbody></table>"
+    },
+    {
+      "title": "Registration and account management",
+      "description": "<p>A registration is required to use the core features of Kiezly (post a job, apply, send messages, leave reviews). The data provided during registration (name, email, password, role) is processed for contract performance under Art. 6(1)(b) GDPR.</p><p>Passwords are stored exclusively in encrypted (hashed) form. We never have access to your password in plain text.</p><p>Authentication is handled via signed JWT tokens (JSON Web Tokens), stored client-side, with a refresh-token mechanism for automatic session renewal.</p>"
+    },
+    {
+      "title": "Job postings and applications",
+      "description": "<p>Content you post as a client in a job listing (description, category, location, compensation) is visible to registered users of the platform. Applications submitted by helpers are visible only to the relevant client and to the helper themselves.</p><p>By posting a job, you consent to the public components of the listing (description, category, postal-code-level location, compensation range) being displayed within the platform. Precise address details are only shared after mutual confirmation between helper and client.</p>"
+    },
+    {
+      "title": "Messages and inbox",
+      "description": "<p>The platform provides a direct communication channel between clients and helpers (inbox). Messages are stored on our servers to enable communication between the parties.</p><p>Messages are transmitted in real time via a Socket.IO connection. We store messages to maintain communication continuity and as documentation in the event of a dispute.</p><p>The legal basis is Art. 6(1)(b) GDPR (performance of contract). Messages are automatically deleted 24 months after the last activity on the associated job.</p>"
+    },
+    {
+      "title": "Rating system",
+      "description": "<p>After completing a job, clients and helpers can rate each other. Ratings (stars and comments) are permanently visible on the rated user's public profile for as long as the account is active.</p><p>The legal basis is Art. 6(1)(b) GDPR. You have the right to have a rating you submitted corrected or deleted if it contains factually incorrect information.</p>"
+    },
+    {
+      "title": "Identity verification",
+      "description": "<p>Helpers may optionally undergo an identity verification to increase trust with clients. This involves submitting an identity document (national ID or passport) for review.</p><p>Submitted documents are <strong>used solely for verification purposes</strong> and are not stored permanently after the review is complete. Only the verification status (verified / not verified) is saved to the profile.</p><p>The legal basis is Art. 6(1)(f) GDPR (legitimate interest: platform safety and user protection).</p>"
+    },
+    {
+      "title": "Technical infrastructure and hosting",
+      "description": "<p>Kiezly.de is hosted on servers of a professional hosting provider. The hosting provider processes personal data as a data processor under Art. 28 GDPR, exclusively on our instructions.</p><p>Every page visit automatically generates technical access data (server logs), including:</p><ul><li>IP address (usually truncated)</li><li>Date and time of access</li><li>Requested URL</li><li>HTTP status code</li><li>Data volume transferred</li><li>Referrer URL</li><li>User agent (browser and operating system)</li></ul><p>This data is used solely for technical delivery, error analysis and security. It is deleted after a maximum of 30 days unless a security incident requires longer retention.</p><p>Legal basis: Art. 6(1)(f) GDPR (legitimate interest).</p>"
+    },
+    {
+      "title": "Cookies, local storage and session management",
+      "description": "<p><strong>Technically necessary storage:</strong> To maintain your login session, authentication tokens (JWT) are stored in your browser's LocalStorage. This is technically necessary for operating the platform and cannot be disabled.</p><p><strong>No tracking cookies:</strong> We do <em>not</em> set analytics, advertising or tracking cookies. Services such as Google Analytics, Facebook Pixel or similar are not integrated.</p><p><strong>No third-party cookies:</strong> No cookies from third-party providers are set.</p><p>Legal basis for technically necessary storage: Art. 6(1)(b) and (f) GDPR.</p>"
+    },
+    {
+      "title": "Recipients and processors",
+      "description": "<p>We do not share your data with third parties except in the following cases:</p><ul><li><strong>Hosting provider:</strong> Technical operation of the infrastructure (data processing agreement under Art. 28 GDPR)</li><li><strong>Email service:</strong> Sending notifications about applications and jobs (transactional emails)</li><li><strong>Other users:</strong> Information from your public profile and job listings is visible to other registered users of the platform (as part of contract performance)</li><li><strong>Legal authorities:</strong> Where required by law or necessary for criminal prosecution</li></ul><p>Data is never passed on to third parties for advertising or marketing purposes.</p>"
+    },
+    {
+      "title": "Third-country transfers",
+      "description": "<p>In principle, your personal data is not transferred to third countries (outside the EU/EEA). If services are used whose providers are based in third countries (e.g. global CDN providers), this is done only on the basis of appropriate safeguards pursuant to Art. 46 GDPR (e.g. EU Standard Contractual Clauses) or with your explicit consent.</p>"
+    },
+    {
+      "title": "Retention periods",
+      "description": "<p>We store your data only for as long as necessary for the respective purpose or as required by statutory retention obligations:</p><ul><li><strong>Account data:</strong> For the duration of membership; deleted within 30 days of account deletion (unless statutory retention obligations apply)</li><li><strong>Job listings:</strong> 12 months after the job is completed or archived</li><li><strong>Messages:</strong> 24 months after the last activity on the associated job</li><li><strong>Ratings:</strong> For as long as the account exists; anonymised after account deletion</li><li><strong>Server logs:</strong> Maximum 30 days, except in the case of security incidents</li><li><strong>Identity verification documents:</strong> Immediately after verification is complete</li></ul><p>After the retention period expires, data is deleted or anonymised such that it can no longer be traced back to you.</p>"
+    },
+    {
+      "title": "Your rights as a data subject",
+      "description": "<p>Under the GDPR, you have the following rights with respect to us as controller:</p><ul><li><strong>Right of access (Art. 15 GDPR):</strong> You may request information about the personal data we hold about you.</li><li><strong>Right to rectification (Art. 16 GDPR):</strong> You may request correction of inaccurate or incomplete data.</li><li><strong>Right to erasure (Art. 17 GDPR):</strong> Under certain conditions, you may request deletion of your data (\"right to be forgotten\").</li><li><strong>Right to restriction of processing (Art. 18 GDPR):</strong> You may request that processing of your data be restricted.</li><li><strong>Right to data portability (Art. 20 GDPR):</strong> You may receive your data in a machine-readable format or have it transferred to another provider.</li><li><strong>Right to object (Art. 21 GDPR):</strong> You may object to processing of your data based on Art. 6(1)(f) GDPR (legitimate interest).</li><li><strong>Right to withdraw consent:</strong> Where processing is based on your consent (Art. 6(1)(a) GDPR), you may withdraw it at any time with effect for the future, without affecting the lawfulness of processing before withdrawal.</li></ul><p>To exercise your rights, please contact us by email at: <a href=\"mailto:datenschutz@kiezly.de\">datenschutz@kiezly.de</a></p><p>We process requests as a rule within 30 days. For complex or numerous requests, this period may be extended by up to two further months.</p>"
+    },
+    {
+      "title": "Right to lodge a complaint with a supervisory authority",
+      "description": "<p>Without prejudice to any other administrative or judicial remedy, you have the right to lodge a complaint with a data protection supervisory authority if you believe that the processing of your personal data violates the GDPR (Art. 77 GDPR).</p><p>The supervisory authority responsible for us in Lower Saxony is:</p><p><strong>Die Landesbeauftragte für den Datenschutz Niedersachsen</strong><br />Prinzenstraße 5<br />30159 Hannover, Germany<br />Phone: +49 511 120-4500<br />Email: <a href=\"mailto:poststelle@lfd.niedersachsen.de\">poststelle@lfd.niedersachsen.de</a><br />Website: <a href=\"https://www.lfd.niedersachsen.de\" target=\"_blank\" rel=\"noopener noreferrer\">www.lfd.niedersachsen.de</a></p>"
+    },
+    {
+      "title": "Data security",
+      "description": "<p>We implement technical and organisational measures to protect your personal data against accidental or deliberate manipulation, loss, destruction or unauthorised access:</p><ul><li><strong>Encryption:</strong> All data transmission occurs exclusively via HTTPS (TLS encryption).</li><li><strong>Password hashing:</strong> Passwords are never stored in plain text.</li><li><strong>JWT authentication:</strong> Sessions are managed via signed tokens with automatic expiry.</li><li><strong>Access restrictions:</strong> Access to personal data is limited to the minimum necessary.</li><li><strong>Regular reviews:</strong> Our security measures are reviewed and updated on a regular basis.</li></ul>"
+    },
+    {
+      "title": "Links to external websites",
+      "description": "<p>Our platform may contain links to external websites. This Privacy Policy applies exclusively to kiezly.de. We accept no responsibility for the data protection practices of linked websites. Please consult the respective privacy policies of external providers.</p>"
+    },
+    {
+      "title": "Changes to this Privacy Policy",
+      "description": "<p>This Privacy Policy may be updated to reflect technical, legal or operational changes. The current version with the date of the last update is always available on this page.</p><p>For significant changes that affect your rights, we will notify you by email if you hold a registered account with us.</p><p><strong>Last updated:</strong> March 2026</p>"
+    }
+  ],
+  "go-back": "Back to home",
+  "toc-title": "Table of contents"
 }

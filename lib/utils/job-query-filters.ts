@@ -10,7 +10,7 @@ export const DEFAULT_FILTERS: Filters = {
   min_price: "",
   max_price: "",
   posted: "any",
-  radius_km: 10,
+  radius_km: 0,
   sort: "new",
   starts_at: undefined,
   ends_at: undefined,
@@ -21,7 +21,7 @@ export const toQuery = (f: Filters, collections?: any) => {
   const p = new URLSearchParams();
   if (f.q) p.set("q", f.q);
   if (f.city) p.set("city", f.city);
-//   if (f.category_id.length) p.set("category_id", f.category_id.join(","));
+  //   if (f.category_id.length) p.set("category_id", f.category_id.join(","));
   if (f.category_id.length) {
     if (collections?.jobCategories?.length) {
       const matched = collections.jobCategories.find(
@@ -52,10 +52,12 @@ export const fromQuery = (qs: string): Filters => {
   const p = new URLSearchParams(qs);
   const types = (p.get("job_type") || "")
     .split(",")
-    .filter(Boolean) as Filters["job_type"];
+    .filter(Boolean)
+    .map(Number) as number[];
   const jobExperience = (p.get("job_experience") || "")
     .split(",")
-    .filter(Boolean) as Filters["job_experience"];
+    .filter(Boolean)
+    .map(Number) as number[];
   const jobTag = (p.get("job_tags") || "")
     .split(",")
     .filter(Boolean)

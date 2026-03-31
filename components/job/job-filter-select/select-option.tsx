@@ -7,13 +7,13 @@ export function Select({
   value,
   onChange,
   options,
-  width = "w-full", // ✅ default width (Tailwind class)
+  width = "w-full", //  default width (Tailwind class)
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: Option[];
-  width?: string; // ✅ optional prop for width
+  width?: string; //  optional prop for width
 }) {
   return (
     <div className={`text-sm ${width}`}>

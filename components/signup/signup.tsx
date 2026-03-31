@@ -9,75 +9,40 @@ import {
 } from "@/lib/react-query/queries/user/account";
 import * as React from "react";
 import toast from "react-hot-toast";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaEye, FaEyeSlash } from "react-icons/fa";
 import { SelectWithFilter } from "../input/select";
 import ZipAutocomplete from "../input/autocomplete";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocalizedRouter } from "@/lib/useLocalizedRouter";
 import { useT } from "@/app/[locale]/layout";
 
-// Simple Link shim so this runs outside Next.js too
 function Link({ href = "#", className = "", children, ...props }) {
-  const router = useRouter();
   const { push } = useLocalizedRouter();
   return (
-    <button
-      type="button"
-      onClick={() => push(href)}
-      className={className}
-      {...props}
-    >
+    <button type="button" onClick={() => push(href)} className={className} {...props}>
       {children}
     </button>
   );
 }
 
-type Tag = {
-  id: number;
-  slug: string;
-  name: string;
-};
-
-interface Country {
-  id: string | number;
-  name: string;
-}
-
-interface ApiResponse {
-  countries: Country[];
-}
-
+type Tag = { id: number; slug: string; name: string };
+interface Country { id: string | number; code?: string; name: string }
+interface ApiResponse { countries: Country[] }
 interface TagInputProps {
-  name: string;
-  label?: string;
-  value: Tag[]; // Now it's an array of objects
-  onChange: (arr: Tag[]) => void;
-  suggestions?: Tag[];
-  placeholder?: string;
-  required?: boolean;
-  error?: string;
+  name: string; label?: string; value: Tag[];
+  onChange: (arr: Tag[]) => void; suggestions?: Tag[];
+  placeholder?: string; required?: boolean; error?: string;
 }
 
-// Utilities
 const EMAIL_RE = new RegExp("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 function isEmailValid(email) {
   if (typeof email !== "string") return false;
   const s = email.trim();
-  if (s.length === 0) return false;
-  return EMAIL_RE.test(s);
+  return s.length > 0 && EMAIL_RE.test(s);
 }
 
 function computePwdScore(password) {
-  let pwd = "";
-  if (password == null) pwd = "";
-  else if (typeof password === "string") pwd = password;
-  else {
-    try {
-      pwd = String(password);
-    } catch {
-      pwd = "";
-    }
-  }
+  const pwd = typeof password === "string" ? password : "";
   let s = 0;
   if (pwd.length >= 8) s++;
   if (/[A-Z]/.test(pwd)) s++;
@@ -87,170 +52,74 @@ function computePwdScore(password) {
   return Math.max(0, Math.min(5, s));
 }
 
-// ------------------------------
-// Taggable Autocomplete (Chips + Suggestions)
-// ------------------------------
-function TagInput({
-  name,
-  label,
-  value,
-  onChange,
-  suggestions = [],
-  placeholder = "Type a skill and press Enter",
-  required = false,
-  error,
-}: TagInputProps) {
+function TagInput({ name, label, value, onChange, suggestions = [], placeholder, required, error }: TagInputProps) {
   const [input, setInput] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(-1);
   const inputRef = React.useRef(null);
-  const listRef = React.useRef(null);
 
-  // Set of selected names for filtering
-  const lowerSelected = React.useMemo(
-    () => new Set(value.map((tag) => tag.name.toLowerCase())),
-    [value]
-  );
-
+  const lowerSelected = React.useMemo(() => new Set(value.map((t) => t.name.toLowerCase())), [value]);
   const filtered = React.useMemo(() => {
     const q = input.trim().toLowerCase();
-    if (!q) {
-      return suggestions
-        .filter((s) => !lowerSelected.has(s.name.toLowerCase()))
-        .slice(0, 8);
-    }
-    return suggestions
-      .filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) &&
-          !lowerSelected.has(s.name.toLowerCase())
-      )
-      .slice(0, 8);
+    return suggestions.filter((s) => (!q || s.name.toLowerCase().includes(q)) && !lowerSelected.has(s.name.toLowerCase())).slice(0, 8);
   }, [input, suggestions, lowerSelected]);
 
   function addTag(tag: Tag) {
     if (lowerSelected.has(tag.name.toLowerCase())) return;
     onChange([...value, tag]);
-    setInput("");
-    setActiveIndex(-1);
-    setOpen(false);
+    setInput(""); setActiveIndex(-1); setOpen(false);
     requestAnimationFrame(() => inputRef.current?.focus());
   }
-
   function removeTag(tag: Tag) {
     onChange(value.filter((v) => v.id !== tag.id));
     inputRef.current?.focus();
   }
-
   function onKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (open && activeIndex >= 0 && activeIndex < filtered.length) {
-        addTag(filtered[activeIndex]);
-      }
-    } else if (e.key === "Backspace" && !input) {
-      if (value.length > 0) removeTag(value[value.length - 1]);
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setOpen(true);
-      setActiveIndex((i) =>
-        Math.min((i < 0 ? -1 : i) + 1, filtered.length - 1)
-      );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((i) => Math.max((i <= 0 ? 0 : i) - 1, 0));
-    } else if (e.key === "Escape") {
-      setOpen(false);
-      setActiveIndex(-1);
-    }
+    if (e.key === "Enter") { e.preventDefault(); if (open && activeIndex >= 0) addTag(filtered[activeIndex]); }
+    else if (e.key === "Backspace" && !input && value.length > 0) removeTag(value[value.length - 1]);
+    else if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setActiveIndex((i) => Math.min(i + 1, filtered.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIndex((i) => Math.max(i - 1, 0)); }
+    else if (e.key === "Escape") { setOpen(false); setActiveIndex(-1); }
   }
 
   return (
     <div>
       {label && (
-        <label
-          className="mb-1 block text-sm font-medium"
-          htmlFor={`${name}-input`}
-        >
-          {label}
-          {required ? " *" : ""}
+        <label className="mb-1.5 block text-[13px] font-medium text-[#374151]" htmlFor={`${name}-input`}>
+          {label}{required && <span className="ml-0.5 text-kz-accent">*</span>}
         </label>
       )}
-
-      <input
-        type="hidden"
-        name={name}
-        value={value.map((tag) => tag.id).join(",")}
-      />
-
+      <input type="hidden" name={name} value={value.map((t) => t.id).join(",")} />
       <div
-        className={`w-full flex flex-wrap gap-2 rounded-xl border px-3 py-1.5 ${
-          error ? "border-red-400 ring-2 ring-red-100" : "border-gray-300"
-        }`}
         onClick={() => inputRef.current?.focus()}
+        className={`flex min-h-[42px] w-full flex-wrap gap-1.5 rounded-lg border px-3 py-2 cursor-text transition-all ${
+          error
+            ? "border-red-400 ring-2 ring-red-100"
+            : "border-[#d1d5db] focus-within:border-kz-accent focus-within:ring-2 focus-within:ring-[rgba(232,98,42,.1)]"
+        }`}
       >
-        {/* <div className="flex flex-wrap gap-2"> */}
         {value.map((tag) => (
-          <span
-            key={tag.id}
-            className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs"
-          >
+          <span key={tag.id} className="inline-flex items-center gap-1 rounded-md bg-[rgba(232,98,42,.08)] px-2.5 py-0.5 text-[12px] font-medium text-kz-accent">
             {tag.name}
-            <button
-              type="button"
-              className="ml-1 rounded p-0.5 hover:bg-gray-200"
-              aria-label={`Remove ${tag.name}`}
-              onClick={() => removeTag(tag)}
-            >
-              ×
-            </button>
+            <button type="button" className="ml-0.5 hover:text-kz-accent/60 leading-none" onClick={() => removeTag(tag)}>×</button>
           </span>
         ))}
         <input
-          id={`${name}-input`}
-          ref={inputRef}
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            setOpen(true);
-            setActiveIndex(-1);
-          }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 100)}
-          onKeyDown={onKeyDown}
-          placeholder={placeholder}
-          className="flex-1 min-w-[10ch] border-0 bg-transparent px-2 py-1 text-sm outline-none"
-          aria-autocomplete="list"
-          aria-controls={`${name}-listbox`}
-          aria-expanded={open}
-          autoComplete="off"
+          id={`${name}-input`} ref={inputRef} value={input}
+          onChange={(e) => { setInput(e.target.value); setOpen(true); setActiveIndex(-1); }}
+          onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 100)}
+          onKeyDown={onKeyDown} placeholder={value.length === 0 ? placeholder : ""}
+          className="flex-1 min-w-[10ch] border-0 bg-transparent text-[13px] outline-none placeholder:text-gray-400"
+          aria-autocomplete="list" autoComplete="off"
         />
-        {/* </div> */}
       </div>
-
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
       {open && filtered.length > 0 && (
-        <ul
-          ref={listRef}
-          id={`${name}-listbox`}
-          role="listbox"
-          className="mt-2 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-md"
-        >
+        <ul role="listbox" className="mt-1 max-h-48 w-full overflow-auto rounded-lg border border-[#e5e7eb] bg-white shadow-lg z-10 relative">
           {filtered.map((opt, i) => (
-            <li
-              key={opt.id}
-              role="option"
-              aria-selected={i === activeIndex}
-              className={`cursor-pointer px-3 py-2 text-sm ${
-                i === activeIndex ? "bg-gray-100" : ""
-              }`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                addTag(opt);
-              }}
-              onMouseEnter={() => setActiveIndex(i)}
-            >
+            <li key={opt.id} role="option" aria-selected={i === activeIndex}
+              className={`cursor-pointer px-3.5 py-2.5 text-[13px] transition-colors ${i === activeIndex ? "bg-[rgba(232,98,42,.06)] text-kz-accent" : "hover:bg-gray-50"}`}
+              onMouseDown={(e) => { e.preventDefault(); addTag(opt); }} onMouseEnter={() => setActiveIndex(i)}>
               {opt.name}
             </li>
           ))}
@@ -260,26 +129,45 @@ function TagInput({
   );
 }
 
-export function renderRichText(
-  text: string,
-  components: Record<string, (children: React.ReactNode) => JSX.Element>
-) {
+export function renderRichText(text: string, components: Record<string, (children: React.ReactNode) => JSX.Element>) {
   if (!text) return null;
-
   const re = /<(\w+)>(.*?)<\/\1>/g;
   const out: React.ReactNode[] = [];
-  let last = 0,
-    m: RegExpExecArray | null;
-
+  let last = 0, m: RegExpExecArray | null, ki = 0;
   while ((m = re.exec(text))) {
     const [full, tag, inner] = m;
-    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m.index > last) out.push(<React.Fragment key={`t-${ki++}`}>{text.slice(last, m.index)}</React.Fragment>);
     const C = components[tag];
-    out.push(C ? C(inner) : inner);
+    out.push(<React.Fragment key={`c-${ki++}`}>{C ? C(inner) : inner}</React.Fragment>);
     last = m.index + full.length;
   }
-  if (last < text.length) out.push(text.slice(last));
+  if (last < text.length) out.push(<React.Fragment key={`e-${ki++}`}>{text.slice(last)}</React.Fragment>);
   return <>{out}</>;
+}
+
+function Field({ label, required = false, error = "", children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-[13px] font-medium text-[#374151]">
+        {label}{required && <span className="ml-0.5 text-kz-accent">*</span>}
+      </label>
+      {children}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+function Input({ error = "", className = "", ...props }) {
+  return (
+    <input
+      className={`w-full h-[42px] rounded-lg border px-3.5 text-[13px] text-[#111110] placeholder:text-gray-400 transition-all focus:outline-none focus:ring-2 ${
+        error
+          ? "border-red-400 focus:ring-red-100"
+          : "border-[#d1d5db] focus:border-kz-accent focus:ring-[rgba(232,98,42,.1)]"
+      } ${className}`}
+      {...props}
+    />
+  );
 }
 
 export default function RegisterPage() {
@@ -287,8 +175,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const roleFromUrl =
-    searchParams.get("role") === "client" ? "client" : "helper";
+  const roleFromUrl = searchParams.get("role") === "client" ? "client" : "helper";
   const [role, setRole] = React.useState(roleFromUrl);
   const [showPassword, setShowPassword] = React.useState(false);
   const [agree, setAgree] = React.useState(false);
@@ -299,35 +186,21 @@ export default function RegisterPage() {
   const [skills, setSkills] = React.useState<Tag[]>([]);
   const [jobCategories, setJobCategories] = React.useState([]);
   const [countries, setCountries] = React.useState([]);
-  const [country, setCountry] = React.useState(
-    countries?.find((c) => c.name == "Germany")?.id || ""
-  );
+  const [country, setCountry] = React.useState(countries?.find((c) => c.code == "DE")?.id || "");
   const [zip, setZip] = React.useState("");
   const [city, setCity] = React.useState("");
   const [state, setState] = React.useState("");
   const [latitude, setLatitude] = React.useState("");
   const [longitude, setLongitude] = React.useState("");
   const [zipOptions, setZipOptions] = React.useState<[]>([]);
-  const [selectedZip, setSelectedZip] = React.useState<Zipcode>({
-    city,
-    state,
-    latitude,
-    longitude,
-    country_id: country,
-    zipcode: zip,
-    street: "",
-    id: 0,
-  });
+  const [selectedZip, setSelectedZip] = React.useState<Zipcode>({ city, state, latitude, longitude, country_id: country, zipcode: zip, street: "", id: 0 });
 
   const signup = useSignup();
   const collections = useCollections();
   const getCity = getCityByZip();
 
-  React.useEffect(() => {
-    setRole(roleFromUrl);
-  }, [roleFromUrl]);
+  React.useEffect(() => { setRole(roleFromUrl); }, [roleFromUrl]);
 
-  // Helper to update both state and the URL (without page reload)
   function setRoleAndUrl(nextRole: "helper" | "client") {
     setRole(nextRole);
     const params = new URLSearchParams(searchParams);
@@ -336,658 +209,377 @@ export default function RegisterPage() {
   }
 
   React.useEffect(() => {
-    collections.mutate(
-      {},
-      {
-        onSuccess: (data) => {
-          console.log(data);
-          setJobCategories(data.data.jobCategories);
-          setCountries(data.data.countries);
-          setCountry(
-            (data.data as ApiResponse).countries?.find(
-              (c) => c.name == "Germany"
-            )?.id || ""
-          );
-        },
-        onError: (err: any) => {},
-      }
-    );
+    collections.mutate({}, {
+      onSuccess: (data) => {
+        setJobCategories(data.data.jobCategories);
+        setCountries(data.data.countries);
+        setCountry((data.data as ApiResponse).countries?.find((c) => c.code == "DE")?.id || "");
+      },
+      onError: () => {},
+    });
   }, []);
 
   React.useEffect(() => {
-    setCity(selectedZip?.city ?? "");
-    setState(selectedZip?.state ?? "");
-    setLatitude(selectedZip?.latitude ?? "");
-    setLongitude(selectedZip?.longitude ?? "");
+    setCity(selectedZip?.city ?? ""); setState(selectedZip?.state ?? "");
+    setLatitude(selectedZip?.latitude ?? ""); setLongitude(selectedZip?.longitude ?? "");
   }, [selectedZip]);
 
-  const setFieldError = React.useCallback((name, error) => {
-    setErrors((prev) => ({ ...prev, [name]: error || undefined }));
-  }, []);
+  const setFieldError = React.useCallback((name, error) => setErrors((prev) => ({ ...prev, [name]: error || undefined })), []);
   const getFieldError = (name) => errors && errors[name];
-  const hasErrors = React.useMemo(
-    () => Object.values(errors || {}).some(Boolean),
-    [errors]
-  );
+  const hasErrors = React.useMemo(() => Object.values(errors || {}).some(Boolean), [errors]);
 
   function validateField(name, value) {
     const v = typeof value === "string" ? value.trim() : "";
     switch (name) {
-      case "firstName":
-        if (!v) return t("form.firstName.error_required");
-        if (v.length < 2) return t("form.firstName.error_min");
-        return "";
-      case "lastName":
-        if (!v) return t("form.lastName.error_required");
-        if (v.length < 2) return t("form.lastName.error_min");
-        return "";
-      case "email":
-        if (!v) return t("form.email.error_required");
-        if (!isEmailValid(v)) return t("form.email.error_invalid");
-        return "";
-      case "password":
-        if (!v) return t("form.password.error_required");
-        if (v.length < 8) return t("form.password.error_min");
-        return "";
-      case "agree":
-        if (!value) return t("form.agree.error_required");
-        return "";
-      case "skills":
-        // Only required for helpers
-        if (role === "helper" && (!Array.isArray(value) || value.length === 0))
-          return t("form.skills.error_required");
-        return "";
-      default:
-        return "";
+      case "firstName": if (!v) return t("form.firstName.error_required"); if (v.length < 2) return t("form.firstName.error_min"); return "";
+      case "lastName":  if (!v) return t("form.lastName.error_required");  if (v.length < 2) return t("form.lastName.error_min");  return "";
+      case "email":     if (!v) return t("form.email.error_required");     if (!isEmailValid(v)) return t("form.email.error_invalid"); return "";
+      case "password":  if (!v) return t("form.password.error_required");  if (v.length < 8) return t("form.password.error_min"); return "";
+      case "agree":     if (!value) return t("form.agree.error_required"); return "";
+      case "skills":    if (role === "helper" && (!Array.isArray(value) || value.length === 0)) return t("form.skills.error_required"); return "";
+      default: return "";
     }
   }
 
   function handleBlur(e) {
     const { name, value, type, checked } = e.target || {};
-    const val = type === "checkbox" ? checked : value;
-    setFieldError(name, validateField(name, val));
+    setFieldError(name, validateField(name, type === "checkbox" ? checked : value));
   }
-
   function handleChange(e) {
     const { name, value, type, checked } = e.target || {};
-    if (
-      ["firstName", "lastName", "email", "password", "agree"].includes(name)
-    ) {
-      const val = type === "checkbox" ? checked : value;
-      setFieldError(name, validateField(name, val));
-    }
+    if (["firstName","lastName","email","password","agree"].includes(name))
+      setFieldError(name, validateField(name, type === "checkbox" ? checked : value));
   }
 
   const handleZip = (z: string) => {
     setZip(z);
-    getCity.mutate(
-      {
-        zip: z,
-        country: country,
-      },
-      {
-        onSuccess: (data) => {
-          console.log(data);
-          setZipOptions(data.data.zipcode);
-        },
-        onError: (err: any) => {},
-      }
-    );
+    getCity.mutate({ zip: z, country }, {
+      onSuccess: (data) => setZipOptions(data.data.zipcode),
+      onError: () => {},
+    });
   };
 
-  const pwdInput = typeof password === "string" ? password : "";
-  const rawScore = React.useMemo(() => computePwdScore(pwdInput), [pwdInput]);
-  const pwdScore = Number.isFinite(rawScore)
-    ? Math.max(0, Math.min(5, rawScore))
-    : 0;
+  const pwdScore = React.useMemo(() => {
+    const raw = computePwdScore(typeof password === "string" ? password : "");
+    return Number.isFinite(raw) ? Math.max(0, Math.min(5, raw)) : 0;
+  }, [password]);
 
   async function onSubmit(e) {
     e.preventDefault();
     setMessage(null);
-
     const form = new FormData(e.currentTarget);
-    const emailVal = form.get("email");
-    const email = typeof emailVal === "string" ? emailVal.trim() : "";
-    const passVal = form.get("password");
-    const pass = typeof passVal === "string" ? passVal : "";
-    const firstNameVal = form.get("firstName");
-    const firstName =
-      typeof firstNameVal === "string" ? firstNameVal.trim() : "";
-    const lastNameVal = form.get("lastName");
-    const lastName = typeof lastNameVal === "string" ? lastNameVal.trim() : "";
-    const orgNameVal = form.get("orgName");
-    const orgName = typeof orgNameVal === "string" ? orgNameVal.trim() : "";
-    const websiteVal = form.get("website");
-    const website = typeof websiteVal === "string" ? websiteVal.trim() : "";
-    const rateVal = form.get("rate");
-    const rate = typeof rateVal === "string" ? rateVal.trim() : "";
+    const email     = (form.get("email")     as string || "").trim();
+    const pass      = (form.get("password")  as string) || "";
+    const firstName = (form.get("firstName") as string || "").trim();
+    const lastName  = (form.get("lastName")  as string || "").trim();
+    const orgName   = (form.get("orgName")   as string || "").trim();
+    const website   = (form.get("website")   as string || "").trim();
+    const rate      = (form.get("rate")      as string || "").trim();
 
     const nextErrors = {
       firstName: validateField("firstName", firstName),
-      lastName: validateField("lastName", lastName),
-      email: validateField("email", email),
-      password: validateField("password", pass),
-      agree: validateField("agree", agree),
-      skills: validateField("skills", skills),
+      lastName:  validateField("lastName",  lastName),
+      email:     validateField("email",     email),
+      password:  validateField("password",  pass),
+      agree:     validateField("agree",     agree),
+      skills:    validateField("skills",    skills),
     };
     setErrors(nextErrors);
-
     if (Object.values(nextErrors).some(Boolean)) {
       setMessage({ type: "error", text: `${t("messages.fix_fields")}` });
-      const firstInvalid = [
-        "firstName",
-        "lastName",
-        "email",
-        "password",
-        "skills",
-      ].find((n) => nextErrors[n]);
-      if (firstInvalid) {
-        const el = e.currentTarget.querySelector(`[name="${firstInvalid}"]`);
-        if (el && typeof el.focus === "function") el.focus();
-      }
+      const firstInvalid = ["firstName","lastName","email","password","skills"].find((n) => nextErrors[n]);
+      if (firstInvalid) { const el = e.currentTarget.querySelector(`[name="${firstInvalid}"]`); if (el?.focus) el.focus(); }
       return;
     }
 
-    const payload = Object.fromEntries(form.entries());
-    payload.role = role;
-
     try {
       setSubmitting(true);
-      const newPayload: SignupData = {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        password,
-        role,
-        city,
-        country,
-        zip,
-        state,
-        latitude,
-        longitude,
-        org_name: orgName,
-        website,
-        skills: skills.map((s) => s.id),
-        rate,
-      };
       const formEl = e.currentTarget;
-      signup.mutate(newPayload, {
-        onSuccess: (data) => {
+      signup.mutate({
+        first_name: firstName, last_name: lastName, email, password, role, city, country, zip, state, latitude, longitude,
+        org_name: orgName, website, skills: skills.map((s) => s.id), rate,
+      } as SignupData, {
+        onSuccess: () => {
           toast.custom((to) => (
-            <div
-              className={`${
-                to.visible ? "animate-enter" : "animate-leave"
-              } max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-            >
-              {/* Icon */}
-              <div className="flex items-center justify-center p-4">
-                <FaCheckCircle className="text-green-500 w-6 h-6" />
-              </div>
-              {/* Text */}
-              <div className="flex-1 w-0 p-4">
-                <p className="text-sm font-semibold text-green-600">
-                  {t("toasts.success_title")}
-                </p>
-                <p className="mt-1 text-sm text-gray-700">
-                  {t("toasts.success_body")}
-                </p>
+            <div className={`${to.visible ? "animate-enter" : "animate-leave"} max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black/10`}>
+              <div className="flex items-center justify-center p-4"><FaCheckCircle className="text-kz-green w-6 h-6" /></div>
+              <div className="flex-1 p-4">
+                <p className="text-sm font-semibold text-kz-green">{t("toasts.success_title")}</p>
+                <p className="mt-1 text-sm text-gray-600">{t("toasts.success_body")}</p>
               </div>
             </div>
           ));
-          setAgree(false);
-          setErrors({});
-          setSubmitting(false);
-          setPassword("");
-          setCity("");
-          setState("");
-          setLatitude("");
-          setLongitude("");
-          setZip("");
-          setSkills([]);
+          setAgree(false); setErrors({}); setSubmitting(false); setPassword("");
+          setCity(""); setState(""); setLatitude(""); setLongitude(""); setZip(""); setSkills([]);
           formEl.reset();
         },
         onError: (err: any) => {
-          toast.error(
-            err?.response?.data?.message || `${t("toast.error_fallback")}`
-          );
+          toast.error(err?.response?.data?.message || `${t("toast.error_fallback")}`);
           setSubmitting(false);
         },
       });
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: (err && err.message) || "Something went wrong.",
-      });
-    } finally {
+      setMessage({ type: "error", text: (err && err.message) || "Something went wrong." });
     }
   }
 
-  const strengthClasses = [
-    "w-0 bg-transparent",
-    "w-1/5 bg-red-400",
-    "w-2/5 bg-orange-400",
-    "w-3/5 bg-yellow-400",
-    "w-4/5 bg-lime-500",
-    "w-full bg-green-500",
+  const strengthConfig = [
+    { w: "w-0",    color: "bg-transparent", label: "",          textColor: "" },
+    { w: "w-1/5",  color: "bg-red-400",     label: "Too weak",  textColor: "text-red-500" },
+    { w: "w-2/5",  color: "bg-orange-400",  label: "Weak",      textColor: "text-orange-500" },
+    { w: "w-3/5",  color: "bg-yellow-400",  label: "Fair",      textColor: "text-yellow-600" },
+    { w: "w-4/5",  color: "bg-lime-500",    label: "Good",      textColor: "text-lime-600" },
+    { w: "w-full", color: "bg-kz-green",    label: "Strong",    textColor: "text-kz-green" },
   ];
-  const safeStrengthClass = strengthClasses[pwdScore] || strengthClasses[0];
-
+  const strength = strengthConfig[pwdScore] || strengthConfig[0];
   const submitDisabled = submitting || hasErrors;
-  const s = t("form.agree.label_html");
+  const agreeText = (() => {
+    const s = t("form.agree.label_html");
+    return s && s !== "form.agree.label_html" ? s : "I agree to the <linkTerms>Terms</linkTerms> and <linkPrivacy>Privacy Policy</linkPrivacy>.";
+  })();
 
-  const text =
-    s && s !== "form.agree.label_html"
-      ? s
-      : "I agree to the <linkTerms>Terms</linkTerms> and <linkPrivacy>Privacy Policy</linkPrivacy>.";
+  const brandPerks = [
+    { icon: "✦", text: role === "helper" ? "Set your own rate and schedule" : "Post a job in under 2 minutes" },
+    { icon: "✦", text: role === "helper" ? "Get paid for work in your Kiez" : "100s of verified helpers nearby" },
+    { icon: "✦", text: role === "helper" ? "Grow your reputation over time" : "Transparent pricing, no surprises" },
+  ];
 
   return (
-    <main className="flex-1 bg-gray-50">
-      <section className="mx-auto max-w-3xl px-4 py-10">
-        <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+    <div className="flex min-h-screen flex-col lg:flex-row pt-16">
 
-            <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600 gap-2">
-              {/* Subtitle */}
-              <p dangerouslySetInnerHTML={{ __html: t("subtitle_html") }} />
-
-              {/* Sign-in link */}
-              <p className="text-sm text-gray-600">
-                {t("cta.signin_prompt")}{" "}
-                <Link
-                  href={`/signin?role=${role}`}
-                  className="text-black font-medium hover:underline"
-                >
-                  {t("cta.signin")}
-                </Link>
-              </p>
-            </div>
+      {/* ── LEFT: Brand panel ────────────────────────────── */}
+      <div
+        className="hidden lg:flex lg:w-5/12 flex-col justify-between px-12 py-10 xl:px-16 xl:py-12"
+        style={{ background: "#111110" }}
+      >
+        {/* Top: logo + intro */}
+        <div>
+          <div className="mb-12">
+            <span className="font-display font-extrabold text-2xl tracking-tight text-white">kiezly</span>
+            <span className="ml-1.5 text-kz-accent text-2xl font-extrabold">.</span>
           </div>
 
-          {/* Role selector */}
-          <div className="mt-6 inline-flex rounded-full bg-gray-100 p-1 text-sm">
-            <button
-              type="button"
-              onClick={() => setRoleAndUrl("helper")}
-              className={`rounded-full px-4 py-2 ${
-                role === "helper"
-                  ? "bg-white shadow ring-1 ring-black/5"
-                  : "opacity-70 hover:opacity-100"
-              }`}
+          <div className="kz-hero-label" style={{ color: "rgba(255,255,255,.35)" }}>
+            {role === "helper" ? "Become a helper" : "Hire local help"}
+          </div>
+
+          <h2
+            className="font-display font-extrabold text-white leading-[1.08] mb-6"
+            style={{ fontSize: "clamp(30px,3.2vw,46px)", letterSpacing: "-1.5px" }}
+          >
+            Your neighbourhood,<br />
+            <span style={{ color: "#e8622a" }}>connected.</span>
+          </h2>
+
+          <p className="text-[15px] leading-relaxed mb-10" style={{ color: "rgba(255,255,255,.5)" }}>
+            {role === "helper"
+              ? "Join thousands of people earning money by helping their neighbours with everyday tasks."
+              : "Find trusted local helpers for any task — from cleaning to handyman work."}
+          </p>
+
+          <ul className="space-y-4">
+            {brandPerks.map((p) => (
+              <li key={p.text} className="flex items-center gap-3">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px]" style={{ background: "rgba(232,98,42,.18)", color: "#e8622a" }}>{p.icon}</span>
+                <span className="text-[14px]" style={{ color: "rgba(255,255,255,.65)" }}>{p.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Bottom: trust line */}
+        <div className="mt-12 pt-8" style={{ borderTop: "1px solid rgba(255,255,255,.08)" }}>
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              {["E","M","K","T"].map((l) => (
+                <div key={l} className="w-8 h-8 rounded-full border-2 border-[#111110] flex items-center justify-center text-[11px] font-bold text-white" style={{ background: `hsl(${l.charCodeAt(0) * 37 % 360},45%,35%)` }}>{l}</div>
+              ))}
+            </div>
+            <p className="text-[13px]" style={{ color: "rgba(255,255,255,.4)" }}>
+              <span className="text-white font-semibold">10,000+</span> people already on Kiezly
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT: Form panel ─────────────────────────────── */}
+      <div className="flex-1 bg-white overflow-y-auto">
+        <div className="mx-auto w-full max-w-xl px-6 py-10 xl:px-8">
+
+          {/* Already have an account */}
+          <div className="mb-8 flex justify-end">
+            <Link
+              href={`/signin?role=${role}`}
+              className="inline-flex items-center gap-2 rounded-full bg-[#111110] px-4 py-2 text-[13px] text-white transition-all hover:bg-kz-accent"
             >
-              {t("roles.helper")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setRoleAndUrl("client")}
-              className={`rounded-full px-4 py-2 ${
-                role === "client"
-                  ? "bg-white shadow ring-1 ring-black/5"
-                  : "opacity-70 hover:opacity-100"
-              }`}
-            >
-              {t("roles.client")}
-            </button>
+              Already have an account?
+              <span className="font-semibold">Sign in →</span>
+            </Link>
+          </div>
+
+          {/* Heading */}
+          <div className="mb-8">
+            <h1 className="font-display font-bold text-[#111110] text-2xl tracking-tight mb-1">
+              Create your account
+            </h1>
+            <p className="text-[14px]" style={{ color: "rgba(17,17,16,.5)" }}>
+              Free to join — takes less than 2 minutes.
+            </p>
+          </div>
+
+          {/* Role toggle */}
+          <div className="mb-8 flex rounded-lg p-1" style={{ background: "#f3f4f6" }}>
+            {(["helper","client"] as const).map((r) => (
+              <button
+                key={r} type="button" onClick={() => setRoleAndUrl(r)}
+                className={`flex-1 py-2.5 rounded-md text-[13px] font-semibold transition-all ${
+                  role === r
+                    ? "bg-white text-[#111110] shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {r === "helper" ? "🛠  " : "📋  "}{t(`roles.${r}`)}
+              </button>
+            ))}
           </div>
 
           {/* Form */}
-          <form
-            onSubmit={onSubmit}
-            noValidate
-            className="mt-8 grid grid-cols-1 gap-5"
-          >
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="mb-1 block text-sm font-medium"
-                >
-                  {t("form.firstName.label")}
-                </label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  required
-                  aria-invalid={!!getFieldError("firstName")}
-                  aria-describedby={
-                    getFieldError("firstName") ? "firstName-error" : undefined
-                  }
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl border px-3 py-2 ${
-                    getFieldError("firstName")
-                      ? "border-red-400 focus:ring-red-200"
-                      : "border-gray-300 focus:ring-black/20"
-                  }`}
-                />
-                {getFieldError("firstName") && (
-                  <p id="firstName-error" className="mt-1 text-xs text-red-600">
-                    {getFieldError("firstName")}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="mb-1 block text-sm font-medium"
-                >
-                  {t("form.lastName.label")}
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  required
-                  aria-invalid={!!getFieldError("lastName")}
-                  aria-describedby={
-                    getFieldError("lastName") ? "lastName-error" : undefined
-                  }
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl border px-3 py-2 ${
-                    getFieldError("lastName")
-                      ? "border-red-400 focus:ring-red-200"
-                      : "border-gray-300 focus:ring-black/20"
-                  }`}
-                />
-                {getFieldError("lastName") && (
-                  <p id="lastName-error" className="mt-1 text-xs text-red-600">
-                    {getFieldError("lastName")}
-                  </p>
-                )}
-              </div>
+          <form onSubmit={onSubmit} noValidate className="space-y-5">
+
+            {/* Name row */}
+            <div className="grid grid-cols-2 gap-4">
+              <Field label={t("form.firstName.label")} required error={getFieldError("firstName")}>
+                <Input name="firstName" required onBlur={handleBlur} onChange={handleChange} error={getFieldError("firstName")} />
+              </Field>
+              <Field label={t("form.lastName.label")} required error={getFieldError("lastName")}>
+                <Input name="lastName" required onBlur={handleBlur} onChange={handleChange} error={getFieldError("lastName")} />
+              </Field>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-1 block text-sm font-medium"
-                >
-                  {t("form.email.label")}
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  required
-                  aria-invalid={!!getFieldError("email")}
-                  aria-describedby={
-                    getFieldError("email") ? "email-error" : undefined
-                  }
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl border px-3 py-2 ${
-                    getFieldError("email")
-                      ? "border-red-400 focus:ring-red-200"
-                      : "border-gray-300 focus:ring-black/20"
-                  }`}
-                />
-                {getFieldError("email") && (
-                  <p id="email-error" className="mt-1 text-xs text-red-600">
-                    {getFieldError("email")}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="mb-1 block text-sm font-medium"
-                >
-                  {t("form.phone.label")}
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2"
-                />
-              </div>
+            {/* Email + Phone */}
+            <div className="grid grid-cols-2 gap-4">
+              <Field label={t("form.email.label")} required error={getFieldError("email")}>
+                <Input type="email" name="email" required autoComplete="email" onBlur={handleBlur} onChange={handleChange} error={getFieldError("email")} />
+              </Field>
+              <Field label={t("form.phone.label")}>
+                <Input type="tel" name="phone" />
+              </Field>
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="mb-1 block text-sm font-medium"
-              >
-                {t("form.password.label")}
-              </label>
+            {/* Password */}
+            <Field label={t("form.password.label")} required error={getFieldError("password")}>
               <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  required
-                  minLength={8}
-                  aria-invalid={!!getFieldError("password")}
-                  aria-describedby={
-                    getFieldError("password") ? "password-error" : undefined
-                  }
+                <Input
+                  type={showPassword ? "text" : "password"} name="password"
+                  required minLength={8} autoComplete="new-password"
                   onBlur={handleBlur}
-                  onChange={(e) => {
-                    setPassword((e.target && e.target.value) || "");
-                    handleChange(e);
-                  }}
-                  className={`w-full rounded-xl border px-3 py-2 pr-12 ${
-                    getFieldError("password")
-                      ? "border-red-400 focus:ring-red-200"
-                      : "border-gray-300 focus:ring-black/20"
-                  }`}
+                  onChange={(e) => { setPassword(e.target.value || ""); handleChange(e); }}
+                  error={getFieldError("password")} className="pr-11"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-2 my-auto rounded-lg px-2 text-xs text-gray-600 hover:bg-gray-100"
-                >
-                  {showPassword
-                    ? `${t("form.password.hide")}`
-                    : `${t("form.password.show")}`}
+                <button type="button" onClick={() => setShowPassword((s) => !s)}
+                  className="absolute inset-y-0 right-3 my-auto text-[15px] text-gray-400 hover:text-gray-600">
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              {getFieldError("password") && (
-                <p id="password-error" className="mt-1 text-xs text-red-600">
-                  {getFieldError("password")}
-                </p>
+              {password.length > 0 && (
+                <div className="mt-2 flex items-center gap-2.5">
+                  <div className="flex-1 h-1 rounded-full overflow-hidden bg-gray-200">
+                    <div className={`h-full rounded-full transition-all duration-300 ${strength.w} ${strength.color}`} />
+                  </div>
+                  <span className={`text-[11px] font-medium w-12 text-right ${strength.textColor}`}>{strength.label}</span>
+                </div>
               )}
-              <div
-                className="mt-2 h-1.5 w-full overflow-hidden rounded bg-gray-200"
-                aria-hidden
-              >
-                <div className={`h-full transition-all ${safeStrengthClass}`} />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                {t("form.password.hint")}
-              </p>
-            </div>
+            </Field>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <div>
+            {/* Location */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-1">
                 <SelectWithFilter
                   label={t("form.country.label")}
-                  labelClass="mb-1 block text-sm font-medium text-gray-700"
-                  value={country}
-                  onChange={(v) => setCountry(v)}
-                  options={countries}
+                  labelClass="mb-1.5 block text-[13px] font-medium text-[#374151]"
+                  value={country} onChange={(v) => setCountry(v)} options={countries}
                 />
               </div>
-              <div>
+              <div className="col-span-1">
                 <ZipAutocomplete
-                  zip={zip}
-                  setZip={setZip}
-                  selectedObject={selectedZip}
-                  setSelectedObject={setSelectedZip}
-                  zipOptions={zipOptions}
-                  onZipChange={handleZip}
-                  label={t("form.zip.label")}
-                  placeholder={t("form.zip.placeholder")}
+                  zip={zip} setZip={setZip} selectedObject={selectedZip} setSelectedObject={setSelectedZip}
+                  zipOptions={zipOptions} onZipChange={handleZip}
+                  label={t("form.zip.label")} placeholder={t("form.zip.placeholder")}
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="city"
-                  className="mb-1 block text-sm font-medium"
-                >
-                  {t("form.city.label")}
-                </label>
-                <input
-                  id="city"
-                  name="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2"
-                />
-              </div>
+              <Field label={t("form.city.label")}>
+                <Input name="city" value={city} onChange={(e) => setCity(e.target.value)} />
+              </Field>
             </div>
 
-            {role === "client" ? (
-              <fieldset className="rounded-2xl border border-gray-200 p-4">
-                <legend className="px-1 text-sm font-semibold text-gray-700">
-                  {t("sections.client")}
-                </legend>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="orgName"
-                      className="mb-1 block text-sm font-medium"
-                    >
-                      {t("form.orgName.label")}
-                    </label>
-                    <input
-                      id="orgName"
-                      name="orgName"
-                      className="w-full rounded-xl border border-gray-300 px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="website"
-                      className="mb-1 block text sm font-medium"
-                    >
-                      {t("form.website.label")}
-                    </label>
-                    <input
-                      id="website"
-                      type="url"
-                      name="website"
-                      className="w-full rounded-xl border border-gray-300 px-3 py-2"
-                    />
-                  </div>
+            {/* Role-specific */}
+            <div className="rounded-lg p-4" style={{ background: "#f9fafb", border: "1px solid #e5e7eb" }}>
+              {role === "client" ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label={t("form.orgName.label")}>
+                    <Input name="orgName" />
+                  </Field>
+                  <Field label={t("form.website.label")}>
+                    <Input type="url" name="website" placeholder="https://" />
+                  </Field>
                 </div>
-              </fieldset>
-            ) : (
-              <fieldset className="rounded-2xl border border-gray-200 p-4">
-                <legend className="px-1 text-sm font-semibold text-gray-700">
-                  {t("sections.helper")}
-                </legend>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <div>
-                    <TagInput
-                      name="skills"
-                      label={t("form.skills.label")}
-                      value={skills}
-                      onChange={(arr) => {
-                        setSkills(arr);
-                        setFieldError("skills", validateField("skills", arr));
-                      }}
-                      suggestions={jobCategories}
-                      required={role === "helper"}
-                      error={getFieldError("skills")}
-                      placeholder={t("form.skills.placeholder")}
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="rate"
-                      className="mb-1 block text-sm font-medium"
-                    >
-                      {t("form.rate.label")}
-                    </label>
-                    <input
-                      id="rate"
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      name="rate"
-                      className="w-full rounded-xl border border-gray-300 px-3 py-2"
-                    />
-                  </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <TagInput
+                    name="skills" label={t("form.skills.label")} value={skills}
+                    onChange={(arr) => { setSkills(arr); setFieldError("skills", validateField("skills", arr)); }}
+                    suggestions={jobCategories} required
+                    error={getFieldError("skills")} placeholder={t("form.skills.placeholder")}
+                  />
+                  <Field label={t("form.rate.label")}>
+                    <div className="relative">
+                      <Input type="number" step="0.5" min="0" name="rate" className="pr-10" />
+                      <span className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-[13px] text-gray-400">€/h</span>
+                    </div>
+                  </Field>
                 </div>
-              </fieldset>
-            )}
-
-            <div className="space-y-3">
-              <label className="flex items-start gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  name="agree"
-                  className={`mt-1 h-4 w-4 rounded ${
-                    getFieldError("agree") ? "ring-2 ring-red-300" : ""
-                  }`}
-                  checked={agree}
-                  onChange={(e) => {
-                    setAgree(!!(e.target && e.target.checked));
-                    handleChange(e);
-                  }}
-                  onBlur={handleBlur}
-                  aria-invalid={!!getFieldError("agree")}
-                  aria-describedby={
-                    getFieldError("agree") ? "agree-error" : undefined
-                  }
-                />
-                <span>
-                  {renderRichText(text, {
-                    linkTerms: (children) => (
-                      <Link href="/terms" className="underline">
-                        {children}
-                      </Link>
-                    ),
-                    linkPrivacy: (children) => (
-                      <Link href="/datenschutz" className="underline">
-                        {children}
-                      </Link>
-                    ),
-                  })}
-                  .
-                </span>
-              </label>
-              {getFieldError("agree") && (
-                <p id="agree-error" className="-mt-2 pl-7 text-xs text-red-600">
-                  {getFieldError("agree")}
-                </p>
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={submitDisabled}
-              className="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-white disabled:opacity-60"
-              aria-disabled={submitDisabled}
-            >
-              {submitting ? `${t("cta.creating")}` : `${t("cta.create")}`}
-            </button>
-            <p className="text-sm text-gray-600">
-              {t("cta.signin_prompt")}
-              <Link
-                href={`/signin?role=${role}`}
-                className="text-black font-medium hover:underline"
-              >
-                {t("cta.signin")}
-              </Link>
-            </p>
+            {/* T&C */}
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox" name="agree"
+                className={`mt-0.5 h-4 w-4 rounded accent-kz-accent ${getFieldError("agree") ? "ring-2 ring-red-300" : ""}`}
+                checked={agree}
+                onChange={(e) => { setAgree(!!(e.target?.checked)); handleChange(e); }}
+                onBlur={handleBlur}
+              />
+              <span className="text-[13px] leading-relaxed" style={{ color: "rgba(17,17,16,.55)" }}>
+                {renderRichText(agreeText, {
+                  linkTerms: (children) => <Link href="/terms" className="text-[#111110] underline underline-offset-2 hover:text-kz-accent">{children}</Link>,
+                  linkPrivacy: (children) => <Link href="/datenschutz" className="text-[#111110] underline underline-offset-2 hover:text-kz-accent">{children}</Link>,
+                })}
+              </span>
+            </label>
+            {getFieldError("agree") && <p className="text-xs text-red-500">{getFieldError("agree")}</p>}
 
+            {/* Error banner */}
             {message && (
-              <div
-                className={`rounded-xl border px-4 py-3 text-sm ${
-                  message.type === "success"
-                    ? "border-green-200 bg-green-50 text-green-700"
-                    : "border-red-200 bg-red-50 text-red-700"
-                }`}
-              >
+              <div className={`rounded-lg border px-4 py-3 text-[13px] ${
+                message.type === "success" ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-600"
+              }`}>
                 {message.text}
               </div>
             )}
+
+            {/* Submit */}
+            <button
+              type="submit" disabled={submitDisabled}
+              className="w-full h-[46px] rounded-lg bg-kz-accent text-white font-semibold text-[14px] tracking-wide transition-all hover:bg-[#d4561f] active:scale-[.99] disabled:opacity-50"
+            >
+              {submitting ? `${t("cta.creating")}` : `${t("cta.create")}`}
+            </button>
+
           </form>
         </div>
-      </section>
-    </main>
+      </div>
+
+    </div>
   );
 }

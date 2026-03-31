@@ -1,0 +1,34 @@
+{
+    "title": "My Inbox",
+    "inbox_header": "My Jobs",
+    "applications_header": "Applicants",
+    "expired": "This job has expired",
+    "select_job_message": "Select a job to view applicants",
+    "chat": {
+        "select_applicant": "Select an applicant to start chatting",
+        "select_job": "Select a job to view your messages",
+        "message_placeholder": "Type a message...",
+        "job_expired": "Job has been expired",
+        "loading_older": "Loading old messages",
+        "load_older": "Load old message"
+    },
+    "empty_inbox": {
+        "no_jobs": {
+            "title": "No Jobs yet"
+        },
+        "no_applicants": {
+            "title": "No applicants yet for this job"
+        }
+    },
+    "reviews": {
+        "rating": {
+            "title": "Rating",
+            "empty": "Tap to rate"
+        },
+        "review": {
+            "description": "Describe your experience..."
+        },
+        "description": "Please select a star rating to enable sending.",
+        "success": "Review submitted successfully!"
+    }
+}

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Private user pages — no SEO value, avoid duplicate content
+Disallow: /*/my-profile
+Disallow: /*/my-jobs
+Disallow: /*/my-inbox
+Disallow: /*/saved-job
+Disallow: /*/applied-jobs
+Disallow: /*/reported-jobs
+Disallow: /*/change-password
+Disallow: /*/post-job/
+Disallow: /*/reset-password/
+Disallow: /*/verify-email/
+Disallow: /*/unauthorized
+
+Sitemap: https://kiezly.de/sitemap.xml

@@ -12,7 +12,7 @@
             "placeholder": "Stadt oder Postleitzahl"
         },
         "button": "Suchen",
-        "description": "Tipp: Nutzen Sie Ihre Nachbarschaft (z. B. „Braunschweig, Weststadt“), um Helfer in der Nähe zu sehen.",
+        "description": "Tipp: Nutzen Sie Ihre Nachbarschaft (z. B. Braunschweig, Weststadt), um Helfer in der Nähe zu sehen.",
         "badge": {
             "id-verified": "Ausweis verifiziert",
             "first-aid": "Erste-Hilfe-Abzeichen",
@@ -21,10 +21,32 @@
     },
     "popular": "Aktuell in Ihrer Nähe beliebt",
     "popular-rate": "ab 15 €/h",
+    "hero": {
+        "label": "Mini-Jobs · Nachbarschaft · Deutschland",
+        "heading-suffix": "Helfer.",
+        "heading-faded": "Dein Kiez.",
+        "scroll": "scroll",
+        "card": {
+            "payment": "Bezahlung",
+            "applicants": "Bewerber",
+            "rating": "Ø Bewert.",
+            "select": "Auswählen",
+            "profile": "Profil",
+            "open": "Offen",
+            "badge-done": "Job erledigt · 15 €",
+            "badge-match": "⚡ Match in 8 Min.",
+            "badge-verified": "Verifiziert"
+        }
+    },
     "how-it-works": {
+        "label": "So funktioniert's",
         "title": "Wie es funktioniert",
         "description": "Einfach, schnell und für Minijobs in Deutschland konzipiert.",
         "button": "Erfahren Sie mehr",
+        "live-label": "Live Jobs — Deutschland",
+        "tag-open": "Offen",
+        "tag-select": "Auswählen",
+        "tag-paid": "Bezahlt",
         "steps": [
             {
                 "icon": "FileText",
@@ -44,6 +66,7 @@
         ]
     },
     "categories": {
+        "label": "Kategorien",
         "title": "Kategorien durchsuchen",
         "description": "Von schnellen Aufgaben bis hin zu wiederkehrender Hilfe.",
         "subtitle": "Typische Aufgaben · ab 15 €/h",
@@ -51,8 +74,14 @@
         "find-job": "{name}-Jobs finden"
     },
     "trust-safety": {
-        "title": "Vertrauen und Sicherheit",
-        "description": "Auf deutsche Minijobs zugeschnittene Überprüfung und Beratung.",
+        "label": "Vertrauen & Sicherheit",
+        "title": "Zahlen, die sprechen",
+        "description": "Kiezly ist auf echtem Vertrauen aufgebaut – verifizierte Profile, sichere Zahlung, echte Bewertungen.",
+        "stats": [
+            { "num": "4",  "accent": ".8★", "label": "Ø Bewertung",   "desc": "Basierend auf tausenden abgeschlossenen Jobs in der Nachbarschaft." },
+            { "num": "2",  "accent": "k+",  "label": "Aktive Helfer", "desc": "Geprüfte Helfer in deiner Umgebung, bereit für deinen nächsten Auftrag." },
+            { "num": "98", "accent": "%",   "label": "Zufriedenheit", "desc": "Unsere Nutzer empfehlen Kiezly weiter – für zuverlässige Mini-Jobs ohne Stress." }
+        ],
         "steps": [
             {
                 "icon": "CheckCircle2",
@@ -71,7 +100,21 @@
             }
         ]
     },
+    "features": {
+        "label": "Warum Kiezly",
+        "title": "Sicherheit ist kein Zufall",
+        "description": "Jeder Schritt ist darauf ausgelegt, dass du dich auf den Job konzentrieren kannst.",
+        "items": [
+            { "icon": "🪪", "title": "Verifizierte Profile",  "desc": "Jeder Helfer durchläuft eine Identitätsprüfung. Du weißt immer, wer vor deiner Tür steht." },
+            { "icon": "🔒", "title": "Sichere Zahlung",        "desc": "Geld wird erst freigegeben, wenn der Job erledigt ist. Vollständiger Käuferschutz inklusive." },
+            { "icon": "⭐", "title": "Echte Bewertungen",      "desc": "Transparentes System nach jedem Job. Nur wirkliche Nutzer können bewerten." },
+            { "icon": "📍", "title": "Hyper-lokal",            "desc": "Kiezly zeigt dir nur Helfer und Jobs in deiner direkten Nachbarschaft." },
+            { "icon": "⚡", "title": "Schnelle Matches",       "desc": "Durchschnittlich findest du in unter 30 Minuten einen passenden Helfer." },
+            { "icon": "💬", "title": "Direkter Chat",          "desc": "Kommuniziere direkt mit deinem Helfer – sicher, einfach, ohne Umwege." }
+        ]
+    },
     "help": {
+        "label": "Jetzt loslegen",
         "title": "Bereit, Hilfe zu finden?",
         "description": "Minijob kostenlos veröffentlichen – ab heute Bewerbungen erhalten.",
         "mini‑job": "Minijob veröffentlichen",

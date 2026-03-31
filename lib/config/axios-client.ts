@@ -15,7 +15,10 @@ let accessToken: string | null = null;
 
 // refresh flow
 let isRefreshing = false;
-let failedQueue: { resolve: (token?: string) => void; reject: (err?: any) => void }[] = [];
+let failedQueue: {
+  resolve: (token?: string) => void;
+  reject: (err?: any) => void;
+}[] = [];
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token)));
@@ -46,12 +49,18 @@ export const setAccessToken = (token: string | null, opts: CookieOpts = {}) => {
   }
 };
 
-export const setRefreshToken = (token: string | null, opts: CookieOpts = {}) => {
+export const setRefreshToken = (
+  token: string | null,
+  opts: CookieOpts = {}
+) => {
   const common = { secure: true, sameSite: "strict" as const, path: "/" };
   if (token) {
     if (opts.remember) {
       // 30 days persistent cookie
-      setCookie("refreshToken", token, { ...common, maxAge: 60 * 60 * 24 * 30 });
+      setCookie("refreshToken", token, {
+        ...common,
+        maxAge: 60 * 60 * 24 * 30,
+      });
     } else {
       // session cookie (expires when the browser closes)
       setCookie("refreshToken", token, { ...common });
@@ -62,13 +71,15 @@ export const setRefreshToken = (token: string | null, opts: CookieOpts = {}) => 
 };
 
 const apiClient = axios.create({
-  baseURL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
 // attach token to requests
 apiClient.interceptors.request.use((config) => {
+  const locale = getCookie("NEXT_LOCALE") || "de";
+  config.baseURL = `${baseURL}/${locale}`;
+
   if (!accessToken) {
     accessToken = (getCookie("accessToken") as string | null) || null; // optional: pick up session cookie
   }
@@ -83,7 +94,7 @@ apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
-     if (originalRequest?.skipAuthRefresh) {
+    if (originalRequest?.skipAuthRefresh) {
       return Promise.reject(error);
     }
 
@@ -101,11 +112,14 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = (getCookie("refreshToken") as string | null) || null;
+        const refreshToken =
+          (getCookie("refreshToken") as string | null) || null;
         if (!refreshToken) throw new Error("Missing refresh token");
+        const locale = getCookie("NEXT_LOCALE") || "de";
+        const BASEURL = `${baseURL}/${locale}`;
 
         const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+          `${BASEURL}/auth/refresh`,
           { token: refreshToken },
           { withCredentials: true }
         );

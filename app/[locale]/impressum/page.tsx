@@ -1,61 +1,87 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { useRouter } from 'next/navigation';
 import { useLocalizedRouter } from '@/lib/useLocalizedRouter';
 import { useT } from '../layout';
 
 export default function ImpressumPage() {
-    const router = useRouter();
-    const { push } = useLocalizedRouter();
-    const t = useT("impressum");
-    const lists = t("lists") || [];
+  const { push } = useLocalizedRouter();
+  const t = useT("impressum");
+  const sections = t("sections") || [];
 
-    return (
-        <div className="min-h-screen bg-neutral-50 text-neutral-900">
-            <main className="mx-auto max-w-6xl px-4 py-6">
-                <div className="mb-4">
-                    <h1 className="text-2xl font-semibold">{t("header")}</h1>
-                </div>
-
-                <div className="mt-6">
-                    <Card>
-                        <CardContent className="p-5 text-sm text-neutral-700 space-y-2">
-                            <div
-                                className={`w-full inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium transition-colors rounded-lg rounded-full px-3 py-2 bg-gray-50 text-gray-600 border border-gray-200`}
-                            >
-                                {t("description")}
-                            </div>
-
-                            {lists.map((list: any, i: number) => {
-                                return (
-                                    <div className='py-1' key={i}>
-                                        <h3 className='text-lg font-medium text-gray-800 mb-1'>{list.title}</h3>
-                                        {
-                                            list.description.map((des: string, j: number) => {
-                                                return (
-                                                    <div
-                                                        className="text-gray-700 text-sm leading-relaxed mt-3"
-                                                        dangerouslySetInnerHTML={{ __html: des || "" }}
-                                                    />
-                                                )
-                                            })
-                                        }
-                                    </div>
-                                );
-                            })}
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div className="mt-8">
-                    <button onClick={() => push("/")} className="inline-flex items-center justify-center rounded-2xl text-sm font-medium px-3 py-2 transition-colors border bg-neutral-900 text-white border-neutral-900 hover:opacity-90">
-                        {t("go-back")} <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
-                </div>
-            </main>
+  return (
+    <div className="min-h-screen bg-white" style={{ paddingTop: '64px' }}>
+      {/* Page header */}
+      <div style={{ borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff' }}>
+        <div className="mx-auto max-w-3xl px-6 py-10">
+          <span
+            className="inline-block mb-3 text-[11px] font-semibold tracking-[.08em] uppercase"
+            style={{ color: '#e8622a' }}
+          >
+            {t("description")}
+          </span>
+          <h1
+            className="font-display font-bold text-[36px] leading-[1.15] text-[#111110]"
+            style={{ letterSpacing: '-.5px' }}
+          >
+            {t("header")}
+          </h1>
         </div>
-    )
+      </div>
+
+      {/* Content */}
+      <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="space-y-8">
+          {sections.map((section: { title: string; items: string[] }, i: number) => (
+            <div
+              key={i}
+              className="rounded-[12px] p-6"
+              style={{ background: '#f7f7f5', border: '1px solid rgba(0,0,0,.06)' }}
+            >
+              <div className="flex items-start gap-3 mb-4">
+                <div
+                  className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white mt-[1px]"
+                  style={{ background: '#e8622a' }}
+                >
+                  {i + 1}
+                </div>
+                <h2 className="font-display font-semibold text-[16px] text-[#111110]">
+                  {section.title}
+                </h2>
+              </div>
+              <div className="pl-9 space-y-2">
+                {section.items.map((item: string, j: number) => (
+                  <div
+                    key={j}
+                    className="text-[14px] leading-[1.7]"
+                    style={{ color: 'rgba(17,17,16,.65)' }}
+                    dangerouslySetInnerHTML={{ __html: item }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer nav */}
+        <div
+          className="mt-10 pt-8 flex items-center justify-between"
+          style={{ borderTop: '1px solid rgba(0,0,0,.07)' }}
+        >
+          <button
+            onClick={() => push("/")}
+            className="inline-flex items-center gap-2 text-[13px] font-medium transition-colors"
+            style={{ color: 'rgba(17,17,16,.5)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#e8622a'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(17,17,16,.5)'; }}
+          >
+            ← {t("go-back")}
+          </button>
+          <span className="text-[12px]" style={{ color: 'rgba(17,17,16,.3)' }}>
+            kiezly.de
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
